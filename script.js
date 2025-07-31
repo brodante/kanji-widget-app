@@ -480,7 +480,7 @@ class KanjiLearningApp {
         
         // Remove existing font and size classes
         appContainer.classList.remove('font-size-small', 'font-size-medium', 'font-size-large', 'font-size-extra-large');
-        widget.classList.remove('font-honoka-mincho', 'font-hanazono-mincho', 'font-babelstone-han', 
+        widget.classList.remove('font-zen-antique', 'font-zen-maru-gothic', 'font-hannari', 'font-kokoro',
                                 'font-hiragino-sans', 'font-yu-gothic', 'font-meiryo', 'font-ms-gothic');
         
         // Apply font size class
@@ -488,9 +488,10 @@ class KanjiLearningApp {
         
         // Apply font family class or style
         const fontClassMap = {
-            'Honoka Mincho': 'font-honoka-mincho',
-            'Hanazono Mincho': 'font-hanazono-mincho',
-            'BabelStone Han': 'font-babelstone-han',
+            'Zen Antique': 'font-zen-antique',
+            'Zen Maru Gothic': 'font-zen-maru-gothic',
+            'Hannari': 'font-hannari',
+            'Kokoro': 'font-kokoro',
             'Hiragino Sans': 'font-hiragino-sans',
             'Yu Gothic': 'font-yu-gothic',
             'Meiryo': 'font-meiryo',
