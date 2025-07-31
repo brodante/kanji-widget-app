@@ -225,13 +225,21 @@ class KanjiLearningApp {
                     ${this.currentKanji.onyomi.length > 0 ? `
                         <div class="reading-group">
                             <div class="reading-label">On'yomi</div>
-                            <div class="reading-value" onclick="app.playSpecificReading('${this.currentKanji.onyomi[0]}')">${this.currentKanji.onyomi.join(', ')}</div>
+                            <div class="reading-value">
+                                ${this.currentKanji.onyomi.map(reading => 
+                                    `<span class="clickable-reading" onclick="app.playSpecificReading('${reading}')" title="Click to pronounce">${reading}</span>`
+                                ).join(', ')}
+                            </div>
                         </div>
                     ` : ''}
                     ${this.currentKanji.kunyomi.length > 0 ? `
                         <div class="reading-group">
                             <div class="reading-label">Kun'yomi</div>
-                            <div class="reading-value" onclick="app.playSpecificReading('${this.currentKanji.kunyomi[0]}')">${this.currentKanji.kunyomi.join(', ')}</div>
+                            <div class="reading-value">
+                                ${this.currentKanji.kunyomi.map(reading => 
+                                    `<span class="clickable-reading" onclick="app.playSpecificReading('${reading}')" title="Click to pronounce">${reading}</span>`
+                                ).join(', ')}
+                            </div>
                         </div>
                     ` : ''}
                 </div>
@@ -240,7 +248,10 @@ class KanjiLearningApp {
                         <h4>Examples</h4>
                         ${this.currentKanji.examples.slice(0, 3).map(example => `
                             <div class="example-item">
-                                <span class="example-word">${example.word}</span>
+                                <span class="example-word" onclick="app.playSpecificReading('${example.reading || example.word}')" title="Click to pronounce">
+                                    ${example.word}
+                                    ${example.reading ? `<span class="reading-hiragana">${example.reading}</span>` : ''}
+                                </span>
                                 <span class="example-meaning">${example.meaning}</span>
                             </div>
                         `).join('')}
