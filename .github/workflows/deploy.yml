@@ -25,21 +25,29 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+    - name: Create deployment directory
+      run: |
+        mkdir -p deploy
+        # Copy only necessary files for static hosting
+        cp index.html deploy/
+        cp styles.css deploy/
+        cp script.js deploy/
+        cp kanji-data.js deploy/
+        cp audio-manager.js deploy/
+        cp storage-manager.js deploy/
+        cp manifest.json deploy/
+        cp sw.js deploy/
+        cp README.md deploy/
+        # Copy docs if they exist
+        if [ -d "docs" ]; then cp -r docs deploy/; fi
         
-    - name: Install dependencies
-      run: npm install
-      
     - name: Setup Pages
       uses: actions/configure-pages@v4
       
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: '.'
+        path: './deploy'
         
     - name: Deploy to GitHub Pages
       id: deployment
