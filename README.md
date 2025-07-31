@@ -51,15 +51,25 @@ A web-based Japanese kanji learning application with interactive widgets, progre
 ### Static Hosting
 Simply serve the files from any static web server - no backend required for basic functionality.
 
-## Android Conversion
+## Deployment Options
 
-The app includes comprehensive documentation for converting to Android APK:
+### 🌐 GitHub Pages (Recommended)
+Deploy instantly to GitHub Pages for free hosting:
+
+1. Push code to GitHub repository
+2. Enable Pages in repository settings  
+3. Access at: `https://yourusername.github.io/repository-name`
+
+See `docs/DEPLOY.md` for detailed deployment instructions.
+
+### 📱 Android Conversion
+Convert to native Android app:
 
 - **WebView Wrapper**: Simple Android app using WebView (recommended)
-- **Cordova/PhoneGap**: Cross-platform mobile app framework
+- **Cordova/PhoneGap**: Cross-platform mobile app framework  
 - **PWA**: Progressive Web App for app-like mobile experience
 
-See `android-setup.md` and the `android-example/` folder for complete implementation guides.
+See `android-setup.md` and `android-example/` folder for complete guides.
 
 ## Project Structure
 
@@ -118,7 +128,7 @@ See `android-setup.md` and the `android-example/` folder for complete implementa
 
 ## License
 
-This project is open source. Feel free to use, modify, and distribute.
+This project is open source and available for use, modification, and distribution.
 
 ## Development
 

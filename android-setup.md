@@ -156,4 +156,6 @@ self.addEventListener('install', event => {
 - Icons in various sizes (48dp, 72dp, 96dp, 144dp, 192dp)
 - Splash screen images
 
-Would you like me to help you set up any of these approaches?
+## Additional Resources
+
+For more detailed implementation examples, see the `android-example/` directory which contains complete project templates for each approach.

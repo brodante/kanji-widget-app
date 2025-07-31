@@ -64,3 +64,6 @@ android-project/local.properties
 # Replit specific
 .replit
 replit.nix
+
+# Attached assets (AI conversation artifacts)
+attached_assets/
