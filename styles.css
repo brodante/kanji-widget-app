@@ -48,9 +48,10 @@ body {
 }
 
 /* Font Family Support */
-.font-honoka-mincho { font-family: 'Honoka Mincho', 'Noto Sans JP', serif; }
-.font-hanazono-mincho { font-family: 'Hanazono Mincho', 'Noto Sans JP', serif; }
-.font-babelstone-han { font-family: 'BabelStone Han', 'Noto Sans JP', sans-serif; }
+.font-zen-antique { font-family: 'Zen Antique', 'Noto Sans JP', serif; }
+.font-zen-maru-gothic { font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; }
+.font-hannari { font-family: 'Hannari', 'Noto Sans JP', serif; }
+.font-kokoro { font-family: 'Kokoro', 'Noto Sans JP', serif; }
 .font-hiragino-sans { font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; }
 .font-yu-gothic { font-family: 'Yu Gothic', 'Meiryo', sans-serif; }
 .font-meiryo { font-family: 'Meiryo', sans-serif; }
