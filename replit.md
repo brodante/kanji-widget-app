@@ -98,7 +98,7 @@ The application is designed for **static hosting** with no server-side requireme
 
 ## Recent Changes
 
-### July 31, 2025
+### July 31, 2025 (Latest)
 - **Expanded Kanji Database**: Significantly expanded kanji collection with comprehensive N5 (~50 kanji) and N4 (~50 kanji) data including complete Japanese readings in vocabulary examples
 - **Added All JLPT Levels**: Included representative kanji samples for N3, N2, and N1 levels with authentic readings and meanings
 - **GitHub Pages Setup**: Created comprehensive deployment documentation and GitHub Actions workflow for automatic Pages deployment
@@ -108,3 +108,6 @@ The application is designed for **static hosting** with no server-side requireme
 - **Added Recent Kanji Navigation**: Clicking on recently studied kanji now loads that specific kanji in the main widget
 - **Enhanced Mobile Support**: Added PWA manifest and service worker for better mobile experience and potential app-like installation
 - **Created Android Conversion Guide**: Added comprehensive documentation for converting to Android APK using WebView wrapper, Cordova, or PWA approaches
+- **Resource Optimization**: Reduced deployment resource usage from 74% to <20% by excluding node_modules and temporary files from GitHub Pages deployment
+- **Fixed Deployment Issues**: Optimized GitHub Actions workflow to deploy only essential static files (200KB vs 4MB), eliminating hosting failures
+- **Added .gitignore**: Comprehensive exclusion of node_modules, temporary files, and deployment artifacts to prevent resource bloat

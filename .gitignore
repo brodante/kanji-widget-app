@@ -1,8 +1,9 @@
-# Dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
 # Runtime data
 pids
@@ -10,60 +11,54 @@ pids
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
-coverage/
+# Dependency directories
+node_modules/
+jspm_packages/
 
-# nyc test coverage
-.nyc_output
+# Optional npm cache directory
+.npm
 
-# Environment variables
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.test
+.env.production
 
-# Logs
-logs
-*.log
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Editor directories and files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Temporary files
-tmp/
-temp/
-
-# Build outputs
-dist/
-build/
-
-# Android specific (if building APK)
-android-project/app/build/
-android-project/app/release/
-android-project/.gradle/
-android-project/local.properties
-
-# Backup files
-*.backup
-*.bak
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
 
 # Replit specific
 .replit
-replit.nix
+.upm/
 
-# Attached assets (AI conversation artifacts)
+# Deployment directory
+deploy/
+
+# Attached assets and temporary files
 attached_assets/
+*.tmp
+*.temp

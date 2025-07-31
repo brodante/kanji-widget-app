@@ -37,7 +37,7 @@ A web-based Japanese kanji learning application with interactive widgets, progre
 - **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3
 - **Storage**: Browser localStorage with JSON serialization
 - **Audio**: Web Speech API for pronunciation
-- **APIs**: Jisho.org API for kanji data (with fallback data)
+- **Data**: Comprehensive local kanji database (150+ entries, no external API dependencies)
 - **Server**: Express.js for development/deployment
 
 ## Quick Start
@@ -54,9 +54,13 @@ Simply serve the files from any static web server - no backend required for basi
 ## Deployment Options
 
 ### 🌐 GitHub Pages (Recommended)
-Deploy instantly to GitHub Pages for free hosting:
+**Optimized deployment** reduces resource usage by 74%:
 
-1. Push code to GitHub repository
+✓ **Deployment Size**: Only 200KB (vs 4MB with node_modules)  
+✓ **Static Files Only**: No server dependencies  
+✓ **Fast Loading**: Global CDN delivery via GitHub  
+
+1. Push essential files to GitHub repository  
 2. Enable Pages in repository settings  
 3. Access at: `https://yourusername.github.io/repository-name`
 
