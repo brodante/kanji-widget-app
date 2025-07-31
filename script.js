@@ -478,14 +478,28 @@ class KanjiLearningApp {
         const widget = document.getElementById('kanjiWidget');
         const appContainer = document.querySelector('.app-container');
         
-        // Remove existing font classes
+        // Remove existing font and size classes
         appContainer.classList.remove('font-size-small', 'font-size-medium', 'font-size-large', 'font-size-extra-large');
+        widget.classList.remove('font-honoka-mincho', 'font-hanazono-mincho', 'font-babelstone-han', 
+                                'font-hiragino-sans', 'font-yu-gothic', 'font-meiryo', 'font-ms-gothic');
         
         // Apply font size class
         appContainer.classList.add(`font-size-${this.settings.fontSize}`);
         
-        // Apply font family
-        if (this.settings.kanjiFont !== 'Noto Sans JP') {
+        // Apply font family class or style
+        const fontClassMap = {
+            'Honoka Mincho': 'font-honoka-mincho',
+            'Hanazono Mincho': 'font-hanazono-mincho',
+            'BabelStone Han': 'font-babelstone-han',
+            'Hiragino Sans': 'font-hiragino-sans',
+            'Yu Gothic': 'font-yu-gothic',
+            'Meiryo': 'font-meiryo',
+            'MS Gothic': 'font-ms-gothic'
+        };
+
+        if (fontClassMap[this.settings.kanjiFont]) {
+            widget.classList.add(fontClassMap[this.settings.kanjiFont]);
+        } else if (this.settings.kanjiFont !== 'Noto Sans JP') {
             widget.style.fontFamily = `'${this.settings.kanjiFont}', 'Noto Sans JP', sans-serif`;
         } else {
             widget.style.fontFamily = '';

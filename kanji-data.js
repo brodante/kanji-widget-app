@@ -1,6 +1,7 @@
 class KanjiData {
     static cache = new Map();
     static baseUrl = 'https://jisho.org/api/v1/search/words';
+    static wanikaniUrl = 'https://api.wanikani.com/v2/subjects';
     
     // Comprehensive JLPT kanji data based on official study lists
     static fallbackData = {
@@ -1690,17 +1691,78 @@ class KanjiData {
     };
 
     static async getKanjiByLevel(level = 'N5') {
-        // Use comprehensive fallback data directly since we have complete data
-        // and API calls are blocked by CORS in browser environments
-        const kanjiList = this.fallbackData[level] || this.fallbackData['N5'];
-        return kanjiList;
+        const cacheKey = `level_${level}`;
+        
+        // Return cached data if available
+        if (this.cache.has(cacheKey)) {
+            return this.cache.get(cacheKey);
+        }
+
+        try {
+            // First try to fetch fresh data from multiple APIs
+            let kanjiList = await this.fetchKanjiFromMultipleSources(level);
+            
+            // If API data is not available, use fallback data
+            if (!kanjiList || kanjiList.length === 0) {
+                kanjiList = this.fallbackData[level] || this.fallbackData['N5'];
+                console.log(`Using fallback data for ${level}, ${kanjiList.length} kanji available`);
+            } else {
+                console.log(`Fetched ${kanjiList.length} kanji from APIs for ${level}`);
+            }
+            
+            // Cache the result
+            this.cache.set(cacheKey, kanjiList);
+            return kanjiList;
+
+        } catch (error) {
+            console.error('Error loading kanji data:', error);
+            // Return fallback data on error
+            const fallback = this.fallbackData[level] || this.fallbackData['N5'];
+            this.cache.set(cacheKey, fallback);
+            return fallback;
+        }
     }
 
     static async fetchKanjiFromJisho(character) {
-        // API calls are disabled due to CORS restrictions in browser environment
-        // We use comprehensive fallback data instead for all kanji information
-        console.log(`Using fallback data for kanji: ${character}`);
-        return null;
+        try {
+            const response = await fetch(`${this.baseUrl}?keyword=${encodeURIComponent(character)}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.data || data.data.length === 0) {
+                return null;
+            }
+
+            // Find the entry that contains our kanji character
+            const entry = data.data.find(item => 
+                item.japanese.some(jp => jp.word && jp.word.includes(character))
+            );
+
+            if (!entry) {
+                return null;
+            }
+
+            // Extract kanji information
+            const japanese = entry.japanese[0];
+            const senses = entry.senses[0];
+            
+            return {
+                character: character,
+                meanings: senses.english_definitions || [],
+                onyomi: this.extractReadings(entry.japanese, 'on') || [],
+                kunyomi: this.extractReadings(entry.japanese, 'kun') || [],
+                examples: this.extractExamples(data.data.slice(0, 3), character),
+                jlpt: this.extractJLPTLevel(entry.tags) || 'N5'
+            };
+
+        } catch (error) {
+            console.error(`Error fetching kanji ${character} from Jisho:`, error);
+            return null;
+        }
     }
 
     static extractReadings(japaneseEntries, type) {
@@ -1758,9 +1820,20 @@ class KanjiData {
     }
 
     static async searchKanji(query) {
-        // Search within our comprehensive fallback data instead of API
+        try {
+            // Try API search first
+            const response = await fetch(`${this.baseUrl}?keyword=${encodeURIComponent(query)}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                return data.data || [];
+            }
+        } catch (error) {
+            console.error('Error searching kanji via API:', error);
+        }
+
+        // Fallback to local search
         const results = [];
-        
         Object.values(this.fallbackData).forEach(levelKanji => {
             levelKanji.forEach(kanji => {
                 if (kanji.character.includes(query) || 
@@ -1772,6 +1845,220 @@ class KanjiData {
         });
         
         return results;
+    }
+
+    static async fetchKanjiFromMultipleSources(level) {
+        try {
+            // Try WaniKani API first for comprehensive data
+            const wanikaniData = await this.fetchFromWaniKani(level);
+            if (wanikaniData && wanikaniData.length > 0) {
+                return wanikaniData;
+            }
+
+            // Fallback to enhanced fallback data with more entries
+            return this.getEnhancedFallbackData(level);
+        } catch (error) {
+            console.error('Error fetching from multiple sources:', error);
+            return null;
+        }
+    }
+
+    static async fetchFromWaniKani(level) {
+        try {
+            // Note: WaniKani API requires authentication for full access
+            // This is a simplified version that would work with public endpoints
+            const jlptMapping = {
+                'N5': '1,2,3',
+                'N4': '4,5,6',
+                'N3': '7,8,9',
+                'N2': '10,11,12',
+                'N1': '13,14,15'
+            };
+
+            const levelParam = jlptMapping[level] || '1,2,3';
+            const response = await fetch(`${this.wanikaniUrl}?types=kanji&levels=${levelParam}`, {
+                headers: {
+                    'Authorization': 'Bearer YOUR_WANIKANI_TOKEN' // User would need to provide this
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('WaniKani API not available');
+            }
+
+            const data = await response.json();
+            return this.parseWaniKaniData(data.data);
+        } catch (error) {
+            console.error('WaniKani API error:', error);
+            return null;
+        }
+    }
+
+    static parseWaniKaniData(data) {
+        return data.map(item => ({
+            character: item.data.characters,
+            meanings: item.data.meanings.map(m => m.meaning),
+            onyomi: item.data.readings.filter(r => r.type === 'onyomi').map(r => r.reading),
+            kunyomi: item.data.readings.filter(r => r.type === 'kunyomi').map(r => r.reading),
+            jlpt: `N${Math.ceil(item.data.level / 10)}`,
+            examples: []
+        }));
+    }
+
+    static getEnhancedFallbackData(level) {
+        // Return expanded fallback data with more entries per level
+        const baseData = this.fallbackData[level] || this.fallbackData['N5'];
+        
+        // Add more kanji to reach target numbers per level
+        const enhancedData = [...baseData];
+        
+        // Add additional kanji based on level requirements
+        const additionalKanji = this.getAdditionalKanjiForLevel(level);
+        enhancedData.push(...additionalKanji);
+        
+        return enhancedData;
+    }
+
+    static getAdditionalKanjiForLevel(level) {
+        const additionalKanji = {
+            'N5': [
+                // Adding more N5 kanji to reach 80+ total
+                {
+                    character: '水',
+                    meanings: ['water'],
+                    onyomi: ['スイ'],
+                    kunyomi: ['みず'],
+                    jlpt: 'N5',
+                    examples: [
+                        { word: '水', reading: 'みず', meaning: 'water' },
+                        { word: '水曜日', reading: 'すいようび', meaning: 'Wednesday' },
+                        { word: '水泳', reading: 'すいえい', meaning: 'swimming' }
+                    ]
+                },
+                {
+                    character: '火',
+                    meanings: ['fire'],
+                    onyomi: ['カ'],
+                    kunyomi: ['ひ', 'ほ'],
+                    jlpt: 'N5',
+                    examples: [
+                        { word: '火', reading: 'ひ', meaning: 'fire' },
+                        { word: '火曜日', reading: 'かようび', meaning: 'Tuesday' },
+                        { word: '花火', reading: 'はなび', meaning: 'fireworks' }
+                    ]
+                },
+                {
+                    character: '木',
+                    meanings: ['tree', 'wood'],
+                    onyomi: ['モク', 'ボク'],
+                    kunyomi: ['き'],
+                    jlpt: 'N5',
+                    examples: [
+                        { word: '木', reading: 'き', meaning: 'tree' },
+                        { word: '木曜日', reading: 'もくようび', meaning: 'Thursday' },
+                        { word: '木材', reading: 'もくざい', meaning: 'lumber' }
+                    ]
+                },
+                {
+                    character: '金',
+                    meanings: ['gold', 'money'],
+                    onyomi: ['キン', 'コン'],
+                    kunyomi: ['かね', 'かな'],
+                    jlpt: 'N5',
+                    examples: [
+                        { word: '金', reading: 'かね', meaning: 'money' },
+                        { word: '金曜日', reading: 'きんようび', meaning: 'Friday' },
+                        { word: '金色', reading: 'きんいろ', meaning: 'golden color' }
+                    ]
+                },
+                {
+                    character: '土',
+                    meanings: ['earth', 'soil'],
+                    onyomi: ['ド', 'ト'],
+                    kunyomi: ['つち'],
+                    jlpt: 'N5',
+                    examples: [
+                        { word: '土', reading: 'つち', meaning: 'soil' },
+                        { word: '土曜日', reading: 'どようび', meaning: 'Saturday' },
+                        { word: '土地', reading: 'とち', meaning: 'land' }
+                    ]
+                }
+            ],
+            'N4': [
+                // Adding more N4 kanji
+                {
+                    character: '経',
+                    meanings: ['sutra', 'longitude', 'pass through'],
+                    onyomi: ['ケイ', 'キョウ'],
+                    kunyomi: ['へ'],
+                    jlpt: 'N4',
+                    examples: [
+                        { word: '経済', reading: 'けいざい', meaning: 'economy' },
+                        { word: '経験', reading: 'けいけん', meaning: 'experience' },
+                        { word: '神経', reading: 'しんけい', meaning: 'nerve' }
+                    ]
+                },
+                {
+                    character: '済',
+                    meanings: ['settle', 'finish', 'feel at ease'],
+                    onyomi: ['サイ'],
+                    kunyomi: ['す'],
+                    jlpt: 'N4',
+                    examples: [
+                        { word: '経済', reading: 'けいざい', meaning: 'economy' },
+                        { word: '済む', reading: 'すむ', meaning: 'to finish' },
+                        { word: '救済', reading: 'きゅうさい', meaning: 'relief' }
+                    ]
+                }
+            ],
+            'N3': [
+                // Adding more N3 kanji
+                {
+                    character: '議',
+                    meanings: ['deliberation', 'consultation', 'debate'],
+                    onyomi: ['ギ'],
+                    kunyomi: [],
+                    jlpt: 'N3',
+                    examples: [
+                        { word: '議論', reading: 'ぎろん', meaning: 'argument, discussion' },
+                        { word: '会議', reading: 'かいぎ', meaning: 'meeting' },
+                        { word: '議員', reading: 'ぎいん', meaning: 'member of parliament' }
+                    ]
+                }
+            ],
+            'N2': [
+                // Additional N2 kanji
+                {
+                    character: '療',
+                    meanings: ['heal', 'cure'],
+                    onyomi: ['リョウ'],
+                    kunyomi: [],
+                    jlpt: 'N2',
+                    examples: [
+                        { word: '治療', reading: 'ちりょう', meaning: 'medical treatment' },
+                        { word: '療法', reading: 'りょうほう', meaning: 'therapy' },
+                        { word: '医療', reading: 'いりょう', meaning: 'medical care' }
+                    ]
+                }
+            ],
+            'N1': [
+                // Additional N1 kanji
+                {
+                    character: '騎',
+                    meanings: ['equestrian', 'riding on horses'],
+                    onyomi: ['キ'],
+                    kunyomi: [],
+                    jlpt: 'N1',
+                    examples: [
+                        { word: '騎士', reading: 'きし', meaning: 'knight' },
+                        { word: '騎兵', reading: 'きへい', meaning: 'cavalry' },
+                        { word: '騎手', reading: 'きしゅ', meaning: 'jockey' }
+                    ]
+                }
+            ]
+        };
+
+        return additionalKanji[level] || [];
     }
 
     static getRandomKanji(level = 'N5') {
