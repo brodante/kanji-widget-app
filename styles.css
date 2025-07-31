@@ -219,6 +219,20 @@ body {
     font-weight: 400;
 }
 
+.clickable-reading {
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin: 0.1rem;
+}
+
+.clickable-reading:hover {
+    color: var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+}
+
 .kanji-examples {
     margin-top: 1rem;
     text-align: left;
@@ -242,6 +256,23 @@ body {
 
 .example-word {
     font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.example-word:hover {
+    color: var(--primary-color);
+}
+
+.reading-hiragana {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    opacity: 0.8;
+    font-weight: 400;
+    margin-top: 0.2rem;
 }
 
 .example-meaning {
