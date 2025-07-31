@@ -99,6 +99,11 @@ The application is designed for **static hosting** with no server-side requireme
 ## Recent Changes
 
 ### July 31, 2025
+- **Expanded Kanji Database**: Significantly expanded kanji collection with comprehensive N5 (~50 kanji) and N4 (~50 kanji) data including complete Japanese readings in vocabulary examples
+- **Added All JLPT Levels**: Included representative kanji samples for N3, N2, and N1 levels with authentic readings and meanings
+- **GitHub Pages Setup**: Created comprehensive deployment documentation and GitHub Actions workflow for automatic Pages deployment
+- **Professional Documentation**: Added `docs/DEPLOY.md` with detailed hosting instructions and troubleshooting guides
+- **Enhanced Data Quality**: All vocabulary examples now include proper Japanese readings (hiragana) for pronunciation accuracy
 - **Updated Widget Interface**: Separated check button from widget click - users now click dedicated green check button to mark kanji as mastered
 - **Added Recent Kanji Navigation**: Clicking on recently studied kanji now loads that specific kanji in the main widget
 - **Enhanced Mobile Support**: Added PWA manifest and service worker for better mobile experience and potential app-like installation
