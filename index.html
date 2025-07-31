@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KanjiWidgets - Daily Kanji Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Material+Icons&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6200EE">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="KanjiWidgets">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1><i class="fas fa-language"></i> KanjiWidgets</h1>
+            <div class="header-controls">
+                <button id="settingsBtn" class="icon-btn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button id="themeToggle" class="icon-btn" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Widget Size Selector -->
+            <div class="widget-controls">
+                <label for="widgetSize">Widget Size:</label>
+                <select id="widgetSize">
+                    <option value="small">2x2 - Kanji Only</option>
+                    <option value="medium" selected>2x3 - Kanji + Audio</option>
+                    <option value="large">3x3 - Full Details</option>
+                </select>
+            </div>
+
+            <!-- Kanji Widget -->
+            <div id="kanjiWidget" class="kanji-widget medium-widget">
+                <div class="widget-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading Kanji...</p>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <h3>Learning Progress</h3>
+                    <div class="progress-stats">
+                        <span id="masteredCount">0</span> mastered | 
+                        <span id="totalStudied">0</span> studied
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Recent Kanji -->
+            <div class="recent-section">
+                <h3>Recently Studied</h3>
+                <div id="recentKanji" class="recent-grid">
+                    <!-- Recent kanji will be populated here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="close-btn" id="closeSettings">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-group">
+                        <label for="jlptLevel">JLPT Level:</label>
+                        <select id="jlptLevel">
+                            <option value="all">All Levels</option>
+                            <option value="N5" selected>N5 (Beginner)</option>
+                            <option value="N4">N4</option>
+                            <option value="N3">N3</option>
+                            <option value="N2">N2</option>
+                            <option value="N1">N1 (Advanced)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="autoPlay">Auto-play pronunciation:</label>
+                        <input type="checkbox" id="autoPlay">
+                    </div>
+                    <div class="setting-group">
+                        <label for="showFurigana">Show Furigana:</label>
+                        <input type="checkbox" id="showFurigana" checked>
+                    </div>
+                    <div class="setting-group">
+                        <label for="kanjiFont">Kanji Font:</label>
+                        <select id="kanjiFont">
+                            <option value="Noto Sans JP">Noto Sans JP (Default)</option>
+                            <option value="Hiragino Sans">Hiragino Sans</option>
+                            <option value="Yu Gothic">Yu Gothic</option>
+                            <option value="Meiryo">Meiryo</option>
+                            <option value="MS Gothic">MS Gothic</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="fontSize">Font Size:</label>
+                        <select id="fontSize">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                            <option value="extra-large">Extra Large</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="defaultAudio">Default Audio Type:</label>
+                        <select id="defaultAudio">
+                            <option value="kunyomi" selected>Kun'yomi (Japanese reading)</option>
+                            <option value="onyomi">On'yomi (Chinese reading)</option>
+                            <option value="first">First available reading</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="localBackupFreq">Local Backup Frequency:</label>
+                        <select id="localBackupFreq">
+                            <option value="never">Never</option>
+                            <option value="daily" selected>Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="onlineBackupFreq">Online Backup Frequency:</label>
+                        <select id="onlineBackupFreq">
+                            <option value="never" selected>Never</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <div class="backup-buttons">
+                            <button id="createBackup" class="backup-btn">Create Local Backup</button>
+                            <button id="restoreBackup" class="backup-btn">Import Backup</button>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <button id="resetProgress" class="reset-btn">Reset All Progress</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="toast">
+            <span id="toastMessage"></span>
+        </div>
+
+        <!-- Hidden file input for backup import -->
+        <input type="file" id="backupFileInput" accept=".json" style="display: none;">
+    </div>
+
+    <script src="storage-manager.js"></script>
+    <script src="audio-manager.js"></script>
+    <script src="kanji-data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+    "name": "KanjiWidgets - Daily Kanji Learning",
+    "short_name": "KanjiWidgets",
+    "description": "Interactive Japanese Kanji learning with widgets and spaced repetition",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#6200EE",
+    "theme_color": "#6200EE",
+    "orientation": "portrait",
+    "scope": "/",
+    "icons": [
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM2MjAwRUUiLz4KPHR5cGVOb0dvY2hpIG9yaWVudEZvbnROYW1lPSJOb3RvIFNhbnMgSlAiIHRleHRBbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udFNpemU9IjcyIiB4PSI5NiIgeT0iMTIwIj7mloE8L3RleHQ+Cjx0ZXh0IHRleHRBbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udFNpemU9IjE2IiB4PSI5NiIgeT0iMTUwIj5XaWRnZXRzPC90ZXh0Pgo8L3N2Zz4K",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiM2MjAwRUUiLz4KPHR5cGVOb0dvY2hpIG9yaWVudEZvbnROYW1lPSJOb3RvIFNhbnMgSlAiIHRleHRBbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udFNpemU9IjE5MiIgeT0iMzIwIj7mloE8L3RleHQ+Cjx0ZXh0IHRleHRBbmNob3I9Im1pZGRsZSIgZmlsbD0iI0ZGRkZGRiIgZm9udFNpemU9IjQwIiB4PSIyNTYiIHk9IjQwMCI+V2lkZ2V0czwvdGV4dD4KPC9zdmc+Cg==",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ],
+    "categories": ["education", "productivity"],
+    "lang": "en"
+}

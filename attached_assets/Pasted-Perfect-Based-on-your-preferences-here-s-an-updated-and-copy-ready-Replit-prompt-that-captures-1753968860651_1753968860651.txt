@@ -1,0 +1,123 @@
+Perfect! Based on your preferences, here’s an **updated and copy-ready Replit prompt** that captures **everything you just described**, with refined feature details and UI behavior.
+
+---
+
+**💡 Replit Prompt: Japanese Kanji Learning Widgets App for Android (Kotlin + Material UI)**
+
+---
+
+**Project Title**:
+*KanjiWidgets – Daily Kanji Learning via Interactive Android Widgets*
+
+---
+
+**Project Description**:
+Build an Android app using **Kotlin** that delivers **interactive home screen widgets** for learning **Japanese Kanji** and vocabulary.
+The widgets function like a **mini spaced-repetition system (SRS)**, helping users gradually master kanji, one at a time.
+
+Each widget should display:
+
+* **The Kanji character**
+* **Meaning** (in English)
+* **On’yomi and Kun’yomi readings**
+* **Vocabulary examples**
+* **Optional audio pronunciation**
+
+Users can interact with the widget to **mark a kanji as "mastered"**, which fetches the **next one** in their list. Data is fetched from **Jisho.org API** and optionally stored for **offline use** via local cache or downloadable packages.
+
+---
+
+**🌐 Data Sources**:
+
+* Fetch kanji, readings, and vocab dynamically from **Jisho.org API**
+* Allow optional offline mode by downloading a **local JSON/SQLite kanji bundle**
+
+---
+
+**🔧 Tech Stack**:
+
+* **Language**: Kotlin
+* **UI Framework**: Android SDK with Material UI components (XML or Compose depending on widget support)
+* **Widget API**: Android App Widgets using **RemoteViews** (fallback) or **Glance (if supported)**
+* **Data Storage**: Cloud sync (Firebase or similar), local cache using Room / DataStore
+* **Audio**: Use Text-to-Speech (TTS) or preloaded audio files for pronunciation
+
+---
+
+**📱 Widget Behavior (Responsive by Size)**:
+
+| Widget Size | Displayed Info                                  |
+| ----------- | ----------------------------------------------- |
+| **2x2**     | Kanji only                                      |
+| **2x3**     | Kanji + Speaker icon (tap to play reading)      |
+| **3x3**     | Kanji + On’yomi + Kun’yomi + Pronunciation text |
+
+> On tap: user can mark kanji as “mastered”, which advances to the next kanji.
+
+---
+
+**🎨 Customization Options**:
+
+* Widget theme: **Transparent / Translucent / Blur background**
+* **Custom background image** for the widget
+* **Font size/style**
+* Option to limit kanji to **JLPT level** (N5 to N1)
+
+---
+
+**🧠 Learning Flow**:
+
+1. User adds the widget to home screen
+2. Kanji is shown from API/local data
+3. Tap → mark as “understood” → shows next kanji
+4. Progress is tracked **in the cloud**
+5. Option to **review mastered kanji** in the app
+6. Optional: Add “Remind me later” or “Skip” action
+
+---
+
+**📦 Optional Features**:
+
+* Downloadable offline bundles per JLPT level
+* Kanji review history with filters
+* Notification reminder (e.g., “Review your Kanji now!”)
+* Light/Dark mode based on system theme
+* Audio pronunciation via speaker icon
+* App UI inspired by **Aniyomi/Tachiyomi**
+
+---
+
+**❓Questions Clarified by User**:
+
+* ✅ **Data source**: Preferably **Jisho.org API**, fallback to offline bundle
+* ✅ **Storage**: Cloud preferred (Firebase or equivalent)
+* ✅ **Interaction**: User can **mark kanji as learned** → advance to next
+* ✅ **Widget count**: One, but **resizable with adaptive layout**
+* ✅ **Offline support**: Yes, on demand
+* ✅ **UI Framework**: Either XML or Compose — no preference, as long as result looks modern (like Tachiyomi/Aniyomi)
+
+---
+
+**✅ Getting Started**:
+
+1. Set up a Kotlin-based Android project with widget support
+2. Create a `KanjiWidgetProvider` using RemoteViews (or Glance if preferred)
+3. Build UI layouts for different widget sizes
+4. Connect to **Jisho.org API** to fetch kanji info
+5. Track user progress via Firebase or local Room DB
+6. Add interaction to mark kanji as learned
+7. Handle offline mode by allowing download of kanji bundles
+8. Add theming/customization options
+
+---
+
+Let me know when you're ready and I can help you generate:
+
+* Starter Android `build.gradle` setup
+* Widget provider Kotlin class
+* Layout files per widget size
+* Simple Jisho.org API fetcher
+* Pronunciation playback with Text-to-Speech
+* Optional offline kanji bundle structure (JSON)
+
+You can paste this into Replit's project setup to get collaborators or even share it with mentors/communities for feedback.
