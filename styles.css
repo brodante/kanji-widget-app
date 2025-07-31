@@ -47,6 +47,15 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Font Family Support */
+.font-honoka-mincho { font-family: 'Honoka Mincho', 'Noto Sans JP', serif; }
+.font-hanazono-mincho { font-family: 'Hanazono Mincho', 'Noto Sans JP', serif; }
+.font-babelstone-han { font-family: 'BabelStone Han', 'Noto Sans JP', sans-serif; }
+.font-hiragino-sans { font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; }
+.font-yu-gothic { font-family: 'Yu Gothic', 'Meiryo', sans-serif; }
+.font-meiryo { font-family: 'Meiryo', sans-serif; }
+.font-ms-gothic { font-family: 'MS Gothic', monospace; }
+
 .app-container {
     max-width: 800px;
     margin: 0 auto;
