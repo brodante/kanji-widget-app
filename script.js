@@ -20,12 +20,28 @@ class KanjiLearningApp {
     init() {
         this.loadSettings();
         this.bindEvents();
+        this.bindFontGridEvents();
         this.loadCurrentKanji();
         this.updateProgress();
         this.loadRecentKanji();
         this.applyTheme();
         this.applyFontSettings();
+        this.updateFontPreviewActive();
         this.scheduleBackups();
+    }
+
+    bindFontGridEvents() {
+        const fontOptions = document.querySelectorAll('.font-option');
+        fontOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const selectedFont = option.getAttribute('data-font');
+                this.settings.kanjiFont = selectedFont;
+                document.getElementById('kanjiFont').value = selectedFont;
+                this.saveSettings();
+                this.applyFontSettings();
+                this.updateFontPreviewActive();
+            });
+        });
     }
 
     bindEvents() {
@@ -46,6 +62,13 @@ class KanjiLearningApp {
 
         document.getElementById('closeSettings').addEventListener('click', () => {
             this.closeSettings();
+        });
+
+        // Close sidebar when clicking on the modal backdrop
+        document.getElementById('settingsModal').addEventListener('click', (e) => {
+            if (e.target.id === 'settingsModal') {
+                this.closeSettings();
+            }
         });
 
         // Settings changes
@@ -73,15 +96,6 @@ class KanjiLearningApp {
         // New settings handlers
         document.getElementById('kanjiFont').addEventListener('change', (e) => {
             this.settings.kanjiFont = e.target.value;
-            this.saveSettings();
-            this.applyFontSettings();
-            this.updateFontPreviewActive();
-        });
-
-        // Handle hidden input for font selection via grid
-        document.getElementById('kanjiFont-hidden').addEventListener('change', (e) => {
-            this.settings.kanjiFont = e.target.value;
-            document.getElementById('kanjiFont').value = e.target.value;
             this.saveSettings();
             this.applyFontSettings();
             this.updateFontPreviewActive();
@@ -457,6 +471,9 @@ class KanjiLearningApp {
         document.getElementById('defaultAudio').value = this.settings.defaultAudio;
         document.getElementById('localBackupFreq').value = this.settings.localBackupFreq;
         document.getElementById('onlineBackupFreq').value = this.settings.onlineBackupFreq;
+        
+        // Update font preview active state
+        this.updateFontPreviewActive();
     }
 
     closeSettings() {
@@ -537,6 +554,22 @@ class KanjiLearningApp {
             widget.style.fontFamily = `'${this.settings.kanjiFont}', 'Noto Sans JP', sans-serif`;
         } else {
             widget.style.fontFamily = '';
+        }
+    }
+
+    updateFontPreviewActive() {
+        // Set the active state on the font preview grid
+        const fontOptions = document.querySelectorAll('.font-option');
+        fontOptions.forEach(option => {
+            option.classList.remove('active');
+            if (option.getAttribute('data-font') === this.settings.kanjiFont) {
+                option.classList.add('active');
+            }
+        });
+        // Also update hidden input
+        const hiddenInput = document.getElementById('kanjiFont-hidden');
+        if (hiddenInput) {
+            hiddenInput.value = this.settings.kanjiFont;
         }
     }
 
