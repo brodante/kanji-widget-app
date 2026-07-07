@@ -75,6 +75,16 @@ class KanjiLearningApp {
             this.settings.kanjiFont = e.target.value;
             this.saveSettings();
             this.applyFontSettings();
+            this.updateFontPreviewActive();
+        });
+
+        // Handle hidden input for font selection via grid
+        document.getElementById('kanjiFont-hidden').addEventListener('change', (e) => {
+            this.settings.kanjiFont = e.target.value;
+            document.getElementById('kanjiFont').value = e.target.value;
+            this.saveSettings();
+            this.applyFontSettings();
+            this.updateFontPreviewActive();
         });
 
         document.getElementById('fontSize').addEventListener('change', (e) => {
@@ -318,6 +328,7 @@ class KanjiLearningApp {
         if (!this.currentKanji) return;
 
         let readingToPlay = '';
+        let readingType = 'onyomi';
         
         // Determine which reading to play based on default audio setting
         switch (this.settings.defaultAudio) {
@@ -325,11 +336,13 @@ class KanjiLearningApp {
                 readingToPlay = this.currentKanji.kunyomi.length > 0 ? 
                     this.currentKanji.kunyomi[0] : 
                     (this.currentKanji.onyomi.length > 0 ? this.currentKanji.onyomi[0] : '');
+                readingType = 'kunyomi';
                 break;
             case 'onyomi':
                 readingToPlay = this.currentKanji.onyomi.length > 0 ? 
                     this.currentKanji.onyomi[0] : 
                     (this.currentKanji.kunyomi.length > 0 ? this.currentKanji.kunyomi[0] : '');
+                readingType = 'onyomi';
                 break;
             case 'first':
             default:
@@ -339,7 +352,16 @@ class KanjiLearningApp {
         }
 
         if (readingToPlay) {
-            AudioManager.speak(readingToPlay, 'ja-JP');
+            // Try Kanji Alive API first for professional audio quality
+            if (AudioManager.kanjiAliveApiKey && this.currentKanji.character) {
+                AudioManager.speakKanjiWithAPI(this.currentKanji.character, readingType)
+                    .catch(err => {
+                        console.log('API audio failed, using fallback');
+                        AudioManager.speak(readingToPlay, 'ja-JP');
+                    });
+            } else {
+                AudioManager.speak(readingToPlay, 'ja-JP');
+            }
             
             // Visual feedback
             const btn = document.querySelector('.action-btn .fa-volume-up');

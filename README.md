@@ -11,9 +11,14 @@ A web-based Japanese kanji learning application with interactive widgets, progre
 - **Spaced Repetition**: Smart kanji presentation system
 
 ### 🎵 Audio Features
-- **Text-to-Speech**: Japanese pronunciation using browser's speech synthesis
+- **Professional Audio**: Integrates with Kanji Alive API for studio-quality native speaker pronunciation
+- **Multi-Source TTS**: Automatic fallback chain:
+  1. Kanji Alive API (professional) - optional with free API key
+  2. Google Translate TTS (high quality)
+  3. Web Speech API (fallback)
 - **Customizable Audio**: Choose default reading type (kun'yomi, on'yomi, or first available)
 - **Interactive Readings**: Click on specific readings to hear pronunciation
+- **Audio Caching**: Fast replay of previously played audio
 
 ### 🎨 Customization
 - **Font Options**: Multiple Japanese font choices (Noto Sans JP, Hiragino Sans, Yu Gothic, etc.)
@@ -50,6 +55,30 @@ A web-based Japanese kanji learning application with interactive widgets, progre
 
 ### Static Hosting
 Simply serve the files from any static web server - no backend required for basic functionality.
+
+## Audio Setup (Optional - For Professional Quality)
+
+The app includes a 3-tier audio system that works out of the box:
+
+**Default Setup (Works Immediately)**
+- Uses Google Translate TTS and Web Speech API
+- No configuration needed
+- Good quality Japanese pronunciation
+
+**Upgrade with Kanji Alive API (Optional)**
+- Get professional native speaker audio
+- Real-world example sentences with audio
+- Complete kanji data (meanings, stroke order, etc.)
+- Free tier available
+
+See [AUDIO-SETUP.md](AUDIO-SETUP.md) for detailed instructions on setting up the Kanji Alive API.
+
+**Quick Setup:**
+```javascript
+// 1. Get free API key from: https://rapidapi.com/KanjiAlive/api/learn-to-read-and-write-japanese-kanji
+// 2. Run in browser console:
+AudioManager.setApiKey("your-api-key-here");
+```
 
 ## Deployment Options
 
