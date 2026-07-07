@@ -442,8 +442,11 @@ body {
     padding: 0;
     border-radius: var(--border-radius);
     box-shadow: var(--elevation-3);
-    width: 100%;
-    max-width: 500px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
     animation: slideIn 0.3s ease;
 }
 
@@ -453,6 +456,7 @@ body {
     align-items: center;
     padding: 1.5rem;
     border-bottom: 1px solid rgba(var(--on-surface), 0.1);
+    flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -475,6 +479,8 @@ body {
 
 .modal-body {
     padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .setting-group {
@@ -483,7 +489,7 @@ body {
 
 .setting-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     font-weight: 500;
     color: var(--on-surface);
 }
@@ -502,6 +508,56 @@ body {
 .setting-group input[type="checkbox"] {
     width: auto;
     transform: scale(1.2);
+}
+
+/* Font Preview Grid */
+.font-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.font-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0.75rem;
+    border: 2px solid rgba(var(--on-surface), 0.2);
+    border-radius: 8px;
+    background-color: var(--surface);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.font-option:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-color), 0.05);
+    transform: translateY(-2px);
+}
+
+.font-option.active {
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-color), 0.1);
+    box-shadow: 0 0 10px rgba(var(--primary-color), 0.3);
+}
+
+.font-sample {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--on-surface);
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.font-name {
+    font-size: 0.75rem;
+    text-align: center;
+    color: var(--on-surface-variant);
+    font-weight: 500;
 }
 
 .reset-btn {
