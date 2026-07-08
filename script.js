@@ -226,6 +226,9 @@ class KanjiLearningApp {
             // Small widget: Just kanji
             content += `
                 <div class="widget-actions">
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank', 'noopener,noreferrer')" title="Look on Jisho">
+                        <i class="fas fa-book-open"></i>
+                    </button>
                     <button class="action-btn master-action-btn" onclick="app.markAsMastered()" title="Mark as Mastered">
                         <i class="fas fa-check"></i>
                     </button>
@@ -238,6 +241,9 @@ class KanjiLearningApp {
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()" title="Play Pronunciation">
                         <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank', 'noopener,noreferrer')" title="Look on Jisho">
+                        <i class="fas fa-book-open"></i>
                     </button>
                     <button class="action-btn master-action-btn" onclick="app.markAsMastered()" title="Mark as Mastered">
                         <i class="fas fa-check"></i>
@@ -286,11 +292,17 @@ class KanjiLearningApp {
                 ` : ''}
                 <div class="stroke-order-section">
                     <div class="stroke-order-header">Stroke order</div>
+                    <div class="stroke-order-toolbar">
+                        <button class="stroke-order-play" onclick="app.playStrokeOrderAnimation()" type="button">Animate</button>
+                    </div>
                     <div id="strokeOrderContainer" class="stroke-order-container"></div>
                 </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()" title="Play Pronunciation">
                         <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank', 'noopener,noreferrer')" title="Look on Jisho">
+                        <i class="fas fa-book-open"></i>
                     </button>
                     <button class="action-btn master-action-btn" onclick="app.markAsMastered()" title="Mark as Mastered">
                         <i class="fas fa-check"></i>
@@ -468,37 +480,136 @@ class KanjiLearningApp {
         const container = document.getElementById('strokeOrderContainer');
         if (!container || !this.currentKanji?.character) return;
 
+        this.stopStrokeOrderAnimation();
         container.innerHTML = '<div class="stroke-order-loading">Loading stroke order…</div>';
 
         const svgMarkup = await this.fetchStrokeOrderSvg(this.currentKanji.character);
         if (svgMarkup) {
             container.innerHTML = svgMarkup;
+            this.prepareStrokeOrderAnimation();
         } else {
             container.innerHTML = '<div class="stroke-order-empty">Stroke order preview unavailable for this kanji.</div>';
         }
     }
 
     async fetchStrokeOrderSvg(character) {
-        const codePoint = character.codePointAt(0).toString(16).toUpperCase();
-        const candidates = [
-            `${character}.svg`,
-            `${codePoint}.svg`,
-            `${codePoint.padStart(5, '0')}.svg`
+        const codePoint = character.codePointAt(0).toString(16).toLowerCase();
+        const hex = codePoint.padStart(5, '0');
+        const fileNames = [
+            `${hex}.svg`,
+            `${hex}-Kaisho.svg`,
+            `${hex}-Jinmeiyo.svg`
+        ];
+        const baseUrls = [
+            `https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/`,
+            `https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg/kanji/`
         ];
 
-        for (const fileName of candidates) {
-            try {
-                const response = await fetch(`https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/${fileName}`);
-                if (response.ok) {
-                    const text = await response.text();
-                    return text.includes('<svg') ? text : null;
+        for (const fileName of fileNames) {
+            for (const baseUrl of baseUrls) {
+                try {
+                    const response = await fetch(`${baseUrl}${fileName}`, {
+                        cache: 'force-cache'
+                    });
+                    if (response.ok) {
+                        const text = await response.text();
+                        const sanitized = this.sanitizeStrokeOrderSvg(text);
+                        if (sanitized) return sanitized;
+                    }
+                } catch (error) {
+                    console.warn(`Stroke order fetch failed for ${fileName}`, error);
                 }
-            } catch (error) {
-                console.warn(`Stroke order fetch failed for ${fileName}`, error);
             }
         }
 
         return null;
+    }
+
+    sanitizeStrokeOrderSvg(markup) {
+        if (!markup) return null;
+
+        let cleaned = markup.replace(/^\uFEFF/, '').trim();
+        cleaned = cleaned.replace(/<\?xml[^>]*\?>/gi, '').replace(/<!DOCTYPE[^>]*>/gi, '');
+
+        const start = cleaned.indexOf('<svg');
+        const end = cleaned.lastIndexOf('</svg>');
+        if (start === -1 || end === -1) return null;
+
+        cleaned = cleaned.slice(start, end + 6);
+        return cleaned.replace(/<path([^>]*)>/gi, '<path$1>');
+    }
+
+    prepareStrokeOrderAnimation() {
+        const container = document.getElementById('strokeOrderContainer');
+        if (!container) return;
+
+        const svg = container.querySelector('svg');
+        if (!svg) return;
+
+        svg.setAttribute('viewBox', svg.getAttribute('viewBox') || '0 0 109 109');
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        svg.style.color = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#6200EE';
+
+        const paths = Array.from(svg.querySelectorAll('path'));
+        paths.forEach((path) => {
+            const length = path.getTotalLength ? path.getTotalLength() : 0;
+            path.style.strokeDasharray = `${length}`;
+            path.style.strokeDashoffset = `${length}`;
+            path.style.opacity = '0.2';
+            path.style.transition = 'none';
+        });
+    }
+
+    playStrokeOrderAnimation() {
+        const container = document.getElementById('strokeOrderContainer');
+        if (!container) return;
+
+        const svg = container.querySelector('svg');
+        if (!svg) return;
+
+        this.stopStrokeOrderAnimation();
+
+        const paths = Array.from(svg.querySelectorAll('path'));
+        if (paths.length === 0) return;
+
+        const duration = 220;
+        let index = 0;
+
+        const step = () => {
+            if (index >= paths.length) {
+                this.strokeOrderTimer = null;
+                return;
+            }
+
+            const path = paths[index];
+            const length = path.getTotalLength ? path.getTotalLength() : 0;
+            path.style.transition = `stroke-dashoffset ${duration}ms linear, opacity ${duration / 2}ms ease`;
+            path.style.opacity = '1';
+            path.style.strokeDashoffset = '0';
+            index += 1;
+            this.strokeOrderTimer = window.setTimeout(step, duration + 40);
+        };
+
+        step();
+    }
+
+    stopStrokeOrderAnimation() {
+        if (this.strokeOrderTimer) {
+            window.clearTimeout(this.strokeOrderTimer);
+            this.strokeOrderTimer = null;
+        }
+
+        const container = document.getElementById('strokeOrderContainer');
+        if (!container) return;
+
+        const svg = container.querySelector('svg');
+        if (!svg) return;
+
+        Array.from(svg.querySelectorAll('path')).forEach((path) => {
+            path.style.transition = 'none';
+            path.style.opacity = '0.2';
+            path.style.strokeDashoffset = path.getTotalLength ? `${path.getTotalLength()}` : '0';
+        });
     }
 
     updateProgress() {
