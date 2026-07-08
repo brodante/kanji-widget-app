@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KanjiWidgets - Daily Kanji Learning</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Material+Icons&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Zen+Antique&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/earlyaccess/hannari.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/earlyaccess/kokoro.css" rel="stylesheet">
@@ -106,6 +107,10 @@
                     <div class="setting-group">
                         <label>Kanji Font:</label>
                         <div class="font-preview-grid" id="fontPreviewGrid">
+                            <div class="font-option" data-font="Klee One">
+                                <div class="font-sample" style="font-family: 'Klee One';">日本</div>
+                                <div class="font-name">Klee One</div>
+                            </div>
                             <div class="font-option" data-font="Noto Sans JP">
                                 <div class="font-sample" style="font-family: 'Noto Sans JP';">日本</div>
                                 <div class="font-name">Noto Sans JP</div>
@@ -144,7 +149,8 @@
                             </div>
                         </div>
                         <select id="kanjiFont" style="display: none;">
-                            <option value="Noto Sans JP">Noto Sans JP (Default)</option>
+                            <option value="Klee One" selected>Klee One (Default)</option>
+                            <option value="Noto Sans JP">Noto Sans JP</option>
                             <option value="Zen Antique">Zen Antique (Mincho Style)</option>
                             <option value="Zen Maru Gothic">Zen Maru Gothic</option>
                             <option value="Hannari">Hannari (Traditional)</option>
@@ -154,7 +160,7 @@
                             <option value="Meiryo">Meiryo</option>
                             <option value="MS Gothic">MS Gothic</option>
                         </select>
-                        <input type="hidden" id="kanjiFont-hidden" value="Noto Sans JP">
+                        <input type="hidden" id="kanjiFont-hidden" value="Klee One">
                     </div>
                     <div class="setting-group">
                         <label for="fontSize">Font Size:</label>
@@ -212,6 +218,23 @@
         <!-- Hidden file input for backup import -->
         <input type="file" id="backupFileInput" accept=".json" style="display: none;">
     </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <p>Made with love by <a href="https://github.com/brodante/" target="_blank" rel="noopener noreferrer">d4nte</a></p>
+                <p class="footer-jp japanese-text">愛をこめて <a href="https://github.com/brodante/" target="_blank" rel="noopener noreferrer">ダンテ</a> が作りました</p>
+            </div>
+            <div class="footer-actions">
+                <a class="footer-btn" href="https://github.com/brodante/kanji-widgets-app" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-github"></i> View on GitHub
+                </a>
+                <a class="footer-link" href="https://github.com/brodante/kanji-widgets-app/issues/new" target="_blank" rel="noopener noreferrer">
+                    Create issue
+                </a>
+            </div>
+        </div>
+    </footer>
 
     <script src="storage-manager.js"></script>
     <script src="audio-manager.js"></script>

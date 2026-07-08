@@ -7,7 +7,7 @@ class KanjiLearningApp {
             jlptLevel: 'N5',
             autoPlay: false,
             showFurigana: true,
-            kanjiFont: 'Noto Sans JP',
+            kanjiFont: 'Klee One',
             fontSize: 'medium',
             defaultAudio: 'kunyomi',
             localBackupFreq: 'daily',
@@ -217,7 +217,7 @@ class KanjiLearningApp {
         let content = '';
 
         // Base kanji display
-        content += `<div class="kanji-character">${this.currentKanji.character}</div>`;
+        content += `<div class="kanji-character japanese-text">${this.currentKanji.character}</div>`;
 
         if (this.widgetSize === 'small') {
             // Small widget: Just kanji
@@ -248,20 +248,20 @@ class KanjiLearningApp {
                 <div class="kanji-readings">
                     ${this.currentKanji.onyomi.length > 0 ? `
                         <div class="reading-group">
-                            <div class="reading-label">On'yomi</div>
-                            <div class="reading-value">
+                            <div class="reading-label japanese-text">On'yomi</div>
+                            <div class="reading-value japanese-text">
                                 ${this.currentKanji.onyomi.map(reading => 
-                                    `<span class="clickable-reading" onclick="app.playSpecificReading('${reading}')" title="Click to pronounce">${reading}</span>`
+                                    `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')" title="Click to pronounce">${reading}</span>`
                                 ).join(', ')}
                             </div>
                         </div>
                     ` : ''}
                     ${this.currentKanji.kunyomi.length > 0 ? `
                         <div class="reading-group">
-                            <div class="reading-label">Kun'yomi</div>
-                            <div class="reading-value">
+                            <div class="reading-label japanese-text">Kun'yomi</div>
+                            <div class="reading-value japanese-text">
                                 ${this.currentKanji.kunyomi.map(reading => 
-                                    `<span class="clickable-reading" onclick="app.playSpecificReading('${reading}')" title="Click to pronounce">${reading}</span>`
+                                    `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')" title="Click to pronounce">${reading}</span>`
                                 ).join(', ')}
                             </div>
                         </div>
@@ -272,9 +272,9 @@ class KanjiLearningApp {
                         <h4>Examples</h4>
                         ${this.currentKanji.examples.slice(0, 3).map(example => `
                             <div class="example-item">
-                                <span class="example-word" onclick="app.playSpecificReading('${example.reading || example.word}')" title="Click to pronounce">
+                                <span class="example-word japanese-text" onclick="app.playSpecificReading('${example.reading || example.word}')" title="Click to pronounce">
                                     ${example.word}
-                                    ${example.reading ? `<span class="reading-hiragana">${example.reading}</span>` : ''}
+                                    ${example.reading ? `<span class="reading-hiragana japanese-text">${example.reading}</span>` : ''}
                                 </span>
                                 <span class="example-meaning">${example.meaning}</span>
                             </div>
@@ -417,7 +417,7 @@ class KanjiLearningApp {
 
         container.innerHTML = recent.map(item => `
             <div class="recent-item" onclick="app.showKanjiFromRecent('${item.character}')">
-                <div class="recent-kanji">${item.character}</div>
+                <div class="recent-kanji japanese-text">${item.character}</div>
                 <div class="recent-meaning">${item.meanings.slice(0, 2).join(', ')}</div>
             </div>
         `).join('');
@@ -530,7 +530,7 @@ class KanjiLearningApp {
         
         // Remove existing font and size classes
         appContainer.classList.remove('font-size-small', 'font-size-medium', 'font-size-large', 'font-size-extra-large');
-        widget.classList.remove('font-zen-antique', 'font-zen-maru-gothic', 'font-hannari', 'font-kokoro',
+        widget.classList.remove('font-klee-one', 'font-noto-sans-jp', 'font-zen-antique', 'font-zen-maru-gothic', 'font-hannari', 'font-kokoro',
                                 'font-hiragino-sans', 'font-yu-gothic', 'font-meiryo', 'font-ms-gothic');
         
         // Apply font size class
@@ -538,6 +538,8 @@ class KanjiLearningApp {
         
         // Apply font family class or style
         const fontClassMap = {
+            'Klee One': 'font-klee-one',
+            'Noto Sans JP': 'font-noto-sans-jp',
             'Zen Antique': 'font-zen-antique',
             'Zen Maru Gothic': 'font-zen-maru-gothic',
             'Hannari': 'font-hannari',
@@ -550,10 +552,11 @@ class KanjiLearningApp {
 
         if (fontClassMap[this.settings.kanjiFont]) {
             widget.classList.add(fontClassMap[this.settings.kanjiFont]);
+            widget.style.removeProperty('--japanese-font');
         } else if (this.settings.kanjiFont !== 'Noto Sans JP') {
-            widget.style.fontFamily = `'${this.settings.kanjiFont}', 'Noto Sans JP', sans-serif`;
+            widget.style.setProperty('--japanese-font', `'${this.settings.kanjiFont}', 'Noto Sans JP', sans-serif`);
         } else {
-            widget.style.fontFamily = '';
+            widget.style.removeProperty('--japanese-font');
         }
     }
 
