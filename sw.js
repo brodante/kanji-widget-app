@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanji-widgets-v2';
+const CACHE_NAME = 'kanji-widgets-v3';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -31,13 +31,22 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     if (event.request.method !== 'GET') return;
 
-    event.respondWith(
-        fetch(event.request)
-            .then(response => {
-                const copy = response.clone();
-                caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-                return response;
-            })
-            .catch(() => caches.match(event.request))
-    );
+    const { request } = event;
+    const url = new URL(request.url);
+    const shouldCache = request.destination === 'script' || request.destination === 'style' || request.destination === 'document' || request.mode === 'navigate';
+
+    if (shouldCache && (url.origin === self.location.origin || url.hostname === 'raw.githubusercontent.com' || url.hostname === 'cdn.jsdelivr.net')) {
+        event.respondWith(
+            fetch(request, { cache: 'no-store' })
+                .then(response => {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+                    return response;
+                })
+                .catch(() => caches.match(request))
+        );
+        return;
+    }
+
+    event.respondWith(fetch(request));
 });

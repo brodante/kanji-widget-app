@@ -403,6 +403,18 @@ body {
     transform: scale(1.1);
 }
 
+.action-btn.jisho-btn {
+    width: 44px;
+    font-size: 0.95rem;
+    background-color: rgba(var(--primary-color-rgb), 0.12);
+    color: var(--primary-color);
+    box-shadow: none;
+}
+
+.action-btn.jisho-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.22);
+}
+
 .master-btn {
     position: absolute;
     bottom: 1rem;
@@ -782,6 +794,22 @@ body {
     margin-bottom: 0.5rem;
 }
 
+.stroke-order-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.45rem;
+}
+
+.stroke-order-play {
+    border: none;
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+    background: rgba(var(--primary-color-rgb), 0.12);
+    color: var(--primary-color);
+    cursor: pointer;
+}
+
 .stroke-order-container {
     display: flex;
     justify-content: center;
@@ -796,6 +824,15 @@ body {
     width: 100%;
     max-width: 220px;
     height: auto;
+}
+
+.stroke-order-container path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
 }
 
 .stroke-order-loading,
