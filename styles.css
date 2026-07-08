@@ -1148,3 +1148,31 @@ input:focus {
     border-color: transparent !important;
     transform: translateY(-1px);
 }
+
+/* Layout rule to pull checkboxes onto a clean single row */
+.setting-group.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Pushes the text to the left, checkbox to the far right */
+    gap: 1rem;
+    padding: 0.4rem 0;
+}
+
+/* Ensure the tiny checkboxes align smoothly center-wise with the label baseline text */
+.setting-row input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+/* Fix for KanjiVG stroke order numbers visibility across light/dark themes */
+#strokeOrderContainer svg text {
+    fill: var(--text-color) !important;
+    /* Forces the numbers to match your theme's text color */
+    opacity: 0.6;
+    /* Makes them slightly subtle so they don't distract from the main strokes */
+    font-family: 'Noto Sans JP', sans-serif !important;
+    font-weight: 500;
+}
