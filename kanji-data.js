@@ -1671,7 +1671,7 @@ class KanjiData {
     static async getKanjiByLevel(level = 'N5') {
         const cacheKey = `level_${level}`;
 
-        // Return cached data immediately if available
+        // Return cached data if available
         if (this.cache.has(cacheKey)) {
             return this.cache.get(cacheKey);
         }
@@ -1689,6 +1689,11 @@ class KanjiData {
                 const updatedUnique = Array.from(new Map(freshData.map(k => [k.character, k])).values());
                 this.cache.set(cacheKey, updatedUnique);
                 console.log(`Background sync finished: Loaded ${updatedUnique.length} kanji for ${level}`);
+
+                // CRITICAL FIX: Inform the app to auto-refresh the UI if viewing this level
+                if (window.app && window.app.settings.jlptLevel === level) {
+                    window.app.refreshActivePool(updatedUnique);
+                }
             }
         }).catch(error => console.log('Background sync skipped:', error));
 
@@ -2091,34 +2096,56 @@ class KanjiData {
 
     static async fetchFromKanjiApi(level) {
         try {
-            const levelKanji = this.getEnhancedFallbackData(level);
-            const apiResults = [];
+            console.log(`Querying KanjiAPI for full canonical ${level} index list...`);
 
-            for (let i = 0; i < Math.min(5, levelKanji.length); i++) {
-                try {
-                    const kanji = levelKanji[i];
-                    const response = await fetch(`${this.kanjiApiUrl}/${encodeURIComponent(kanji.character)}`);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        apiResults.push({
-                            character: data.kanji,
-                            meanings: data.meanings,
-                            onyomi: data.on_readings || [],
-                            kunyomi: data.kun_readings || [],
-                            jlpt: level,
-                            examples: await this.fetchExamplesFromTatoeba(data.kanji)
-                        });
-                    }
-                } catch (error) {
-                    console.log(`Failed to fetch ${levelKanji[i].character} from KanjiAPI`);
-                }
-            }
+            // Extract the digit (e.g., 'N2' becomes '2') to map to the official endpoint layout
+            const levelNumber = level.replace('N', '');
+            const listResponse = await fetch(`https://kanjiapi.dev/v1/kanji/jlpt-${levelNumber}`);
+            if (!listResponse.ok) throw new Error(`KanjiAPI level list fetch failed: ${listResponse.status}`);
+
+            const charactersArray = await listResponse.json();
+            console.log(`Discovered ${charactersArray.length} characters on the web for ${level}`);
+
+            // Map the characters into your application format
+            const apiResults = charactersArray.map(char => {
+                const localFallback = this.getEnhancedFallbackData(level).find(k => k.character === char);
+                if (localFallback) return localFallback;
+
+                return {
+                    character: char,
+                    meanings: [`JLPT ${level} character`],
+                    onyomi: [],
+                    kunyomi: [],
+                    jlpt: level,
+                    examples: []
+                };
+            });
+
+            // Kick off deep metadata scraping for the top batch asynchronously
+            this.enrichKanjiBatchInBackground(apiResults.slice(0, 15));
 
             return apiResults;
         } catch (error) {
-            console.error('KanjiAPI.dev error:', error);
+            console.error('KanjiAPI network fallback layer failure:', error);
             return [];
+        }
+    }
+
+    // Helper to smoothly grab meanings & examples without stalling your application page load
+    static async enrichKanjiBatchInBackground(batch) {
+        for (const item of batch) {
+            try {
+                const res = await fetch(`${this.kanjiApiUrl}/${encodeURIComponent(item.character)}`);
+                if (res.ok) {
+                    const detailedData = await res.json();
+                    item.meanings = detailedData.meanings || item.meanings;
+                    item.onyomi = detailedData.on_readings || [];
+                    item.kunyomi = detailedData.kun_readings || [];
+                    item.examples = await this.fetchExamplesFromTatoeba(item.character);
+                }
+            } catch (e) {
+                console.warn(`Background card enrichment skipped for ${item.character}`);
+            }
         }
     }
 

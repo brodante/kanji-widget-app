@@ -213,6 +213,17 @@ class KanjiLearningApp {
         }
     }
 
+    refreshActivePool(updatedPool) {
+        if (!updatedPool || updatedPool.length === 0) return;
+
+        // Update the pool seamlessly in memory
+        this.currentKanjiPool = updatedPool;
+
+        // Re-render the stats and journey grid instantly without touching the current card
+        this.updateProgress();
+        this.renderKanjiJourney();
+    }
+
     renderKanji() {
         if (!this.currentKanji) return;
 
@@ -430,8 +441,9 @@ class KanjiLearningApp {
         const container = document.getElementById('kanjiJourney');
         const summary = document.getElementById('journeySummary');
         const progressStats = document.getElementById('progressStats');
+        const header = document.querySelector('.journey-section .journey-header');
 
-        if (!container || !summary || !progressStats) return;
+        if (!container || !summary || !progressStats || !header) return;
 
         const progress = StorageManager.getProgress();
         const masteredCount = progress.mastered.length;
@@ -439,8 +451,15 @@ class KanjiLearningApp {
         const totalCount = pool.length;
         const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
 
+        // Update basic counts
         summary.textContent = `${masteredCount} mastered`;
         progressStats.textContent = `${masteredCount} mastered | ${totalCount} total (${levelLabel})`;
+
+        // Remove old toggle buttons from header and bottom to prevent duplicates
+        const oldTopBtn = document.getElementById('toggleJourneyBtn');
+        if (oldTopBtn) oldTopBtn.remove();
+        const oldBottomContainer = document.getElementById('journeyBottomToggleContainer');
+        if (oldBottomContainer) oldBottomContainer.remove();
 
         if (totalCount === 0) {
             container.innerHTML = '<p class="stroke-order-empty">Loading kanji list…</p>';
@@ -448,12 +467,95 @@ class KanjiLearningApp {
         }
 
         const masteredSet = new Set(progress.mastered || []);
-        container.innerHTML = pool.map(kanji => `
+
+        // NEW CONFIGURATION: Bump the default compact visibility threshold limit to 100
+        const defaultLimit = 100;
+        const needsTruncation = totalCount > defaultLimit;
+
+        if (this.isJourneyExpanded === undefined) {
+            this.isJourneyExpanded = false;
+        }
+
+        const visiblePool = (needsTruncation && !this.isJourneyExpanded)
+            ? pool.slice(0, defaultLimit)
+            : pool;
+
+        // 1. Generate core collection of pill items
+        let pillsHtml = visiblePool.map(kanji => `
             <button class="journey-pill ${masteredSet.has(kanji.character) ? 'mastered' : 'pending'}" data-character="${kanji.character}" type="button">
                 ${kanji.character}
             </button>
         `).join('');
 
+        // NEW ADDITION: If truncated, append a dedicated trailing indicator placeholder inside the grid container row loop
+        if (needsTruncation && !this.isJourneyExpanded) {
+            pillsHtml += `
+                <div class="journey-ellipsis" title="More kanji remaining underneath">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+            `;
+        }
+
+        // 2. Wrap the grid interior with the fade class style if collapsed
+        if (needsTruncation && !this.isJourneyExpanded) {
+            container.innerHTML = `<div class="compact-fade-wrapper">${pillsHtml}</div>`;
+        } else {
+            container.innerHTML = pillsHtml;
+        }
+
+        // 3. Handle Dual Action Triggers if level pool exceeds 100 records
+        if (needsTruncation) {
+            // Function to handle synchronized state updates
+            const toggleStateAction = () => {
+                this.isJourneyExpanded = !this.isJourneyExpanded;
+                this.renderKanjiJourney();
+
+                // When collapsing from the bottom button, smoothly bounce view frame back up to header block 
+                if (!this.isJourneyExpanded) {
+                    header.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            };
+
+            // BUTTON 1: Inject the top action button directly into section header
+            const topBtn = document.createElement('button');
+            topBtn.id = 'toggleJourneyBtn';
+            topBtn.className = 'stroke-order-play';
+            topBtn.type = 'button';
+            topBtn.style.padding = '0.3rem 1rem';
+            topBtn.style.fontSize = '0.85rem';
+            topBtn.style.display = 'inline-flex';
+            topBtn.style.alignItems = 'center';
+            topBtn.style.gap = '0.4rem';
+            topBtn.style.marginLeft = 'auto';
+
+            topBtn.innerHTML = `
+                <span>${this.isJourneyExpanded ? 'Show Less' : 'Show Remaining'}</span>
+                <i class="fas ${this.isJourneyExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+            `;
+            header.appendChild(topBtn);
+            topBtn.addEventListener('click', toggleStateAction);
+
+            // BUTTON 2: Inject the bottom action button right outside grid boundaries at the floor base
+            const bottomDiv = document.createElement('div');
+            bottomDiv.id = 'journeyBottomToggleContainer';
+            bottomDiv.style.width = '100%';
+            bottomDiv.style.display = 'flex';
+            bottomDiv.style.justifyContent = 'center';
+            bottomDiv.style.marginTop = '1.2rem';
+
+            bottomDiv.innerHTML = `
+                <button id="toggleJourneyBottomBtn" class="stroke-order-play" type="button" style="padding: 0.4rem 1.5rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; color: var(--text-color); cursor: pointer; transition: all 0.2s ease;">
+                    <span>${this.isJourneyExpanded ? 'Show Less' : `Show Remaining (${totalCount - defaultLimit} more)`}</span>
+                    <i class="fas ${this.isJourneyExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+                </button>
+            `;
+            // Insert it cleanly immediately after your journey-grid element block bounds
+            container.parentNode.insertBefore(bottomDiv, container.nextSibling);
+
+            document.getElementById('toggleJourneyBottomBtn').addEventListener('click', toggleStateAction);
+        }
+
+        // Rebind card loading events to current layout collection
         container.querySelectorAll('.journey-pill').forEach(button => {
             button.addEventListener('click', () => {
                 this.showSpecificKanji(button.getAttribute('data-character'));
