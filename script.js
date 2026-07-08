@@ -1,6 +1,7 @@
 class KanjiLearningApp {
     constructor() {
         this.currentKanji = null;
+        this.currentKanjiPool = [];
         this.currentIndex = 0;
         this.widgetSize = 'medium';
         this.settings = {
@@ -167,7 +168,8 @@ class KanjiLearningApp {
 
         try {
             const progress = StorageManager.getProgress();
-            const availableKanji = await KanjiData.getKanjiByLevel(this.settings.jlptLevel);
+            const availableKanji = await this.getKanjiPool(this.settings.jlptLevel);
+            this.currentKanjiPool = availableKanji;
             
             if (availableKanji.length === 0) {
                 throw new Error('No kanji available for this level');
@@ -193,6 +195,7 @@ class KanjiLearningApp {
 
             this.currentKanji = nextKanji;
             this.renderKanji();
+            this.renderKanjiJourney();
 
             if (this.settings.autoPlay) {
                 setTimeout(() => this.playPronunciation(), 1000);
@@ -281,6 +284,10 @@ class KanjiLearningApp {
                         `).join('')}
                     </div>
                 ` : ''}
+                <div class="stroke-order-section">
+                    <div class="stroke-order-header">Stroke order</div>
+                    <div id="strokeOrderContainer" class="stroke-order-container"></div>
+                </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()" title="Play Pronunciation">
                         <i class="fas fa-volume-up"></i>
@@ -293,6 +300,9 @@ class KanjiLearningApp {
         }
 
         widget.innerHTML = content;
+        if (this.widgetSize !== 'small') {
+            this.loadStrokeOrder();
+        }
     }
 
     changeWidgetSize(size) {
@@ -330,6 +340,7 @@ class KanjiLearningApp {
 
         // Update progress display
         this.updateProgress();
+        this.renderKanjiJourney();
         this.loadRecentKanji();
 
         // Load next kanji
@@ -393,16 +404,115 @@ class KanjiLearningApp {
         }
     }
 
+    async getKanjiPool(level = this.settings.jlptLevel) {
+        if (level === 'all') {
+            const levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
+            const pools = await Promise.all(levels.map(item => KanjiData.getKanjiByLevel(item)));
+            return pools.flat();
+        }
+
+        return KanjiData.getKanjiByLevel(level);
+    }
+
+    renderKanjiJourney() {
+        const container = document.getElementById('kanjiJourney');
+        const summary = document.getElementById('journeySummary');
+        const progressStats = document.getElementById('progressStats');
+
+        if (!container || !summary || !progressStats) return;
+
+        const progress = StorageManager.getProgress();
+        const masteredCount = progress.mastered.length;
+        const pool = this.currentKanjiPool.length > 0 ? this.currentKanjiPool : [];
+        const totalCount = pool.length;
+        const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
+
+        summary.textContent = `${masteredCount} mastered`;
+        progressStats.textContent = `${masteredCount} mastered | ${totalCount} total (${levelLabel})`;
+
+        if (totalCount === 0) {
+            container.innerHTML = '<p class="stroke-order-empty">Loading kanji list…</p>';
+            return;
+        }
+
+        const masteredSet = new Set(progress.mastered || []);
+        container.innerHTML = pool.map(kanji => `
+            <button class="journey-pill ${masteredSet.has(kanji.character) ? 'mastered' : 'pending'}" data-character="${kanji.character}" type="button">
+                ${kanji.character}
+            </button>
+        `).join('');
+
+        container.querySelectorAll('.journey-pill').forEach(button => {
+            button.addEventListener('click', () => {
+                this.showSpecificKanji(button.getAttribute('data-character'));
+            });
+        });
+    }
+
+    async showSpecificKanji(character) {
+        if (!character) return;
+
+        const pool = this.currentKanjiPool.length > 0 ? this.currentKanjiPool : await this.getKanjiPool(this.settings.jlptLevel);
+        this.currentKanjiPool = pool;
+        const foundKanji = pool.find(item => item.character === character);
+
+        if (foundKanji) {
+            this.currentKanji = foundKanji;
+            this.renderKanji();
+            this.showToast(`Showing ${character}`);
+            document.getElementById('kanjiWidget').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    async loadStrokeOrder() {
+        const container = document.getElementById('strokeOrderContainer');
+        if (!container || !this.currentKanji?.character) return;
+
+        container.innerHTML = '<div class="stroke-order-loading">Loading stroke order…</div>';
+
+        const svgMarkup = await this.fetchStrokeOrderSvg(this.currentKanji.character);
+        if (svgMarkup) {
+            container.innerHTML = svgMarkup;
+        } else {
+            container.innerHTML = '<div class="stroke-order-empty">Stroke order preview unavailable for this kanji.</div>';
+        }
+    }
+
+    async fetchStrokeOrderSvg(character) {
+        const codePoint = character.codePointAt(0).toString(16).toUpperCase();
+        const candidates = [
+            `${character}.svg`,
+            `${codePoint}.svg`,
+            `${codePoint.padStart(5, '0')}.svg`
+        ];
+
+        for (const fileName of candidates) {
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/${fileName}`);
+                if (response.ok) {
+                    const text = await response.text();
+                    return text.includes('<svg') ? text : null;
+                }
+            } catch (error) {
+                console.warn(`Stroke order fetch failed for ${fileName}`, error);
+            }
+        }
+
+        return null;
+    }
+
     updateProgress() {
         const progress = StorageManager.getProgress();
         const masteredCount = progress.mastered.length;
-        const totalStudied = progress.studied.length;
+        const totalCount = this.currentKanjiPool.length || 0;
+        const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
 
-        document.getElementById('masteredCount').textContent = masteredCount;
-        document.getElementById('totalStudied').textContent = totalStudied;
+        const progressStats = document.getElementById('progressStats');
+        if (progressStats) {
+            progressStats.textContent = `${masteredCount} mastered | ${totalCount} total (${levelLabel})`;
+        }
 
-        // Update progress bar (assuming goal of 100 kanji for now)
-        const progressPercentage = Math.min((masteredCount / 100) * 100, 100);
+        const progressPercentage = totalCount > 0 ? Math.min((masteredCount / totalCount) * 100, 100) : 0;
         document.getElementById('progressFill').style.width = `${progressPercentage}%`;
     }
 
@@ -442,6 +552,7 @@ class KanjiLearningApp {
             if (foundKanji) {
                 this.currentKanji = foundKanji;
                 this.renderKanji();
+                this.renderKanjiJourney();
                 this.showToast(`Showing details for "${character}"`);
                 
                 // Scroll to widget
@@ -485,6 +596,7 @@ class KanjiLearningApp {
         if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
             StorageManager.resetProgress();
             this.updateProgress();
+            this.renderKanjiJourney();
             this.loadRecentKanji();
             this.loadCurrentKanji();
             this.showToast('Progress reset successfully');
