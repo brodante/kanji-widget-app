@@ -311,12 +311,16 @@ body {
     font-size: 1rem;
     color: var(--primary-color);
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.4rem;
+    /* Slightly more breathing room before the text */
 }
 
 .reading-value {
-    font-size: 1.2rem;
-    font-weight: 400;
+    font-size: 1.45rem !important;
+    /* Visibly enlarges the core Hiragana/Katakana text */
+    font-weight: 700 !important;
+    /* Makes the font bolder so it's easy to read */
+    color: var(--on-surface);
 }
 
 .clickable-reading {
@@ -348,19 +352,32 @@ body {
 .example-item {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    background-color: rgba(var(--primary-color), 0.05);
-    border-radius: 8px;
+    align-items: center;
+    padding: 0.6rem 0;
+    /* Slightly tighter vertical spacing */
+    border-bottom: 1px solid var(--border-color);
 }
 
 .example-word {
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    font-size: 1.35rem !important;
+    /* Made the Kanji word visibly bigger */
+    font-weight: bold;
+    color: var(--on-surface);
+}
+
+.example-reading {
+    font-size: 1.05rem !important;
+    /* Scaled up the furigana kana underneath */
+    color: var(--primary-color);
+    margin-top: 0.15rem;
+    /* Tighter gap between the kanji and its reading */
+}
+
+.example-meaning {
+    font-size: 1.1rem !important;
+    /* Enlarged the English definition on the right */
+    color: var(--on-surface-variant);
+    text-align: right;
 }
 
 .example-word:hover {
@@ -368,18 +385,21 @@ body {
 }
 
 .reading-hiragana {
-    font-size: 0.95rem;
+    font-size: 1.05rem !important;
+    /* Increased by ~10% for better readability */
     color: var(--primary-color);
-    opacity: 0.8;
-    font-weight: 400;
+    opacity: 0.95;
+    /* Slightly increased opacity so it stands out clearer */
+    font-weight: 500 !important;
+    /* Slightly sharper font weight */
     margin-top: 0.2rem;
 }
 
-.example-meaning {
+/* .example-meaning {
     color: var(--on-surface);
     opacity: 0.8;
     font-size: 0.95rem;
-}
+} */
 
 .widget-actions {
     position: absolute;
@@ -848,6 +868,13 @@ body {
     stroke-linecap: round;
     stroke-linejoin: round;
     /*vector-effect: non-scaling-stroke; /* STROKE BUG stroke order bug fixed rn dont change!!! */
+}
+
+.stroke-order-container svg text {
+    font-size: 8px !important;
+    font-family: sans-serif !important;
+    fill: rgba(255, 255, 255, 0.4) !important;
+    /* Makes numbers subtly dim and clean */
 }
 
 .stroke-order-loading,
