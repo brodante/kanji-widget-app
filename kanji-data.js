@@ -25,7 +25,7 @@ class KanjiData {
                 character: '一',
                 meanings: ['one'],
                 onyomi: ['イチ'],
-                kunyomi: ['ひと'],
+                kunyomi: ['ひと.'],
                 jlpt: 'N5',
                 examples: [
                     { word: '一つ', reading: 'ひとつ', meaning: 'one (thing)' },
@@ -73,7 +73,7 @@ class KanjiData {
                 character: '大',
                 meanings: ['large', 'big'],
                 onyomi: ['ダイ', 'タイ'],
-                kunyomi: ['おお'],
+                kunyomi: ['おお.', 'おおきい'],
                 jlpt: 'N5',
                 examples: [
                     { word: '大きい', reading: 'おおきい', meaning: 'big' },
@@ -97,7 +97,7 @@ class KanjiData {
                 character: '二',
                 meanings: ['two'],
                 onyomi: ['ニ', 'ジ'],
-                kunyomi: ['ふた'],
+                kunyomi: ['ふた.'],
                 jlpt: 'N5',
                 examples: [
                     { word: '二つ', reading: 'ふたつ', meaning: 'two (things)' },
@@ -133,7 +133,7 @@ class KanjiData {
                 character: '長',
                 meanings: ['long', 'leader', 'senior'],
                 onyomi: ['チョウ'],
-                kunyomi: ['なが', 'おさ'],
+                kunyomi: ['なが.い', 'おさ'],
                 jlpt: 'N5',
                 examples: [
                     { word: '長い', reading: 'ながい', meaning: 'long' },
@@ -145,7 +145,7 @@ class KanjiData {
                 character: '出',
                 meanings: ['exit', 'leave', 'go out'],
                 onyomi: ['シュツ', 'スイ'],
-                kunyomi: ['で', 'だ', 'い'],
+                kunyomi: ['で.る', 'だ.す', 'い.でる'],
                 jlpt: 'N5',
                 examples: [
                     { word: '出る', reading: 'でる', meaning: 'to go out' },
@@ -157,7 +157,7 @@ class KanjiData {
                 character: '三',
                 meanings: ['three'],
                 onyomi: ['サン'],
-                kunyomi: ['み'],
+                kunyomi: ['み', 'み.つ'],
                 jlpt: 'N5',
                 examples: [
                     { word: '三つ', reading: 'みっつ', meaning: 'three (things)' },
@@ -169,7 +169,7 @@ class KanjiData {
                 character: '時',
                 meanings: ['time', 'hour'],
                 onyomi: ['ジ'],
-                kunyomi: ['とき', 'どき'],
+                kunyomi: ['とき', '-どき'],
                 jlpt: 'N5',
                 examples: [
                     { word: '時間', reading: 'じかん', meaning: 'time' },
@@ -181,7 +181,7 @@ class KanjiData {
                 character: '行',
                 meanings: ['go', 'conduct', 'line'],
                 onyomi: ['コウ', 'ギョウ'],
-                kunyomi: ['い', 'ゆ', 'おこな'],
+                kunyomi: ['い.く', 'ゆ.く', 'おこな.う'],
                 jlpt: 'N5',
                 examples: [
                     { word: '行く', reading: 'いく', meaning: 'to go' },
@@ -193,7 +193,7 @@ class KanjiData {
                 character: '見',
                 meanings: ['see', 'look', 'watch'],
                 onyomi: ['ケン'],
-                kunyomi: ['み'],
+                kunyomi: ['み.る', 'み.せる', 'み.える'],
                 jlpt: 'N5',
                 examples: [
                     { word: '見る', reading: 'みる', meaning: 'to see' },
@@ -217,7 +217,7 @@ class KanjiData {
                 character: '分',
                 meanings: ['minute', 'part', 'understand'],
                 onyomi: ['ブン', 'フン', 'ブ'],
-                kunyomi: ['わ'],
+                kunyomi: ['わ.かる', 'わ.ける', 'わ.かれる'],
                 jlpt: 'N5',
                 examples: [
                     { word: '分かる', reading: 'わかる', meaning: 'to understand' },
@@ -229,7 +229,7 @@ class KanjiData {
                 character: '後',
                 meanings: ['behind', 'after', 'later'],
                 onyomi: ['ゴ', 'コウ'],
-                kunyomi: ['のち', 'うし', 'あと'],
+                kunyomi: ['のち', 'うし.ろ', 'あと', 'おく.れる'],
                 jlpt: 'N5',
                 examples: [
                     { word: '後で', reading: 'あとで', meaning: 'later' },
@@ -253,7 +253,7 @@ class KanjiData {
                 character: '生',
                 meanings: ['life', 'birth', 'genuine'],
                 onyomi: ['セイ', 'ショウ'],
-                kunyomi: ['い', 'う', 'なま'],
+                kunyomi: ['い.きる', 'う.む', 'なま', 'は.やす'],
                 jlpt: 'N5',
                 examples: [
                     { word: '学生', reading: 'がくせい', meaning: 'student' },
@@ -265,7 +265,7 @@ class KanjiData {
                 character: '五',
                 meanings: ['five'],
                 onyomi: ['ゴ'],
-                kunyomi: ['いつ'],
+                kunyomi: ['いつ', 'いつ.つ'],
                 jlpt: 'N5',
                 examples: [
                     { word: '五つ', reading: 'いつつ', meaning: 'five (things)' },
@@ -282,14 +282,14 @@ class KanjiData {
                 examples: [
                     { word: '時間', reading: 'じかん', meaning: 'time' },
                     { word: '人間', reading: 'にんげん', meaning: 'human' },
-                    { word: '間に合う', reading: 'まにあう', meaning: 'to be in time' }
+                    { word: '間に合う', reading: 'まニアう', meaning: 'to be in time' }
                 ]
             },
             {
                 character: '上',
                 meanings: ['above', 'up', 'on'],
                 onyomi: ['ジョウ', 'ショウ'],
-                kunyomi: ['うえ', 'うわ', 'かみ', 'あ', 'のぼ'],
+                kunyomi: ['うえ', 'うわ', 'かみ', 'あ.がる', 'のぼ.る'],
                 jlpt: 'N5',
                 examples: [
                     { word: '上', reading: 'うえ', meaning: 'above, up' },
@@ -313,7 +313,7 @@ class KanjiData {
                 character: '四',
                 meanings: ['four'],
                 onyomi: ['シ'],
-                kunyomi: ['よ', 'よん'],
+                kunyomi: ['よ', 'よ.つ', 'よん'],
                 jlpt: 'N5',
                 examples: [
                     { word: '四つ', reading: 'よっつ', meaning: 'four (things)' },
@@ -337,7 +337,7 @@ class KanjiData {
                 character: '金',
                 meanings: ['gold', 'money', 'metal'],
                 onyomi: ['キン', 'コン'],
-                kunyomi: ['かね', 'かな'],
+                kunyomi: ['かね', 'かな-'],
                 jlpt: 'N5',
                 examples: [
                     { word: '金', reading: 'かね', meaning: 'money' },
@@ -349,7 +349,7 @@ class KanjiData {
                 character: '九',
                 meanings: ['nine'],
                 onyomi: ['キュウ', 'ク'],
-                kunyomi: ['ここの'],
+                kunyomi: ['ここの', 'ここの.つ'],
                 jlpt: 'N5',
                 examples: [
                     { word: '九つ', reading: 'ここのつ', meaning: 'nine (things)' },
@@ -361,7 +361,7 @@ class KanjiData {
                 character: '入',
                 meanings: ['enter', 'put in'],
                 onyomi: ['ニュウ'],
-                kunyomi: ['い', 'はい'],
+                kunyomi: ['はい.る', 'い.れる'],
                 jlpt: 'N5',
                 examples: [
                     { word: '入る', reading: 'はいる', meaning: 'to enter' },
@@ -373,10 +373,10 @@ class KanjiData {
                 character: '八',
                 meanings: ['eight'],
                 onyomi: ['ハチ'],
-                kunyomi: ['や', 'やっ'],
+                kunyomi: ['や', 'や.つ', 'よっ.つ'],
                 jlpt: 'N5',
                 examples: [
-                    { word: '八つ', reading: 'やっつ', meaning: 'eight (things)' },
+                    { word: '八つ', reading: 'яっつ', meaning: 'eight (things)' },
                     { word: '八人', reading: 'はちにん', meaning: 'eight people' },
                     { word: '八時', reading: 'はちじ', meaning: 'eight o\'clock' }
                 ]
@@ -385,7 +385,7 @@ class KanjiData {
                 character: '六',
                 meanings: ['six'],
                 onyomi: ['ロク'],
-                kunyomi: ['む', 'むっ'],
+                kunyomi: ['む', 'む.つ', 'むい'],
                 jlpt: 'N5',
                 examples: [
                     { word: '六つ', reading: 'むっつ', meaning: 'six (things)' },
@@ -397,7 +397,7 @@ class KanjiData {
                 character: '下',
                 meanings: ['under', 'below', 'down'],
                 onyomi: ['カ', 'ゲ'],
-                kunyomi: ['した', 'しも', 'もと', 'さ', 'くだ', 'お'],
+                kunyomi: ['した', 'しも', 'もと', 'さ.がる', 'くだ.る', 'お.りる'],
                 jlpt: 'N5',
                 examples: [
                     { word: '下', reading: 'した', meaning: 'under, below' },
@@ -409,7 +409,7 @@ class KanjiData {
                 character: '来',
                 meanings: ['come', 'next'],
                 onyomi: ['ライ'],
-                kunyomi: ['く', 'き'],
+                kunyomi: ['く.る', 'き.たる', 'き.たす'],
                 jlpt: 'N5',
                 examples: [
                     { word: '来る', reading: 'くる', meaning: 'to come' },
@@ -433,7 +433,7 @@ class KanjiData {
                 character: '小',
                 meanings: ['small', 'little'],
                 onyomi: ['ショウ'],
-                kunyomi: ['ちい', 'こ', 'お'],
+                kunyomi: ['ちい.さい', 'こ-', 'お-'],
                 jlpt: 'N5',
                 examples: [
                     { word: '小さい', reading: 'ちいさい', meaning: 'small' },
@@ -445,7 +445,7 @@ class KanjiData {
                 character: '七',
                 meanings: ['seven'],
                 onyomi: ['シチ'],
-                kunyomi: ['なな', 'なの'],
+                kunyomi: ['なな', 'なな.つ', 'なの'],
                 jlpt: 'N5',
                 examples: [
                     { word: '七つ', reading: 'ななつ', meaning: 'seven (things)' },
@@ -469,7 +469,7 @@ class KanjiData {
                 character: '話',
                 meanings: ['talk', 'speak', 'story'],
                 onyomi: ['ワ'],
-                kunyomi: ['はな', 'はなし'],
+                kunyomi: ['はな.す', 'はなし'],
                 jlpt: 'N5',
                 examples: [
                     { word: '話す', reading: 'はなす', meaning: 'to speak' },
@@ -481,7 +481,7 @@ class KanjiData {
                 character: '少',
                 meanings: ['few', 'little'],
                 onyomi: ['ショウ'],
-                kunyomi: ['すく', 'すこ'],
+                kunyomi: ['すく.ない', 'すこ.し'],
                 jlpt: 'N5',
                 examples: [
                     { word: '少し', reading: 'すこし', meaning: 'a little' },
@@ -505,7 +505,7 @@ class KanjiData {
                 character: '学',
                 meanings: ['study', 'learning', 'science'],
                 onyomi: ['ガク'],
-                kunyomi: ['まな'],
+                kunyomi: ['まな.ぶ'],
                 jlpt: 'N5',
                 examples: [
                     { word: '学校', reading: 'がっこう', meaning: 'school' },
@@ -517,24 +517,12 @@ class KanjiData {
                 character: '外',
                 meanings: ['outside', 'other', 'foreign'],
                 onyomi: ['ガイ', 'ゲ'],
-                kunyomi: ['そと', 'ほか', 'はず'],
+                kunyomi: ['そと', 'ほか', 'はず.す', 'はず.れる'],
                 jlpt: 'N5',
                 examples: [
                     { word: '外', reading: 'そと', meaning: 'outside' },
                     { word: '外国', reading: 'がいこく', meaning: 'foreign country' },
                     { word: '海外', reading: 'かいがい', meaning: 'overseas' }
-                ]
-            },
-            {
-                character: '国',
-                meanings: ['country'],
-                onyomi: ['コク'],
-                kunyomi: ['くに'],
-                jlpt: 'N5',
-                examples: [
-                    { word: '国', reading: 'くに', meaning: 'country' },
-                    { word: '外国', reading: 'がいこく', meaning: 'foreign country' },
-                    { word: '中国', reading: 'ちゅうごく', meaning: 'China' }
                 ]
             },
             {
@@ -553,7 +541,7 @@ class KanjiData {
                 character: '高',
                 meanings: ['high', 'tall', 'expensive'],
                 onyomi: ['コウ'],
-                kunyomi: ['たか', 'だか'],
+                kunyomi: ['たか.い', 'たか.まる', 'たか.める'],
                 jlpt: 'N5',
                 examples: [
                     { word: '高い', reading: 'たかい', meaning: 'high, expensive' },
@@ -589,7 +577,7 @@ class KanjiData {
                 character: '語',
                 meanings: ['language', 'word'],
                 onyomi: ['ゴ'],
-                kunyomi: ['かた'],
+                kunyomi: ['かた.る', 'かた.らう'],
                 jlpt: 'N5',
                 examples: [
                     { word: '日本語', reading: 'にほんご', meaning: 'Japanese language' },
@@ -613,24 +601,12 @@ class KanjiData {
                 character: '帰',
                 meanings: ['return', 'go back'],
                 onyomi: ['キ'],
-                kunyomi: ['かえ'],
+                kunyomi: ['かえ.る', 'かえ.す'],
                 jlpt: 'N5',
                 examples: [
                     { word: '帰る', reading: 'かえる', meaning: 'to return' },
                     { word: '帰国', reading: 'きこく', meaning: 'return to one\'s country' },
                     { word: '帰り', reading: 'かえり', meaning: 'return trip' }
-                ]
-            },
-            {
-                character: '入',
-                meanings: ['enter', 'put in'],
-                onyomi: ['ニュウ'],
-                kunyomi: ['い', 'はい'],
-                jlpt: 'N5',
-                examples: [
-                    { word: '入る', reading: 'はいる', meaning: 'to enter' },
-                    { word: '入口', reading: 'いりぐち', meaning: 'entrance' },
-                    { word: '入学', reading: 'にゅうがく', meaning: 'entering school' }
                 ]
             }
         ],
@@ -640,7 +616,7 @@ class KanjiData {
                 character: '会',
                 meanings: ['meeting', 'meet', 'association'],
                 onyomi: ['カイ', 'エ'],
-                kunyomi: ['あ'],
+                kunyomi: ['あ.う'],
                 jlpt: 'N4',
                 examples: [
                     { word: '会う', reading: 'あう', meaning: 'to meet' },
@@ -652,7 +628,7 @@ class KanjiData {
                 character: '同',
                 meanings: ['same', 'agree', 'equal'],
                 onyomi: ['ドウ'],
-                kunyomi: ['おな'],
+                kunyomi: ['おな.じ'],
                 jlpt: 'N4',
                 examples: [
                     { word: '同じ', reading: 'おなじ', meaning: 'same' },
@@ -676,7 +652,7 @@ class KanjiData {
                 character: '自',
                 meanings: ['oneself', 'self'],
                 onyomi: ['ジ', 'シ'],
-                kunyomi: ['みずか'],
+                kunyomi: ['みずか.ら'],
                 jlpt: 'N4',
                 examples: [
                     { word: '自分', reading: 'じぶん', meaning: 'oneself' },
@@ -748,7 +724,7 @@ class KanjiData {
                 character: '方',
                 meanings: ['direction', 'person', 'way'],
                 onyomi: ['ホウ'],
-                kunyomi: ['かた', 'がた'],
+                kunyomi: ['かた', '-がた'],
                 jlpt: 'N4',
                 examples: [
                     { word: '方法', reading: 'ほうほう', meaning: 'method' },
@@ -760,7 +736,7 @@ class KanjiData {
                 character: '新',
                 meanings: ['new', 'fresh'],
                 onyomi: ['シン'],
-                kunyomi: ['あたら', 'あら', 'にい'],
+                kunyomi: ['あたら.しい', 'あら.た', 'にい-'],
                 jlpt: 'N4',
                 examples: [
                     { word: '新しい', reading: 'あたらしい', meaning: 'new' },
@@ -781,7 +757,7 @@ class KanjiData {
                 ]
             },
             {
-                character: '員',
+                character: '员',
                 meanings: ['member', 'staff', 'employee'],
                 onyomi: ['イン'],
                 kunyomi: [],
@@ -796,7 +772,7 @@ class KanjiData {
                 character: '立',
                 meanings: ['stand', 'rise'],
                 onyomi: ['リツ', 'リュウ'],
-                kunyomi: ['た'],
+                kunyomi: ['た.つ', 'た.てる'],
                 jlpt: 'N4',
                 examples: [
                     { word: '立つ', reading: 'たつ', meaning: 'to stand' },
@@ -808,7 +784,7 @@ class KanjiData {
                 character: '開',
                 meanings: ['open', 'unfold'],
                 onyomi: ['カイ'],
-                kunyomi: ['ひら', 'あ'],
+                kunyomi: ['ひら.く', 'ひら.く', 'あ.く', 'あ.ける'],
                 jlpt: 'N4',
                 examples: [
                     { word: '開く', reading: 'ひらく', meaning: 'to open' },
@@ -820,7 +796,7 @@ class KanjiData {
                 character: '手',
                 meanings: ['hand'],
                 onyomi: ['シュ'],
-                kunyomi: ['て', 'た'],
+                kunyomi: ['て', 'た-'],
                 jlpt: 'N4',
                 examples: [
                     { word: '手', reading: 'て', meaning: 'hand' },
@@ -844,7 +820,7 @@ class KanjiData {
                 character: '問',
                 meanings: ['question', 'ask', 'problem'],
                 onyomi: ['モン'],
-                kunyomi: ['と'],
+                kunyomi: ['と.う', 'と.い'],
                 jlpt: 'N4',
                 examples: [
                     { word: '質問', reading: 'しつもん', meaning: 'question' },
@@ -856,7 +832,7 @@ class KanjiData {
                 character: '代',
                 meanings: ['substitute', 'generation', 'age'],
                 onyomi: ['ダイ', 'タイ'],
-                kunyomi: ['か', 'よ', 'しろ'],
+                kunyomi: ['か.える', 'か.わる', 'よ', 'しろ'],
                 jlpt: 'N4',
                 examples: [
                     { word: '時代', reading: 'じだい', meaning: 'era, period' },
@@ -868,7 +844,7 @@ class KanjiData {
                 character: '明',
                 meanings: ['bright', 'clear', 'light'],
                 onyomi: ['メイ', 'ミョウ'],
-                kunyomi: ['あか', 'あき', 'あ'],
+                kunyomi: ['あか.るい', 'あき.らかな', 'あ.ける'],
                 jlpt: 'N4',
                 examples: [
                     { word: '明るい', reading: 'あかるい', meaning: 'bright' },
@@ -880,7 +856,7 @@ class KanjiData {
                 character: '動',
                 meanings: ['move', 'motion'],
                 onyomi: ['ドウ'],
-                kunyomi: ['うご'],
+                kunyomi: ['うご.く', 'うご.かす'],
                 jlpt: 'N4',
                 examples: [
                     { word: '動く', reading: 'うごく', meaning: 'to move' },
@@ -904,7 +880,7 @@ class KanjiData {
                 character: '目',
                 meanings: ['eye', 'look'],
                 onyomi: ['モク', 'ボク'],
-                kunyomi: ['め', 'ま'],
+                kunyomi: ['め', 'ま-'],
                 jlpt: 'N4',
                 examples: [
                     { word: '目', reading: 'め', meaning: 'eye' },
@@ -916,7 +892,7 @@ class KanjiData {
                 character: '通',
                 meanings: ['pass through', 'traffic', 'communicate'],
                 onyomi: ['ツウ', 'ツ'],
-                kunyomi: ['とお', 'かよ'],
+                kunyomi: ['とお.る', 'とお.す', 'かよ.う'],
                 jlpt: 'N4',
                 examples: [
                     { word: '通る', reading: 'とおる', meaning: 'to pass through' },
@@ -928,7 +904,7 @@ class KanjiData {
                 character: '言',
                 meanings: ['say', 'word', 'speech'],
                 onyomi: ['ゲン', 'ゴン'],
-                kunyomi: ['い', 'こと'],
+                kunyomi: ['い.う', 'こと'],
                 jlpt: 'N4',
                 examples: [
                     { word: '言う', reading: 'いう', meaning: 'to say' },
@@ -964,7 +940,7 @@ class KanjiData {
                 character: '田',
                 meanings: ['rice field'],
                 onyomi: ['デン'],
-                kunyomi: ['た', 'だ'],
+                kunyomi: ['た', 'だ-'],
                 jlpt: 'N4',
                 examples: [
                     { word: '田', reading: 'た', meaning: 'rice field' },
@@ -976,7 +952,7 @@ class KanjiData {
                 character: '主',
                 meanings: ['master', 'main', 'lord'],
                 onyomi: ['シュ', 'ス'],
-                kunyomi: ['ぬし', 'おも'],
+                kunyomi: ['ぬし', 'おも.な'],
                 jlpt: 'N4',
                 examples: [
                     { word: '主人', reading: 'しゅじん', meaning: 'husband, master' },
@@ -988,10 +964,10 @@ class KanjiData {
                 character: '思',
                 meanings: ['think', 'thought'],
                 onyomi: ['シ'],
-                kunyomi: ['おも'],
+                kunyomi: ['おも.う'],
                 jlpt: 'N4',
                 examples: [
-                    { word: '思う', reading: 'おもう', meaning: 'to think' },
+                    { word: '思う', reading: 'お思う', meaning: 'to think' },
                     { word: '思想', reading: 'しそう', meaning: 'thought, idea' },
                     { word: '意思', reading: 'いし', meaning: 'intention, will' }
                 ]
@@ -1000,7 +976,7 @@ class KanjiData {
                 character: '考',
                 meanings: ['think', 'consider'],
                 onyomi: ['コウ'],
-                kunyomi: ['かんが'],
+                kunyomi: ['かんが.える'],
                 jlpt: 'N4',
                 examples: [
                     { word: '考える', reading: 'かんがえる', meaning: 'to think' },
@@ -1012,7 +988,7 @@ class KanjiData {
                 character: '知',
                 meanings: ['know', 'wisdom'],
                 onyomi: ['チ'],
-                kunyomi: ['し'],
+                kunyomi: ['し.る'],
                 jlpt: 'N4',
                 examples: [
                     { word: '知る', reading: 'しる', meaning: 'to know' },
@@ -1036,7 +1012,7 @@ class KanjiData {
                 character: '多',
                 meanings: ['many', 'much'],
                 onyomi: ['タ'],
-                kunyomi: ['おお'],
+                kunyomi: ['おおい'],
                 jlpt: 'N4',
                 examples: [
                     { word: '多い', reading: 'おおい', meaning: 'many, much' },
@@ -1048,7 +1024,7 @@ class KanjiData {
                 character: '正',
                 meanings: ['correct', 'justice', 'right'],
                 onyomi: ['セイ', 'ショウ'],
-                kunyomi: ['ただ', 'まさ'],
+                kunyomi: ['ただ.しい', 'ただ.す', 'まさ'],
                 jlpt: 'N4',
                 examples: [
                     { word: '正しい', reading: 'ただしい', meaning: 'correct' },
@@ -1060,12 +1036,12 @@ class KanjiData {
                 character: '安',
                 meanings: ['cheap', 'safe', 'peaceful'],
                 onyomi: ['アン'],
-                kunyomi: ['やす'],
+                kunyomi: ['やす.い'],
                 jlpt: 'N4',
                 examples: [
                     { word: '安い', reading: 'やすい', meaning: 'cheap' },
                     { word: '安全', reading: 'あんぜん', meaning: 'safety' },
-                    { word: '不安', reading: 'ふあん', meaning: 'anxiety' }
+                    { word: '不安', reading: 'ふ안', meaning: 'anxiety' }
                 ]
             },
             {
@@ -1096,7 +1072,7 @@ class KanjiData {
                 character: '切',
                 meanings: ['cut', 'urgent'],
                 onyomi: ['セツ', 'サイ'],
-                kunyomi: ['き', 'き'],
+                kunyomi: ['き.る', 'き.れる'],
                 jlpt: 'N4',
                 examples: [
                     { word: '切る', reading: 'きる', meaning: 'to cut' },
@@ -1108,7 +1084,7 @@ class KanjiData {
                 character: '近',
                 meanings: ['near', 'close'],
                 onyomi: ['キン'],
-                kunyomi: ['ちか'],
+                kunyomi: ['ちか.い'],
                 jlpt: 'N4',
                 examples: [
                     { word: '近い', reading: 'ちかい', meaning: 'near, close' },
@@ -1144,7 +1120,7 @@ class KanjiData {
                 character: '急',
                 meanings: ['urgent', 'sudden', 'steep'],
                 onyomi: ['キュウ'],
-                kunyomi: ['いそ'],
+                kunyomi: ['いそ.ぐ'],
                 jlpt: 'N4',
                 examples: [
                     { word: '急ぐ', reading: 'いそぐ', meaning: 'to hurry' },
@@ -1156,7 +1132,7 @@ class KanjiData {
                 character: '使',
                 meanings: ['use', 'employ'],
                 onyomi: ['シ'],
-                kunyomi: ['つか'],
+                kunyomi: ['つか.う'],
                 jlpt: 'N4',
                 examples: [
                     { word: '使う', reading: 'つかう', meaning: 'to use' },
@@ -1168,7 +1144,7 @@ class KanjiData {
                 character: '始',
                 meanings: ['begin', 'start'],
                 onyomi: ['シ'],
-                kunyomi: ['はじ'],
+                kunyomi: ['はじ.める', 'はじ.まる'],
                 jlpt: 'N4',
                 examples: [
                     { word: '始める', reading: 'はじめる', meaning: 'to begin' },
@@ -1180,7 +1156,7 @@ class KanjiData {
                 character: '実',
                 meanings: ['real', 'truth', 'fruit'],
                 onyomi: ['ジツ'],
-                kunyomi: ['み', 'みの'],
+                kunyomi: ['み', 'みの.る'],
                 jlpt: 'N4',
                 examples: [
                     { word: '実は', reading: 'じつは', meaning: 'actually' },
@@ -1204,7 +1180,7 @@ class KanjiData {
                 character: '声',
                 meanings: ['voice'],
                 onyomi: ['セイ', 'ショウ'],
-                kunyomi: ['こえ', 'こわ'],
+                kunyomi: ['こえ', 'こわ-'],
                 jlpt: 'N4',
                 examples: [
                     { word: '声', reading: 'こえ', meaning: 'voice' },
@@ -1216,7 +1192,7 @@ class KanjiData {
                 character: '風',
                 meanings: ['wind', 'style'],
                 onyomi: ['フウ', 'フ'],
-                kunyomi: ['かぜ', 'かざ'],
+                kunyomi: ['かぜ', 'かざ-'],
                 jlpt: 'N4',
                 examples: [
                     { word: '風', reading: 'かぜ', meaning: 'wind' },
@@ -1240,7 +1216,7 @@ class KanjiData {
                 character: '写',
                 meanings: ['copy', 'photograph'],
                 onyomi: ['シャ'],
-                kunyomi: ['うつ'],
+                kunyomi: ['うつ.す', 'うつ.る'],
                 jlpt: 'N4',
                 examples: [
                     { word: '写真', reading: 'しゃしん', meaning: 'photograph' },
@@ -1264,7 +1240,7 @@ class KanjiData {
                 character: '活',
                 meanings: ['life', 'activity'],
                 onyomi: ['カツ'],
-                kunyomi: ['い'],
+                kunyomi: ['い.きる', 'い.かす', 'い.ける'],
                 jlpt: 'N4',
                 examples: [
                     { word: '活動', reading: 'かつどう', meaning: 'activity' },
@@ -1288,7 +1264,7 @@ class KanjiData {
                 character: '真',
                 meanings: ['true', 'reality', 'genuine'],
                 onyomi: ['シン'],
-                kunyomi: ['ま', 'まこと'],
+                kunyomi: ['ま-', 'まこと'],
                 jlpt: 'N4',
                 examples: [
                     { word: '真っ白', reading: 'まっしろ', meaning: 'pure white' },
@@ -1300,7 +1276,7 @@ class KanjiData {
                 character: '有',
                 meanings: ['exist', 'have', 'possess'],
                 onyomi: ['ユウ', 'ウ'],
-                kunyomi: ['あ'],
+                kunyomi: ['あ.る'],
                 jlpt: 'N4',
                 examples: [
                     { word: '有名', reading: 'ゆうめい', meaning: 'famous' },
@@ -1312,7 +1288,7 @@ class KanjiData {
                 character: '無',
                 meanings: ['nothing', 'none', 'without'],
                 onyomi: ['ム', 'ブ'],
-                kunyomi: ['な'],
+                kunyomi: ['な.い'],
                 jlpt: 'N4',
                 examples: [
                     { word: '無料', reading: 'むりょう', meaning: 'free of charge' },
@@ -1339,7 +1315,7 @@ class KanjiData {
                 character: '経',
                 meanings: ['sutra', 'longitude', 'pass through'],
                 onyomi: ['ケイ', 'キョウ'],
-                kunyomi: ['へ'],
+                kunyomi: ['へ.る'],
                 jlpt: 'N3',
                 examples: [
                     { word: '経済', reading: 'けいざい', meaning: 'economy' },
@@ -1351,7 +1327,7 @@ class KanjiData {
                 character: '済',
                 meanings: ['settle', 'finish', 'feel at ease'],
                 onyomi: ['サイ'],
-                kunyomi: ['す'],
+                kunyomi: ['す.む', 'す.ます'],
                 jlpt: 'N3',
                 examples: [
                     { word: '経済', reading: 'けいざい', meaning: 'economy' },
@@ -1363,7 +1339,7 @@ class KanjiData {
                 character: '治',
                 meanings: ['reign', 'be at peace', 'cure'],
                 onyomi: ['ジ', 'チ'],
-                kunyomi: ['おさ', 'なお'],
+                kunyomi: ['おさ.める', 'おさ.まる', 'なお.る', 'なお.す'],
                 jlpt: 'N3',
                 examples: [
                     { word: '政治', reading: 'せいじ', meaning: 'politics' },
@@ -1462,7 +1438,7 @@ class KanjiData {
                 character: '象',
                 meanings: ['elephant', 'phenomenon', 'image'],
                 onyomi: ['ショウ', 'ゾウ'],
-                kunyomi: ['かたど'],
+                kunyomi: ['かたど.る'],
                 jlpt: 'N2',
                 examples: [
                     { word: '現象', reading: 'げんしょう', meaning: 'phenomenon' },
@@ -1474,7 +1450,7 @@ class KanjiData {
                 character: '増',
                 meanings: ['increase', 'add', 'augment'],
                 onyomi: ['ゾウ'],
-                kunyomi: ['ま', 'ふ'],
+                kunyomi: ['ま.す', 'ま.える', 'ふ.える', 'ふ.やす'],
                 jlpt: 'N2',
                 examples: [
                     { word: '増加', reading: 'ぞうか', meaning: 'increase' },
@@ -1486,7 +1462,7 @@ class KanjiData {
                 character: '減',
                 meanings: ['dwindle', 'decrease', 'reduce'],
                 onyomi: ['ゲン'],
-                kunyomi: ['へ'],
+                kunyomi: ['へ.る', 'へ.らす'],
                 jlpt: 'N2',
                 examples: [
                     { word: '減る', reading: 'へる', meaning: 'to decrease' },
@@ -1510,7 +1486,7 @@ class KanjiData {
                 character: '況',
                 meanings: ['condition', 'situation'],
                 onyomi: ['キョウ'],
-                kunyomi: ['いわ', 'まし'],
+                kunyomi: ['いわ.んや'],
                 jlpt: 'N2',
                 examples: [
                     { word: '状況', reading: 'じょうきょう', meaning: 'situation, circumstances' },
@@ -1522,7 +1498,7 @@ class KanjiData {
                 character: '態',
                 meanings: ['attitude', 'condition', 'figure'],
                 onyomi: ['タイ'],
-                kunyomi: ['わざ'],
+                kunyomi: ['わざ.と'],
                 jlpt: 'N2',
                 examples: [
                     { word: '態度', reading: 'たいど', meaning: 'attitude' },
@@ -1539,7 +1515,7 @@ class KanjiData {
                 examples: [
                     { word: '階層', reading: 'かいそう', meaning: 'class, level, stratum' },
                     { word: '大気層', reading: 'たいきそう', meaning: 'atmosphere' },
-                    { word: '若い層', reading: 'わかいそう', meaning: 'young demographic' }
+                    { word: '若い層', reading: 'わかい層', meaning: 'young demographic' }
                 ]
             },
             {
@@ -1558,7 +1534,7 @@ class KanjiData {
                 character: '設',
                 meanings: ['establishment', 'provision', 'prepare'],
                 onyomi: ['セツ'],
-                kunyomi: ['もう'],
+                kunyomi: ['もう.ける'],
                 jlpt: 'N2',
                 examples: [
                     { word: '設立', reading: 'せつりつ', meaning: 'establishment, founding' },
@@ -1585,7 +1561,7 @@ class KanjiData {
                 character: '慣',
                 meanings: ['accustomed', 'get used to', 'become experienced'],
                 onyomi: ['カン'],
-                kunyomi: ['な'],
+                kunyomi: ['な.れる', 'な.らす'],
                 jlpt: 'N1',
                 examples: [
                     { word: '習慣', reading: 'しゅうかん', meaning: 'habit, custom' },
@@ -1609,19 +1585,19 @@ class KanjiData {
                 character: '施',
                 meanings: ['give', 'bestow', 'perform'],
                 onyomi: ['シ', 'セ'],
-                kunyomi: ['ほどこ'],
+                kunyomi: ['ほどこ.す'],
                 jlpt: 'N1',
                 examples: [
                     { word: '実施', reading: 'じっし', meaning: 'enforcement, implementation' },
                     { word: '施設', reading: 'しせつ', meaning: 'institution, establishment' },
-                    { word: '措施', reading: 'そち', meaning: 'measure, step' }
+                    { word: '措置', reading: 'そち', meaning: 'measure, step' }
                 ]
             },
             {
                 character: '奪',
                 meanings: ['rob', 'take by force', 'snatch away'],
                 onyomi: ['ダツ'],
-                kunyomi: ['うば'],
+                kunyomi: ['うば.う'],
                 jlpt: 'N1',
                 examples: [
                     { word: '奪う', reading: 'うばう', meaning: 'to snatch away' },
@@ -1633,7 +1609,7 @@ class KanjiData {
                 character: '探',
                 meanings: ['grope', 'search', 'look for'],
                 onyomi: ['タン'],
-                kunyomi: ['さが', 'さぐ'],
+                kunyomi: ['さが.す', 'さぐ.る'],
                 jlpt: 'N1',
                 examples: [
                     { word: '探す', reading: 'さがす', meaning: 'to search for' },
@@ -1645,7 +1621,7 @@ class KanjiData {
                 character: '維',
                 meanings: ['fiber', 'tie', 'rope'],
                 onyomi: ['イ'],
-                kunyomi: ['これ'],
+                kunyomi: [],
                 jlpt: 'N1',
                 examples: [
                     { word: '維持', reading: 'いじ', meaning: 'maintenance, preservation' },
@@ -1657,7 +1633,7 @@ class KanjiData {
                 character: '献',
                 meanings: ['offering', 'present', 'dedicate'],
                 onyomi: ['ケン', 'コン'],
-                kunyomi: ['たてまつ'],
+                kunyomi: ['たてまつ.る'],
                 jlpt: 'N1',
                 examples: [
                     { word: '献身', reading: 'けんしん', meaning: 'devotion, dedication' },
@@ -1669,7 +1645,7 @@ class KanjiData {
                 character: '優',
                 meanings: ['tenderness', 'excel', 'surpass'],
                 onyomi: ['ユウ', 'ウ'],
-                kunyomi: ['やさ', 'すぐ'],
+                kunyomi: ['やさ.しい', 'すぐ.れる'],
                 jlpt: 'N1',
                 examples: [
                     { word: '優しい', reading: 'やさしい', meaning: 'kind, gentle' },
@@ -1681,7 +1657,7 @@ class KanjiData {
                 character: '握',
                 meanings: ['grip', 'hold', 'mould sushi'],
                 onyomi: ['アク'],
-                kunyomi: ['にぎ'],
+                kunyomi: ['にぎ.る'],
                 jlpt: 'N1',
                 examples: [
                     { word: '握る', reading: 'にぎる', meaning: 'to grasp, to grip' },
@@ -1772,15 +1748,11 @@ class KanjiData {
         
         japaneseEntries.forEach(entry => {
             if (entry.reading) {
-                // This is a simplified approach - in reality, determining
-                // on'yomi vs kun'yomi is more complex
                 if (type === 'on') {
-                    // On'yomi are typically in katakana or shorter
                     if (entry.reading.length <= 3 || /[ァ-ヴ]/.test(entry.reading)) {
                         readings.push(entry.reading);
                     }
                 } else {
-                    // Kun'yomi are typically longer or in hiragana
                     if (entry.reading.length > 3 && !/[ァ-ヴ]/.test(entry.reading)) {
                         readings.push(entry.reading);
                     }
@@ -1853,11 +1825,9 @@ class KanjiData {
         try {
             console.log(`Fetching kanji data for ${level} from multiple sources...`);
             
-            // Start with enhanced fallback data (always available)
             let kanjiList = this.getEnhancedFallbackData(level);
             console.log(`Base fallback data: ${kanjiList.length} kanji for ${level}`);
 
-            // Try to enhance with fresh API data
             try {
                 const kanjiApiData = await this.fetchFromKanjiApi(level);
                 if (kanjiApiData && kanjiApiData.length > 0) {
@@ -1868,7 +1838,6 @@ class KanjiData {
                 console.log('KanjiAPI.dev not available, using fallback data');
             }
 
-            // Try WaniKani if available
             try {
                 const wanikaniData = await this.fetchFromWaniKani(level);
                 if (wanikaniData && wanikaniData.length > 0) {
@@ -1889,8 +1858,6 @@ class KanjiData {
 
     static async fetchFromWaniKani(level) {
         try {
-            // Note: WaniKani API requires authentication for full access
-            // This is a simplified version that would work with public endpoints
             const jlptMapping = {
                 'N5': '1,2,3',
                 'N4': '4,5,6',
@@ -1902,7 +1869,7 @@ class KanjiData {
             const levelParam = jlptMapping[level] || '1,2,3';
             const response = await fetch(`${this.wanikaniUrl}?types=kanji&levels=${levelParam}`, {
                 headers: {
-                    'Authorization': 'Bearer YOUR_WANIKANI_TOKEN' // User would need to provide this
+                    'Authorization': 'Bearer YOUR_WANIKANI_TOKEN'
                 }
             });
 
@@ -1930,14 +1897,10 @@ class KanjiData {
     }
 
     static getEnhancedFallbackData(level) {
-        // Return expanded fallback data with more entries per level
         const baseData = this.fallbackData[level] || this.fallbackData['N5'];
         console.log(`Base data for ${level}: ${baseData.length} kanji`);
         
-        // Add more kanji to reach target numbers per level
         const enhancedData = [...baseData];
-        
-        // Add additional kanji based on level requirements
         const additionalKanji = this.getAdditionalKanjiForLevel(level);
         console.log(`Additional kanji for ${level}: ${additionalKanji.length} kanji`);
         enhancedData.push(...additionalKanji);
@@ -1949,7 +1912,6 @@ class KanjiData {
     static getAdditionalKanjiForLevel(level) {
         const additionalKanji = {
             'N5': [
-                // Adding more N5 kanji to reach 80+ total
                 {
                     character: '水',
                     meanings: ['water'],
@@ -1966,7 +1928,7 @@ class KanjiData {
                     character: '火',
                     meanings: ['fire'],
                     onyomi: ['カ'],
-                    kunyomi: ['ひ', 'ほ'],
+                    kunyomi: ['ひ', 'ほ-'],
                     jlpt: 'N5',
                     examples: [
                         { word: '火', reading: 'ひ', meaning: 'fire' },
@@ -1978,7 +1940,7 @@ class KanjiData {
                     character: '木',
                     meanings: ['tree', 'wood'],
                     onyomi: ['モク', 'ボク'],
-                    kunyomi: ['き'],
+                    kunyomi: ['き', 'こ-'],
                     jlpt: 'N5',
                     examples: [
                         { word: '木', reading: 'き', meaning: 'tree' },
@@ -1990,7 +1952,7 @@ class KanjiData {
                     character: '金',
                     meanings: ['gold', 'money'],
                     onyomi: ['キン', 'コン'],
-                    kunyomi: ['かね', 'かな'],
+                    kunyomi: ['かね', 'かな-'],
                     jlpt: 'N5',
                     examples: [
                         { word: '金', reading: 'かね', meaning: 'money' },
@@ -2010,7 +1972,6 @@ class KanjiData {
                         { word: '土地', reading: 'とち', meaning: 'land' }
                     ]
                 },
-                // Adding 40+ more N5 kanji to reach 100+ total
                 {
                     character: '月',
                     meanings: ['moon', 'month'],
@@ -2039,7 +2000,7 @@ class KanjiData {
                     character: '生',
                     meanings: ['life', 'birth', 'student'],
                     onyomi: ['セイ', 'ショウ'],
-                    kunyomi: ['い', 'う', 'なま'],
+                    kunyomi: ['い.きる', 'う.む', 'なま', 'は.やす'],
                     jlpt: 'N5',
                     examples: [
                         { word: '生活', reading: 'せいかつ', meaning: 'life, living' },
@@ -2051,7 +2012,7 @@ class KanjiData {
                     character: '大',
                     meanings: ['big', 'large'],
                     onyomi: ['ダイ', 'タイ'],
-                    kunyomi: ['おお'],
+                    kunyomi: ['おお.', 'おおきい'],
                     jlpt: 'N5',
                     examples: [
                         { word: '大きい', reading: 'おおきい', meaning: 'big' },
@@ -2063,7 +2024,7 @@ class KanjiData {
                     character: '小',
                     meanings: ['small', 'little'],
                     onyomi: ['ショウ'],
-                    kunyomi: ['ちい', 'こ', 'お'],
+                    kunyomi: ['ちい.さい', 'こ-', 'お-'],
                     jlpt: 'N5',
                     examples: [
                         { word: '小さい', reading: 'ちいさい', meaning: 'small' },
@@ -2075,7 +2036,7 @@ class KanjiData {
                     character: '中',
                     meanings: ['middle', 'inside'],
                     onyomi: ['チュウ'],
-                    kunyomi: ['なか'],
+                    kunyomi: ['なか', 'うち'],
                     jlpt: 'N5',
                     examples: [
                         { word: '中', reading: 'なか', meaning: 'inside' },
@@ -2087,7 +2048,7 @@ class KanjiData {
                     character: '高',
                     meanings: ['high', 'expensive'],
                     onyomi: ['コウ'],
-                    kunyomi: ['たか'],
+                    kunyomi: ['たか.い', 'たか.まる', 'たか.める'],
                     jlpt: 'N5',
                     examples: [
                         { word: '高い', reading: 'たかい', meaning: 'high, expensive' },
@@ -2099,7 +2060,7 @@ class KanjiData {
                     character: '学',
                     meanings: ['study', 'learning'],
                     onyomi: ['ガク'],
-                    kunyomi: ['まな'],
+                    kunyomi: ['まな.ぶ'],
                     jlpt: 'N5',
                     examples: [
                         { word: '学ぶ', reading: 'まなぶ', meaning: 'to learn' },
@@ -2123,7 +2084,7 @@ class KanjiData {
                     character: '先',
                     meanings: ['before', 'ahead', 'previous'],
                     onyomi: ['セン'],
-                    kunyomi: ['さき'],
+                    kunyomi: ['さき', 'まず'],
                     jlpt: 'N5',
                     examples: [
                         { word: '先生', reading: 'せんせい', meaning: 'teacher' },
@@ -2159,7 +2120,7 @@ class KanjiData {
                     character: '時',
                     meanings: ['time', 'hour'],
                     onyomi: ['ジ'],
-                    kunyomi: ['とき'],
+                    kunyomi: ['とき', '-どき'],
                     jlpt: 'N5',
                     examples: [
                         { word: '時間', reading: 'じかん', meaning: 'time' },
@@ -2171,7 +2132,7 @@ class KanjiData {
                     character: '間',
                     meanings: ['interval', 'between'],
                     onyomi: ['カン', 'ケン'],
-                    kunyomi: ['あいだ', 'ま'],
+                    kunyomi: ['あいだ', 'ま', 'あい'],
                     jlpt: 'N5',
                     examples: [
                         { word: '時間', reading: 'じかん', meaning: 'time' },
@@ -2181,12 +2142,11 @@ class KanjiData {
                 }
             ],
             'N4': [
-                // Adding more N4 kanji
                 {
                     character: '経',
                     meanings: ['sutra', 'longitude', 'pass through'],
                     onyomi: ['ケイ', 'キョウ'],
-                    kunyomi: ['へ'],
+                    kunyomi: ['へ.る'],
                     jlpt: 'N4',
                     examples: [
                         { word: '経済', reading: 'けいざい', meaning: 'economy' },
@@ -2198,7 +2158,7 @@ class KanjiData {
                     character: '済',
                     meanings: ['settle', 'finish', 'feel at ease'],
                     onyomi: ['サイ'],
-                    kunyomi: ['す'],
+                    kunyomi: ['す.む', 'す.ます'],
                     jlpt: 'N4',
                     examples: [
                         { word: '経済', reading: 'けいざい', meaning: 'economy' },
@@ -2206,24 +2166,23 @@ class KanjiData {
                         { word: '救済', reading: 'きゅうさい', meaning: 'relief' }
                     ]
                 },
-                // Adding 30+ more N4 kanji
                 {
                     character: '考',
                     meanings: ['think', 'consider'],
                     onyomi: ['コウ'],
-                    kunyomi: ['かんが'],
+                    kunyomi: ['かんが.える'],
                     jlpt: 'N4',
                     examples: [
                         { word: '考える', reading: 'かんがえる', meaning: 'to think' },
                         { word: '思考', reading: 'しこう', meaning: 'thought' },
-                        { word: '考案', reading: 'こうあん', meaning: 'idea, plan' }
+                        { word: '考案', reading: 'こう案', meaning: 'idea, plan' }
                     ]
                 },
                 {
                     character: '思',
                     meanings: ['think', 'feel'],
                     onyomi: ['シ'],
-                    kunyomi: ['おも'],
+                    kunyomi: ['おmo.う'],
                     jlpt: 'N4',
                     examples: [
                         { word: '思う', reading: 'おもう', meaning: 'to think, feel' },
@@ -2247,7 +2206,7 @@ class KanjiData {
                     character: '味',
                     meanings: ['taste', 'flavor'],
                     onyomi: ['ミ'],
-                    kunyomi: ['あじ'],
+                    kunyomi: ['あじ', 'あじ.わう'],
                     jlpt: 'N4',
                     examples: [
                         { word: '味', reading: 'あじ', meaning: 'taste' },
@@ -2281,7 +2240,6 @@ class KanjiData {
                 }
             ],
             'N3': [
-                // Adding more N3 kanji
                 {
                     character: '議',
                     meanings: ['deliberation', 'consultation', 'debate'],
@@ -2296,7 +2254,6 @@ class KanjiData {
                 }
             ],
             'N2': [
-                // Additional N2 kanji
                 {
                     character: '療',
                     meanings: ['heal', 'cure'],
@@ -2311,7 +2268,6 @@ class KanjiData {
                 }
             ],
             'N1': [
-                // Additional N1 kanji
                 {
                     character: '騎',
                     meanings: ['equestrian', 'riding on horses'],
@@ -2332,12 +2288,9 @@ class KanjiData {
 
     static async fetchFromKanjiApi(level) {
         try {
-            // KanjiAPI.dev doesn't have JLPT level filtering, so we'll fetch common kanji
-            // and filter by our local knowledge of JLPT levels
             const levelKanji = this.getEnhancedFallbackData(level);
             const apiResults = [];
 
-            // Fetch detailed data for a subset of kanji from KanjiAPI.dev
             for (let i = 0; i < Math.min(5, levelKanji.length); i++) {
                 try {
                     const kanji = levelKanji[i];
