@@ -231,12 +231,19 @@ class AudioManager {
     }
 
     static async speak(text, lang = 'ja-JP') {
-        if (this.isSupported && this.synth) {
-            const result = await this.speakFallback(text, lang);
-            if (result) return true;
+        if (!text) return false;
+
+        // Clean up dictionary boundary dots so the word flows naturally (e.g., まな.ぶ -> まなぶ)
+        const cleanText = text.replace(/\./g, '');
+
+        // Primary Tier: Force the premium Google Translate voice engine
+        if (lang.startsWith('ja')) {
+            const success = await this.speakWithGoogle(cleanText, 'ja');
+            if (success) return true;
         }
 
-        return this.speakWithGoogle(text, 'ja');
+        // Emergency Fallback: If network audio fails/blocks, drop back to local system speech
+        return this.speakFallback(cleanText, lang);
     }
 
     // Enhanced method: Speak kanji reading with Kanji Alive API support

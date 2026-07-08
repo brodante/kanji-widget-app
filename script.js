@@ -409,9 +409,9 @@ class KanjiLearningApp {
         }
     }
 
-    playSpecificReading(reading) {
+    async playSpecificReading(reading) {
         if (reading) {
-            AudioManager.speak(reading, 'ja-JP');
+            await AudioManager.speak(reading, 'ja-JP');
             this.showToast(`Playing pronunciation: ${reading}`);
         }
     }
