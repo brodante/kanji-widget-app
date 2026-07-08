@@ -553,14 +553,14 @@ class KanjiLearningApp {
         const paths = Array.from(svg.querySelectorAll('path'));
         paths.forEach((path) => {
             const length = path.getTotalLength ? path.getTotalLength() : 0;
-            const padding = 14;
-            const drawLength = length > 0 ? length + padding : 0;
+            const drawLength = length > 0 ? length * 3 : 0;
             path.style.transition = 'none';
             path.style.strokeLinecap = 'round';
             path.style.strokeLinejoin = 'round';
-            path.style.strokeDasharray = `${drawLength} ${drawLength}`;
+            path.style.strokeDasharray = `${drawLength}`;
             path.style.strokeDashoffset = `${drawLength}`;
-            path.style.opacity = '0.2';
+            path.style.opacity = '0';
+            path.style.strokeOpacity = '1';
             path.getBoundingClientRect();
         });
     }
@@ -588,8 +588,10 @@ class KanjiLearningApp {
 
             const path = paths[index];
             const length = path.getTotalLength ? path.getTotalLength() : 0;
+            const drawLength = length > 0 ? length * 3 : 0;
             path.style.transition = `stroke-dashoffset ${duration}ms linear, opacity ${duration / 2}ms ease`;
             path.style.opacity = '1';
+            path.style.strokeDasharray = `${drawLength}`;
             path.style.strokeDashoffset = '0';
             path.getBoundingClientRect();
             index += 1;
@@ -613,10 +615,11 @@ class KanjiLearningApp {
 
         Array.from(svg.querySelectorAll('path')).forEach((path) => {
             const length = path.getTotalLength ? path.getTotalLength() : 0;
-            const padding = 14;
+            const drawLength = length > 0 ? length * 3 : 0;
             path.style.transition = 'none';
-            path.style.opacity = '0.2';
-            path.style.strokeDashoffset = `${length + padding}`;
+            path.style.opacity = '0';
+            path.style.strokeDasharray = `${drawLength}`;
+            path.style.strokeDashoffset = `${drawLength}`;
         });
     }
 
