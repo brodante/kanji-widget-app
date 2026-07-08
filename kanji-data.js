@@ -1670,35 +1670,34 @@ class KanjiData {
 
     static async getKanjiByLevel(level = 'N5') {
         const cacheKey = `level_${level}`;
-        
+
         // Return cached data if available
         if (this.cache.has(cacheKey)) {
             return this.cache.get(cacheKey);
         }
 
-        try {
-            // First try to fetch fresh data from multiple APIs
-            let kanjiList = await this.fetchKanjiFromMultipleSources(level);
-            
-            // If API data is not available, use fallback data
-            if (!kanjiList || kanjiList.length === 0) {
-                kanjiList = this.fallbackData[level] || this.fallbackData['N5'];
-                console.log(`Using fallback data for ${level}, ${kanjiList.length} kanji available`);
-            } else {
-                console.log(`Fetched ${kanjiList.length} kanji from APIs for ${level}`);
-            }
-            
-            // Cache the result
-            this.cache.set(cacheKey, kanjiList);
-            return kanjiList;
+        // 1. INSTANT LOAD: Grab local fallback data immediately so the UI doesn't freeze
+        let kanjiList = this.getEnhancedFallbackData(level);
 
-        } catch (error) {
-            console.error('Error loading kanji data:', error);
-            // Return fallback data on error
-            const fallback = this.fallbackData[level] || this.fallbackData['N5'];
-            this.cache.set(cacheKey, fallback);
-            return fallback;
-        }
+        // Ensure no duplicates exist in the initial load
+        const uniqueKanji = Array.from(new Map(kanjiList.map(k => [k.character, k])).values());
+        this.cache.set(cacheKey, uniqueKanji);
+
+        // 2. BACKGROUND SYNC: Fetch from external APIs without blocking the user
+        this.fetchKanjiFromMultipleSources(level).then(freshData => {
+            if (freshData && freshData.length > 0) {
+                const updatedUnique = Array.from(new Map(freshData.map(k => [k.character, k])).values());
+                this.cache.set(cacheKey, updatedUnique);
+                console.log(`Background sync finished: Loaded ${updatedUnique.length} kanji for ${level}`);
+
+                // CRITICAL FIX: Inform the app to auto-refresh the UI if viewing this level
+                if (window.app && window.app.settings.jlptLevel === level) {
+                    window.app.refreshActivePool(updatedUnique);
+                }
+            }
+        }).catch(error => console.log('Background sync skipped:', error));
+
+        return uniqueKanji;
     }
 
     static async fetchKanjiFromJisho(character) {
@@ -1912,234 +1911,43 @@ class KanjiData {
     static getAdditionalKanjiForLevel(level) {
         const additionalKanji = {
             'N5': [
-                {
-                    character: '水',
-                    meanings: ['water'],
-                    onyomi: ['スイ'],
-                    kunyomi: ['みず'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '水', reading: 'みず', meaning: 'water' },
-                        { word: '水曜日', reading: 'すいようび', meaning: 'Wednesday' },
-                        { word: '水泳', reading: 'すいえい', meaning: 'swimming' }
-                    ]
-                },
-                {
-                    character: '火',
-                    meanings: ['fire'],
-                    onyomi: ['カ'],
-                    kunyomi: ['ひ', 'ほ-'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '火', reading: 'ひ', meaning: 'fire' },
-                        { word: '火曜日', reading: 'かようび', meaning: 'Tuesday' },
-                        { word: '花火', reading: 'はなび', meaning: 'fireworks' }
-                    ]
-                },
-                {
-                    character: '木',
-                    meanings: ['tree', 'wood'],
-                    onyomi: ['モク', 'ボク'],
-                    kunyomi: ['き', 'こ-'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '木', reading: 'き', meaning: 'tree' },
-                        { word: '木曜日', reading: 'もくようび', meaning: 'Thursday' },
-                        { word: '木材', reading: 'もくざい', meaning: 'lumber' }
-                    ]
-                },
-                {
-                    character: '金',
-                    meanings: ['gold', 'money'],
-                    onyomi: ['キン', 'コン'],
-                    kunyomi: ['かね', 'かな-'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '金', reading: 'かね', meaning: 'money' },
-                        { word: '金曜日', reading: 'きんようび', meaning: 'Friday' },
-                        { word: '金色', reading: 'きんいろ', meaning: 'golden color' }
-                    ]
-                },
-                {
-                    character: '土',
-                    meanings: ['earth', 'soil'],
-                    onyomi: ['ド', 'ト'],
-                    kunyomi: ['つち'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '土', reading: 'つち', meaning: 'soil' },
-                        { word: '土曜日', reading: 'どようび', meaning: 'Saturday' },
-                        { word: '土地', reading: 'とち', meaning: 'land' }
-                    ]
-                },
-                {
-                    character: '月',
-                    meanings: ['moon', 'month'],
-                    onyomi: ['ゲツ', 'ガツ'],
-                    kunyomi: ['つき'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '月', reading: 'つき', meaning: 'moon' },
-                        { word: '一月', reading: 'いちがつ', meaning: 'January' },
-                        { word: '月曜日', reading: 'げつようび', meaning: 'Monday' }
-                    ]
-                },
-                {
-                    character: '年',
-                    meanings: ['year'],
-                    onyomi: ['ネン'],
-                    kunyomi: ['とし'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '年', reading: 'とし', meaning: 'year' },
-                        { word: '今年', reading: 'ことし', meaning: 'this year' },
-                        { word: '来年', reading: 'らいねん', meaning: 'next year' }
-                    ]
-                },
-                {
-                    character: '生',
-                    meanings: ['life', 'birth', 'student'],
-                    onyomi: ['セイ', 'ショウ'],
-                    kunyomi: ['い.きる', 'う.む', 'なま', 'は.やす'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '生活', reading: 'せいかつ', meaning: 'life, living' },
-                        { word: '学生', reading: 'がくせい', meaning: 'student' },
-                        { word: '先生', reading: 'せんせい', meaning: 'teacher' }
-                    ]
-                },
-                {
-                    character: '大',
-                    meanings: ['big', 'large'],
-                    onyomi: ['ダイ', 'タイ'],
-                    kunyomi: ['おお.', 'おおきい'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '大きい', reading: 'おおきい', meaning: 'big' },
-                        { word: '大学', reading: 'だいがく', meaning: 'university' },
-                        { word: '大切', reading: 'たいせつ', meaning: 'important' }
-                    ]
-                },
-                {
-                    character: '小',
-                    meanings: ['small', 'little'],
-                    onyomi: ['ショウ'],
-                    kunyomi: ['ちい.さい', 'こ-', 'お-'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '小さい', reading: 'ちいさい', meaning: 'small' },
-                        { word: '小学校', reading: 'しょうがっこう', meaning: 'elementary school' },
-                        { word: '小説', reading: 'しょうせつ', meaning: 'novel' }
-                    ]
-                },
-                {
-                    character: '中',
-                    meanings: ['middle', 'inside'],
-                    onyomi: ['チュウ'],
-                    kunyomi: ['なか', 'うち'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '中', reading: 'なか', meaning: 'inside' },
-                        { word: '中学校', reading: 'ちゅうがっこう', meaning: 'middle school' },
-                        { word: '中国', reading: 'ちゅうごく', meaning: 'China' }
-                    ]
-                },
-                {
-                    character: '高',
-                    meanings: ['high', 'expensive'],
-                    onyomi: ['コウ'],
-                    kunyomi: ['たか.い', 'たか.まる', 'たか.める'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '高い', reading: 'たかい', meaning: 'high, expensive' },
-                        { word: '高校', reading: 'こうこう', meaning: 'high school' },
-                        { word: '最高', reading: 'さいこう', meaning: 'best, highest' }
-                    ]
-                },
-                {
-                    character: '学',
-                    meanings: ['study', 'learning'],
-                    onyomi: ['ガク'],
-                    kunyomi: ['まな.ぶ'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '学ぶ', reading: 'まなぶ', meaning: 'to learn' },
-                        { word: '学校', reading: 'がっこう', meaning: 'school' },
-                        { word: '大学', reading: 'だいがく', meaning: 'university' }
-                    ]
-                },
-                {
-                    character: '校',
-                    meanings: ['school'],
-                    onyomi: ['コウ'],
-                    kunyomi: [],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '学校', reading: 'がっこう', meaning: 'school' },
-                        { word: '高校', reading: 'こうこう', meaning: 'high school' },
-                        { word: '校長', reading: 'こうちょう', meaning: 'principal' }
-                    ]
-                },
-                {
-                    character: '先',
-                    meanings: ['before', 'ahead', 'previous'],
-                    onyomi: ['セン'],
-                    kunyomi: ['さき', 'まず'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '先生', reading: 'せんせい', meaning: 'teacher' },
-                        { word: '先週', reading: 'せんしゅう', meaning: 'last week' },
-                        { word: '先に', reading: 'さきに', meaning: 'ahead, first' }
-                    ]
-                },
-                {
-                    character: '毎',
-                    meanings: ['every'],
-                    onyomi: ['マイ'],
-                    kunyomi: [],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '毎日', reading: 'まいにち', meaning: 'every day' },
-                        { word: '毎朝', reading: 'まいあさ', meaning: 'every morning' },
-                        { word: '毎年', reading: 'まいとし', meaning: 'every year' }
-                    ]
-                },
-                {
-                    character: '何',
-                    meanings: ['what', 'how many'],
-                    onyomi: ['カ'],
-                    kunyomi: ['なに', 'なん'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '何', reading: 'なに', meaning: 'what' },
-                        { word: '何時', reading: 'なんじ', meaning: 'what time' },
-                        { word: '何人', reading: 'なんにん', meaning: 'how many people' }
-                    ]
-                },
-                {
-                    character: '時',
-                    meanings: ['time', 'hour'],
-                    onyomi: ['ジ'],
-                    kunyomi: ['とき', '-どき'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '時間', reading: 'じかん', meaning: 'time' },
-                        { word: '何時', reading: 'なんじ', meaning: 'what time' },
-                        { word: '時計', reading: 'とけい', meaning: 'clock, watch' }
-                    ]
-                },
-                {
-                    character: '間',
-                    meanings: ['interval', 'between'],
-                    onyomi: ['カン', 'ケン'],
-                    kunyomi: ['あいだ', 'ま', 'あい'],
-                    jlpt: 'N5',
-                    examples: [
-                        { word: '時間', reading: 'じかん', meaning: 'time' },
-                        { word: '間に', reading: 'あいだに', meaning: 'between' },
-                        { word: '人間', reading: 'にんげん', meaning: 'human being' }
-                    ]
-                }
+                // Cleaned standard additions (duplicates from base fallbackData removed)
+                { character: '水', meanings: ['water'], onyomi: ['スイ'], kunyomi: ['みず'], jlpt: 'N5', examples: [{ word: '水', reading: 'みず', meaning: 'water' }] },
+                { character: '火', meanings: ['fire'], onyomi: ['カ'], kunyomi: ['ひ', 'ほ-'], jlpt: 'N5', examples: [{ word: '火', reading: 'ひ', meaning: 'fire' }] },
+                { character: '木', meanings: ['tree', 'wood'], onyomi: ['モク', 'ボク'], kunyomi: ['き'], jlpt: 'N5', examples: [{ word: '木', reading: 'き', meaning: 'tree' }] },
+                { character: '土', meanings: ['earth', 'soil'], onyomi: ['ド', 'ト'], kunyomi: ['つち'], jlpt: 'N5', examples: [{ word: '土', reading: 'つち', meaning: 'soil' }] },
+                { character: '先', meanings: ['before', 'ahead'], onyomi: ['セン'], kunyomi: ['さき'], jlpt: 'N5', examples: [{ word: '先生', reading: 'せんせい', meaning: 'teacher' }] },
+                { character: '何', meanings: ['what', 'how many'], onyomi: ['カ'], kunyomi: ['なに', 'なん'], jlpt: 'N5', examples: [{ word: '何', reading: 'なに', meaning: 'what' }] },
+
+                // Missing JLPT N5 Kanji to reach the official count
+                { character: '万', meanings: ['ten thousand'], onyomi: ['マン', 'バン'], kunyomi: [], jlpt: 'N5', examples: [{ word: '一万', reading: 'いちまん', meaning: 'ten thousand' }] },
+                { character: '父', meanings: ['father'], onyomi: ['フ'], kunyomi: ['ちち'], jlpt: 'N5', examples: [{ word: 'お父さん', reading: 'おとうさん', meaning: 'father' }] },
+                { character: '母', meanings: ['mother'], onyomi: ['ボ'], kunyomi: ['はは'], jlpt: 'N5', examples: [{ word: 'お母さん', reading: 'おかあさん', meaning: 'mother' }] },
+                { character: '友', meanings: ['friend'], onyomi: ['ユウ'], kunyomi: ['とも'], jlpt: 'N5', examples: [{ word: '友達', reading: 'ともだち', meaning: 'friend' }] },
+                { character: '男', meanings: ['man', 'male'], onyomi: ['ダン', 'ナン'], kunyomi: ['おとこ'], jlpt: 'N5', examples: [{ word: '男の子', reading: 'おとこのこ', meaning: 'boy' }] },
+                { character: '女', meanings: ['woman', 'female'], onyomi: ['ジョ'], kunyomi: ['おんな'], jlpt: 'N5', examples: [{ word: '女の子', reading: 'おんなのこ', meaning: 'girl' }] },
+                { character: '子', meanings: ['child'], onyomi: ['シ', 'ス'], kunyomi: ['こ'], jlpt: 'N5', examples: [{ word: '子供', reading: 'こども', meaning: 'child' }] },
+                { character: '食', meanings: ['eat', 'food'], onyomi: ['ショク'], kunyomi: ['た.べる'], jlpt: 'N5', examples: [{ word: '食べる', reading: 'たべる', meaning: 'to eat' }] },
+                { character: '飲', meanings: ['drink'], onyomi: ['イン'], kunyomi: ['の.む'], jlpt: 'N5', examples: [{ word: '飲む', reading: 'のむ', meaning: 'to drink' }] },
+                { character: '買', meanings: ['buy'], onyomi: ['バイ'], kunyomi: ['か.う'], jlpt: 'N5', examples: [{ word: '買う', reading: 'かう', meaning: 'to buy' }] },
+                { character: '書', meanings: ['write', 'book'], onyomi: ['ショ'], kunyomi: ['か.く'], jlpt: 'N5', examples: [{ word: '書く', reading: 'かく', meaning: 'to write' }] },
+                { character: '読', meanings: ['read'], onyomi: ['ドク'], kunyomi: ['よ.む'], jlpt: 'N5', examples: [{ word: '読む', reading: 'よむ', meaning: 'to read' }] },
+                { character: '聞', meanings: ['hear', 'ask', 'listen'], onyomi: ['ブン', 'モン'], kunyomi: ['き.く'], jlpt: 'N5', examples: [{ word: '聞く', reading: 'きく', meaning: 'to listen/ask' }] },
+                { character: '西', meanings: ['west'], onyomi: ['セイ', 'サイ'], kunyomi: ['にし'], jlpt: 'N5', examples: [{ word: '西', reading: 'にし', meaning: 'west' }] },
+                { character: '南', meanings: ['south'], onyomi: ['ナン', 'ナ'], kunyomi: ['みなみ'], jlpt: 'N5', examples: [{ word: '南', reading: 'みなみ', meaning: 'south' }] },
+                { character: '北', meanings: ['north'], onyomi: ['ホク'], kunyomi: ['きた'], jlpt: 'N5', examples: [{ word: '北', reading: 'きた', meaning: 'north' }] },
+                { character: '半', meanings: ['half'], onyomi: ['ハン'], kunyomi: ['なか.ば'], jlpt: 'N5', examples: [{ word: '半分', reading: 'はんぶん', meaning: 'half' }] },
+                { character: '電', meanings: ['electricity'], onyomi: ['デン'], kunyomi: [], jlpt: 'N5', examples: [{ word: '電車', reading: 'でんしゃ', meaning: 'train' }] },
+                { character: '門', meanings: ['gates'], onyomi: ['モン'], kunyomi: ['かど'], jlpt: 'N5', examples: [{ word: '門', reading: 'もん', meaning: 'gate' }] },
+                { character: '午', meanings: ['noon'], onyomi: ['ゴ'], kunyomi: [], jlpt: 'N5', examples: [{ word: '午前', reading: 'ごぜん', meaning: 'morning/AM' }] },
+                { character: '駅', meanings: ['station'], onyomi: ['エキ'], kunyomi: [], jlpt: 'N5', examples: [{ word: '駅', reading: 'えき', meaning: 'station' }] },
+                { character: '店', meanings: ['store', 'shop'], onyomi: ['テン'], kunyomi: ['みせ'], jlpt: 'N5', examples: [{ word: '店', reading: 'みせ', meaning: 'shop' }] },
+                { character: '空', meanings: ['sky', 'empty'], onyomi: ['クウ'], kunyomi: ['そら', 'あ.く'], jlpt: 'N5', examples: [{ word: '空', reading: 'そら', meaning: 'sky' }] },
+                { character: '白', meanings: ['white'], onyomi: ['ハク', 'ビャク'], kunyomi: ['しろ', 'しろ.い'], jlpt: 'N5', examples: [{ word: '白い', reading: 'しろい', meaning: 'white' }] },
+                { character: '雨', meanings: ['rain'], onyomi: ['ウ'], kunyomi: ['あめ'], jlpt: 'N5', examples: [{ word: '雨', reading: 'あめ', meaning: 'rain' }] },
+                { character: '足', meanings: ['foot', 'leg'], onyomi: ['ソク'], kunyomi: ['あし', 'た.りる'], jlpt: 'N5', examples: [{ word: '足', reading: 'あし', meaning: 'foot/leg' }] },
+                { character: '耳', meanings: ['ear'], onyomi: ['ジ'], kunyomi: ['みみ'], jlpt: 'N5', examples: [{ word: '耳', reading: 'みみ', meaning: 'ear' }] },
+                { character: '口', meanings: ['mouth'], onyomi: ['コウ'], kunyomi: ['くち'], jlpt: 'N5', examples: [{ word: '口', reading: 'くち', meaning: 'mouth' }] }
             ],
             'N4': [
                 {
@@ -2182,7 +1990,7 @@ class KanjiData {
                     character: '思',
                     meanings: ['think', 'feel'],
                     onyomi: ['シ'],
-                    kunyomi: ['おmo.う'],
+                    kunyomi: ['おも.う'],
                     jlpt: 'N4',
                     examples: [
                         { word: '思う', reading: 'おもう', meaning: 'to think, feel' },
@@ -2288,34 +2096,56 @@ class KanjiData {
 
     static async fetchFromKanjiApi(level) {
         try {
-            const levelKanji = this.getEnhancedFallbackData(level);
-            const apiResults = [];
+            console.log(`Querying KanjiAPI for full canonical ${level} index list...`);
 
-            for (let i = 0; i < Math.min(5, levelKanji.length); i++) {
-                try {
-                    const kanji = levelKanji[i];
-                    const response = await fetch(`${this.kanjiApiUrl}/${encodeURIComponent(kanji.character)}`);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        apiResults.push({
-                            character: data.kanji,
-                            meanings: data.meanings,
-                            onyomi: data.on_readings || [],
-                            kunyomi: data.kun_readings || [],
-                            jlpt: level,
-                            examples: await this.fetchExamplesFromTatoeba(data.kanji)
-                        });
-                    }
-                } catch (error) {
-                    console.log(`Failed to fetch ${levelKanji[i].character} from KanjiAPI`);
-                }
-            }
+            // Extract the digit (e.g., 'N2' becomes '2') to map to the official endpoint layout
+            const levelNumber = level.replace('N', '');
+            const listResponse = await fetch(`https://kanjiapi.dev/v1/kanji/jlpt-${levelNumber}`);
+            if (!listResponse.ok) throw new Error(`KanjiAPI level list fetch failed: ${listResponse.status}`);
+
+            const charactersArray = await listResponse.json();
+            console.log(`Discovered ${charactersArray.length} characters on the web for ${level}`);
+
+            // Map the characters into your application format
+            const apiResults = charactersArray.map(char => {
+                const localFallback = this.getEnhancedFallbackData(level).find(k => k.character === char);
+                if (localFallback) return localFallback;
+
+                return {
+                    character: char,
+                    meanings: [`JLPT ${level} character`],
+                    onyomi: [],
+                    kunyomi: [],
+                    jlpt: level,
+                    examples: []
+                };
+            });
+
+            // Kick off deep metadata scraping for the top batch asynchronously
+            this.enrichKanjiBatchInBackground(apiResults.slice(0, 15));
 
             return apiResults;
         } catch (error) {
-            console.error('KanjiAPI.dev error:', error);
+            console.error('KanjiAPI network fallback layer failure:', error);
             return [];
+        }
+    }
+
+    // Helper to smoothly grab meanings & examples without stalling your application page load
+    static async enrichKanjiBatchInBackground(batch) {
+        for (const item of batch) {
+            try {
+                const res = await fetch(`${this.kanjiApiUrl}/${encodeURIComponent(item.character)}`);
+                if (res.ok) {
+                    const detailedData = await res.json();
+                    item.meanings = detailedData.meanings || item.meanings;
+                    item.onyomi = detailedData.on_readings || [];
+                    item.kunyomi = detailedData.kun_readings || [];
+                    item.examples = await this.fetchExamplesFromTatoeba(item.character);
+                }
+            } catch (e) {
+                console.warn(`Background card enrichment skipped for ${item.character}`);
+            }
         }
     }
 
