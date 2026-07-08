@@ -19,6 +19,9 @@ class AudioManager {
         if ('speechSynthesis' in window) {
             this.synth = window.speechSynthesis;
             this.isSupported = true;
+            if (this.synth && typeof this.synth.onvoiceschanged === 'undefined') {
+                this.synth.onvoiceschanged = () => {};
+            }
         } else {
             console.warn('Speech synthesis not supported in this browser');
             this.isSupported = false;
@@ -140,46 +143,73 @@ class AudioManager {
         }
     }
 
+    static async waitForVoices(timeoutMs = 3000) {
+        if (!this.isSupported || !this.synth) return [];
+
+        const voices = this.synth.getVoices();
+        if (voices.length > 0) return voices;
+
+        return new Promise((resolve) => {
+            const timeoutId = window.setTimeout(() => {
+                this.synth.onvoiceschanged = null;
+                resolve(this.synth.getVoices());
+            }, timeoutMs);
+
+            this.synth.onvoiceschanged = () => {
+                window.clearTimeout(timeoutId);
+                this.synth.onvoiceschanged = null;
+                resolve(this.synth.getVoices());
+            };
+        });
+    }
+
+    static selectPreferredVoice(voices, lang = 'ja-JP') {
+        if (!voices || voices.length === 0) return null;
+
+        const langPrefix = (lang || 'ja-JP').split('-')[0].toLowerCase();
+        const japaneseVoices = voices.filter(voice => {
+            const name = (voice.lang || '').toLowerCase();
+            return name === 'ja-jp' || name.startsWith('ja') || name.startsWith(langPrefix);
+        });
+
+        const preferredPatterns = [
+            /google|siri|microsoft|yukiko|haruka|sayaka|kyoko|otoya|mei|sora|hanako/i,
+            /japanese|ja/i
+        ];
+
+        for (const pattern of preferredPatterns) {
+            const match = japaneseVoices.find(voice => pattern.test(voice.name));
+            if (match) return match;
+        }
+
+        return japaneseVoices[0] || voices[0] || null;
+    }
+
     // Fallback to Web Speech API with proper Japanese voice selection
-    static speakFallback(text, lang = 'ja-JP') {
+    static async speakFallback(text, lang = 'ja-JP') {
         if (!this.isSupported || !this.synth) {
             console.warn('Speech synthesis not available');
             return false;
         }
 
         try {
-            // Cancel any ongoing speech
             this.synth.cancel();
+            if (typeof this.synth.resume === 'function') {
+                try { this.synth.resume(); } catch (resumeError) {
+                    console.debug('Speech synthesis resume warning:', resumeError);
+                }
+            }
 
-            // Create utterance
+            const voices = await this.waitForVoices(3500);
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            utterance.rate = 0.85;
+            utterance.rate = 0.95;
             utterance.pitch = 1.0;
             utterance.volume = 1.0;
 
-            // Get all voices and prefer Japanese
-            const voices = this.synth.getVoices();
-            
-            // Try multiple strategies to find Japanese voice
-            let selectedVoice = null;
-            
-            // Strategy 1: Exact lang match
-            selectedVoice = voices.find(v => v.lang === 'ja-JP' && v.name.includes('Google'));
-            
-            // Strategy 2: Any Japanese voice
-            if (!selectedVoice) {
-                selectedVoice = voices.find(v => v.lang === 'ja-JP');
-            }
-            
-            // Strategy 3: Japanese lang prefix
-            if (!selectedVoice) {
-                selectedVoice = voices.find(v => v.lang.startsWith('ja'));
-            }
-
-            if (selectedVoice) {
-                utterance.voice = selectedVoice;
-                console.log('Using voice:', selectedVoice.name, selectedVoice.lang);
+            const preferredVoice = this.selectPreferredVoice(voices, lang);
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
             }
 
             utterance.onerror = (event) => {
@@ -187,9 +217,10 @@ class AudioManager {
             };
 
             utterance.onend = () => {
-                console.log('Speech synthesis completed');
+                this.isPlaying = false;
             };
 
+            this.isPlaying = true;
             this.synth.speak(utterance);
             return true;
 
@@ -199,8 +230,12 @@ class AudioManager {
         }
     }
 
-    static speak(text, lang = 'ja-JP') {
-        // Try with Google TTS as primary (since Kanji Alive needs API key)
+    static async speak(text, lang = 'ja-JP') {
+        if (this.isSupported && this.synth) {
+            const result = await this.speakFallback(text, lang);
+            if (result) return true;
+        }
+
         return this.speakWithGoogle(text, 'ja');
     }
 
