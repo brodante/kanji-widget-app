@@ -553,15 +553,11 @@ class KanjiLearningApp {
         const paths = Array.from(svg.querySelectorAll('path'));
         paths.forEach((path) => {
             const length = path.getTotalLength ? path.getTotalLength() : 0;
-            const drawLength = length > 0 ? length * 3 : 0;
+            path.style.strokeDasharray = `${length}`;
+            // Keep the character fully drawn and visible on initial widget load
+            path.style.strokeDashoffset = '0';
+            path.style.opacity = '1';
             path.style.transition = 'none';
-            path.style.strokeLinecap = 'round';
-            path.style.strokeLinejoin = 'round';
-            path.style.strokeDasharray = `${drawLength}`;
-            path.style.strokeDashoffset = `${drawLength}`;
-            path.style.opacity = '0';
-            path.style.strokeOpacity = '1';
-            path.getBoundingClientRect();
         });
     }
 
@@ -577,8 +573,17 @@ class KanjiLearningApp {
         const paths = Array.from(svg.querySelectorAll('path'));
         if (paths.length === 0) return;
 
-        const duration = 220;
+        // Increased multiplier to make the drawing pace significantly more relaxed and legible
+        const msPerUnitLength = 7.2;
         let index = 0;
+
+        // Reset all paths to completely hidden states right before the animation sequence kicks off
+        paths.forEach((path) => {
+            const length = path.getTotalLength ? path.getTotalLength() : 0;
+            path.style.transition = 'none';
+            path.style.strokeDashoffset = `${length}`;
+            path.style.opacity = '0';
+        });
 
         const step = () => {
             if (index >= paths.length) {
@@ -588,18 +593,54 @@ class KanjiLearningApp {
 
             const path = paths[index];
             const length = path.getTotalLength ? path.getTotalLength() : 0;
-            const drawLength = length > 0 ? length * 3 : 0;
-            path.style.transition = `stroke-dashoffset ${duration}ms linear, opacity ${duration / 2}ms ease`;
-            path.style.opacity = '1';
-            path.style.strokeDasharray = `${drawLength}`;
-            path.style.strokeDashoffset = '0';
+
+            // Make sure the stroke properties are fully reset before drawing
+            path.style.transition = 'none';
+            path.style.strokeDasharray = `${length}`;
+            path.style.strokeDashoffset = `${length}`;
+            path.style.opacity = '0';
+
+            // CRITICAL: Force a browser layout reflow so it registers the starting hidden state
             path.getBoundingClientRect();
+
+            // Give tiny strokes a comfortable minimum duration so they don't flash too fast
+            const dynamicDuration = Math.max(250, length * msPerUnitLength);
+
+            // Animate stroke-dashoffset linearly, and make opacity kick in instantly
+            path.style.transition = `stroke-dashoffset ${dynamicDuration}ms linear, opacity 50ms ease`;
+            path.style.opacity = '1';
+            path.style.strokeDashoffset = '0';
+
             index += 1;
-            this.strokeOrderTimer = window.setTimeout(step, duration + 40);
+
+            // Wait for the path to finish its drawing window cleanly before moving to the next stroke
+            this.strokeOrderTimer = window.setTimeout(step, dynamicDuration + 100);
         };
 
+        // Minor layout engine kick-off execution
+        svg.getBoundingClientRect();
         step();
     }
+        // const duration = 220;
+        // let index = 0;
+
+        // const step = () => {
+        //     if (index >= paths.length) {
+        //         this.strokeOrderTimer = null;
+        //         return;
+        //     }
+
+        //     const path = paths[index];
+        //     const length = path.getTotalLength ? path.getTotalLength() : 0;
+        //     const drawLength = length > 0 ? length * 3 : 0;
+        //     path.style.transition = `stroke-dashoffset ${duration}ms linear, opacity ${duration / 2}ms ease`;
+        //     path.style.opacity = '1';
+        //     path.style.strokeDasharray = `${drawLength}`;
+        //     path.style.strokeDashoffset = '0';
+        //     path.getBoundingClientRect();
+        //     index += 1;
+        //     this.strokeOrderTimer = window.setTimeout(step, duration + 40);
+        // };
 
     stopStrokeOrderAnimation() {
         if (this.strokeOrderTimer) {

@@ -141,11 +141,14 @@ body {
     align-items: center;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    border: 1px solid rgba(var(--primary-color-rgb), 0.18);
+    border: 1px solid rgba(var(--primary-color-rgb), 0.15);
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.10), rgba(255,255,255,0.02));
+    /* iOS Translucent Light Background Blur */
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     color: var(--on-surface);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
 }
 
 .footer-text p {
@@ -166,36 +169,48 @@ body {
 }
 
 .footer-btn,
-.footer-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    text-decoration: none;
-    border-radius: 999px;
-    padding: 0.6rem 1rem;
-    font-size: 0.95rem;
-    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+.footer-btn:visited,
+.footer-btn:active {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    text-decoration: none !important;
+    border-radius: 999px !important;
+    padding: 0.6rem 1rem !important;
+    font-size: 0.95rem !important;
+    background-color: var(--primary-color) !important;
+    color: var(--on-primary) !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
 }
 
-.footer-btn {
-    background-color: var(--primary-color);
-    color: var(--on-primary);
-}
-
-.footer-link {
-    color: var(--primary-color);
-    background-color: rgba(var(--primary-color-rgb), 0.12);
+.footer-link,
+.footer-link:visited,
+.footer-link:active {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    text-decoration: none !important;
+    border-radius: 999px !important;
+    padding: 0.6rem 1rem !important;
+    font-size: 0.95rem !important;
+    color: var(--primary-color) !important;
+    background-color: rgba(var(--primary-color-rgb), 0.12) !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
 }
 
 .footer-btn:hover,
 .footer-link:hover {
-    transform: translateY(-1px);
+    transform: translateY(-1px) !important;
+    opacity: 0.9 !important;
 }
 
 [data-theme="dark"] .footer-content {
-    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
-    border-color: rgba(255,255,255,0.12);
+    /* iOS Translucent Dark Background Blur */
+    background: rgba(30, 30, 30, 0.55) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Widget Controls */
@@ -832,7 +847,7 @@ body {
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
-    vector-effect: non-scaling-stroke; /* STROKE BUG stroke order bug fixed rn dont change!!! */
+    /*vector-effect: non-scaling-stroke; /* STROKE BUG stroke order bug fixed rn dont change!!! */
 }
 
 .stroke-order-loading,
