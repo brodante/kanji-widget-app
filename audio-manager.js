@@ -103,11 +103,10 @@ class AudioManager {
         }
     }
 
-    // Use Google Translate TTS endpoint as fallback
     static async speakWithGoogle(text, lang = 'ja') {
         try {
             const cacheKey = `${text}_${lang}`;
-            
+
             // Check cache first
             if (this.audioCache.has(cacheKey)) {
                 const audio = this.audioCache.get(cacheKey);
@@ -118,24 +117,33 @@ class AudioManager {
                 return true;
             }
 
-            // Use Google Translate TTS API
+            // Use Google Translate TTS API URL directly
             const encodedText = encodeURIComponent(text);
-            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=tw-ob`;
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=gtx`;
 
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Failed to fetch audio');
+            return new Promise((resolve) => {
+                const audio = new Audio();
+                // Removed audio.crossOrigin to allow Firefox to stream natively without CORS blocks
+                audio.src = url;
 
-            const blob = await response.blob();
-            const audioUrl = URL.createObjectURL(blob);
-            const audio = new Audio(audioUrl);
-            
-            this.audioCache.set(cacheKey, audio);
+                audio.oncanplaythrough = async () => {
+                    try {
+                        this.audioCache.set(cacheKey, audio);
+                        this.isPlaying = true;
+                        await audio.play();
+                        audio.onended = () => { this.isPlaying = false; };
+                        resolve(true);
+                    } catch (playError) {
+                        console.warn('Playback intercepted:', playError);
+                        resolve(false);
+                    }
+                };
 
-            this.isPlaying = true;
-            await audio.play();
-            audio.onended = () => { this.isPlaying = false; };
-
-            return true;
+                audio.onerror = (err) => {
+                    console.warn('Direct media stream block:', err);
+                    resolve(false);
+                };
+            });
 
         } catch (error) {
             console.warn('Google TTS failed, falling back to Web Speech API:', error);
