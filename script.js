@@ -3,7 +3,7 @@ class KanjiLearningApp {
         this.currentKanji = null;
         this.currentKanjiPool = [];
         this.currentIndex = 0;
-        this.widgetSize = 'medium';
+        this.widgetSize = 'large';
         this.settings = {
             jlptLevel: 'N5',
             autoPlay: false,
@@ -47,9 +47,9 @@ class KanjiLearningApp {
 
     bindEvents() {
         // Widget size change
-        document.getElementById('widgetSize').addEventListener('change', (e) => {
-            this.changeWidgetSize(e.target.value);
-        });
+        // document.getElementById('widgetSize').addEventListener('change', (e) => {
+        //     this.changeWidgetSize(e.target.value);
+        // });
 
         // Theme toggle
         document.getElementById('themeToggle').addEventListener('click', () => {
