@@ -105,34 +105,19 @@ class AudioManager {
 
     static async speakWithGoogle(text, lang = 'ja') {
         try {
-            const cacheKey = `${text}_${lang}`;
-
-            // Check cache first
-            if (this.audioCache.has(cacheKey)) {
-                const audio = this.audioCache.get(cacheKey);
-                audio.currentTime = 0;
-                this.isPlaying = true;
-                await audio.play();
-                audio.onended = () => { this.isPlaying = false; };
-                return true;
-            }
-
-            // Use Google Translate TTS API URL directly
             const encodedText = encodeURIComponent(text);
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=gtx`;
 
             return new Promise((resolve) => {
-                const audio = new Audio();
-                // Removed audio.crossOrigin to allow Firefox to stream natively without CORS blocks
-                audio.src = url;
+                // Creating a fresh Audio object every time prevents DOM state crashes.
+                // The browser's network cache handles the actual caching for free!
+                const audio = new Audio(url);
 
                 audio.oncanplaythrough = async () => {
                     try {
-                        this.audioCache.set(cacheKey, audio);
                         this.isPlaying = true;
                         await audio.play();
-                        audio.onended = () => { this.isPlaying = false; };
-                        resolve(true);
+                        audio.onended = () => { this.isPlaying = false; resolve(true); };
                     } catch (playError) {
                         console.warn('Playback intercepted:', playError);
                         resolve(false);
@@ -143,6 +128,9 @@ class AudioManager {
                     console.warn('Direct media stream block:', err);
                     resolve(false);
                 };
+
+                // Failsafe: if Google hangs, force resolve so it can fallback smoothly
+                setTimeout(() => resolve(false), 2000);
             });
 
         } catch (error) {
@@ -174,23 +162,19 @@ class AudioManager {
     static selectPreferredVoice(voices, lang = 'ja-JP') {
         if (!voices || voices.length === 0) return null;
 
-        const langPrefix = (lang || 'ja-JP').split('-')[0].toLowerCase();
         const japaneseVoices = voices.filter(voice => {
             const name = (voice.lang || '').toLowerCase();
-            return name === 'ja-jp' || name.startsWith('ja') || name.startsWith(langPrefix);
+            return name === 'ja-jp' || name.startsWith('ja');
         });
 
-        const preferredPatterns = [
-            /google|siri|microsoft|yukiko|haruka|sayaka|kyoko|otoya|mei|sora|hanako/i,
-            /japanese|ja/i
-        ];
+        // 1. Forcefully hunt down Premium Cloud Voices (Chrome's Google Voice or Edge's Natural Voice)
+        let bestVoice = japaneseVoices.find(v => v.name === 'Google 日本語' || v.name.includes('Google') || v.name.includes('Online (Natural)'));
 
-        for (const pattern of preferredPatterns) {
-            const match = japaneseVoices.find(voice => pattern.test(voice.name));
-            if (match) return match;
-        }
+        // 2. Try Apple's premium Mac/iOS voices if on Apple devices
+        if (!bestVoice) bestVoice = japaneseVoices.find(v => v.name.includes('Siri') || v.name.includes('Kyoko') || v.name.includes('Otoya'));
 
-        return japaneseVoices[0] || voices[0] || null;
+        // 3. Fallback to standard local voices
+        return bestVoice || japaneseVoices[0] || voices[0] || null;
     }
 
     // Fallback to Web Speech API with proper Japanese voice selection

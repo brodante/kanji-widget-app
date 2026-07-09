@@ -473,6 +473,14 @@ class KanjiLearningApp {
         const totalCount = pool.length;
         const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
 
+        // Toggle the special 5-row Gojuon grid layout for basic alphabets
+        const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
+        if (isKana) {
+            container.classList.add('kana-layout');
+        } else {
+            container.classList.remove('kana-layout');
+        }
+        
         // Update basic counts
         summary.textContent = `${masteredCount} mastered`;
         progressStats.textContent = `${masteredCount} mastered | ${totalCount} total (${levelLabel})`;
