@@ -102,29 +102,58 @@ class AudioManager {
     static async playKanjiAliveAudio(audioUrl) {
         try {
             const cacheKey = `audio_${audioUrl}`;
-            
+
             if (this.audioCache.has(cacheKey)) {
                 const audio = this.audioCache.get(cacheKey);
                 audio.currentTime = 0;
                 this.isPlaying = true;
                 await audio.play();
-                audio.onended = () => { this.isPlaying = false; };
-                return true;
+                return new Promise((resolve) => {
+                    audio.onended = () => { this.isPlaying = false; resolve(true); };
+                    audio.onerror = () => { resolve(false); };
+                });
             }
 
-            const response = await fetch(audioUrl);
-            if (!response.ok) throw new Error('Failed to fetch audio');
-
-            const blob = await response.blob();
-            const audioObjectUrl = URL.createObjectURL(blob);
-            const audio = new Audio(audioObjectUrl);
-            
+            // FIREFOX FIX: Do not fetch as a blob first. Assigning the URL directly and 
+            // playing it immediately preserves the "user gesture" security token.
+            const audio = new Audio(audioUrl);
             this.audioCache.set(cacheKey, audio);
 
-            this.isPlaying = true;
-            await audio.play();
-            audio.onended = () => { this.isPlaying = false; };
-            return true;
+            return new Promise((resolve) => {
+                // Safety timeout increased to 5s for slower connections
+                const timeoutId = setTimeout(() => {
+                    resolve(false);
+                }, 5000);
+
+                audio.onended = () => {
+                    clearTimeout(timeoutId);
+                    this.isPlaying = false;
+                    resolve(true);
+                };
+
+                audio.onerror = (err) => {
+                    clearTimeout(timeoutId);
+                    console.warn('KanjiAlive audio network error:', err);
+                    resolve(false);
+                };
+
+                this.isPlaying = true;
+
+                // FIREFOX FIX: Play immediately!
+                // FIREFOX FIX: Play immediately!
+                audio.play().catch(playError => {
+                    clearTimeout(timeoutId);
+
+                    // NEW: Intercept Autoplay Policy Blocks
+                    if (playError.name === 'NotAllowedError') {
+                        console.warn('Browser blocked autoplay on refresh. Click anywhere to enable audio.');
+                        resolve(true); // Fake success so it DOES NOT trigger the robotic fallback
+                    } else {
+                        console.warn('KanjiAlive playback intercepted:', playError);
+                        resolve(false);
+                    }
+                });
+            });
 
         } catch (error) {
             console.warn('Kanji Alive audio playback failed:', error);
@@ -138,28 +167,42 @@ class AudioManager {
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=gtx`;
 
             return new Promise((resolve) => {
-                // Creating a fresh Audio object every time prevents DOM state crashes.
-                // The browser's network cache handles the actual caching for free!
                 const audio = new Audio(url);
 
-                audio.oncanplaythrough = async () => {
-                    try {
-                        this.isPlaying = true;
-                        await audio.play();
-                        audio.onended = () => { this.isPlaying = false; resolve(true); };
-                    } catch (playError) {
-                        console.warn('Playback intercepted:', playError);
-                        resolve(false);
-                    }
+                // FIREFOX FIX: Increased timeout to 4 seconds. 2s was too fast and was 
+                // causing the fallback to fire prematurely on slower connections.
+                const timeoutId = setTimeout(() => {
+                    console.warn('Google TTS timeout');
+                    resolve(false);
+                }, 4000);
+
+                audio.onended = () => {
+                    clearTimeout(timeoutId);
+                    this.isPlaying = false;
+                    resolve(true);
                 };
 
                 audio.onerror = (err) => {
+                    clearTimeout(timeoutId);
                     console.warn('Direct media stream block:', err);
                     resolve(false);
                 };
 
-                // Failsafe: if Google hangs, force resolve so it can fallback smoothly
-                setTimeout(() => resolve(false), 2000);
+                this.isPlaying = true;
+
+                // FIREFOX FIX: Do not wait for oncanplaythrough. Play immediately!
+                audio.play().catch(playError => {
+                    clearTimeout(timeoutId);
+
+                    // NEW: Intercept Autoplay Policy Blocks
+                    if (playError.name === 'NotAllowedError') {
+                        console.warn('Browser blocked autoplay on refresh. Click anywhere to enable audio.');
+                        resolve(true); // Fake success so it DOES NOT trigger the robotic fallback
+                    } else {
+                        console.warn('Playback intercepted by browser:', playError);
+                        resolve(false);
+                    }
+                });
             });
 
         } catch (error) {
