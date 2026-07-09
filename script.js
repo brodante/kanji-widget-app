@@ -51,9 +51,28 @@ class KanjiLearningApp {
         //     this.changeWidgetSize(e.target.value);
         // });
 
-        // Theme toggle
+        // Theme selector (The main control)
+        document.getElementById('themeSelect').addEventListener('change', (e) => {
+            this.setTheme(e.target.value);
+        });
+
+        // Theme toggle button (The "Quick Switcher")
+        // This flips between your default light (yotsuba) and default dark (dracula)
+        // Theme toggle button (The "Quick Switcher")
         document.getElementById('themeToggle').addEventListener('click', () => {
-            this.toggleTheme();
+            const current = localStorage.getItem('theme') || 'yotsuba';
+            const darkThemes = ['dark', 'dracula', 'nord', 'midnight', 'forest'];
+            const isDark = darkThemes.includes(current);
+
+            if (isDark) {
+                // We were in dark mode, switch to the last used light theme (or default to yotsuba)
+                const lastLight = localStorage.getItem('lastLightTheme') || 'yotsuba';
+                this.setTheme(lastLight);
+            } else {
+                // We were in light mode, switch to the last used dark theme (or default to dracula)
+                const lastDark = localStorage.getItem('lastDarkTheme') || 'dracula';
+                this.setTheme(lastDark);
+            }
         });
 
         // Settings modal
@@ -899,25 +918,37 @@ class KanjiLearningApp {
         }
     }
 
-    toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        
-        // Update theme toggle icon
+    // Sets the theme, saves it, and updates the UI
+    setTheme(themeName) {
+        document.documentElement.setAttribute('data-theme', themeName);
+        localStorage.setItem('theme', themeName);
+
+        // Define which themes are "dark"
+        const darkThemes = ['dark', 'dracula', 'nord', 'midnight', 'forest'];
+
+        // Save history so the toggle remembers
+        if (darkThemes.includes(themeName)) {
+            localStorage.setItem('lastDarkTheme', themeName);
+        } else {
+            localStorage.setItem('lastLightTheme', themeName);
+        }
+
+        // Update the dropdown selector
+        const select = document.getElementById('themeSelect');
+        if (select) select.value = themeName;
+
+        // Update the top toggle icon
         const icon = document.querySelector('#themeToggle i');
-        icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        if (icon) {
+            const isDark = darkThemes.includes(themeName);
+            icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+        }
     }
 
+    // Loads the saved theme on startup (Defaulting to 'yotsuba' for new users)
     applyTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        
-        // Update theme toggle icon
-        const icon = document.querySelector('#themeToggle i');
-        icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        const savedTheme = localStorage.getItem('theme') || 'yotsuba';
+        this.setTheme(savedTheme);
     }
 
     loadSettings() {
