@@ -1556,43 +1556,789 @@ class KanjiData {
             ].map(kana => ({ onyomi: [], jlpt: 'Katakana', ...kana })),
             
             'N5': [
-                // Cleaned standard additions (duplicates from base fallbackData removed)
-                { character: '水', meanings: ['water'], onyomi: ['スイ'], kunyomi: ['みず'], jlpt: 'N5', examples: [{ word: '水', reading: 'みず', meaning: 'water' }] },
-                { character: '火', meanings: ['fire'], onyomi: ['カ'], kunyomi: ['ひ', 'ほ-'], jlpt: 'N5', examples: [{ word: '火', reading: 'ひ', meaning: 'fire' }] },
-                { character: '木', meanings: ['tree', 'wood'], onyomi: ['モク', 'ボク'], kunyomi: ['き'], jlpt: 'N5', examples: [{ word: '木', reading: 'き', meaning: 'tree' }] },
-                { character: '土', meanings: ['earth', 'soil'], onyomi: ['ド', 'ト'], kunyomi: ['つち'], jlpt: 'N5', examples: [{ word: '土', reading: 'つち', meaning: 'soil' }] },
-                { character: '先', meanings: ['before', 'ahead'], onyomi: ['セン'], kunyomi: ['さき'], jlpt: 'N5', examples: [{ word: '先生', reading: 'せんせい', meaning: 'teacher' }] },
-                { character: '何', meanings: ['what', 'how many'], onyomi: ['カ'], kunyomi: ['なに', 'なん'], jlpt: 'N5', examples: [{ word: '何', reading: 'なに', meaning: 'what' }] },
-
-                // Missing JLPT N5 Kanji to reach the official count
-                { character: '万', meanings: ['ten thousand'], onyomi: ['マン', 'バン'], kunyomi: [], jlpt: 'N5', examples: [{ word: '一万', reading: 'いちまん', meaning: 'ten thousand' }] },
-                { character: '父', meanings: ['father'], onyomi: ['フ'], kunyomi: ['ちち'], jlpt: 'N5', examples: [{ word: 'お父さん', reading: 'おとうさん', meaning: 'father' }] },
-                { character: '母', meanings: ['mother'], onyomi: ['ボ'], kunyomi: ['はは'], jlpt: 'N5', examples: [{ word: 'お母さん', reading: 'おかあさん', meaning: 'mother' }] },
-                { character: '友', meanings: ['friend'], onyomi: ['ユウ'], kunyomi: ['とも'], jlpt: 'N5', examples: [{ word: '友達', reading: 'ともだち', meaning: 'friend' }] },
-                { character: '男', meanings: ['man', 'male'], onyomi: ['ダン', 'ナン'], kunyomi: ['おとこ'], jlpt: 'N5', examples: [{ word: '男の子', reading: 'おとこのこ', meaning: 'boy' }] },
-                { character: '女', meanings: ['woman', 'female'], onyomi: ['ジョ'], kunyomi: ['おんな'], jlpt: 'N5', examples: [{ word: '女の子', reading: 'おんなのこ', meaning: 'girl' }] },
-                { character: '子', meanings: ['child'], onyomi: ['シ', 'ス'], kunyomi: ['こ'], jlpt: 'N5', examples: [{ word: '子供', reading: 'こども', meaning: 'child' }] },
-                { character: '食', meanings: ['eat', 'food'], onyomi: ['ショク'], kunyomi: ['た.べる'], jlpt: 'N5', examples: [{ word: '食べる', reading: 'たべる', meaning: 'to eat' }] },
-                { character: '飲', meanings: ['drink'], onyomi: ['イン'], kunyomi: ['の.む'], jlpt: 'N5', examples: [{ word: '飲む', reading: 'のむ', meaning: 'to drink' }] },
-                { character: '買', meanings: ['buy'], onyomi: ['バイ'], kunyomi: ['か.う'], jlpt: 'N5', examples: [{ word: '買う', reading: 'かう', meaning: 'to buy' }] },
-                { character: '書', meanings: ['write', 'book'], onyomi: ['ショ'], kunyomi: ['か.く'], jlpt: 'N5', examples: [{ word: '書く', reading: 'かく', meaning: 'to write' }] },
-                { character: '読', meanings: ['read'], onyomi: ['ドク'], kunyomi: ['よ.む'], jlpt: 'N5', examples: [{ word: '読む', reading: 'よむ', meaning: 'to read' }] },
-                { character: '聞', meanings: ['hear', 'ask', 'listen'], onyomi: ['ブン', 'モン'], kunyomi: ['き.く'], jlpt: 'N5', examples: [{ word: '聞く', reading: 'きく', meaning: 'to listen/ask' }] },
-                { character: '西', meanings: ['west'], onyomi: ['セイ', 'サイ'], kunyomi: ['にし'], jlpt: 'N5', examples: [{ word: '西', reading: 'にし', meaning: 'west' }] },
-                { character: '南', meanings: ['south'], onyomi: ['ナン', 'ナ'], kunyomi: ['みなみ'], jlpt: 'N5', examples: [{ word: '南', reading: 'みなみ', meaning: 'south' }] },
-                { character: '北', meanings: ['north'], onyomi: ['ホク'], kunyomi: ['きた'], jlpt: 'N5', examples: [{ word: '北', reading: 'きた', meaning: 'north' }] },
-                { character: '半', meanings: ['half'], onyomi: ['ハン'], kunyomi: ['なか.ば'], jlpt: 'N5', examples: [{ word: '半分', reading: 'はんぶん', meaning: 'half' }] },
-                { character: '電', meanings: ['electricity'], onyomi: ['デン'], kunyomi: [], jlpt: 'N5', examples: [{ word: '電車', reading: 'でんしゃ', meaning: 'train' }] },
-                { character: '門', meanings: ['gates'], onyomi: ['モン'], kunyomi: ['かど'], jlpt: 'N5', examples: [{ word: '門', reading: 'もん', meaning: 'gate' }] },
-                { character: '午', meanings: ['noon'], onyomi: ['ゴ'], kunyomi: [], jlpt: 'N5', examples: [{ word: '午前', reading: 'ごぜん', meaning: 'morning/AM' }] },
-                { character: '駅', meanings: ['station'], onyomi: ['エキ'], kunyomi: [], jlpt: 'N5', examples: [{ word: '駅', reading: 'えき', meaning: 'station' }] },
-                { character: '店', meanings: ['store', 'shop'], onyomi: ['テン'], kunyomi: ['みせ'], jlpt: 'N5', examples: [{ word: '店', reading: 'みせ', meaning: 'shop' }] },
-                { character: '空', meanings: ['sky', 'empty'], onyomi: ['クウ'], kunyomi: ['そら', 'あ.く'], jlpt: 'N5', examples: [{ word: '空', reading: 'そら', meaning: 'sky' }] },
-                { character: '白', meanings: ['white'], onyomi: ['ハク', 'ビャク'], kunyomi: ['しろ', 'しろ.い'], jlpt: 'N5', examples: [{ word: '白い', reading: 'しろい', meaning: 'white' }] },
-                { character: '雨', meanings: ['rain'], onyomi: ['ウ'], kunyomi: ['あめ'], jlpt: 'N5', examples: [{ word: '雨', reading: 'あめ', meaning: 'rain' }] },
-                { character: '足', meanings: ['foot', 'leg'], onyomi: ['ソク'], kunyomi: ['あし', 'た.りる'], jlpt: 'N5', examples: [{ word: '足', reading: 'あし', meaning: 'foot/leg' }] },
-                { character: '耳', meanings: ['ear'], onyomi: ['ジ'], kunyomi: ['みみ'], jlpt: 'N5', examples: [{ word: '耳', reading: 'みみ', meaning: 'ear' }] },
-                { character: '口', meanings: ['mouth'], onyomi: ['コウ'], kunyomi: ['くち'], jlpt: 'N5', examples: [{ word: '口', reading: 'くち', meaning: 'mouth' }] }
+                {
+                    character: '一', meanings: ['one'], onyomi: ['イチ', 'イツ'], kunyomi: ['ひと', 'ひと.つ'], jlpt: 'N5', examples: [
+                        { word: '一', reading: 'いち', meaning: 'one' },
+                        { word: '均一', reading: 'きんいつ', meaning: 'uniformity' },
+                        { word: '一つ', reading: 'ひとつ', meaning: 'one (thing)' },
+                        { word: '一日', reading: 'ついたち', meaning: 'first day of the month' }
+                    ]
+                },
+                {
+                    character: '二', meanings: ['two'], onyomi: ['ニ', 'ジ'], kunyomi: ['ふた', 'ふた.つ'], jlpt: 'N5', examples: [
+                        { word: '二', reading: 'に', meaning: 'two' },
+                        { word: '不二', reading: 'ふじ', meaning: 'peerless, matchless' },
+                        { word: '二つ', reading: 'ふたつ', meaning: 'two (things)' },
+                        { word: '二十', reading: 'にじゅう', meaning: 'twenty' }
+                    ]
+                },
+                {
+                    character: '三', meanings: ['three'], onyomi: ['サン'], kunyomi: ['み', 'み.つ'], jlpt: 'N5', examples: [
+                        { word: '三', reading: 'さん', meaning: 'three' },
+                        { word: '三つ', reading: 'みっつ', meaning: 'three (things)' },
+                        { word: '三日', reading: 'みっか', meaning: 'third day of the month' }
+                    ]
+                },
+                {
+                    character: '四', meanings: ['four'], onyomi: ['シ'], kunyomi: ['よ', 'よ.つ', 'よん'], jlpt: 'N5', examples: [
+                        { word: '四季', reading: 'しき', meaning: 'four seasons' },
+                        { word: '四', reading: 'よん', meaning: 'four' },
+                        { word: '四つ', reading: 'よっつ', meaning: 'four (things)' },
+                        { word: '四人', reading: 'よにん', meaning: 'four people' }
+                    ]
+                },
+                {
+                    character: '五', meanings: ['five'], onyomi: ['ゴ'], kunyomi: ['いつ', 'いつ.つ'], jlpt: 'N5', examples: [
+                        { word: '五', reading: 'ご', meaning: 'five' },
+                        { word: '五つ', reading: 'いつつ', meaning: 'five (things)' },
+                        { word: '五日', reading: 'いつか', meaning: 'fifth day of the month' }
+                    ]
+                },
+                {
+                    character: '六', meanings: ['six'], onyomi: ['ロク'], kunyomi: ['む', 'む.つ'], jlpt: 'N5', examples: [
+                        { word: '六', reading: 'ろく', meaning: 'six' },
+                        { word: '六つ', reading: 'むっつ', meaning: 'six (things)' },
+                        { word: '六日', reading: 'むいか', meaning: 'sixth day of the month' }
+                    ]
+                },
+                {
+                    character: '七', meanings: ['seven'], onyomi: ['シチ'], kunyomi: ['なな', 'なな.つ'], jlpt: 'N5', examples: [
+                        { word: '七', reading: 'しち', meaning: 'seven' },
+                        { word: '七つ', reading: 'ななつ', meaning: 'seven (things)' },
+                        { word: '七日', reading: 'なのか', meaning: 'seventh day of the month' }
+                    ]
+                },
+                {
+                    character: '八', meanings: ['eight'], onyomi: ['ハチ'], kunyomi: ['や', 'や.つ'], jlpt: 'N5', examples: [
+                        { word: '八', reading: 'はち', meaning: 'eight' },
+                        { word: '八つ', reading: 'やっつ', meaning: 'eight (things)' },
+                        { word: '八日', reading: 'ようか', meaning: 'eighth day of the month' },
+                        { word: '八百屋', reading: 'やおや', meaning: 'greengrocer' }
+                    ]
+                },
+                {
+                    character: '九', meanings: ['nine'], onyomi: ['キュウ', 'ク'], kunyomi: ['ここの', 'ここの.つ'], jlpt: 'N5', examples: [
+                        { word: '九', reading: 'きゅう', meaning: 'nine' },
+                        { word: '九つ', reading: 'ここのつ', meaning: 'nine (things)' },
+                        { word: '九日', reading: 'ここのか', meaning: 'ninth day of the month' }
+                    ]
+                },
+                {
+                    character: '十', meanings: ['ten'], onyomi: ['ジュウ'], kunyomi: ['とお', 'と'], jlpt: 'N5', examples: [
+                        { word: '十', reading: 'じゅう', meaning: 'ten' },
+                        { word: '十分', reading: 'じゅうぶん', meaning: 'enough, sufficient' },
+                        { word: '十日', reading: 'とおか', meaning: 'tenth day of the month' }
+                    ]
+                },
+                {
+                    character: '百', meanings: ['hundred'], onyomi: ['ヒャク'], kunyomi: ['もも'], jlpt: 'N5', examples: [
+                        { word: '百', reading: 'ひゃく', meaning: 'one hundred' },
+                        { word: '三百', reading: 'さんびゃく', meaning: 'three hundred' },
+                        { word: '百科事典', reading: 'ひゃっかじてん', meaning: 'encyclopedia' }
+                    ]
+                },
+                {
+                    character: '千', meanings: ['thousand'], onyomi: ['セン'], kunyomi: ['ち'], jlpt: 'N5', examples: [
+                        { word: '千', reading: 'せん', meaning: 'one thousand' },
+                        { word: '三千', reading: 'さんぜん', meaning: 'three thousand' },
+                        { word: '千葉', reading: 'ちば', meaning: 'Chiba (prefecture)' }
+                    ]
+                },
+                {
+                    character: '万', meanings: ['ten thousand'], onyomi: ['マン', 'バン'], kunyomi: [], jlpt: 'N5', examples: [
+                        { word: '一万', reading: 'いちまん', meaning: 'ten thousand' },
+                        { word: '万歳', reading: 'ばんざい', meaning: 'Banzai! / Hurrah!' },
+                        { word: '万年筆', reading: 'まんねんひつ', meaning: 'fountain pen' }
+                    ]
+                },
+                {
+                    character: '円', meanings: ['yen', 'circle'], onyomi: ['エン'], kunyomi: ['まる.い'], jlpt: 'N5', examples: [
+                        { word: '円', reading: 'えん', meaning: 'yen' },
+                        { word: '百円', reading: 'ひゃくえん', meaning: '100 yen' },
+                        { word: '円い', reading: 'まるい', meaning: 'round' }
+                    ]
+                },
+                {
+                    character: '日', meanings: ['day', 'sun', 'Japan'], onyomi: ['ニチ', 'ジツ'], kunyomi: ['ひ', 'か'], jlpt: 'N5', examples: [
+                        { word: '日本', reading: 'にほん', meaning: 'Japan' },
+                        { word: '休日', reading: 'きゅうじつ', meaning: 'holiday' },
+                        { word: '日', reading: 'ひ', meaning: 'day, sun' },
+                        { word: '二十日', reading: 'はつか', meaning: 'twentieth day of the month' }
+                    ]
+                },
+                {
+                    character: '月', meanings: ['month', 'moon'], onyomi: ['ゲツ', 'ガツ'], kunyomi: ['つき'], jlpt: 'N5', examples: [
+                        { word: '月曜日', reading: 'げつようび', meaning: 'Monday' },
+                        { word: '一月', reading: 'いちがつ', meaning: 'January' },
+                        { word: '月', reading: 'つき', meaning: 'moon, month' }
+                    ]
+                },
+                {
+                    character: '火', meanings: ['fire'], onyomi: ['カ'], kunyomi: ['ひ', 'ほ'], jlpt: 'N5', examples: [
+                        { word: '火曜日', reading: 'かようび', meaning: 'Tuesday' },
+                        { word: '火山', reading: 'かざん', meaning: 'volcano' },
+                        { word: '火', reading: 'ひ', meaning: 'fire' },
+                        { word: '花火', reading: 'はなび', meaning: 'fireworks' }
+                    ]
+                },
+                {
+                    character: '水', meanings: ['water'], onyomi: ['スイ'], kunyomi: ['みず'], jlpt: 'N5', examples: [
+                        { word: '水曜日', reading: 'すいようび', meaning: 'Wednesday' },
+                        { word: '香水', reading: 'こうすい', meaning: 'perfume' },
+                        { word: '水', reading: 'みず', meaning: 'water' }
+                    ]
+                },
+                {
+                    character: '木', meanings: ['tree', 'wood'], onyomi: ['モク', 'ボク'], kunyomi: ['き'], jlpt: 'N5', examples: [
+                        { word: '木曜日', reading: 'もくようび', meaning: 'Thursday' },
+                        { word: '大木', reading: 'たいぼく', meaning: 'large tree' },
+                        { word: '木', reading: 'き', meaning: 'tree, wood' }
+                    ]
+                },
+                {
+                    character: '金', meanings: ['gold', 'money', 'metal'], onyomi: ['キン', 'コン'], kunyomi: ['かね'], jlpt: 'N5', examples: [
+                        { word: '金曜日', reading: 'きんようび', meaning: 'Friday' },
+                        { word: '黄金', reading: 'おうごん', meaning: 'gold (color/metal)' },
+                        { word: 'お金', reading: 'おかね', meaning: 'money' }
+                    ]
+                },
+                {
+                    character: '土', meanings: ['earth', 'soil'], onyomi: ['ド', 'ト'], kunyomi: ['つち'], jlpt: 'N5', examples: [
+                        { word: '土曜日', reading: 'どようび', meaning: 'Saturday' },
+                        { word: '土地', reading: 'とち', meaning: 'land, plot' },
+                        { word: '土', reading: 'つち', meaning: 'soil, earth' }
+                    ]
+                },
+                {
+                    character: '年', meanings: ['year'], onyomi: ['ネン'], kunyomi: ['とし'], jlpt: 'N5', examples: [
+                        { word: '今年', reading: 'ことし', meaning: 'this year' },
+                        { word: '去年', reading: 'きょねん', meaning: 'last year' },
+                        { word: '年', reading: 'とし', meaning: 'year, age' }
+                    ]
+                },
+                {
+                    character: '時', meanings: ['time', 'hour'], onyomi: ['ジ'], kunyomi: ['とき'], jlpt: 'N5', examples: [
+                        { word: '時間', reading: 'じかん', meaning: 'time' },
+                        { word: '時計', reading: 'とけい', meaning: 'clock, watch' },
+                        { word: '時', reading: 'とき', meaning: 'time, moment' }
+                    ]
+                },
+                {
+                    character: '分', meanings: ['minute', 'part', 'understand'], onyomi: ['ブン', 'フン', 'ブ'], kunyomi: ['わ.かる', 'わ.ける'], jlpt: 'N5', examples: [
+                        { word: '半分', reading: 'はんぶん', meaning: 'half' },
+                        { word: '五分', reading: 'ごふん', meaning: 'five minutes' },
+                        { word: '分かる', reading: 'わかる', meaning: 'to understand' },
+                        { word: '分ける', reading: 'わける', meaning: 'to divide' }
+                    ]
+                },
+                {
+                    character: '午', meanings: ['noon'], onyomi: ['ゴ'], kunyomi: [], jlpt: 'N5', examples: [
+                        { word: '午前', reading: 'ごぜん', meaning: 'morning, AM' },
+                        { word: '午後', reading: 'ごご', meaning: 'afternoon, PM' },
+                        { word: '正午', reading: 'しょうご', meaning: 'high noon' }
+                    ]
+                },
+                {
+                    character: '前', meanings: ['front', 'before'], onyomi: ['ゼン'], kunyomi: ['まえ'], jlpt: 'N5', examples: [
+                        { word: '午前', reading: 'ごぜん', meaning: 'morning, AM' },
+                        { word: '前', reading: 'まえ', meaning: 'front, before' },
+                        { word: '名前', reading: 'なまえ', meaning: 'name' }
+                    ]
+                },
+                {
+                    character: '後', meanings: ['behind', 'after', 'later'], onyomi: ['ゴ', 'コウ'], kunyomi: ['あと', 'うし.ろ', 'のち'], jlpt: 'N5', examples: [
+                        { word: '午後', reading: 'ごご', meaning: 'afternoon, PM' },
+                        { word: '後輩', reading: 'こうはい', meaning: 'junior' },
+                        { word: '後ろ', reading: 'うしろ', meaning: 'behind, rear' },
+                        { word: '後で', reading: 'あとで', meaning: 'later' }
+                    ]
+                },
+                {
+                    character: '今', meanings: ['now', 'present'], onyomi: ['コン', 'キン'], kunyomi: ['いま'], jlpt: 'N5', examples: [
+                        { word: '今週', reading: 'こんしゅう', meaning: 'this week' },
+                        { word: '今', reading: 'いま', meaning: 'now' },
+                        { word: '今日', reading: 'きょう', meaning: 'today' },
+                        { word: '今年', reading: 'ことし', meaning: 'this year' }
+                    ]
+                },
+                {
+                    character: '週', meanings: ['week'], onyomi: ['シュウ'], kunyomi: [], jlpt: 'N5', examples: [
+                        { word: '今週', reading: 'こんしゅう', meaning: 'this week' },
+                        { word: '週末', reading: 'しゅうまつ', meaning: 'weekend' },
+                        { word: '毎週', reading: 'まいしゅう', meaning: 'every week' }
+                    ]
+                },
+                {
+                    character: '毎', meanings: ['every'], onyomi: ['マイ'], kunyomi: [], jlpt: 'N5', examples: [
+                        { word: '毎日', reading: 'まいにち', meaning: 'every day' },
+                        { word: '毎週', reading: 'まいしゅう', meaning: 'every week' },
+                        { word: '毎月', reading: 'まいつき', meaning: 'every month' }
+                    ]
+                },
+                {
+                    character: '朝', meanings: ['morning'], onyomi: ['チョウ'], kunyomi: ['あさ'], jlpt: 'N5', examples: [
+                        { word: '朝食', reading: 'ちょうしょく', meaning: 'breakfast' },
+                        { word: '朝', reading: 'あさ', meaning: 'morning' },
+                        { word: '今朝', reading: 'けさ', meaning: 'this morning' }
+                    ]
+                },
+                {
+                    character: '昼', meanings: ['daytime', 'noon'], onyomi: ['チュウ'], kunyomi: ['ひる'], jlpt: 'N5', examples: [
+                        { word: '昼食', reading: 'ちゅうしょく', meaning: 'lunch' },
+                        { word: '昼', reading: 'ひる', meaning: 'noon, daytime' },
+                        { word: '昼休み', reading: 'ひるやすみ', meaning: 'lunch break' }
+                    ]
+                },
+                {
+                    character: '夜', meanings: ['night'], onyomi: ['ヤ'], kunyomi: ['よる', 'よ'], jlpt: 'N5', examples: [
+                        { word: '夜行', reading: 'やこう', meaning: 'night train/flight' },
+                        { word: '夜', reading: 'よる', meaning: 'night' },
+                        { word: '今夜', reading: 'こんや', meaning: 'tonight' }
+                    ]
+                },
+                {
+                    character: '夕', meanings: ['evening'], onyomi: ['セキ'], kunyomi: ['ゆう'], jlpt: 'N5', examples: [
+                        { word: '夕食', reading: 'ゆうしょく', meaning: 'dinner' },
+                        { word: '夕方', reading: 'ゆうがた', meaning: 'evening' },
+                        { word: '夕日', reading: 'ゆうひ', meaning: 'setting sun' },
+                        { word: '七夕', reading: 'たなばた', meaning: 'Star Festival' }
+                    ]
+                },
+                {
+                    character: '人', meanings: ['person', 'human'], onyomi: ['ジン', 'ニン'], kunyomi: ['ひと'], jlpt: 'N5', examples: [
+                        { word: '人口', reading: 'じんこう', meaning: 'population' },
+                        { word: '日本人', reading: 'にほんじん', meaning: 'Japanese person' },
+                        { word: '人', reading: 'ひと', meaning: 'person' },
+                        { word: '大人', reading: 'おとな', meaning: 'adult' }
+                    ]
+                },
+                {
+                    character: '男', meanings: ['man', 'male'], onyomi: ['ダン', 'ナン'], kunyomi: ['おとこ'], jlpt: 'N5', examples: [
+                        { word: '男性', reading: 'だんせい', meaning: 'male (gender)' },
+                        { word: '長男', reading: 'ちょうなん', meaning: 'eldest son' },
+                        { word: '男', reading: 'おとこ', meaning: 'man' }
+                    ]
+                },
+                {
+                    character: '女', meanings: ['woman', 'female'], onyomi: ['ジョ'], kunyomi: ['おんな'], jlpt: 'N5', examples: [
+                        { word: '女性', reading: 'じょせい', meaning: 'female (gender)' },
+                        { word: '彼女', reading: 'かのじょ', meaning: 'she, girlfriend' },
+                        { word: '女', reading: 'おんな', meaning: 'woman' }
+                    ]
+                },
+                {
+                    character: '子', meanings: ['child'], onyomi: ['シ', 'ス'], kunyomi: ['こ'], jlpt: 'N5', examples: [
+                        { word: '女子', reading: 'じょし', meaning: 'girl, woman' },
+                        { word: '椅子', reading: 'いす', meaning: 'chair' },
+                        { word: '子', reading: 'こ', meaning: 'child' },
+                        { word: '子供', reading: 'こども', meaning: 'child, children' }
+                    ]
+                },
+                {
+                    character: '父', meanings: ['father'], onyomi: ['フ'], kunyomi: ['ちち'], jlpt: 'N5', examples: [
+                        { word: '父母', reading: 'ふぼ', meaning: 'parents' },
+                        { word: '父', reading: 'ちち', meaning: 'father (own)' },
+                        { word: 'お父さん', reading: 'おとうさん', meaning: 'father (someone else\'s)' }
+                    ]
+                },
+                {
+                    character: '母', meanings: ['mother'], onyomi: ['ボ'], kunyomi: ['はは'], jlpt: 'N5', examples: [
+                        { word: '父母', reading: 'ふぼ', meaning: 'parents' },
+                        { word: '母', reading: 'はは', meaning: 'mother (own)' },
+                        { word: 'お母さん', reading: 'おかあさん', meaning: 'mother (someone else\'s)' }
+                    ]
+                },
+                {
+                    character: '友', meanings: ['friend'], onyomi: ['ユウ'], kunyomi: ['とも'], jlpt: 'N5', examples: [
+                        { word: '友人', reading: 'ゆうじん', meaning: 'friend (formal)' },
+                        { word: '友達', reading: 'ともだち', meaning: 'friend' },
+                        { word: '親友', reading: 'しんゆう', meaning: 'best friend' }
+                    ]
+                },
+                {
+                    character: '目', meanings: ['eye', 'look'], onyomi: ['モク'], kunyomi: ['め'], jlpt: 'N5', examples: [
+                        { word: '目的', reading: 'もくてき', meaning: 'purpose, goal' },
+                        { word: '目', reading: 'め', meaning: 'eye' },
+                        { word: '目薬', reading: 'めぐすり', meaning: 'eye drops' }
+                    ]
+                },
+                {
+                    character: '口', meanings: ['mouth'], onyomi: ['コウ', 'ク'], kunyomi: ['くち'], jlpt: 'N5', examples: [
+                        { word: '人口', reading: 'じんこう', meaning: 'population' },
+                        { word: '悪口', reading: 'あっこう', meaning: 'abuse, insults' },
+                        { word: '口', reading: 'くち', meaning: 'mouth' },
+                        { word: '出口', reading: 'でぐち', meaning: 'exit' }
+                    ]
+                },
+                {
+                    character: '耳', meanings: ['ear'], onyomi: ['ジ'], kunyomi: ['みみ'], jlpt: 'N5', examples: [
+                        { word: '耳鼻科', reading: 'じびか', meaning: 'otolaryngology (ENT)' },
+                        { word: '耳', reading: 'みみ', meaning: 'ear' },
+                        { word: '初耳', reading: 'はつみみ', meaning: 'hearing something for the first time' }
+                    ]
+                },
+                {
+                    character: '手', meanings: ['hand'], onyomi: ['シュ'], kunyomi: ['て'], jlpt: 'N5', examples: [
+                        { word: '歌手', reading: 'かしゅ', meaning: 'singer' },
+                        { word: '拍手', reading: 'はくしゅ', meaning: 'applause' },
+                        { word: '手', reading: 'て', meaning: 'hand' },
+                        { word: '上手', reading: 'じょうず', meaning: 'skillful' }
+                    ]
+                },
+                {
+                    character: '足', meanings: ['foot', 'leg'], onyomi: ['ソク'], kunyomi: ['あし', 'た.りる'], jlpt: 'N5', examples: [
+                        { word: '満足', reading: 'まんぞく', meaning: 'satisfaction' },
+                        { word: '遠足', reading: 'えんそく', meaning: 'excursion, school trip' },
+                        { word: '足', reading: 'あし', meaning: 'foot, leg' },
+                        { word: '足りる', reading: 'たりる', meaning: 'to be sufficient' }
+                    ]
+                },
+                {
+                    character: '山', meanings: ['mountain'], onyomi: ['サン'], kunyomi: ['やま'], jlpt: 'N5', examples: [
+                        { word: '登山', reading: 'とざん', meaning: 'mountain climbing' },
+                        { word: '富士山', reading: 'ふじさん', meaning: 'Mount Fuji' },
+                        { word: '山', reading: 'やま', meaning: 'mountain' }
+                    ]
+                },
+                {
+                    character: '川', meanings: ['river'], onyomi: ['セン'], kunyomi: ['かわ'], jlpt: 'N5', examples: [
+                        { word: '河川', reading: 'かせん', meaning: 'rivers (formal)' },
+                        { word: '川', reading: 'かわ', meaning: 'river' },
+                        { word: '小川', reading: 'おがわ', meaning: 'stream, brook' }
+                    ]
+                },
+                {
+                    character: '天', meanings: ['heavens', 'sky'], onyomi: ['テン'], kunyomi: ['あま'], jlpt: 'N5', examples: [
+                        { word: '天気', reading: 'てんき', meaning: 'weather' },
+                        { word: '天才', reading: 'てんさい', meaning: 'genius' },
+                        { word: '天の川', reading: 'あまのがわ', meaning: 'Milky Way' }
+                    ]
+                },
+                {
+                    character: '空', meanings: ['sky', 'empty'], onyomi: ['クウ'], kunyomi: ['そら', 'あ.く', 'から'], jlpt: 'N5', examples: [
+                        { word: '空気', reading: 'くうき', meaning: 'air, atmosphere' },
+                        { word: '空間', reading: 'くうかん', meaning: 'space, room' },
+                        { word: '空', reading: 'そら', meaning: 'sky' },
+                        { word: '空く', reading: 'あく', meaning: 'to become empty' }
+                    ]
+                },
+                {
+                    character: '雨', meanings: ['rain'], onyomi: ['ウ'], kunyomi: ['あめ'], jlpt: 'N5', examples: [
+                        { word: '雨天', reading: 'うてん', meaning: 'rainy weather' },
+                        { word: '雨', reading: 'あめ', meaning: 'rain' },
+                        { word: '大雨', reading: 'おおあめ', meaning: 'heavy rain' }
+                    ]
+                },
+                {
+                    character: '白', meanings: ['white'], onyomi: ['ハク', 'ビャク'], kunyomi: ['しろ', 'しろ.い'], jlpt: 'N5', examples: [
+                        { word: '紅白', reading: 'こうはく', meaning: 'red and white' },
+                        { word: '白鳥', reading: 'はくちょう', meaning: 'swan' },
+                        { word: '白', reading: 'しろ', meaning: 'white' },
+                        { word: '面白い', reading: 'おもしろい', meaning: 'interesting' }
+                    ]
+                },
+                {
+                    character: '黒', meanings: ['black'], onyomi: ['コク'], kunyomi: ['くろ', 'くろ.い'], jlpt: 'N5', examples: [
+                        { word: '黒板', reading: 'こくばん', meaning: 'blackboard' },
+                        { word: '黒', reading: 'くろ', meaning: 'black' },
+                        { word: '真っ黒', reading: 'まっくろ', meaning: 'pitch black' }
+                    ]
+                },
+                {
+                    character: '赤', meanings: ['red'], onyomi: ['セキ'], kunyomi: ['あか', 'あか.い'], jlpt: 'N5', examples: [
+                        { word: '赤道', reading: 'せきどう', meaning: 'equator' },
+                        { word: '赤', reading: 'あか', meaning: 'red' },
+                        { word: '赤ちゃん', reading: 'あかちゃん', meaning: 'baby' }
+                    ]
+                },
+                {
+                    character: '青', meanings: ['blue'], onyomi: ['セイ', 'ショウ'], kunyomi: ['あお', 'あお.い'], jlpt: 'N5', examples: [
+                        { word: '青年', reading: 'せいねん', meaning: 'youth, young man' },
+                        { word: '青春', reading: 'せいしゅん', meaning: 'youth, springtime of life' },
+                        { word: '青', reading: 'あお', meaning: 'blue' },
+                        { word: '真っ青', reading: 'まっさお', meaning: 'deep blue, pale' }
+                    ]
+                },
+                {
+                    character: '北', meanings: ['north'], onyomi: ['ホク'], kunyomi: ['きた'], jlpt: 'N5', examples: [
+                        { word: '北極', reading: 'ほっきょく', meaning: 'North Pole' },
+                        { word: '敗北', reading: 'はいぼく', meaning: 'defeat' },
+                        { word: '北', reading: 'きた', meaning: 'north' }
+                    ]
+                },
+                {
+                    character: '南', meanings: ['south'], onyomi: ['ナン', 'ナ'], kunyomi: ['みなみ'], jlpt: 'N5', examples: [
+                        { word: '南極', reading: 'なんきょく', meaning: 'South Pole' },
+                        { word: '東南', reading: 'とうなん', meaning: 'southeast' },
+                        { word: '南', reading: 'みなみ', meaning: 'south' }
+                    ]
+                },
+                {
+                    character: '東', meanings: ['east'], onyomi: ['トウ'], kunyomi: ['ひがし'], jlpt: 'N5', examples: [
+                        { word: '東京', reading: 'とうきょう', meaning: 'Tokyo' },
+                        { word: '関東', reading: 'かんとう', meaning: 'Kanto region' },
+                        { word: '東', reading: 'ひがし', meaning: 'east' }
+                    ]
+                },
+                {
+                    character: '西', meanings: ['west'], onyomi: ['セイ', 'サイ'], kunyomi: ['にし'], jlpt: 'N5', examples: [
+                        { word: '関西', reading: 'かんさい', meaning: 'Kansai region' },
+                        { word: '西洋', reading: 'せいよう', meaning: 'the West' },
+                        { word: '西', reading: 'にし', meaning: 'west' }
+                    ]
+                },
+                {
+                    character: '上', meanings: ['above', 'up'], onyomi: ['ジョウ'], kunyomi: ['うえ', 'あ.がる', 'のぼ.る'], jlpt: 'N5', examples: [
+                        { word: '頂上', reading: 'ちょうじょう', meaning: 'summit, peak' },
+                        { word: '上着', reading: 'うわぎ', meaning: 'coat, jacket' },
+                        { word: '上', reading: 'うえ', meaning: 'above, up' },
+                        { word: '上がる', reading: 'あがる', meaning: 'to go up' },
+                        { word: '上る', reading: 'のぼる', meaning: 'to climb' }
+                    ]
+                },
+                {
+                    character: '下', meanings: ['under', 'down', 'descend'], onyomi: ['カ', 'ゲ'], kunyomi: ['した', 'さ.がる', 'くだ.る'], jlpt: 'N5', examples: [
+                        { word: '地下鉄', reading: 'ちかてつ', meaning: 'subway' },
+                        { word: '下車', reading: 'げしゃ', meaning: 'getting off' },
+                        { word: '下', reading: 'した', meaning: 'under, below' },
+                        { word: '下がる', reading: 'さがる', meaning: 'to go down, to drop' },
+                        { word: '下る', reading: 'くだる', meaning: 'to descend' }
+                    ]
+                },
+                {
+                    character: '左', meanings: ['left'], onyomi: ['サ'], kunyomi: ['ひだり'], jlpt: 'N5', examples: [
+                        { word: '左折', reading: 'させつ', meaning: 'left turn' },
+                        { word: '左右', reading: 'さゆう', meaning: 'left and right' },
+                        { word: '左', reading: 'ひだり', meaning: 'left' }
+                    ]
+                },
+                {
+                    character: '右', meanings: ['right'], onyomi: ['ウ', 'ユウ'], kunyomi: ['みぎ'], jlpt: 'N5', examples: [
+                        { word: '右折', reading: 'うせつ', meaning: 'right turn' },
+                        { word: '左右', reading: 'さゆう', meaning: 'left and right' },
+                        { word: '右', reading: 'みぎ', meaning: 'right' }
+                    ]
+                },
+                {
+                    character: '中', meanings: ['inside', 'middle'], onyomi: ['チュウ'], kunyomi: ['なか'], jlpt: 'N5', examples: [
+                        { word: '中国', reading: 'ちゅうごく', meaning: 'China' },
+                        { word: '集中', reading: 'しゅうちゅう', meaning: 'concentration' },
+                        { word: '中', reading: 'なか', meaning: 'inside, middle' },
+                        { word: '一日中', reading: 'いちにちじゅう', meaning: 'all day long' }
+                    ]
+                },
+                {
+                    character: '外', meanings: ['outside', 'foreign'], onyomi: ['ガイ', 'ゲ'], kunyomi: ['そと', 'はず.す'], jlpt: 'N5', examples: [
+                        { word: '外国', reading: 'がいこく', meaning: 'foreign country' },
+                        { word: '外科', reading: 'げか', meaning: 'surgery (department)' },
+                        { word: '外', reading: 'そと', meaning: 'outside' },
+                        { word: '外す', reading: 'はずす', meaning: 'to remove' }
+                    ]
+                },
+                {
+                    character: '間', meanings: ['interval', 'between'], onyomi: ['カン', 'ケン'], kunyomi: ['あいだ', 'ま'], jlpt: 'N5', examples: [
+                        { word: '空間', reading: 'くうかん', meaning: 'space, room' },
+                        { word: '世間', reading: 'せけん', meaning: 'society, world' },
+                        { word: '間', reading: 'あいだ', meaning: 'between' },
+                        { word: '間に合う', reading: 'まにあう', meaning: 'to be in time' }
+                    ]
+                },
+                {
+                    character: '行', meanings: ['go'], onyomi: ['コウ', 'ギョウ'], kunyomi: ['い.く', 'ゆ.く', 'おこな.う'], jlpt: 'N5', examples: [
+                        { word: '銀行', reading: 'ぎんこう', meaning: 'bank' },
+                        { word: '行事', reading: 'ぎょうじ', meaning: 'event, function' },
+                        { word: '行く', reading: 'いく', meaning: 'to go' },
+                        { word: '行く', reading: 'ゆく', meaning: 'to go' },
+                        { word: '行う', reading: 'おこなう', meaning: 'to carry out' }
+                    ]
+                },
+                {
+                    character: '来', meanings: ['come', 'next'], onyomi: ['ライ'], kunyomi: ['く.る', 'き.たる', 'こ.ない'], jlpt: 'N5', examples: [
+                        { word: '来年', reading: 'らいねん', meaning: 'next year' },
+                        { word: '未来', reading: 'みらい', meaning: 'future' },
+                        { word: '来る', reading: 'くる', meaning: 'to come' },
+                        { word: '来る', reading: 'きたる', meaning: 'upcoming' },
+                        { word: '来ない', reading: 'こない', meaning: 'not coming' }
+                    ]
+                },
+                {
+                    character: '出', meanings: ['exit', 'leave'], onyomi: ['シュツ'], kunyomi: ['で.る', 'だ.す'], jlpt: 'N5', examples: [
+                        { word: '出発', reading: 'しゅっぱつ', meaning: 'departure' },
+                        { word: '輸出', reading: 'ゆしゅつ', meaning: 'export' },
+                        { word: '出る', reading: 'でる', meaning: 'to exit, to appear' },
+                        { word: '出す', reading: 'だす', meaning: 'to take out' }
+                    ]
+                },
+                {
+                    character: '入', meanings: ['enter', 'put in'], onyomi: ['ニュウ'], kunyomi: ['はい.る', 'い.れる'], jlpt: 'N5', examples: [
+                        { word: '入学', reading: 'にゅうがく', meaning: 'entering school' },
+                        { word: '輸入', reading: 'ゆにゅう', meaning: 'import' },
+                        { word: '入る', reading: 'はいる', meaning: 'to enter' },
+                        { word: '入れる', reading: 'いれる', meaning: 'to put in' }
+                    ]
+                },
+                {
+                    character: '生', meanings: ['life', 'birth'], onyomi: ['セイ', 'ショウ'], kunyomi: ['い.きる', 'う.まれる', 'なま'], jlpt: 'N5', examples: [
+                        { word: '先生', reading: 'せんせい', meaning: 'teacher' },
+                        { word: '一生', reading: 'いっしょう', meaning: 'whole life' },
+                        { word: '生きる', reading: 'いきる', meaning: 'to live' },
+                        { word: '生まれる', reading: 'うまれる', meaning: 'to be born' },
+                        { word: '生', reading: 'なま', meaning: 'raw' }
+                    ]
+                },
+                {
+                    character: '休', meanings: ['rest', 'holiday'], onyomi: ['キュウ'], kunyomi: ['やす.む', 'やす.み'], jlpt: 'N5', examples: [
+                        { word: '休日', reading: 'きゅうじつ', meaning: 'holiday' },
+                        { word: '定休日', reading: 'ていきゅうじつ', meaning: 'regular holiday' },
+                        { word: '休む', reading: 'やすむ', meaning: 'to rest, to be absent' },
+                        { word: '休み', reading: 'やすみ', meaning: 'rest, vacation' }
+                    ]
+                },
+                {
+                    character: '見', meanings: ['see', 'look'], onyomi: ['ケン'], kunyomi: ['み.る', 'み.せる', 'み.える'], jlpt: 'N5', examples: [
+                        { word: '見学', reading: 'けんがく', meaning: 'inspection, study visit' },
+                        { word: '発見', reading: 'はっけん', meaning: 'discovery' },
+                        { word: '見る', reading: 'みる', meaning: 'to see, to look' },
+                        { word: '見せる', reading: 'みせる', meaning: 'to show' },
+                        { word: '見える', reading: 'みえる', meaning: 'to be seen' }
+                    ]
+                },
+                {
+                    character: '言', meanings: ['say', 'word'], onyomi: ['ゲン', 'ゴン'], kunyomi: ['い.う'], jlpt: 'N5', examples: [
+                        { word: '伝言', reading: 'でんごん', meaning: 'message' },
+                        { word: '言語', reading: 'げんご', meaning: 'language' },
+                        { word: '言う', reading: 'いう', meaning: 'to say' },
+                        { word: '一言', reading: 'ひとこと', meaning: 'single word' }
+                    ]
+                },
+                {
+                    character: '話', meanings: ['talk', 'speak'], onyomi: ['ワ'], kunyomi: ['はな.す', 'はなし'], jlpt: 'N5', examples: [
+                        { word: '会話', reading: 'かいわ', meaning: 'conversation' },
+                        { word: '世話', reading: 'せわ', meaning: 'looking after, help' },
+                        { word: '話す', reading: 'はなす', meaning: 'to speak' },
+                        { word: '話', reading: 'はなし', meaning: 'talk, story' }
+                    ]
+                },
+                {
+                    character: '読', meanings: ['read'], onyomi: ['ドク'], kunyomi: ['よ.む'], jlpt: 'N5', examples: [
+                        { word: '読書', reading: 'どくしょ', meaning: 'reading books' },
+                        { word: '音読', reading: 'おんどく', meaning: 'reading aloud' },
+                        { word: '読む', reading: 'よむ', meaning: 'to read' }
+                    ]
+                },
+                {
+                    character: '書', meanings: ['write'], onyomi: ['ショ'], kunyomi: ['か.く'], jlpt: 'N5', examples: [
+                        { word: '辞書', reading: 'じしょ', meaning: 'dictionary' },
+                        { word: '読書', reading: 'どくしょ', meaning: 'reading books' },
+                        { word: '書く', reading: 'かく', meaning: 'to write' }
+                    ]
+                },
+                {
+                    character: '買', meanings: ['buy'], onyomi: ['バイ'], kunyomi: ['か.う'], jlpt: 'N5', examples: [
+                        { word: '売買', reading: 'ばいばい', meaning: 'trade, buying and selling' },
+                        { word: '買収', reading: 'ばいしゅう', meaning: 'acquisition, buyout' },
+                        { word: '買う', reading: 'かう', meaning: 'to buy' },
+                        { word: '買い物', reading: 'かいもの', meaning: 'shopping' }
+                    ]
+                },
+                {
+                    character: '飲', meanings: ['drink'], onyomi: ['イン'], kunyomi: ['の.む'], jlpt: 'N5', examples: [
+                        { word: '飲食店', reading: 'いんしょくてん', meaning: 'restaurant' },
+                        { word: '飲料水', reading: 'いんりょうすい', meaning: 'drinking water' },
+                        { word: '飲む', reading: 'のむ', meaning: 'to drink' },
+                        { word: '飲み物', reading: 'のみもの', meaning: 'drink, beverage' }
+                    ]
+                },
+                {
+                    character: '食', meanings: ['eat', 'food'], onyomi: ['ショク'], kunyomi: ['た.べる', 'く.う'], jlpt: 'N5', examples: [
+                        { word: '食事', reading: 'しょくじ', meaning: 'meal' },
+                        { word: '食堂', reading: 'しょくどう', meaning: 'dining hall' },
+                        { word: '食べる', reading: 'たべる', meaning: 'to eat' },
+                        { word: '食う', reading: 'くう', meaning: 'to eat (rough)' }
+                    ]
+                },
+                {
+                    character: '立', meanings: ['stand'], onyomi: ['リツ'], kunyomi: ['た.つ', 'た.てる'], jlpt: 'N5', examples: [
+                        { word: '国立', reading: 'こくりつ', meaning: 'national' },
+                        { word: '自立', reading: 'じりつ', meaning: 'independence' },
+                        { word: '立つ', reading: 'たつ', meaning: 'to stand' },
+                        { word: '立てる', reading: 'たてる', meaning: 'to stand up, to establish' }
+                    ]
+                },
+                {
+                    character: '本', meanings: ['book', 'origin'], onyomi: ['ホン'], kunyomi: ['もと'], jlpt: 'N5', examples: [
+                        { word: '日本', reading: 'にほん', meaning: 'Japan' },
+                        { word: '基本', reading: 'きほん', meaning: 'foundation, basis' },
+                        { word: '本', reading: 'ほん', meaning: 'book' },
+                        { word: '山本', reading: 'やまもと', meaning: 'Yamamoto (surname)' }
+                    ]
+                },
+                {
+                    character: '車', meanings: ['car', 'vehicle'], onyomi: ['シャ'], kunyomi: ['くるま'], jlpt: 'N5', examples: [
+                        { word: '電車', reading: 'でんしゃ', meaning: 'train' },
+                        { word: '自動車', reading: 'じどうしゃ', meaning: 'automobile' },
+                        { word: '車', reading: 'くるま', meaning: 'car, vehicle' }
+                    ]
+                },
+                {
+                    character: '電', meanings: ['electricity'], onyomi: ['デン'], kunyomi: [], jlpt: 'N5', examples: [
+                        { word: '電話', reading: 'でんわ', meaning: 'telephone' },
+                        { word: '電気', reading: 'でんき', meaning: 'electricity, light' }
+                    ]
+                },
+                {
+                    character: '駅', meanings: ['station'], onyomi: ['エキ'], kunyomi: [], jlpt: 'N5', examples: [
+                        { word: '駅前', reading: 'えきまえ', meaning: 'in front of the station' },
+                        { word: '各駅', reading: 'かくえき', meaning: 'every station' }
+                    ]
+                },
+                {
+                    character: '店', meanings: ['shop', 'store'], onyomi: ['テン'], kunyomi: ['みせ'], jlpt: 'N5', examples: [
+                        { word: '喫茶店', reading: 'きっさてん', meaning: 'coffee shop' },
+                        { word: '店員', reading: 'てんいん', meaning: 'shop clerk' },
+                        { word: '店', reading: 'みせ', meaning: 'shop, store' }
+                    ]
+                },
+                {
+                    character: '道', meanings: ['road', 'path'], onyomi: ['ドウ'], kunyomi: ['みち'], jlpt: 'N5', examples: [
+                        { word: '水道', reading: 'すいどう', meaning: 'water supply' },
+                        { word: '柔道', reading: 'じゅうどう', meaning: 'judo' },
+                        { word: '道', reading: 'みち', meaning: 'road, path' }
+                    ]
+                },
+                {
+                    character: '名', meanings: ['name'], onyomi: ['メイ', 'ミョウ'], kunyomi: ['な'], jlpt: 'N5', examples: [
+                        { word: '有名', reading: 'ゆうめい', meaning: 'famous' },
+                        { word: '名物', reading: 'めいぶつ', meaning: 'famous product' },
+                        { word: '名前', reading: 'なまえ', meaning: 'name' },
+                        { word: '名', reading: 'な', meaning: 'name' }
+                    ]
+                },
+                {
+                    character: '国', meanings: ['country'], onyomi: ['コク'], kunyomi: ['くに'], jlpt: 'N5', examples: [
+                        { word: '外国', reading: 'がいこく', meaning: 'foreign country' },
+                        { word: '国家', reading: 'こっか', meaning: 'state, nation' },
+                        { word: '国', reading: 'くに', meaning: 'country' }
+                    ]
+                },
+                {
+                    character: '語', meanings: ['language', 'word'], onyomi: ['ゴ'], kunyomi: ['かた.る'], jlpt: 'N5', examples: [
+                        { word: '英語', reading: 'えいご', meaning: 'English language' },
+                        { word: '敬語', reading: 'けいご', meaning: 'honorific language' },
+                        { word: '語る', reading: 'かたる', meaning: 'to talk, to narrate' },
+                        { word: '物語', reading: 'ものがたり', meaning: 'tale, story' }
+                    ]
+                },
+                {
+                    character: '校', meanings: ['school'], onyomi: ['コウ'], kunyomi: [], jlpt: 'N5', examples: [
+                        { word: '学校', reading: 'がっこう', meaning: 'school' },
+                        { word: '高校', reading: 'こうこう', meaning: 'high school' }
+                    ]
+                },
+                {
+                    character: '学', meanings: ['study', 'learning'], onyomi: ['ガク'], kunyomi: ['まな.ぶ'], jlpt: 'N5', examples: [
+                        { word: '学生', reading: 'がくせい', meaning: 'student' },
+                        { word: '大学', reading: 'だいがく', meaning: 'university' },
+                        { word: '学ぶ', reading: 'まなぶ', meaning: 'to study, to learn' }
+                    ]
+                },
+                {
+                    character: '先', meanings: ['before', 'ahead'], onyomi: ['セン'], kunyomi: ['さき'], jlpt: 'N5', examples: [
+                        { word: '先生', reading: 'せんせい', meaning: 'teacher' },
+                        { word: '先月', reading: 'せんげつ', meaning: 'last month' },
+                        { word: '先', reading: 'さき', meaning: 'ahead, future' }
+                    ]
+                },
+                {
+                    character: '高', meanings: ['high', 'expensive'], onyomi: ['コウ'], kunyomi: ['たか.い'], jlpt: 'N5', examples: [
+                        { word: '高校', reading: 'こうこう', meaning: 'high school' },
+                        { word: '最高', reading: 'さいこう', meaning: 'highest, supreme' },
+                        { word: '高い', reading: 'たかい', meaning: 'high, expensive' },
+                        { word: '高さ', reading: 'たかさ', meaning: 'height' }
+                    ]
+                },
+                {
+                    character: '安', meanings: ['cheap', 'safe'], onyomi: ['アン'], kunyomi: ['やす.い'], jlpt: 'N5', examples: [
+                        { word: '安全', reading: 'あんぜん', meaning: 'safety' },
+                        { word: '不安', reading: 'ふあん', meaning: 'anxiety, uneasiness' },
+                        { word: '安い', reading: 'やすい', meaning: 'cheap' }
+                    ]
+                },
+                {
+                    character: '新', meanings: ['new'], onyomi: ['シン'], kunyomi: ['あたら.しい', 'あら.た'], jlpt: 'N5', examples: [
+                        { word: '新聞', reading: 'しんぶん', meaning: 'newspaper' },
+                        { word: '新鮮', reading: 'しんせん', meaning: 'fresh' },
+                        { word: '新しい', reading: 'あたらしい', meaning: 'new' },
+                        { word: '新た', reading: 'あらた', meaning: 'new, fresh' }
+                    ]
+                },
+                {
+                    character: '古', meanings: ['old'], onyomi: ['コ'], kunyomi: ['ふる.い'], jlpt: 'N5', examples: [
+                        { word: '中古', reading: 'ちゅうこ', meaning: 'used, second-hand' },
+                        { word: '古代', reading: 'こだい', meaning: 'ancient times' },
+                        { word: '古い', reading: 'ふるい', meaning: 'old (thing)' }
+                    ]
+                },
+                {
+                    character: '長', meanings: ['long', 'leader'], onyomi: ['チョウ'], kunyomi: ['なが.い'], jlpt: 'N5', examples: [
+                        { word: '社長', reading: 'しゃちょう', meaning: 'company president' },
+                        { word: '身長', reading: 'しんちょう', meaning: 'height (of body)' },
+                        { word: '長い', reading: 'ながい', meaning: 'long' }
+                    ]
+                },
+                {
+                    character: '多', meanings: ['many', 'much'], onyomi: ['タ'], kunyomi: ['おお.い'], jlpt: 'N5', examples: [
+                        { word: '多数', reading: 'たすう', meaning: 'large number, majority' },
+                        { word: '多少', reading: 'たしょう', meaning: 'more or less' },
+                        { word: '多い', reading: 'おおい', meaning: 'many, numerous' }
+                    ]
+                },
+                {
+                    character: '少', meanings: ['few', 'little'], onyomi: ['ショウ'], kunyomi: ['すこ.し', 'すく.ない'], jlpt: 'N5', examples: [
+                        { word: '少年', reading: 'しょうねん', meaning: 'boy, youth' },
+                        { word: '少数', reading: 'しょうすう', meaning: 'minority, few' },
+                        { word: '少し', reading: 'すこし', meaning: 'a little' },
+                        { word: '少ない', reading: 'すくない', meaning: 'few, scarce' }
+                    ]
+                },
+                {
+                    character: '大', meanings: ['big', 'large'], onyomi: ['ダイ', 'タイ'], kunyomi: ['おお.きい'], jlpt: 'N5', examples: [
+                        { word: '大学', reading: 'だいがく', meaning: 'university' },
+                        { word: '大切', reading: 'たいせつ', meaning: 'important' },
+                        { word: '大きい', reading: 'おおきい', meaning: 'big' },
+                        { word: '大人', reading: 'おとな', meaning: 'adult' }
+                    ]
+                },
+                {
+                    character: '小', meanings: ['small'], onyomi: ['ショウ'], kunyomi: ['ちい.さい', 'こ', 'お'], jlpt: 'N5', examples: [
+                        { word: '小学校', reading: 'しょうがっこう', meaning: 'elementary school' },
+                        { word: '小説', reading: 'しょうせつ', meaning: 'novel' },
+                        { word: '小さい', reading: 'ちいさい', meaning: 'small' },
+                        { word: '小鳥', reading: 'ことり', meaning: 'small bird' }
+                    ]
+                },
+                {
+                    character: '元', meanings: ['origin', 'foundation'], onyomi: ['ゲン', 'ガン'], kunyomi: ['もと'], jlpt: 'N5', examples: [
+                        { word: '元気', reading: 'げんき', meaning: 'healthy, energetic' },
+                        { word: '元日', reading: 'がんじつ', meaning: 'New Year\'s Day' },
+                        { word: '元', reading: 'もと', meaning: 'origin' },
+                        { word: '足元', reading: 'あしもと', meaning: 'at one\'s feet' }
+                    ]
+                },
+                {
+                    character: '気', meanings: ['spirit', 'mind'], onyomi: ['キ', 'ケ'], kunyomi: [], jlpt: 'N5', examples: [
+                        { word: '天気', reading: 'てんき', meaning: 'weather' },
+                        { word: '気持ち', reading: 'きもち', meaning: 'feeling, mood' },
+                        { word: '気配', reading: 'けはい', meaning: 'indication, sign' }
+                    ]
+                },
+                {
+                    character: '何', meanings: ['what', 'how many'], onyomi: ['カ'], kunyomi: ['なに', 'なん'], jlpt: 'N5', examples: [
+                        { word: '幾何', reading: 'きか', meaning: 'geometry' },
+                        { word: '何', reading: 'なに', meaning: 'what' },
+                        { word: '何人', reading: 'なんにん', meaning: 'how many people' }
+                    ]
+                }
             ],
             
             'N4': [
