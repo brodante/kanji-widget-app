@@ -854,6 +854,15 @@ body {
     padding: 0.5rem;
     border-radius: 12px;
     background: rgba(var(--primary-color-rgb), 0.05);
+
+    /* NEW: Make it look and feel clickable */
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+/* NEW: Add a subtle highlight when hovering */
+.stroke-order-container:hover {
+    background: rgba(var(--primary-color-rgb), 0.08);
 }
 
 .stroke-order-container svg {
