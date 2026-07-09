@@ -1669,6 +1669,11 @@ class KanjiData {
     };
 
     static async getKanjiByLevel(level = 'N5') {
+        // NEW: Bypass the browser cache completely for hardcoded basic alphabets
+        if (level === 'Hiragana' || level === 'Katakana') {
+            // THE FIX: Use getAdditionalKanjiForLevel so N5 kanji don't get mixed in
+            return this.getAdditionalKanjiForLevel(level);
+        }
         const cacheKey = `level_${level}`;
 
         // Return cached data if available
@@ -1910,6 +1915,52 @@ class KanjiData {
 
     static getAdditionalKanjiForLevel(level) {
         const additionalKanji = {
+            'Hiragana': [
+                // A
+                { character: 'あ', meanings: ['a'], kunyomi: ['あ'] }, { character: 'い', meanings: ['i'], kunyomi: ['い'] }, { character: 'う', meanings: ['u'], kunyomi: ['う'] }, { character: 'え', meanings: ['e'], kunyomi: ['え'] }, { character: 'お', meanings: ['o'], kunyomi: ['お'] },
+                // K
+                { character: 'か', meanings: ['ka'], kunyomi: ['か'] }, { character: 'き', meanings: ['ki'], kunyomi: ['き'] }, { character: 'く', meanings: ['ku'], kunyomi: ['く'] }, { character: 'け', meanings: ['ke'], kunyomi: ['け'] }, { character: 'こ', meanings: ['ko'], kunyomi: ['こ'] },
+                // S
+                { character: 'さ', meanings: ['sa'], kunyomi: ['さ'] }, { character: 'し', meanings: ['shi'], kunyomi: ['し'] }, { character: 'す', meanings: ['su'], kunyomi: ['す'] }, { character: 'せ', meanings: ['se'], kunyomi: ['せ'] }, { character: 'そ', meanings: ['so'], kunyomi: ['そ'] },
+                // T
+                { character: 'た', meanings: ['ta'], kunyomi: ['た'] }, { character: 'ち', meanings: ['chi'], kunyomi: ['ち'] }, { character: 'つ', meanings: ['tsu'], kunyomi: ['つ'] }, { character: 'て', meanings: ['te'], kunyomi: ['て'] }, { character: 'と', meanings: ['to'], kunyomi: ['と'] },
+                // N
+                { character: 'な', meanings: ['na'], kunyomi: ['な'] }, { character: 'に', meanings: ['ni'], kunyomi: ['に'] }, { character: 'ぬ', meanings: ['nu'], kunyomi: ['ぬ'] }, { character: 'ね', meanings: ['ne'], kunyomi: ['ね'] }, { character: 'の', meanings: ['no'], kunyomi: ['の'] },
+                // H
+                { character: 'は', meanings: ['ha'], kunyomi: ['は'] }, { character: 'ひ', meanings: ['hi'], kunyomi: ['ひ'] }, { character: 'ふ', meanings: ['fu'], kunyomi: ['ふ'] }, { character: 'へ', meanings: ['he'], kunyomi: ['へ'] }, { character: 'ほ', meanings: ['ho'], kunyomi: ['ほ'] },
+                // M
+                { character: 'ま', meanings: ['ma'], kunyomi: ['ま'] }, { character: 'み', meanings: ['mi'], kunyomi: ['み'] }, { character: 'む', meanings: ['mu'], kunyomi: ['む'] }, { character: 'め', meanings: ['me'], kunyomi: ['め'] }, { character: 'も', meanings: ['mo'], kunyomi: ['も'] },
+                // Y
+                { character: 'や', meanings: ['ya'], kunyomi: ['や'] }, { character: 'ゆ', meanings: ['yu'], kunyomi: ['ゆ'] }, { character: 'よ', meanings: ['yo'], kunyomi: ['よ'] },
+                // R
+                { character: 'ら', meanings: ['ra'], kunyomi: ['ら'] }, { character: 'り', meanings: ['ri'], kunyomi: ['り'] }, { character: 'る', meanings: ['ru'], kunyomi: ['る'] }, { character: 'れ', meanings: ['re'], kunyomi: ['れ'] }, { character: 'ろ', meanings: ['ro'], kunyomi: ['ろ'] },
+                // W & N
+                { character: 'わ', meanings: ['wa'], kunyomi: ['わ'] }, { character: 'を', meanings: ['wo'], kunyomi: ['を'] }, { character: 'ん', meanings: ['n'], kunyomi: ['ん'] }
+            ].map(kana => ({ onyomi: [], examples: [], jlpt: 'Hiragana', ...kana })),
+
+            'Katakana': [
+                // A
+                { character: 'ア', meanings: ['a'], kunyomi: ['ア'] }, { character: 'イ', meanings: ['i'], kunyomi: ['イ'] }, { character: 'ウ', meanings: ['u'], kunyomi: ['ウ'] }, { character: 'エ', meanings: ['e'], kunyomi: ['エ'] }, { character: 'オ', meanings: ['o'], kunyomi: ['オ'] },
+                // K
+                { character: 'カ', meanings: ['ka'], kunyomi: ['カ'] }, { character: 'キ', meanings: ['ki'], kunyomi: ['キ'] }, { character: 'ク', meanings: ['ku'], kunyomi: ['ク'] }, { character: 'ケ', meanings: ['ke'], kunyomi: ['ケ'] }, { character: 'コ', meanings: ['ko'], kunyomi: ['コ'] },
+                // S
+                { character: 'サ', meanings: ['sa'], kunyomi: ['サ'] }, { character: 'シ', meanings: ['shi'], kunyomi: ['シ'] }, { character: 'ス', meanings: ['su'], kunyomi: ['ス'] }, { character: 'セ', meanings: ['se'], kunyomi: ['セ'] }, { character: 'ソ', meanings: ['so'], kunyomi: ['ソ'] },
+                // T
+                { character: 'タ', meanings: ['ta'], kunyomi: ['タ'] }, { character: 'チ', meanings: ['chi'], kunyomi: ['チ'] }, { character: 'ツ', meanings: ['tsu'], kunyomi: ['ツ'] }, { character: 'テ', meanings: ['te'], kunyomi: ['テ'] }, { character: 'ト', meanings: ['to'], kunyomi: ['ト'] },
+                // N
+                { character: 'ナ', meanings: ['na'], kunyomi: ['ナ'] }, { character: 'ニ', meanings: ['ni'], kunyomi: ['ニ'] }, { character: 'ヌ', meanings: ['nu'], kunyomi: ['ヌ'] }, { character: 'ネ', meanings: ['ne'], kunyomi: ['ネ'] }, { character: 'ノ', meanings: ['no'], kunyomi: ['ノ'] },
+                // H
+                { character: 'ハ', meanings: ['ha'], kunyomi: ['ハ'] }, { character: 'ヒ', meanings: ['hi'], kunyomi: ['ヒ'] }, { character: 'フ', meanings: ['fu'], kunyomi: ['フ'] }, { character: 'ヘ', meanings: ['he'], kunyomi: ['ヘ'] }, { character: 'ホ', meanings: ['ho'], kunyomi: ['ホ'] },
+                // M
+                { character: 'マ', meanings: ['ma'], kunyomi: ['マ'] }, { character: 'ミ', meanings: ['mi'], kunyomi: ['ミ'] }, { character: 'ム', meanings: ['mu'], kunyomi: ['ム'] }, { character: 'メ', meanings: ['me'], kunyomi: ['メ'] }, { character: 'モ', meanings: ['mo'], kunyomi: ['モ'] },
+                // Y
+                { character: 'ヤ', meanings: ['ya'], kunyomi: ['ヤ'] }, { character: 'ユ', meanings: ['yu'], kunyomi: ['ユ'] }, { character: 'ヨ', meanings: ['yo'], kunyomi: ['ヨ'] },
+                // R
+                { character: 'ラ', meanings: ['ra'], kunyomi: ['ラ'] }, { character: 'リ', meanings: ['ri'], kunyomi: ['リ'] }, { character: 'ル', meanings: ['ru'], kunyomi: ['ル'] }, { character: 'レ', meanings: ['re'], kunyomi: ['レ'] }, { character: 'ロ', meanings: ['ro'], kunyomi: ['ロ'] },
+                // W & N
+                { character: 'ワ', meanings: ['wa'], kunyomi: ['ワ'] }, { character: 'ヲ', meanings: ['wo'], kunyomi: ['ヲ'] }, { character: 'ン', meanings: ['n'], kunyomi: ['ン'] }
+            ].map(kana => ({ onyomi: [], examples: [], jlpt: 'Katakana', ...kana })),
+            
             'N5': [
                 // Cleaned standard additions (duplicates from base fallbackData removed)
                 { character: '水', meanings: ['water'], onyomi: ['スイ'], kunyomi: ['みず'], jlpt: 'N5', examples: [{ word: '水', reading: 'みず', meaning: 'water' }] },
@@ -1949,6 +2000,7 @@ class KanjiData {
                 { character: '耳', meanings: ['ear'], onyomi: ['ジ'], kunyomi: ['みみ'], jlpt: 'N5', examples: [{ word: '耳', reading: 'みみ', meaning: 'ear' }] },
                 { character: '口', meanings: ['mouth'], onyomi: ['コウ'], kunyomi: ['くち'], jlpt: 'N5', examples: [{ word: '口', reading: 'くち', meaning: 'mouth' }] }
             ],
+            
             'N4': [
                 {
                     character: '経',
@@ -2095,6 +2147,12 @@ class KanjiData {
     }
 
     static async fetchFromKanjiApi(level) {
+        // NEW: Intercept Kana selections and skip the external API sync completely
+        if (level === 'Hiragana' || level === 'Katakana') {
+            console.log(`Skipping KanjiAPI background sync for ${level}`);
+            return [];
+        }
+
         try {
             console.log(`Querying KanjiAPI for full canonical ${level} index list...`);
 

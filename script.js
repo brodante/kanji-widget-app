@@ -79,6 +79,28 @@ class KanjiLearningApp {
             this.loadCurrentKanji();
         });
 
+        // Setup Premium Kana Buttons
+        // Setup Premium Kana Buttons
+        const setupKanaButton = (buttonId, levelName) => {
+            const btn = document.getElementById(buttonId);
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    this.settings.jlptLevel = levelName;
+                    this.saveSettings();
+
+                    // Safely close the modal without permanently hiding it
+                    this.closeSettings();
+                    this.showToast(`Switched to ${levelName} Practice!`);
+
+                    // Let your app handle the loading and UI updates naturally
+                    this.loadCurrentKanji();
+                });
+            }
+        };
+
+        setupKanaButton('btnHiragana', 'Hiragana');
+        setupKanaButton('btnKatakana', 'Katakana');
+
         document.getElementById('autoPlay').addEventListener('change', (e) => {
             this.settings.autoPlay = e.target.checked;
             this.saveSettings();
