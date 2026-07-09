@@ -1445,3 +1445,73 @@ input:focus {
     background-color: rgba(150, 150, 150, 0.2);
     margin: 0.3rem 0;
 }
+
+/* ========================================== */
+/* Daily Streak Badge */
+/* ========================================== */
+.streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #FF9A9E, #FF5252);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 10px rgba(255, 82, 82, 0.3);
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.streak-badge:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 14px rgba(255, 82, 82, 0.4);
+}
+
+.streak-badge i {
+    color: #FFE082;
+    /* Golden flame core */
+    font-size: 1.2rem;
+    animation: flicker 2s infinite alternate;
+}
+
+/* Grayed out state when streak is 0 */
+.streak-badge.inactive {
+    background: rgba(150, 150, 150, 0.15);
+    color: var(--on-surface);
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.streak-badge.inactive i {
+    color: inherit;
+    animation: none;
+}
+
+@keyframes flicker {
+    0% {
+        transform: scale(1) rotate(-2deg);
+        opacity: 0.9;
+    }
+
+    25% {
+        transform: scale(1.05) rotate(2deg);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(0.95) rotate(-1deg);
+        opacity: 0.85;
+    }
+
+    75% {
+        transform: scale(1.08) rotate(3deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.9;
+    }
+}

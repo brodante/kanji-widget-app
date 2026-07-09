@@ -76,9 +76,15 @@
 
             <!-- Progress Section -->
             <div class="progress-section">
-                <div class="progress-header">
-                    <h3>Learning Progress</h3>
-                    <div id="progressStats" class="progress-stats">0 mastered | 0 total (N5 level)</div>
+                <div class="progress-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3>Learning Progress</h3>
+                        <div id="progressStats" class="progress-stats">0 mastered | 0 total (N5 level)</div>
+                    </div>
+                    <div class="streak-badge" id="streakBadge" title="Daily Learning Streak">
+                        <i class="fas fa-fire"></i>
+                        <span id="streakCount">0</span>
+                    </div>
                 </div>
                 <div class="progress-bar">
                     <div id="progressFill" class="progress-fill"></div>
