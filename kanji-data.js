@@ -1916,50 +1916,140 @@ class KanjiData {
     static getAdditionalKanjiForLevel(level) {
         const additionalKanji = {
             'Hiragana': [
-                // A
-                { character: 'あ', meanings: ['a'], kunyomi: ['あ'] }, { character: 'い', meanings: ['i'], kunyomi: ['い'] }, { character: 'う', meanings: ['u'], kunyomi: ['う'] }, { character: 'え', meanings: ['e'], kunyomi: ['え'] }, { character: 'お', meanings: ['o'], kunyomi: ['お'] },
-                // K
-                { character: 'か', meanings: ['ka'], kunyomi: ['か'] }, { character: 'き', meanings: ['ki'], kunyomi: ['き'] }, { character: 'く', meanings: ['ku'], kunyomi: ['く'] }, { character: 'け', meanings: ['ke'], kunyomi: ['け'] }, { character: 'こ', meanings: ['ko'], kunyomi: ['こ'] },
-                // S
-                { character: 'さ', meanings: ['sa'], kunyomi: ['さ'] }, { character: 'し', meanings: ['shi'], kunyomi: ['し'] }, { character: 'す', meanings: ['su'], kunyomi: ['す'] }, { character: 'せ', meanings: ['se'], kunyomi: ['せ'] }, { character: 'そ', meanings: ['so'], kunyomi: ['そ'] },
-                // T
-                { character: 'た', meanings: ['ta'], kunyomi: ['た'] }, { character: 'ち', meanings: ['chi'], kunyomi: ['ち'] }, { character: 'つ', meanings: ['tsu'], kunyomi: ['つ'] }, { character: 'て', meanings: ['te'], kunyomi: ['て'] }, { character: 'と', meanings: ['to'], kunyomi: ['と'] },
-                // N
-                { character: 'な', meanings: ['na'], kunyomi: ['な'] }, { character: 'に', meanings: ['ni'], kunyomi: ['に'] }, { character: 'ぬ', meanings: ['nu'], kunyomi: ['ぬ'] }, { character: 'ね', meanings: ['ne'], kunyomi: ['ね'] }, { character: 'の', meanings: ['no'], kunyomi: ['の'] },
-                // H
-                { character: 'は', meanings: ['ha'], kunyomi: ['は'] }, { character: 'ひ', meanings: ['hi'], kunyomi: ['ひ'] }, { character: 'ふ', meanings: ['fu'], kunyomi: ['ふ'] }, { character: 'へ', meanings: ['he'], kunyomi: ['へ'] }, { character: 'ほ', meanings: ['ho'], kunyomi: ['ほ'] },
-                // M
-                { character: 'ま', meanings: ['ma'], kunyomi: ['ま'] }, { character: 'み', meanings: ['mi'], kunyomi: ['み'] }, { character: 'む', meanings: ['mu'], kunyomi: ['む'] }, { character: 'め', meanings: ['me'], kunyomi: ['め'] }, { character: 'も', meanings: ['mo'], kunyomi: ['も'] },
-                // Y
-                { character: 'や', meanings: ['ya'], kunyomi: ['や'] }, { character: 'ゆ', meanings: ['yu'], kunyomi: ['ゆ'] }, { character: 'よ', meanings: ['yo'], kunyomi: ['よ'] },
-                // R
-                { character: 'ら', meanings: ['ra'], kunyomi: ['ら'] }, { character: 'り', meanings: ['ri'], kunyomi: ['り'] }, { character: 'る', meanings: ['ru'], kunyomi: ['る'] }, { character: 'れ', meanings: ['re'], kunyomi: ['れ'] }, { character: 'ろ', meanings: ['ro'], kunyomi: ['ろ'] },
-                // W & N
-                { character: 'わ', meanings: ['wa'], kunyomi: ['わ'] }, { character: 'を', meanings: ['wo'], kunyomi: ['を'] }, { character: 'ん', meanings: ['n'], kunyomi: ['ん'] }
-            ].map(kana => ({ onyomi: [], examples: [], jlpt: 'Hiragana', ...kana })),
+                // A Row
+                { character: 'あ', meanings: ['a'], kunyomi: ['あ'], examples: [{ word: 'ありがとう', reading: 'ありがとう', meaning: 'Thank you' }, { word: '雨', reading: 'あめ', meaning: 'Rain' }] },
+                { character: 'い', meanings: ['i'], kunyomi: ['い'], examples: [{ word: '犬', reading: 'いぬ', meaning: 'Dog' }, { word: '今', reading: 'いま', meaning: 'Now' }] },
+                { character: 'う', meanings: ['u'], kunyomi: ['う'], examples: [{ word: '海', reading: 'うみ', meaning: 'Sea' }, { word: '歌', reading: 'うた', meaning: 'Song' }] },
+                { character: 'え', meanings: ['e'], kunyomi: ['え'], examples: [{ word: '駅', reading: 'えき', meaning: 'Station' }, { word: '鉛筆', reading: 'えんぴつ', meaning: 'Pencil' }] },
+                { character: 'お', meanings: ['o'], kunyomi: ['お'], examples: [{ word: 'おはよう', reading: 'おはよう', meaning: 'Good morning' }, { word: 'お茶', reading: 'おちゃ', meaning: 'Tea' }] },
+
+                // K Row
+                { character: 'か', meanings: ['ka'], kunyomi: ['か'], examples: [{ word: '傘', reading: 'かさ', meaning: 'Umbrella' }, { word: '家族', reading: 'かぞく', meaning: 'Family' }] },
+                { character: 'き', meanings: ['ki'], kunyomi: ['き'], examples: [{ word: '木', reading: 'き', meaning: 'Tree' }, { word: '今日', reading: 'きょう', meaning: 'Today' }] },
+                { character: 'く', meanings: ['ku'], kunyomi: ['く'], examples: [{ word: '靴', reading: 'くつ', meaning: 'Shoes' }, { word: '車', reading: 'くるま', meaning: 'Car' }] },
+                { character: 'け', meanings: ['ke'], kunyomi: ['け'], examples: [{ word: '今朝', reading: 'けさ', meaning: 'This morning' }, { word: '結婚', reading: 'けっこん', meaning: 'Marriage' }] },
+                { character: 'こ', meanings: ['ko'], kunyomi: ['こ'], examples: [{ word: '子供', reading: 'こども', meaning: 'Child' }, { word: '心', reading: 'こころ', meaning: 'Heart' }] },
+
+                // S Row
+                { character: 'さ', meanings: ['sa'], kunyomi: ['さ'], examples: [{ word: '桜', reading: 'さくら', meaning: 'Cherry blossom' }, { word: '魚', reading: 'さかな', meaning: 'Fish' }] },
+                { character: 'し', meanings: ['shi'], kunyomi: ['し'], examples: [{ word: '写真', reading: 'しゃしん', meaning: 'Photo' }, { word: '仕事', reading: 'しごと', meaning: 'Work' }] },
+                { character: 'す', meanings: ['su'], kunyomi: ['す'], examples: [{ word: '寿司', reading: 'すし', meaning: 'Sushi' }, { word: '水泳', reading: 'すいえい', meaning: 'Swimming' }] },
+                { character: 'せ', meanings: ['se'], kunyomi: ['せ'], examples: [{ word: '先生', reading: 'せんせい', meaning: 'Teacher' }, { word: '世界', reading: 'せかい', meaning: 'World' }] },
+                { character: 'そ', meanings: ['so'], kunyomi: ['そ'], examples: [{ word: '空', reading: 'そら', meaning: 'Sky' }, { word: '外', reading: 'そと', meaning: 'Outside' }] },
+
+                // T Row
+                { character: 'た', meanings: ['ta'], kunyomi: ['た'], examples: [{ word: '食べ物', reading: 'たべもの', meaning: 'Food' }, { word: '卵', reading: 'たまご', meaning: 'Egg' }] },
+                { character: 'ち', meanings: ['chi'], kunyomi: ['ち'], examples: [{ word: '地下鉄', reading: 'ちかてつ', meaning: 'Subway' }, { word: '近い', reading: 'ちかい', meaning: 'Near' }] },
+                { character: 'つ', meanings: ['tsu'], kunyomi: ['つ'], examples: [{ word: '月', reading: 'つき', meaning: 'Moon' }, { word: '机', reading: 'つくえ', meaning: 'Desk' }] },
+                { character: 'て', meanings: ['te'], kunyomi: ['て'], examples: [{ word: '手', reading: 'て', meaning: 'Hand' }, { word: '手紙', reading: 'てがみ', meaning: 'Letter' }] },
+                { character: 'と', meanings: ['to'], kunyomi: ['と'], examples: [{ word: '友達', reading: 'ともだち', meaning: 'Friend' }, { word: '時計', reading: 'とけい', meaning: 'Clock' }] },
+
+                // N Row
+                { character: 'な', meanings: ['na'], kunyomi: ['な'], examples: [{ word: '名前', reading: 'なまえ', meaning: 'Name' }, { word: '夏', reading: 'なつ', meaning: 'Summer' }] },
+                { character: 'に', meanings: ['ni'], kunyomi: ['に'], examples: [{ word: '肉', reading: 'にく', meaning: 'Meat' }, { word: '日本', reading: 'にほん', meaning: 'Japan' }] },
+                { character: 'ぬ', meanings: ['nu'], kunyomi: ['ぬ'], examples: [{ word: 'ぬいぐるみ', reading: 'ぬいぐるみ', meaning: 'Stuffed toy' }, { word: '塗る', reading: 'ぬる', meaning: 'To paint' }] },
+                { character: 'ね', meanings: ['ne'], kunyomi: ['ね'], examples: [{ word: '猫', reading: 'ねこ', meaning: 'Cat' }, { word: '眠い', reading: 'ねむい', meaning: 'Sleepy' }] },
+                { character: 'の', meanings: ['no'], kunyomi: ['の'], examples: [{ word: '飲み物', reading: 'のみもの', meaning: 'Drink' }, { word: '乗り物', reading: 'のりもの', meaning: 'Vehicle' }] },
+
+                // H Row
+                { character: 'は', meanings: ['ha'], kunyomi: ['は'], examples: [{ word: '花', reading: 'はな', meaning: 'Flower' }, { word: '春', reading: 'はる', meaning: 'Spring' }] },
+                { character: 'ひ', meanings: ['hi'], kunyomi: ['ひ'], examples: [{ word: '人', reading: 'ひと', meaning: 'Person' }, { word: '飛行機', reading: 'ひこうき', meaning: 'Airplane' }] },
+                { character: 'ふ', meanings: ['fu'], kunyomi: ['ふ'], examples: [{ word: '冬', reading: 'ふゆ', meaning: 'Winter' }, { word: '船', reading: 'ふね', meaning: 'Ship' }] },
+                { character: 'へ', meanings: ['he'], kunyomi: ['へ'], examples: [{ word: '部屋', reading: 'へや', meaning: 'Room' }, { word: '平和', reading: 'へいわ', meaning: 'Peace' }] },
+                { character: 'ほ', meanings: ['ho'], kunyomi: ['ほ'], examples: [{ word: '星', reading: 'ほし', meaning: 'Star' }, { word: '本', reading: 'ほん', meaning: 'Book' }] },
+
+                // M Row
+                { character: 'ま', meanings: ['ma'], kunyomi: ['ま'], examples: [{ word: '窓', reading: 'まど', meaning: 'Window' }, { word: '毎日', reading: 'まいにち', meaning: 'Every day' }] },
+                { character: 'み', meanings: ['mi'], kunyomi: ['み'], examples: [{ word: '水', reading: 'みず', meaning: 'Water' }, { word: '道', reading: 'みち', meaning: 'Road/Street' }] },
+                { character: 'む', meanings: ['mu'], kunyomi: ['む'], examples: [{ word: '虫', reading: 'むし', meaning: 'Insect' }, { word: '昔', reading: 'むかし', meaning: 'Old times' }] },
+                { character: 'め', meanings: ['me'], kunyomi: ['め'], examples: [{ word: '目', reading: 'め', meaning: 'Eye' }, { word: '眼鏡', reading: 'めがね', meaning: 'Glasses' }] },
+                { character: 'も', meanings: ['mo'], kunyomi: ['も'], examples: [{ word: '森', reading: 'もり', meaning: 'Forest' }, { word: '桃', reading: 'もも', meaning: 'Peach' }] },
+
+                // Y Row
+                { character: 'や', meanings: ['ya'], kunyomi: ['や'], examples: [{ word: '山', reading: 'やま', meaning: 'Mountain' }, { word: '野菜', reading: 'やさい', meaning: 'Vegetable' }] },
+                { character: 'ゆ', meanings: ['yu'], kunyomi: ['ゆ'], examples: [{ word: '雪', reading: 'ゆき', meaning: 'Snow' }, { word: '夢', reading: 'ゆめ', meaning: 'Dream' }] },
+                { character: 'よ', meanings: ['yo'], kunyomi: ['よ'], examples: [{ word: '夜', reading: 'よる', meaning: 'Night' }, { word: '呼ぶ', reading: 'よぶ', meaning: 'To call' }] },
+
+                // R Row
+                { character: 'ら', meanings: ['ra'], kunyomi: ['ら'], examples: [{ word: '来週', reading: 'らいしゅう', meaning: 'Next week' }, { word: '楽', reading: 'らく', meaning: 'Comfortable' }] },
+                { character: 'り', meanings: ['ri'], kunyomi: ['り'], examples: [{ word: '林檎', reading: 'りんご', meaning: 'Apple' }, { word: '料理', reading: 'りょうり', meaning: 'Cooking' }] },
+                { character: 'る', meanings: ['ru'], kunyomi: ['る'], examples: [{ word: '留守', reading: 'るす', meaning: 'Absence' }, { word: '走る', reading: 'はしる', meaning: 'To run' }] },
+                { character: 'れ', meanings: ['re'], kunyomi: ['れ'], examples: [{ word: '冷蔵庫', reading: 'れいぞうこ', meaning: 'Refrigerator' }, { word: '練習', reading: 'れんしゅう', meaning: 'Practice' }] },
+                { character: 'ろ', meanings: ['ro'], kunyomi: ['ろ'], examples: [{ word: '六', reading: 'ろく', meaning: 'Six' }, { word: '廊下', reading: 'ろうか', meaning: 'Corridor' }] },
+
+                // W & N Row
+                { character: 'わ', meanings: ['wa'], kunyomi: ['わ'], examples: [{ word: '私', reading: 'わたし', meaning: 'I/Me' }, { word: '笑う', reading: 'わらう', meaning: 'To laugh' }] },
+                { character: 'を', meanings: ['wo'], kunyomi: ['を'], examples: [{ word: '本を読む', reading: 'ほんをよむ', meaning: 'Read a book' }] },
+                { character: 'ん', meanings: ['n'], kunyomi: ['ん'], examples: [{ word: 'パン', reading: 'ぱん', meaning: 'Bread' }, { word: '三', reading: 'さん', meaning: 'Three' }] }
+            ].map(kana => ({ onyomi: [], jlpt: 'Hiragana', ...kana })),
 
             'Katakana': [
-                // A
-                { character: 'ア', meanings: ['a'], kunyomi: ['ア'] }, { character: 'イ', meanings: ['i'], kunyomi: ['イ'] }, { character: 'ウ', meanings: ['u'], kunyomi: ['ウ'] }, { character: 'エ', meanings: ['e'], kunyomi: ['エ'] }, { character: 'オ', meanings: ['o'], kunyomi: ['オ'] },
-                // K
-                { character: 'カ', meanings: ['ka'], kunyomi: ['カ'] }, { character: 'キ', meanings: ['ki'], kunyomi: ['キ'] }, { character: 'ク', meanings: ['ku'], kunyomi: ['ク'] }, { character: 'ケ', meanings: ['ke'], kunyomi: ['ケ'] }, { character: 'コ', meanings: ['ko'], kunyomi: ['コ'] },
-                // S
-                { character: 'サ', meanings: ['sa'], kunyomi: ['サ'] }, { character: 'シ', meanings: ['shi'], kunyomi: ['シ'] }, { character: 'ス', meanings: ['su'], kunyomi: ['ス'] }, { character: 'セ', meanings: ['se'], kunyomi: ['セ'] }, { character: 'ソ', meanings: ['so'], kunyomi: ['ソ'] },
-                // T
-                { character: 'タ', meanings: ['ta'], kunyomi: ['タ'] }, { character: 'チ', meanings: ['chi'], kunyomi: ['チ'] }, { character: 'ツ', meanings: ['tsu'], kunyomi: ['ツ'] }, { character: 'テ', meanings: ['te'], kunyomi: ['テ'] }, { character: 'ト', meanings: ['to'], kunyomi: ['ト'] },
-                // N
-                { character: 'ナ', meanings: ['na'], kunyomi: ['ナ'] }, { character: 'ニ', meanings: ['ni'], kunyomi: ['ニ'] }, { character: 'ヌ', meanings: ['nu'], kunyomi: ['ヌ'] }, { character: 'ネ', meanings: ['ne'], kunyomi: ['ネ'] }, { character: 'ノ', meanings: ['no'], kunyomi: ['ノ'] },
-                // H
-                { character: 'ハ', meanings: ['ha'], kunyomi: ['ハ'] }, { character: 'ヒ', meanings: ['hi'], kunyomi: ['ヒ'] }, { character: 'フ', meanings: ['fu'], kunyomi: ['フ'] }, { character: 'ヘ', meanings: ['he'], kunyomi: ['ヘ'] }, { character: 'ホ', meanings: ['ho'], kunyomi: ['ホ'] },
-                // M
-                { character: 'マ', meanings: ['ma'], kunyomi: ['マ'] }, { character: 'ミ', meanings: ['mi'], kunyomi: ['ミ'] }, { character: 'ム', meanings: ['mu'], kunyomi: ['ム'] }, { character: 'メ', meanings: ['me'], kunyomi: ['メ'] }, { character: 'モ', meanings: ['mo'], kunyomi: ['モ'] },
-                // Y
-                { character: 'ヤ', meanings: ['ya'], kunyomi: ['ヤ'] }, { character: 'ユ', meanings: ['yu'], kunyomi: ['ユ'] }, { character: 'ヨ', meanings: ['yo'], kunyomi: ['ヨ'] },
-                // R
-                { character: 'ラ', meanings: ['ra'], kunyomi: ['ラ'] }, { character: 'リ', meanings: ['ri'], kunyomi: ['リ'] }, { character: 'ル', meanings: ['ru'], kunyomi: ['ル'] }, { character: 'レ', meanings: ['re'], kunyomi: ['レ'] }, { character: 'ロ', meanings: ['ro'], kunyomi: ['ロ'] },
-                // W & N
-                { character: 'ワ', meanings: ['wa'], kunyomi: ['ワ'] }, { character: 'ヲ', meanings: ['wo'], kunyomi: ['ヲ'] }, { character: 'ン', meanings: ['n'], kunyomi: ['ン'] }
-            ].map(kana => ({ onyomi: [], examples: [], jlpt: 'Katakana', ...kana })),
+                // A Row
+                { character: 'ア', meanings: ['a'], kunyomi: ['ア'], examples: [{ word: 'アイス', reading: 'アイス', meaning: 'Ice cream' }, { word: 'アニメ', reading: 'アニメ', meaning: 'Anime' }] },
+                { character: 'イ', meanings: ['i'], kunyomi: ['イ'], examples: [{ word: 'インターネット', reading: 'インターネット', meaning: 'Internet' }, { word: 'イギリス', reading: 'イギリス', meaning: 'UK' }] },
+                { character: 'ウ', meanings: ['u'], kunyomi: ['ウ'], examples: [{ word: 'ウイルス', reading: 'ウイルス', meaning: 'Virus' }, { word: 'ウィンドウ', reading: 'ウィンドウ', meaning: 'Window' }] },
+                { character: 'エ', meanings: ['e'], kunyomi: ['エ'], examples: [{ word: 'エレベーター', reading: 'エレベーター', meaning: 'Elevator' }, { word: 'エンジン', reading: 'エンジン', meaning: 'Engine' }] },
+                { character: 'オ', meanings: ['o'], kunyomi: ['オ'], examples: [{ word: 'オレンジ', reading: 'オレンジ', meaning: 'Orange' }, { word: 'オリンピック', reading: 'オリンピック', meaning: 'Olympics' }] },
+
+                // K Row
+                { character: 'カ', meanings: ['ka'], kunyomi: ['カ'], examples: [{ word: 'カメラ', reading: 'カメラ', meaning: 'Camera' }, { word: 'カレンダー', reading: 'カレンダー', meaning: 'Calendar' }] },
+                { character: 'キ', meanings: ['ki'], kunyomi: ['キ'], examples: [{ word: 'キーボード', reading: 'キーボード', meaning: 'Keyboard' }, { word: 'ギター', reading: 'ギター', meaning: 'Guitar' }] },
+                { character: 'ク', meanings: ['ku'], kunyomi: ['ク'], examples: [{ word: 'クラス', reading: 'クラス', meaning: 'Class' }, { word: 'クレジットカード', reading: 'クレジットカード', meaning: 'Credit card' }] },
+                { character: 'ケ', meanings: ['ke'], kunyomi: ['ケ'], examples: [{ word: 'ケーキ', reading: 'ケーキ', meaning: 'Cake' }, { word: 'ケース', reading: 'ケース', meaning: 'Case' }] },
+                { character: 'コ', meanings: ['ko'], kunyomi: ['コ'], examples: [{ word: 'コーヒー', reading: 'コーヒー', meaning: 'Coffee' }, { word: 'コンピューター', reading: 'コンピューター', meaning: 'Computer' }] },
+
+                // S Row
+                { character: 'サ', meanings: ['sa'], kunyomi: ['サ'], examples: [{ word: 'サッカー', reading: 'サッカー', meaning: 'Soccer' }, { word: 'サラダ', reading: 'サラダ', meaning: 'Salad' }] },
+                { character: 'シ', meanings: ['shi'], kunyomi: ['シ'], examples: [{ word: 'シャツ', reading: 'シャツ', meaning: 'Shirt' }, { word: 'シャワー', reading: 'シャワー', meaning: 'Shower' }] },
+                { character: 'ス', meanings: ['su'], kunyomi: ['ス'], examples: [{ word: 'スポーツ', reading: 'スポーツ', meaning: 'Sports' }, { word: 'スマートフォン', reading: 'スマートフォン', meaning: 'Smartphone' }] },
+                { character: 'セ', meanings: ['se'], kunyomi: ['セ'], examples: [{ word: 'セーター', reading: 'セーター', meaning: 'Sweater' }, { word: 'センター', reading: 'センター', meaning: 'Center' }] },
+                { character: 'ソ', meanings: ['so'], kunyomi: ['ソ'], examples: [{ word: 'ソファ', reading: 'ソファ', meaning: 'Sofa' }, { word: 'ソース', reading: 'ソース', meaning: 'Sauce' }] },
+
+                // T Row
+                { character: 'タ', meanings: ['ta'], kunyomi: ['タ'], examples: [{ word: 'タクシー', reading: 'タクシー', meaning: 'Taxi' }, { word: 'タオル', reading: 'タオル', meaning: 'Towel' }] },
+                { character: 'チ', meanings: ['chi'], kunyomi: ['チ'], examples: [{ word: 'チーズ', reading: 'チーズ', meaning: 'Cheese' }, { word: 'チケット', reading: 'チケット', meaning: 'Ticket' }] },
+                { character: 'ツ', meanings: ['tsu'], kunyomi: ['ツ'], examples: [{ word: 'ツアー', reading: 'ツアー', meaning: 'Tour' }, { word: 'スーツ', reading: 'スーツ', meaning: 'Suit' }] },
+                { character: 'テ', meanings: ['te'], kunyomi: ['テ'], examples: [{ word: 'テレビ', reading: 'テレビ', meaning: 'TV' }, { word: 'テーブル', reading: 'テーブル', meaning: 'Table' }] },
+                { character: 'ト', meanings: ['to'], kunyomi: ['ト'], examples: [{ word: 'トイレ', reading: 'トイレ', meaning: 'Toilet' }, { word: 'トマト', reading: 'トマト', meaning: 'Tomato' }] },
+
+                // N Row
+                { character: 'ナ', meanings: ['na'], kunyomi: ['ナ'], examples: [{ word: 'ナイフ', reading: 'ナイフ', meaning: 'Knife' }, { word: 'バナナ', reading: 'バナナ', meaning: 'Banana' }] },
+                { character: 'ニ', meanings: ['ni'], kunyomi: ['ニ'], examples: [{ word: 'ニュース', reading: 'ニュース', meaning: 'News' }, { word: 'テニス', reading: 'テニス', meaning: 'Tennis' }] },
+                { character: 'ヌ', meanings: ['nu'], kunyomi: ['ヌ'], examples: [{ word: 'ヌードル', reading: 'ヌードル', meaning: 'Noodle' }, { word: 'カヌー', reading: 'カヌー', meaning: 'Canoe' }] },
+                { character: 'ネ', meanings: ['ne'], kunyomi: ['ネ'], examples: [{ word: 'ネクタイ', reading: 'ネクタイ', meaning: 'Necktie' }, { word: 'ネット', reading: 'ネット', meaning: 'Net' }] },
+                { character: 'ノ', meanings: ['no'], kunyomi: ['ノ'], examples: [{ word: 'ノート', reading: 'ノート', meaning: 'Notebook' }, { word: 'ノック', reading: 'ノック', meaning: 'Knock' }] },
+
+                // H Row
+                { character: 'ハ', meanings: ['ha'], kunyomi: ['ハ'], examples: [{ word: 'ハンバーガー', reading: 'ハンバーガー', meaning: 'Hamburger' }, { word: 'バス', reading: 'バス', meaning: 'Bus' }] },
+                { character: 'ヒ', meanings: ['hi'], kunyomi: ['ヒ'], examples: [{ word: 'ヒーター', reading: 'ヒーター', meaning: 'Heater' }, { word: 'ヒーロー', reading: 'ヒーロー', meaning: 'Hero' }] },
+                { character: 'フ', meanings: ['fu'], kunyomi: ['フ'], examples: [{ word: 'フィルム', reading: 'フィルム', meaning: 'Film' }, { word: 'フォーク', reading: 'フォーク', meaning: 'Fork' }] },
+                { character: 'ヘ', meanings: ['he'], kunyomi: ['ヘ'], examples: [{ word: 'ヘリコプター', reading: 'ヘリコプター', meaning: 'Helicopter' }, { word: 'ヘルメット', reading: 'ヘルメット', meaning: 'Helmet' }] },
+                { character: 'ホ', meanings: ['ho'], kunyomi: ['ホ'], examples: [{ word: 'ホテル', reading: 'ホテル', meaning: 'Hotel' }, { word: 'ホット', reading: 'ホット', meaning: 'Hot' }] },
+
+                // M Row
+                { character: 'マ', meanings: ['ma'], kunyomi: ['マ'], examples: [{ word: 'マウス', reading: 'マウス', meaning: 'Mouse' }, { word: 'マスク', reading: 'マスク', meaning: 'Mask' }] },
+                { character: 'ミ', meanings: ['mi'], kunyomi: ['ミ'], examples: [{ word: 'ミルク', reading: 'ミルク', meaning: 'Milk' }, { word: 'ミラー', reading: 'ミラー', meaning: 'Mirror' }] },
+                { character: 'ム', meanings: ['mu'], kunyomi: ['ム'], examples: [{ word: 'ムービー', reading: 'ムービー', meaning: 'Movie' }, { word: 'チーム', reading: 'チーム', meaning: 'Team' }] },
+                { character: 'メ', meanings: ['me'], kunyomi: ['メ'], examples: [{ word: 'メール', reading: 'メール', meaning: 'Email' }, { word: 'メモ', reading: 'メモ', meaning: 'Memo' }] },
+                { character: 'モ', meanings: ['mo'], kunyomi: ['モ'], examples: [{ word: 'モニター', reading: 'モニター', meaning: 'Monitor' }, { word: 'モーター', reading: 'モーター', meaning: 'Motor' }] },
+
+                // Y Row
+                { character: 'ヤ', meanings: ['ya'], kunyomi: ['ヤ'], examples: [{ word: 'タイヤ', reading: 'タイヤ', meaning: 'Tire' }, { word: 'ダイヤ', reading: 'ダイヤ', meaning: 'Diamond' }] },
+                { character: 'ユ', meanings: ['yu'], kunyomi: ['ユ'], examples: [{ word: 'ユニフォーム', reading: 'ユニフォーム', meaning: 'Uniform' }, { word: 'ユーモア', reading: 'ユーモア', meaning: 'Humor' }] },
+                { character: 'ヨ', meanings: ['yo'], kunyomi: ['ヨ'], examples: [{ word: 'ヨーロッパ', reading: 'ヨーロッパ', meaning: 'Europe' }, { word: 'ヨガ', reading: 'ヨガ', meaning: 'Yoga' }] },
+
+                // R Row
+                { character: 'ラ', meanings: ['ra'], kunyomi: ['ラ'], examples: [{ word: 'ラジオ', reading: 'ラジオ', meaning: 'Radio' }, { word: 'ラーメン', reading: 'ラーメン', meaning: 'Ramen' }] },
+                { character: 'リ', meanings: ['ri'], kunyomi: ['リ'], examples: [{ word: 'リモコン', reading: 'リモコン', meaning: 'Remote control' }, { word: 'リスト', reading: 'リスト', meaning: 'List' }] },
+                { character: 'ル', meanings: ['ru'], kunyomi: ['ル'], examples: [{ word: 'ルール', reading: 'ルール', meaning: 'Rule' }, { word: 'ルーター', reading: 'ルーター', meaning: 'Router' }] },
+                { character: 'レ', meanings: ['re'], kunyomi: ['レ'], examples: [{ word: 'レストラン', reading: 'レストラン', meaning: 'Restaurant' }, { word: 'レシート', reading: 'レシート', meaning: 'Receipt' }] },
+                { character: 'ロ', meanings: ['ro'], kunyomi: ['ロ'], examples: [{ word: 'ロボット', reading: 'ロボット', meaning: 'Robot' }, { word: 'ロッカー', reading: 'ロッカー', meaning: 'Locker' }] },
+
+                // W & N Row
+                { character: 'ワ', meanings: ['wa'], kunyomi: ['ワ'], examples: [{ word: 'ワイン', reading: 'ワイン', meaning: 'Wine' }, { word: 'ワイシャツ', reading: 'ワイシャツ', meaning: 'Dress shirt' }] },
+                { character: 'ヲ', meanings: ['wo'], kunyomi: ['ヲ'], examples: [{ word: 'ヲタク', reading: 'ヲタク', meaning: 'Otaku' }] },
+                { character: 'ン', meanings: ['n'], kunyomi: ['ン'], examples: [{ word: 'ペン', reading: 'ペン', meaning: 'Pen' }, { word: 'ボタン', reading: 'ボタン', meaning: 'Button' }] }
+            ].map(kana => ({ onyomi: [], jlpt: 'Katakana', ...kana })),
             
             'N5': [
                 // Cleaned standard additions (duplicates from base fallbackData removed)
