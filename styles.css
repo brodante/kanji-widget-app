@@ -1377,3 +1377,71 @@ input:focus {
     background-color: #6A1B9A !important;
     box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
 }
+
+/* ========================================== */
+/* Quick Level Dropdown Menu */
+/* ========================================== */
+.level-dropdown {
+    display: none;
+    position: absolute;
+    top: 130%;
+    right: 0;
+    background-color: var(--surface);
+    border: 1px solid rgba(150, 150, 150, 0.2);
+    border-radius: 12px;
+    box-shadow: var(--elevation-3);
+    padding: 0.5rem;
+    min-width: 170px;
+    z-index: 1000;
+    flex-direction: column;
+    gap: 0.2rem;
+    animation: fadeIn 0.2s ease;
+}
+
+.level-dropdown.show {
+    display: flex;
+}
+
+.level-option {
+    background: none;
+    border: none;
+    color: var(--on-surface);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.level-option .kana-icon {
+    font-family: var(--japanese-font);
+    font-weight: bold;
+    color: var(--primary-color);
+    width: 24px;
+    text-align: center;
+}
+
+.level-option:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    color: var(--primary-color);
+}
+
+.level-option.active {
+    background-color: var(--primary-color);
+    color: var(--on-primary);
+}
+
+.level-option.active .kana-icon {
+    color: var(--on-primary);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: rgba(150, 150, 150, 0.2);
+    margin: 0.3rem 0;
+}
