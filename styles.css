@@ -1251,3 +1251,61 @@ input:focus {
     justify-content: center;
     font-size: 1.15rem;
 }
+
+/* --- Light Themes --- */
+[data-theme="yotsuba"] {
+    --primary-color: #789922;
+    --background: #F0EAD6;
+    --surface: #FFFFFF;
+    --on-surface: #333;
+}
+
+[data-theme="paper"] {
+    --primary-color: #222222;
+    --background: #FFFFFF;
+    --surface: #F5F5F5;
+    --on-surface: #000;
+}
+
+[data-theme="candy"] {
+    --primary-color: #FF80AB;
+    --background: #FFF5F7;
+    --surface: #FFFFFF;
+    --on-surface: #4A148C;
+}
+
+[data-theme="sunrise"] {
+    --primary-color: #FF9800;
+    --background: #FFFDE7;
+    --surface: #FFFFFF;
+    --on-surface: #5D4037;
+}
+
+/* --- Dark Themes --- */
+[data-theme="dracula"] {
+    --primary-color: #BD93F9;
+    --background: #282A36;
+    --surface: #44475A;
+    --on-surface: #F8F8F2;
+}
+
+[data-theme="nord"] {
+    --primary-color: #88C0D0;
+    --background: #2E3440;
+    --surface: #3B4252;
+    --on-surface: #ECEFF4;
+}
+
+[data-theme="midnight"] {
+    --primary-color: #2979FF;
+    --background: #0D1117;
+    --surface: #161B22;
+    --on-surface: #C9D1D9;
+}
+
+[data-theme="forest"] {
+    --primary-color: #81C784;
+    --background: #1B262C;
+    --surface: #2F4858;
+    --on-surface: #E0F2F1;
+}
