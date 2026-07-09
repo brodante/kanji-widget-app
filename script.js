@@ -556,7 +556,8 @@ class KanjiLearningApp {
         const masteredSet = new Set(progress.mastered || []);
 
         // NEW CONFIGURATION: Bump the default compact visibility threshold limit to 100
-        const defaultLimit = 100;
+        // Kanji Blur Limit
+        const defaultLimit = 108;
         const needsTruncation = totalCount > defaultLimit;
 
         if (this.isJourneyExpanded === undefined) {
