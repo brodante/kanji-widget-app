@@ -352,32 +352,38 @@ body {
 .example-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 0.6rem 0;
-    /* Slightly tighter vertical spacing */
-    border-bottom: 1px solid var(--border-color);
+    align-items: flex-start;
+    /* Aligns text to the top when wrapping occurs */
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(150, 150, 150, 0.2);
+    gap: 1.5rem;
+    /* Forces a safe gap between the Japanese word and English meaning */
 }
 
 .example-word {
     font-size: 1.35rem !important;
-    /* Made the Kanji word visibly bigger */
+    /* Kept your larger size */
     font-weight: bold;
     color: var(--on-surface);
+    flex-shrink: 0;
+    /* Prevents the Japanese kanji from getting squished */
 }
 
 .example-reading {
     font-size: 1.05rem !important;
-    /* Scaled up the furigana kana underneath */
     color: var(--primary-color);
     margin-top: 0.15rem;
-    /* Tighter gap between the kanji and its reading */
 }
 
 .example-meaning {
     font-size: 1.1rem !important;
-    /* Enlarged the English definition on the right */
+    /* Kept your larger size */
     color: var(--on-surface-variant);
     text-align: right;
+    max-width: 50%;
+    /* The magic line: Forces it to wrap at half the parent div! */
+    word-wrap: break-word;
+    line-height: 1.4;
 }
 
 .example-word:hover {
