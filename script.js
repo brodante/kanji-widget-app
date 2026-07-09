@@ -658,6 +658,37 @@ class KanjiLearningApp {
         const foundKanji = pool.find(item => item.character === character);
 
         if (foundKanji) {
+            // THE FIX: Hydrate skeleton API data BEFORE rendering!
+            const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
+            if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
+
+                // Show temporary loading state on the widget
+                const widget = document.getElementById('kanjiWidget');
+                if (widget) {
+                    widget.innerHTML = `<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Fetching readings for ${character}...</p></div>`;
+                }
+
+                try {
+                    const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
+                    if (details) {
+                        foundKanji.meanings = details.meanings;
+                        foundKanji.onyomi = details.onyomi;
+                        foundKanji.kunyomi = details.kunyomi;
+                        foundKanji.examples = details.examples;
+
+                        // Save it back to the cache so we only fetch it once
+                        const cacheKey = `level_${this.settings.jlptLevel}`;
+                        if (KanjiData.cache.has(cacheKey)) {
+                            const cachedPool = KanjiData.cache.get(cacheKey);
+                            const index = cachedPool.findIndex(k => k.character === foundKanji.character);
+                            if (index !== -1) cachedPool[index] = foundKanji;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Hydration failed:", err);
+                }
+            }
+
             this.currentKanji = foundKanji;
             this.renderKanji();
             this.showToast(`Showing ${character}`);
@@ -890,7 +921,7 @@ class KanjiLearningApp {
             // Find the kanji in our data
             const availableKanji = await KanjiData.getKanjiByLevel(this.settings.jlptLevel);
             let foundKanji = availableKanji.find(k => k.character === character);
-            
+
             // If not found in current level, search in all levels
             if (!foundKanji) {
                 const allLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
@@ -900,17 +931,33 @@ class KanjiLearningApp {
                     if (foundKanji) break;
                 }
             }
-            
+
             if (foundKanji) {
+                // THE FIX: Hydrate before rendering!
+                const isKana = foundKanji.jlpt === 'Hiragana' || foundKanji.jlpt === 'Katakana';
+                if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
+                    try {
+                        const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
+                        if (details) {
+                            foundKanji.meanings = details.meanings;
+                            foundKanji.onyomi = details.onyomi;
+                            foundKanji.kunyomi = details.kunyomi;
+                            foundKanji.examples = details.examples;
+                        }
+                    } catch (err) {
+                        console.error("Hydration failed from recent:", err);
+                    }
+                }
+
                 this.currentKanji = foundKanji;
                 this.renderKanji();
                 this.renderKanjiJourney();
                 this.showToast(`Showing details for "${character}"`);
-                
+
                 // Scroll to widget
-                document.getElementById('kanjiWidget').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
+                document.getElementById('kanjiWidget').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
                 });
             } else {
                 this.showToast(`Could not find details for "${character}"`);
