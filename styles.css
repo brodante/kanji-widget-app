@@ -854,6 +854,15 @@ body {
     padding: 0.5rem;
     border-radius: 12px;
     background: rgba(var(--primary-color-rgb), 0.05);
+
+    /* NEW: Make it look and feel clickable */
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+/* NEW: Add a subtle highlight when hovering */
+.stroke-order-container:hover {
+    background: rgba(var(--primary-color-rgb), 0.08);
 }
 
 .stroke-order-container svg {
@@ -1175,4 +1184,70 @@ input:focus {
     /* Makes them slightly subtle so they don't distract from the main strokes */
     font-family: 'Noto Sans JP', sans-serif !important;
     font-weight: 500;
+}
+
+.premium-kana-btn {
+    flex: 1;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 0.8rem;
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.premium-kana-btn .kana-icon {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.premium-kana-btn:hover {
+    background: rgba(187, 134, 252, 0.15);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(187, 134, 252, 0.2);
+}
+
+.premium-kana-btn:active {
+    transform: translateY(0);
+}
+/* Premium Kana Gojuon Grid Layout */
+#kanjiJourney.kana-layout,
+#kanjiJourney.kana-layout .compact-fade-wrapper {
+    display: grid !important;
+    grid-template-rows: repeat(5, auto);
+    /* Forces exactly 5 rows (a, i, u, e, o) */
+    grid-auto-flow: column;
+    /* Flows items top-to-bottom, then moves to next column */
+    justify-content: start;
+    gap: 0.6rem;
+    overflow-x: auto;
+    /* Allows swiping left/right on mobile */
+
+    /* THE FIX: Added breathing room for focus rings/shadows so they don't clip */
+    padding-top: 0.4rem;
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+    padding-bottom: 0.8rem;
+}
+
+/* Make the grid pills perfectly square so they look like a chart */
+#kanjiJourney.kana-layout .journey-pill {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
 }
