@@ -23,6 +23,7 @@ class KanjiLearningApp {
         this.loadSettings();
         this.bindEvents();
         this.bindFontGridEvents();
+        this.updateLevelIcon(); //kanji gear added
         this.loadCurrentKanji();
         this.updateProgress();
         this.loadRecentKanji();
@@ -58,23 +59,59 @@ class KanjiLearningApp {
         });
 
         // Theme toggle button (The "Quick Switcher")
-        // This flips between your default light (yotsuba) and default dark (dracula)
+        // This flips between your default light (candy) and default dark (dracula)
         // Theme toggle button (The "Quick Switcher")
         document.getElementById('themeToggle').addEventListener('click', () => {
-            const current = localStorage.getItem('theme') || 'yotsuba';
+            const current = localStorage.getItem('theme') || 'candy';
             const darkThemes = ['dark', 'dracula', 'nord', 'midnight', 'forest'];
             const isDark = darkThemes.includes(current);
 
             if (isDark) {
-                // We were in dark mode, switch to the last used light theme (or default to yotsuba)
-                const lastLight = localStorage.getItem('lastLightTheme') || 'yotsuba';
+                // We were in dark mode, switch to the last used light theme (or default to candy)
+                const lastLight = localStorage.getItem('lastLightTheme') || 'candy';
                 this.setTheme(lastLight);
             } else {
-                // We were in light mode, switch to the last used dark theme (or default to dracula)
-                const lastDark = localStorage.getItem('lastDarkTheme') || 'dracula';
+                // We were in light mode, switch to the last used dark theme (or default to dark)
+                const lastDark = localStorage.getItem('lastDarkTheme') || 'dark';
                 this.setTheme(lastDark);
             }
         });
+
+        // Level Switcher Dropdown
+        const levelToggleBtn = document.getElementById('levelToggleBtn');
+        const levelDropdown = document.getElementById('levelDropdown');
+
+        if (levelToggleBtn && levelDropdown) {
+            levelToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                levelDropdown.classList.toggle('show');
+            });
+
+            // Close dropdown when clicking anywhere outside
+            document.addEventListener('click', (e) => {
+                if (!levelToggleBtn.contains(e.target) && !levelDropdown.contains(e.target)) {
+                    levelDropdown.classList.remove('show');
+                }
+            });
+
+            // Handle clicking a level inside the dropdown
+            document.querySelectorAll('.level-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const newLevel = option.getAttribute('data-level');
+
+                    // Update settings
+                    this.settings.jlptLevel = newLevel;
+                    document.getElementById('jlptLevel').value = newLevel; // Sync settings modal
+
+                    this.saveSettings();
+                    this.updateLevelIcon(); // Change the button text
+                    levelDropdown.classList.remove('show'); // Hide dropdown
+
+                    this.showToast(`Switched to ${newLevel}`);
+                    this.loadCurrentKanji(); // Load new characters
+                });
+            });
+        }
 
         // Settings modal
         document.getElementById('settingsBtn').addEventListener('click', () => {
@@ -96,10 +133,10 @@ class KanjiLearningApp {
         document.getElementById('jlptLevel').addEventListener('change', (e) => {
             this.settings.jlptLevel = e.target.value;
             this.saveSettings();
+            this.updateLevelIcon(); // Update the button text
             this.loadCurrentKanji();
         });
 
-        // Setup Premium Kana Buttons
         // Setup Premium Kana Buttons
         const setupKanaButton = (buttonId, levelName) => {
             const btn = document.getElementById(buttonId);
@@ -107,6 +144,7 @@ class KanjiLearningApp {
                 btn.addEventListener('click', () => {
                     this.settings.jlptLevel = levelName;
                     this.saveSettings();
+                    this.updateLevelIcon(); // Update the button text
 
                     // Safely close the modal without permanently hiding it
                     this.closeSettings();
@@ -199,6 +237,34 @@ class KanjiLearningApp {
         });
     }
 
+    updateLevelIcon() {
+        const btn = document.getElementById('levelToggleBtn');
+        if (!btn) return;
+
+        const levelMap = {
+            'Hiragana': 'あ',
+            'Katakana': 'ア',
+            'N5': '漢5',
+            'N4': '漢4',
+            'N3': '漢3',
+            'N2': '漢2',
+            'N1': '漢1',
+            'all': '全'
+        };
+
+        // Update the button icon text
+        btn.textContent = levelMap[this.settings.jlptLevel] || '漢';
+
+        // Update the dropdown active states
+        document.querySelectorAll('.level-option').forEach(opt => {
+            if (opt.getAttribute('data-level') === this.settings.jlptLevel) {
+                opt.classList.add('active');
+            } else {
+                opt.classList.remove('active');
+            }
+        });
+    }
+    
     async loadCurrentKanji() {
         const widget = document.getElementById('kanjiWidget');
         widget.innerHTML = `
@@ -1095,9 +1161,9 @@ class KanjiLearningApp {
         }
     }
 
-    // Loads the saved theme on startup (Defaulting to 'yotsuba' for new users)
+    // Loads the saved theme on startup (Defaulting to 'candy' for new users)
     applyTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'yotsuba';
+        const savedTheme = localStorage.getItem('theme') || 'candy';
         this.setTheme(savedTheme);
     }
 
