@@ -1309,3 +1309,65 @@ input:focus {
     --surface: #2F4858;
     --on-surface: #E0F2F1;
 }
+
+/* ========================================== */
+/* Premium Hint Box Styling */
+/* ========================================== */
+.premium-hint-box {
+    display: none;
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(138, 43, 226, 0.03));
+    border: 1px solid rgba(138, 43, 226, 0.2);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+.premium-hint-content {
+    font-size: 0.95rem;
+    color: var(--on-surface);
+    line-height: 1.5;
+    text-align: left;
+}
+
+.hint-header {
+    font-weight: bold;
+    color: #8A2BE2;
+    /* A nice purple for the premium feel */
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.radical-hint {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    background: rgba(var(--on-surface-rgb), 0.05);
+    padding: 0.4rem;
+    border-radius: 6px;
+}
+
+.close-hint {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--on-surface);
+    opacity: 0.4;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    font-size: 1.1rem;
+}
+
+.close-hint:hover {
+    opacity: 1;
+}
+
+.action-btn.hint-btn:hover {
+    background-color: #6A1B9A !important;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
