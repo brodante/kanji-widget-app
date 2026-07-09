@@ -14,6 +14,35 @@ class AudioManager {
             localStorage.setItem('kanjiAliveApiKey', key);
         }
     }
+    // NEW: Fetch Premium Mnemonics and Human Audio from KanjiAlive
+    static async fetchKanjiAliveData(character) {
+        if (!this.kanjiAliveApiKey) return null;
+
+        const cacheKey = `ka_${character}`;
+        if (this.kanjiDataCache.has(cacheKey)) {
+            return this.kanjiDataCache.get(cacheKey);
+        }
+
+        try {
+            const response = await fetch(`https://kanjialive-api.p.rapidapi.com/api/public/kanji/${encodeURIComponent(character)}`, {
+                method: 'GET',
+                headers: {
+                    'x-rapidapi-host': 'kanjialive-api.p.rapidapi.com',
+                    'x-rapidapi-key': this.kanjiAliveApiKey
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.kanjiDataCache.set(cacheKey, data);
+                return data;
+            }
+            return null;
+        } catch (e) {
+            console.warn('KanjiAlive Premium Fetch Error:', e);
+            return null;
+        }
+    }
 
     static init() {
         if ('speechSynthesis' in window) {
