@@ -12,7 +12,8 @@ class KanjiLearningApp {
             fontSize: 'medium',
             defaultAudio: 'kunyomi',
             localBackupFreq: 'daily',
-            onlineBackupFreq: 'never'
+            onlineBackupFreq: 'never',
+            kanjiAliveKey: ''
         };
         
         this.init();
@@ -211,7 +212,7 @@ class KanjiLearningApp {
             const progress = StorageManager.getProgress();
             const availableKanji = await this.getKanjiPool(this.settings.jlptLevel);
             this.currentKanjiPool = availableKanji;
-            
+
             if (availableKanji.length === 0) {
                 throw new Error('No kanji available for this level');
             }
@@ -234,6 +235,40 @@ class KanjiLearningApp {
                 this.showToast('Congratulations! You\'ve mastered all kanji in this level. Starting over.');
             }
 
+            // =======================================================================
+            // THE INTERCEPTOR: Load deep metadata for API skeleton entries on demand
+            // =======================================================================
+            const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
+            if (nextKanji && !isKana && (!nextKanji.onyomi || nextKanji.onyomi.length === 0) && (!nextKanji.kunyomi || nextKanji.kunyomi.length === 0)) {
+                try {
+                    const loadingText = widget.querySelector('.widget-loading p');
+                    if (loadingText) {
+                        loadingText.textContent = `Hydrating metadata for ${nextKanji.character}...`;
+                    }
+
+                    const details = await KanjiData.fetchKanjiDetails(nextKanji.character);
+                    if (details) {
+                        nextKanji.meanings = details.meanings;
+                        nextKanji.onyomi = details.onyomi;
+                        nextKanji.kunyomi = details.kunyomi;
+                        nextKanji.examples = details.examples;
+
+                        // Save directly into your tracking references
+                        this.currentKanjiPool[this.currentIndex] = nextKanji;
+
+                        const cacheKey = `level_${this.settings.jlptLevel}`;
+                        if (KanjiData.cache.has(cacheKey)) {
+                            const cachedPool = KanjiData.cache.get(cacheKey);
+                            const index = cachedPool.findIndex(k => k.character === nextKanji.character);
+                            if (index !== -1) cachedPool[index] = nextKanji;
+                        }
+                    }
+                } catch (err) {
+                    console.error("On-demand hydration failed:", err);
+                }
+            }
+            // =======================================================================
+
             this.currentKanji = nextKanji;
             this.renderKanji();
             this.renderKanjiJourney();
@@ -253,7 +288,7 @@ class KanjiLearningApp {
             `;
         }
     }
-
+    
     refreshActivePool(updatedPool) {
         if (!updatedPool || updatedPool.length === 0) return;
 
@@ -352,6 +387,9 @@ class KanjiLearningApp {
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()" title="Play Pronunciation">
                         <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="action-btn hint-btn" onclick="app.showPremiumHint()" title="Premium Hint & Audio" style="background-color: #8A2BE2; color: white;">
+                        <i class="fas fa-lightbulb"></i>
                     </button>
                     <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank', 'noopener,noreferrer')" title="Look on Jisho">
                         <i class="fas fa-book-open"></i>
@@ -518,7 +556,8 @@ class KanjiLearningApp {
         const masteredSet = new Set(progress.mastered || []);
 
         // NEW CONFIGURATION: Bump the default compact visibility threshold limit to 100
-        const defaultLimit = 100;
+        // Kanji Blur Limit
+        const defaultLimit = 108;
         const needsTruncation = totalCount > defaultLimit;
 
         if (this.isJourneyExpanded === undefined) {
@@ -620,6 +659,37 @@ class KanjiLearningApp {
         const foundKanji = pool.find(item => item.character === character);
 
         if (foundKanji) {
+            // THE FIX: Hydrate skeleton API data BEFORE rendering!
+            const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
+            if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
+
+                // Show temporary loading state on the widget
+                const widget = document.getElementById('kanjiWidget');
+                if (widget) {
+                    widget.innerHTML = `<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Fetching readings for ${character}...</p></div>`;
+                }
+
+                try {
+                    const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
+                    if (details) {
+                        foundKanji.meanings = details.meanings;
+                        foundKanji.onyomi = details.onyomi;
+                        foundKanji.kunyomi = details.kunyomi;
+                        foundKanji.examples = details.examples;
+
+                        // Save it back to the cache so we only fetch it once
+                        const cacheKey = `level_${this.settings.jlptLevel}`;
+                        if (KanjiData.cache.has(cacheKey)) {
+                            const cachedPool = KanjiData.cache.get(cacheKey);
+                            const index = cachedPool.findIndex(k => k.character === foundKanji.character);
+                            if (index !== -1) cachedPool[index] = foundKanji;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Hydration failed:", err);
+                }
+            }
+
             this.currentKanji = foundKanji;
             this.renderKanji();
             this.showToast(`Showing ${character}`);
@@ -852,7 +922,7 @@ class KanjiLearningApp {
             // Find the kanji in our data
             const availableKanji = await KanjiData.getKanjiByLevel(this.settings.jlptLevel);
             let foundKanji = availableKanji.find(k => k.character === character);
-            
+
             // If not found in current level, search in all levels
             if (!foundKanji) {
                 const allLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
@@ -862,17 +932,33 @@ class KanjiLearningApp {
                     if (foundKanji) break;
                 }
             }
-            
+
             if (foundKanji) {
+                // THE FIX: Hydrate before rendering!
+                const isKana = foundKanji.jlpt === 'Hiragana' || foundKanji.jlpt === 'Katakana';
+                if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
+                    try {
+                        const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
+                        if (details) {
+                            foundKanji.meanings = details.meanings;
+                            foundKanji.onyomi = details.onyomi;
+                            foundKanji.kunyomi = details.kunyomi;
+                            foundKanji.examples = details.examples;
+                        }
+                    } catch (err) {
+                        console.error("Hydration failed from recent:", err);
+                    }
+                }
+
                 this.currentKanji = foundKanji;
                 this.renderKanji();
                 this.renderKanjiJourney();
                 this.showToast(`Showing details for "${character}"`);
-                
+
                 // Scroll to widget
-                document.getElementById('kanjiWidget').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
+                document.getElementById('kanjiWidget').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
                 });
             } else {
                 this.showToast(`Could not find details for "${character}"`);
@@ -880,6 +966,70 @@ class KanjiLearningApp {
         } catch (error) {
             console.error('Error showing kanji from recent:', error);
             this.showToast(`Error loading "${character}"`);
+        }
+    }
+    
+    async showPremiumHint() {
+        // Prevent API waste on basic Kana
+        if (this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana') {
+            this.showToast('Premium data is only available for Kanji characters!');
+            return;
+        }
+
+        if (!this.settings.kanjiAliveKey) {
+            this.showToast('Enter a free KanjiAlive RapidAPI Key in Settings to unlock Premium Data & Human Audio!');
+            this.openSettings();
+            return;
+        }
+
+        const widget = document.getElementById('kanjiWidget');
+        let hintBox = document.getElementById('premiumHintBox');
+
+        // Create the box if it doesn't exist
+        if (!hintBox) {
+            hintBox = document.createElement('div');
+            hintBox.id = 'premiumHintBox';
+            hintBox.className = 'premium-hint-box';
+            const actions = widget.querySelector('.widget-actions');
+            actions.parentNode.insertBefore(hintBox, actions);
+        }
+
+        hintBox.innerHTML = `<div style="text-align: center; padding: 1rem;"><i class="fas fa-spinner fa-spin"></i> Loading Premium Data...</div>`;
+        hintBox.style.display = 'block';
+
+        const data = await AudioManager.fetchKanjiAliveData(this.currentKanji.character);
+
+        // FIXED: Removed the check for the non-existent 'hint' property
+        // We now build a rich UI using the deep English meaning and Radical structure they provide
+        if (data && data.kanji && data.kanji.meaning) {
+            hintBox.innerHTML = `
+                <div class="premium-hint-content">
+                    <div class="hint-header"><i class="fas fa-gem"></i> KanjiAlive Premium Data</div>
+                    <p style="margin-bottom: 0.5rem;"><strong>Deep Meaning:</strong> ${data.kanji.meaning.english}</p>
+                    
+                    ${data.radical && data.radical.character ? `
+                    <div class="radical-hint" style="display: flex; align-items: center; gap: 0.8rem; background: rgba(138, 43, 226, 0.08); padding: 0.6rem; border-radius: 8px;">
+                        <span style="font-size: 2rem; color: #8A2BE2; line-height: 1;">${data.radical.character}</span>
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-color);">Radical: ${data.radical.name.hiragana} (${data.radical.name.romaji})</div>
+                            <div style="font-size: 0.85rem; opacity: 0.8;">${data.radical.meaning.english}</div>
+                        </div>
+                    </div>` : ''}
+                </div>
+                <button class="close-hint" onclick="document.getElementById('premiumHintBox').style.display='none'"><i class="fas fa-times"></i></button>
+            `;
+
+            // Instantly play the crystal-clear native human pronunciation!
+            if (data.examples && data.examples.length > 0 && data.examples[0].audio && data.examples[0].audio.mp3) {
+                const premiumAudio = new Audio(data.examples[0].audio.mp3);
+                premiumAudio.play();
+                this.showToast('Playing Native Speaker Audio...');
+            }
+        } else {
+            hintBox.innerHTML = `
+                <div class="premium-hint-content"><p>No premium data found for this character.</p></div>
+                <button class="close-hint" onclick="document.getElementById('premiumHintBox').style.display='none'"><i class="fas fa-times"></i></button>
+            `;
         }
     }
 
@@ -956,9 +1106,30 @@ class KanjiLearningApp {
         if (saved) {
             this.settings = { ...this.settings, ...JSON.parse(saved) };
         }
+
+        // PREMIUM UPGRADE: Load the KanjiAlive key into the UI and Audio Manager
+        if (this.settings.kanjiAliveKey !== undefined) {
+            const keyInput = document.getElementById('kanjiAliveKey');
+            if (keyInput) {
+                keyInput.value = this.settings.kanjiAliveKey;
+            }
+            // Give the key directly to our audio manager
+            if (window.AudioManager) {
+                AudioManager.setApiKey(this.settings.kanjiAliveKey);
+            }
+        }
     }
 
     saveSettings() {
+        // PREMIUM UPGRADE: Grab the key from the UI before saving
+        const keyInput = document.getElementById('kanjiAliveKey');
+        if (keyInput) {
+            this.settings.kanjiAliveKey = keyInput.value.trim();
+            if (window.AudioManager) {
+                AudioManager.setApiKey(this.settings.kanjiAliveKey);
+            }
+        }
+
         localStorage.setItem('kanjiSettings', JSON.stringify(this.settings));
     }
 
