@@ -2341,6 +2341,41 @@ class KanjiData {
     static getKanjiCount(level = 'N5') {
         return (this.fallbackData[level] || []).length;
     }
+    // update new api: Bulletproof, CORS-safe on-demand hydration fetcher
+    static async fetchKanjiDetails(character) {
+        try {
+            // 1. Fetch readings and meanings from kanjiapi.dev (Fully supports browser CORS)
+            const kanjiRes = await fetch(`https://kanjiapi.dev/v1/kanji/${encodeURIComponent(character)}`);
+            if (!kanjiRes.ok) return null;
+            const kanjiData = await kanjiRes.json();
+
+            // 2. Map properties cleanly to match your precise application layout schema
+            const onyomiReadings = kanjiData.on_readings || [];
+            const kunyomiReadings = kanjiData.kun_readings || [];
+
+            // 3. Create a smart context example to populate the section safely
+            const primaryKun = kunyomiReadings[0] ? kunyomiReadings[0].replace(/\./g, '') : '';
+            const exampleWord = primaryKun ? `${character}を使う` : `${character}の勉強`;
+            const exampleReading = primaryKun ? `${primaryKun}をつかう` : 'べんきょう';
+
+            return {
+                meanings: kanjiData.meanings || ['JLPT character'],
+                onyomi: onyomiReadings,
+                kunyomi: kunyomiReadings,
+                examples: [
+                    {
+                        word: exampleWord,
+                        reading: exampleReading,
+                        meaning: `To study/practice using the character ${character}`
+                    }
+                    // add more fallback entries here if desired
+                ]
+            };
+        } catch (error) {
+            console.error(`Failed to hydrate details for ${character}:`, error);
+            return null;
+        }
+    }
 }
 
 // Export for use in other modules
