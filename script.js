@@ -21,6 +21,7 @@ class KanjiLearningApp {
 
     init() {
         this.loadSettings();
+        this.renderStreak();
         this.bindEvents();
         this.bindFontGridEvents();
         this.updateLevelIcon(); //kanji gear added
@@ -508,6 +509,7 @@ class KanjiLearningApp {
 
         // Update progress display
         this.updateProgress();
+        this.updateStreak(); // Check and increment streak when a kanji is completed
         this.renderKanjiJourney();
         this.loadRecentKanji();
 
@@ -964,6 +966,77 @@ class KanjiLearningApp {
 
         const progressPercentage = totalCount > 0 ? Math.min((masteredCount / totalCount) * 100, 100) : 0;
         document.getElementById('progressFill').style.width = `${progressPercentage}%`;
+    }
+    
+    // Analyzes the date to see if the streak is active, broken, or needs incrementing
+    updateStreak() {
+        let streak = parseInt(localStorage.getItem('dailyStreak') || '0');
+        let lastStudyDate = localStorage.getItem('lastStudyDate');
+        const today = new Date().toDateString();
+
+        if (lastStudyDate === today) {
+            // Already studied today, just ensure the UI is updated
+            this.renderStreak(streak);
+            return;
+        }
+
+        if (lastStudyDate) {
+            const last = new Date(lastStudyDate);
+            const current = new Date(today);
+            const diffTime = Math.abs(current - last);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                // Consecutive day! 
+                streak += 1;
+                this.showToast(`🔥 Streak increased to ${streak} days! Keep it up!`);
+            } else {
+                // Streak broken
+                streak = 1;
+                this.showToast(`Streak reset. Let's build a new one!`);
+            }
+        } else {
+            // Very first time studying
+            streak = 1;
+        }
+
+        // Save progress to memory
+        localStorage.setItem('dailyStreak', streak);
+        localStorage.setItem('lastStudyDate', today);
+        this.renderStreak(streak);
+    }
+
+    // Handles the visual UI state of the fire badge
+    renderStreak(streakValue = null) {
+        if (streakValue === null) {
+            streakValue = parseInt(localStorage.getItem('dailyStreak') || '0');
+            const lastStudyDate = localStorage.getItem('lastStudyDate');
+            const today = new Date().toDateString();
+
+            // If it's been more than 1 day, the streak is technically 0 until they study again
+            if (lastStudyDate) {
+                const last = new Date(lastStudyDate);
+                const current = new Date(today);
+                const diffTime = Math.abs(current - last);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays > 1) {
+                    streakValue = 0;
+                }
+            }
+        }
+
+        const streakCount = document.getElementById('streakCount');
+        const streakBadge = document.getElementById('streakBadge');
+
+        if (streakCount) streakCount.textContent = streakValue;
+
+        if (streakBadge) {
+            if (streakValue === 0) {
+                streakBadge.classList.add('inactive');
+            } else {
+                streakBadge.classList.remove('inactive');
+            }
+        }
     }
 
     loadRecentKanji() {
