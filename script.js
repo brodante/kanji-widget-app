@@ -328,7 +328,7 @@ class KanjiLearningApp {
                     <div class="stroke-order-toolbar">
                         <button class="stroke-order-play" onclick="app.playStrokeOrderAnimation()" type="button">Animate</button>
                     </div>
-                    <div id="strokeOrderContainer" class="stroke-order-container"></div>
+                    <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()" title="Click to replay animation"></div>
                 </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()" title="Play Pronunciation">
