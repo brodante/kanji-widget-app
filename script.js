@@ -79,6 +79,28 @@ class KanjiLearningApp {
             this.loadCurrentKanji();
         });
 
+        // Setup Premium Kana Buttons
+        // Setup Premium Kana Buttons
+        const setupKanaButton = (buttonId, levelName) => {
+            const btn = document.getElementById(buttonId);
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    this.settings.jlptLevel = levelName;
+                    this.saveSettings();
+
+                    // Safely close the modal without permanently hiding it
+                    this.closeSettings();
+                    this.showToast(`Switched to ${levelName} Practice!`);
+
+                    // Let your app handle the loading and UI updates naturally
+                    this.loadCurrentKanji();
+                });
+            }
+        };
+
+        setupKanaButton('btnHiragana', 'Hiragana');
+        setupKanaButton('btnKatakana', 'Katakana');
+
         document.getElementById('autoPlay').addEventListener('change', (e) => {
             this.settings.autoPlay = e.target.checked;
             this.saveSettings();
@@ -306,7 +328,7 @@ class KanjiLearningApp {
                     <div class="stroke-order-toolbar">
                         <button class="stroke-order-play" onclick="app.playStrokeOrderAnimation()" type="button">Animate</button>
                     </div>
-                    <div id="strokeOrderContainer" class="stroke-order-container"></div>
+                    <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()" title="Click to replay animation"></div>
                 </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()" title="Play Pronunciation">
@@ -451,6 +473,14 @@ class KanjiLearningApp {
         const totalCount = pool.length;
         const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
 
+        // Toggle the special 5-row Gojuon grid layout for basic alphabets
+        const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
+        if (isKana) {
+            container.classList.add('kana-layout');
+        } else {
+            container.classList.remove('kana-layout');
+        }
+        
         // Update basic counts
         summary.textContent = `${masteredCount} mastered`;
         progressStats.textContent = `${masteredCount} mastered | ${totalCount} total (${levelLabel})`;
