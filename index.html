@@ -81,140 +81,156 @@
         </main>
 
         <!-- Settings Modal -->
-        <div id="settingsModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Settings</h2>
-                    <button class="close-btn" id="closeSettings">
-                        <i class="fas fa-times"></i>
+<div id="settingsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Settings</h2>
+            <button class="close-btn" id="closeSettings">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="setting-group"
+                style="margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.5rem;">
+                <label style="color: var(--primary-color); font-weight: bold; margin-bottom: 0.8rem;">Basic Alphabets
+                    (Start Here):</label>
+                <div style="display: flex; gap: 1rem; width: 100%;">
+                    <button type="button" id="btnHiragana" class="premium-kana-btn">
+                        <span class="kana-icon">あ</span> Hiragana
+                    </button>
+                    <button type="button" id="btnKatakana" class="premium-kana-btn">
+                        <span class="kana-icon">ア</span> Katakana
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div class="setting-group">
-                        <label for="jlptLevel">JLPT Level:</label>
-                        <select id="jlptLevel">
-                            <option value="all">All Levels</option>
-                            <option value="N5" selected>N5 (Beginner)</option>
-                            <option value="N4">N4</option>
-                            <option value="N3">N3</option>
-                            <option value="N2">N2</option>
-                            <option value="N1">N1 (Advanced)</option>
-                        </select>
+            </div>
+            <div class="setting-group">
+                <label for="jlptLevel">JLPT Level:</label>
+                <select id="jlptLevel">
+                    <option value="Hiragana" hidden>Hiragana (Basic)</option>
+                    <option value="Katakana" hidden>Katakana (Basic)</option>
+            
+                    <option value="all">All Levels</option>
+                    <option value="N5" selected>N5 (Beginner)</option>
+                    <option value="N4">N4</option>
+                    <option value="N3">N3</option>
+                    <option value="N2">N2</option>
+                    <option value="N1">N1 (Advanced)</option>
+                </select>
+            </div>
+            <div class="setting-group setting-row">
+                <label for="autoPlay">Auto-play pronunciation:</label>
+                <input type="checkbox" id="autoPlay">
+            </div>
+            <div class="setting-group setting-row">
+                <label for="showFurigana">Show Furigana <span style="font-size: 0.75rem; opacity: 0.6;">(Coming
+                        Soon)</span>:</label>
+                <input type="checkbox" id="showFurigana" checked>
+            </div>
+            <div class="setting-group">
+                <label>Kanji Font:</label>
+                <div class="font-preview-grid" id="fontPreviewGrid">
+                    <div class="font-option" data-font="Klee One">
+                        <div class="font-sample" style="font-family: 'Klee One';">日本</div>
+                        <div class="font-name">Klee One</div>
                     </div>
-                    <div class="setting-group setting-row">
-                        <label for="autoPlay">Auto-play pronunciation:</label>
-                        <input type="checkbox" id="autoPlay">
+                    <div class="font-option" data-font="Noto Sans JP">
+                        <div class="font-sample" style="font-family: 'Noto Sans JP';">日本</div>
+                        <div class="font-name">Noto Sans JP</div>
                     </div>
-                    <div class="setting-group setting-row">
-                        <label for="showFurigana">Show Furigana <span style="font-size: 0.75rem; opacity: 0.6;">(Coming
-                                Soon)</span>:</label>
-                        <input type="checkbox" id="showFurigana" checked>
+                    <div class="font-option" data-font="Zen Antique">
+                        <div class="font-sample" style="font-family: 'Zen Antique';">日本</div>
+                        <div class="font-name">Zen Antique</div>
                     </div>
-                    <div class="setting-group">
-                        <label>Kanji Font:</label>
-                        <div class="font-preview-grid" id="fontPreviewGrid">
-                            <div class="font-option" data-font="Klee One">
-                                <div class="font-sample" style="font-family: 'Klee One';">日本</div>
-                                <div class="font-name">Klee One</div>
-                            </div>
-                            <div class="font-option" data-font="Noto Sans JP">
-                                <div class="font-sample" style="font-family: 'Noto Sans JP';">日本</div>
-                                <div class="font-name">Noto Sans JP</div>
-                            </div>
-                            <div class="font-option" data-font="Zen Antique">
-                                <div class="font-sample" style="font-family: 'Zen Antique';">日本</div>
-                                <div class="font-name">Zen Antique</div>
-                            </div>
-                            <div class="font-option" data-font="Zen Maru Gothic">
-                                <div class="font-sample" style="font-family: 'Zen Maru Gothic';">日本</div>
-                                <div class="font-name">Zen Maru</div>
-                            </div>
-                            <div class="font-option" data-font="Hannari">
-                                <div class="font-sample" style="font-family: 'Hannari';">日本</div>
-                                <div class="font-name">Hannari</div>
-                            </div>
-                            <div class="font-option" data-font="Kokoro">
-                                <div class="font-sample" style="font-family: 'Kokoro';">日本</div>
-                                <div class="font-name">Kokoro</div>
-                            </div>
-                            <div class="font-option" data-font="Hiragino Sans">
-                                <div class="font-sample" style="font-family: 'Hiragino Sans';">日本</div>
-                                <div class="font-name">Hiragino</div>
-                            </div>
-                            <div class="font-option" data-font="Yu Gothic">
-                                <div class="font-sample" style="font-family: 'Yu Gothic';">日本</div>
-                                <div class="font-name">Yu Gothic</div>
-                            </div>
-                            <div class="font-option" data-font="Meiryo">
-                                <div class="font-sample" style="font-family: 'Meiryo';">日本</div>
-                                <div class="font-name">Meiryo</div>
-                            </div>
-                            <div class="font-option" data-font="MS Gothic">
-                                <div class="font-sample" style="font-family: 'MS Gothic';">日本</div>
-                                <div class="font-name">MS Gothic</div>
-                            </div>
-                        </div>
-                        <select id="kanjiFont" style="display: none;">
-                            <option value="Klee One" selected>Klee One (Default)</option>
-                            <option value="Noto Sans JP">Noto Sans JP</option>
-                            <option value="Zen Antique">Zen Antique (Mincho Style)</option>
-                            <option value="Zen Maru Gothic">Zen Maru Gothic</option>
-                            <option value="Hannari">Hannari (Traditional)</option>
-                            <option value="Kokoro">Kokoro (Brush Style)</option>
-                            <option value="Hiragino Sans">Hiragino Sans</option>
-                            <option value="Yu Gothic">Yu Gothic</option>
-                            <option value="Meiryo">Meiryo</option>
-                            <option value="MS Gothic">MS Gothic</option>
-                        </select>
-                        <input type="hidden" id="kanjiFont-hidden" value="Klee One">
+                    <div class="font-option" data-font="Zen Maru Gothic">
+                        <div class="font-sample" style="font-family: 'Zen Maru Gothic';">日本</div>
+                        <div class="font-name">Zen Maru</div>
                     </div>
-                    <div class="setting-group">
-                        <label for="fontSize">Font Size:</label>
-                        <select id="fontSize">
-                            <option value="small">Small</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="large">Large</option>
-                            <option value="extra-large">Extra Large</option>
-                        </select>
+                    <div class="font-option" data-font="Hannari">
+                        <div class="font-sample" style="font-family: 'Hannari';">日本</div>
+                        <div class="font-name">Hannari</div>
                     </div>
-                    <div class="setting-group">
-                        <label for="defaultAudio">Default Audio Type:</label>
-                        <select id="defaultAudio">
-                            <option value="kunyomi" selected>Kun'yomi (Japanese reading)</option>
-                            <option value="onyomi">On'yomi (Chinese reading)</option>
-                            <option value="first">First available reading</option>
-                        </select>
+                    <div class="font-option" data-font="Kokoro">
+                        <div class="font-sample" style="font-family: 'Kokoro';">日本</div>
+                        <div class="font-name">Kokoro</div>
                     </div>
-                    <div class="setting-group">
-                        <label for="localBackupFreq">Local Backup Frequency:</label>
-                        <select id="localBackupFreq">
-                            <option value="never">Never</option>
-                            <option value="daily" selected>Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                        </select>
+                    <div class="font-option" data-font="Hiragino Sans">
+                        <div class="font-sample" style="font-family: 'Hiragino Sans';">日本</div>
+                        <div class="font-name">Hiragino</div>
                     </div>
-                    <div class="setting-group">
-                        <label for="onlineBackupFreq">Online Backup Frequency:</label>
-                        <select id="onlineBackupFreq">
-                            <option value="never" selected>Never</option>
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                        </select>
+                    <div class="font-option" data-font="Yu Gothic">
+                        <div class="font-sample" style="font-family: 'Yu Gothic';">日本</div>
+                        <div class="font-name">Yu Gothic</div>
                     </div>
-                    <div class="setting-group">
-                        <div class="backup-buttons">
-                            <button id="createBackup" class="backup-btn">Create Local Backup</button>
-                            <button id="restoreBackup" class="backup-btn">Import Backup</button>
-                        </div>
+                    <div class="font-option" data-font="Meiryo">
+                        <div class="font-sample" style="font-family: 'Meiryo';">日本</div>
+                        <div class="font-name">Meiryo</div>
                     </div>
-                    <div class="setting-group">
-                        <button id="resetProgress" class="reset-btn">Reset All Progress</button>
+                    <div class="font-option" data-font="MS Gothic">
+                        <div class="font-sample" style="font-family: 'MS Gothic';">日本</div>
+                        <div class="font-name">MS Gothic</div>
                     </div>
                 </div>
+                <select id="kanjiFont" style="display: none;">
+                    <option value="Klee One" selected>Klee One (Default)</option>
+                    <option value="Noto Sans JP">Noto Sans JP</option>
+                    <option value="Zen Antique">Zen Antique (Mincho Style)</option>
+                    <option value="Zen Maru Gothic">Zen Maru Gothic</option>
+                    <option value="Hannari">Hannari (Traditional)</option>
+                    <option value="Kokoro">Kokoro (Brush Style)</option>
+                    <option value="Hiragino Sans">Hiragino Sans</option>
+                    <option value="Yu Gothic">Yu Gothic</option>
+                    <option value="Meiryo">Meiryo</option>
+                    <option value="MS Gothic">MS Gothic</option>
+                </select>
+                <input type="hidden" id="kanjiFont-hidden" value="Klee One">
+            </div>
+            <div class="setting-group">
+                <label for="fontSize">Font Size:</label>
+                <select id="fontSize">
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                    <option value="extra-large">Extra Large</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label for="defaultAudio">Default Audio Type:</label>
+                <select id="defaultAudio">
+                    <option value="kunyomi" selected>Kun'yomi (Japanese reading)</option>
+                    <option value="onyomi">On'yomi (Chinese reading)</option>
+                    <option value="first">First available reading</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label for="localBackupFreq">Local Backup Frequency:</label>
+                <select id="localBackupFreq">
+                    <option value="never">Never</option>
+                    <option value="daily" selected>Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label for="onlineBackupFreq">Online Backup Frequency:</label>
+                <select id="onlineBackupFreq">
+                    <option value="never" selected>Never</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <div class="backup-buttons">
+                    <button id="createBackup" class="backup-btn">Create Local Backup</button>
+                    <button id="restoreBackup" class="backup-btn">Import Backup</button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <button id="resetProgress" class="reset-btn">Reset All Progress</button>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Notification Toast -->
         <div id="toast" class="toast">

@@ -1176,3 +1176,39 @@ input:focus {
     font-family: 'Noto Sans JP', sans-serif !important;
     font-weight: 500;
 }
+
+.premium-kana-btn {
+    flex: 1;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 0.8rem;
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.premium-kana-btn .kana-icon {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.premium-kana-btn:hover {
+    background: rgba(187, 134, 252, 0.15);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(187, 134, 252, 0.2);
+}
+
+.premium-kana-btn:active {
+    transform: translateY(0);
+}
