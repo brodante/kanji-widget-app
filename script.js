@@ -19,15 +19,18 @@ class KanjiLearningApp {
         this.init();
     }
 
-    init() {
+    async init() {
         this.loadSettings();
         this.renderStreak();
+        await AudioManager.loadLevelAudio(this.settings.jlptLevel);
         this.bindEvents();
         this.bindFontGridEvents();
-        this.updateLevelIcon(); //kanji gear added
-        this.loadCurrentKanji();
+        this.updateLevelIcon();
+
+        // BUG FIX: await this so the pool is loaded before we try to filter recent kanji!
+        await this.loadCurrentKanji();
+
         this.updateProgress();
-        this.loadRecentKanji();
         this.applyTheme();
         this.applyFontSettings();
         this.updateFontPreviewActive();
@@ -109,6 +112,7 @@ class KanjiLearningApp {
                     levelDropdown.classList.remove('show'); // Hide dropdown
 
                     this.showToast(`Switched to ${newLevel}`);
+                    AudioManager.loadLevelAudio(newLevel);
                     this.loadCurrentKanji(); // Load new characters
                 });
             });
@@ -135,17 +139,27 @@ class KanjiLearningApp {
             this.settings.jlptLevel = e.target.value;
             this.saveSettings();
             this.updateLevelIcon(); // Update the button text
+            AudioManager.loadLevelAudio(e.target.value);
             this.loadCurrentKanji();
         });
 
+        // Setup Premium Kana Buttons
         // Setup Premium Kana Buttons
         const setupKanaButton = (buttonId, levelName) => {
             const btn = document.getElementById(buttonId);
             if (btn) {
                 btn.addEventListener('click', () => {
                     this.settings.jlptLevel = levelName;
+
+                    // Sync the main dropdown just in case
+                    const jlptSelect = document.getElementById('jlptLevel');
+                    if (jlptSelect) jlptSelect.value = levelName;
+
                     this.saveSettings();
                     this.updateLevelIcon(); // Update the button text
+
+                    // ADD THIS: Hot-swap the audio database for the Kana buttons
+                    AudioManager.loadLevelAudio(levelName);
 
                     // Safely close the modal without permanently hiding it
                     this.closeSettings();
@@ -340,6 +354,8 @@ class KanjiLearningApp {
             this.renderKanji();
             this.renderKanjiJourney();
 
+            this.loadRecentKanji();
+
             if (this.settings.autoPlay) {
                 setTimeout(() => this.playPronunciation(), 1000);
             }
@@ -435,7 +451,7 @@ class KanjiLearningApp {
                         <h4>Examples</h4>
                         ${this.currentKanji.examples.slice(0, 3).map(example => `
                             <div class="example-item">
-                                <span class="example-word japanese-text" onclick="app.playSpecificReading('${example.reading || example.word}')" title="Click to pronounce">
+                                <span class="example-word japanese-text" onclick="app.playSpecificReading('${example.word}')" title="Click to pronounce">
                                     ${example.word}
                                     ${example.reading ? `<span class="reading-hiragana japanese-text">${example.reading}</span>` : ''}
                                 </span>
@@ -523,21 +539,18 @@ class KanjiLearningApp {
         if (!this.currentKanji) return;
 
         let readingToPlay = '';
-        let readingType = 'onyomi';
-        
+
         // Determine which reading to play based on default audio setting
         switch (this.settings.defaultAudio) {
             case 'kunyomi':
-                readingToPlay = this.currentKanji.kunyomi.length > 0 ? 
-                    this.currentKanji.kunyomi[0] : 
+                readingToPlay = this.currentKanji.kunyomi.length > 0 ?
+                    this.currentKanji.kunyomi[0] :
                     (this.currentKanji.onyomi.length > 0 ? this.currentKanji.onyomi[0] : '');
-                readingType = 'kunyomi';
                 break;
             case 'onyomi':
-                readingToPlay = this.currentKanji.onyomi.length > 0 ? 
-                    this.currentKanji.onyomi[0] : 
+                readingToPlay = this.currentKanji.onyomi.length > 0 ?
+                    this.currentKanji.onyomi[0] :
                     (this.currentKanji.kunyomi.length > 0 ? this.currentKanji.kunyomi[0] : '');
-                readingType = 'onyomi';
                 break;
             case 'first':
             default:
@@ -547,17 +560,9 @@ class KanjiLearningApp {
         }
 
         if (readingToPlay) {
-            // Try Kanji Alive API first for professional audio quality
-            if (AudioManager.kanjiAliveApiKey && this.currentKanji.character) {
-                AudioManager.speakKanjiWithAPI(this.currentKanji.character, readingType)
-                    .catch(err => {
-                        console.log('API audio failed, using fallback');
-                        AudioManager.speak(readingToPlay, 'ja-JP');
-                    });
-            } else {
-                AudioManager.speak(readingToPlay, 'ja-JP');
-            }
-            
+            // BUG FIX: Unconditionally use the local offline Audio Manager
+            AudioManager.speak(readingToPlay, 'ja-JP');
+
             // Visual feedback
             const btn = document.querySelector('.action-btn .fa-volume-up');
             if (btn) {
@@ -762,6 +767,12 @@ class KanjiLearningApp {
             this.renderKanji();
             this.showToast(`Showing ${character}`);
             document.getElementById('kanjiWidget').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            //Auto-play the audio if the setting is enabled
+            if (this.settings.autoPlay) {
+                // A slight 800ms delay makes it feel natural after the scroll animation
+                setTimeout(() => this.playPronunciation(), 800);
+            }
         }
     }
 
@@ -1040,15 +1051,36 @@ class KanjiLearningApp {
     }
 
     loadRecentKanji() {
-        const recent = StorageManager.getRecent();
+        const allRecent = StorageManager.getRecent();
         const container = document.getElementById('recentKanji');
 
-        if (recent.length === 0) {
-            container.innerHTML = '<p style="text-align: center; opacity: 0.6;">No recent kanji yet. Start learning!</p>';
+        if (!container) return;
+
+        // 1. Filter by current level pool to prevent cross-level bugs
+        const currentLevelChars = new Set(this.currentKanjiPool.map(k => k.character));
+        const filteredRecent = allRecent.filter(item => currentLevelChars.has(item.character));
+
+        // 2. Dynamically update the section header text
+        const sectionHeader = container.previousElementSibling;
+        const levelName = this.settings.jlptLevel;
+
+        if (sectionHeader) {
+            if (levelName === 'Hiragana' || levelName === 'Katakana') {
+                sectionHeader.textContent = `Recently Studied ${levelName}`;
+            } else if (levelName === 'all') {
+                sectionHeader.textContent = `Recently Studied (All Levels)`;
+            } else {
+                sectionHeader.textContent = `Recently Studied ${levelName} Kanji`;
+            }
+        }
+
+        // 3. Render the filtered items
+        if (filteredRecent.length === 0) {
+            container.innerHTML = `<p style="text-align: center; opacity: 0.6;">No recently studied items for ${levelName} yet.</p>`;
             return;
         }
 
-        container.innerHTML = recent.map(item => `
+        container.innerHTML = filteredRecent.map(item => `
             <div class="recent-item" onclick="app.showKanjiFromRecent('${item.character}')">
                 <div class="recent-kanji japanese-text">${item.character}</div>
                 <div class="recent-meaning">${item.meanings.slice(0, 2).join(', ')}</div>
@@ -1099,6 +1131,12 @@ class KanjiLearningApp {
                     behavior: 'smooth',
                     block: 'center'
                 });
+
+                //Auto-play the audio if the setting is enabled
+                if (this.settings.autoPlay) {
+                    setTimeout(() => this.playPronunciation(), 800);
+                }
+
             } else {
                 this.showToast(`Could not find details for "${character}"`);
             }
