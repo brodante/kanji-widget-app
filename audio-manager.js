@@ -164,7 +164,7 @@ class AudioManager {
     static async speakWithGoogle(text, lang = 'ja') {
         try {
             const encodedText = encodeURIComponent(text);
-            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=gtx`;
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=tw-ob`;
 
             return new Promise((resolve) => {
                 const audio = new Audio(url);
