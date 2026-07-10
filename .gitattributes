@@ -1,1 +1,1 @@
-assets/your-mp3-folder/* filter=lfs diff=lfs merge=lfs -text
+assets/audio/Kanji/N1/* filter=lfs diff=lfs merge=lfs -text
