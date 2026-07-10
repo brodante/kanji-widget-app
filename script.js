@@ -22,12 +22,12 @@ class KanjiLearningApp {
     async init() {
         this.loadSettings();
         this.renderStreak();
-        await AudioManager.loadLevelAudio(this.settings.jlptLevel);
         this.bindEvents();
         this.bindFontGridEvents();
         this.updateLevelIcon();
 
         // BUG FIX: await this so the pool is loaded before we try to filter recent kanji!
+        // (This now also safely loads offline MP3 paths!)
         await this.loadCurrentKanji();
 
         this.updateProgress();
@@ -112,8 +112,9 @@ class KanjiLearningApp {
                     levelDropdown.classList.remove('show'); // Hide dropdown
 
                     this.showToast(`Switched to ${newLevel}`);
-                    AudioManager.loadLevelAudio(newLevel);
-                    this.loadCurrentKanji(); // Load new characters
+
+                    // Audio is now handled automatically inside this method:
+                    this.loadCurrentKanji();
                 });
             });
         }
@@ -138,12 +139,10 @@ class KanjiLearningApp {
         document.getElementById('jlptLevel').addEventListener('change', (e) => {
             this.settings.jlptLevel = e.target.value;
             this.saveSettings();
-            this.updateLevelIcon(); // Update the button text
-            AudioManager.loadLevelAudio(e.target.value);
+            this.updateLevelIcon();
             this.loadCurrentKanji();
         });
 
-        // Setup Premium Kana Buttons
         // Setup Premium Kana Buttons
         const setupKanaButton = (buttonId, levelName) => {
             const btn = document.getElementById(buttonId);
@@ -156,16 +155,11 @@ class KanjiLearningApp {
                     if (jlptSelect) jlptSelect.value = levelName;
 
                     this.saveSettings();
-                    this.updateLevelIcon(); // Update the button text
+                    this.updateLevelIcon();
 
-                    // ADD THIS: Hot-swap the audio database for the Kana buttons
-                    AudioManager.loadLevelAudio(levelName);
-
-                    // Safely close the modal without permanently hiding it
                     this.closeSettings();
                     this.showToast(`Switched to ${levelName} Practice!`);
 
-                    // Let your app handle the loading and UI updates naturally
                     this.loadCurrentKanji();
                 });
             }
@@ -233,13 +227,6 @@ class KanjiLearningApp {
             this.restoreLocalBackup(e.target.files[0]);
         });
 
-        // Close modal when clicking outside
-        document.getElementById('settingsModal').addEventListener('click', (e) => {
-            if (e.target.id === 'settingsModal') {
-                this.closeSettings();
-            }
-        });
-
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Space' || e.key === 'Enter') {
@@ -282,23 +269,20 @@ class KanjiLearningApp {
     
     async loadCurrentKanji() {
         const widget = document.getElementById('kanjiWidget');
-        widget.innerHTML = `
-            <div class="widget-loading">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Loading Kanji...</p>
-            </div>
-        `;
+        widget.innerHTML = `<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading Kanji...</p></div>`;
 
         try {
             const progress = StorageManager.getProgress();
             const availableKanji = await this.getKanjiPool(this.settings.jlptLevel);
             this.currentKanjiPool = availableKanji;
 
+            // THE FIX: Pass the pool directly into the Audio Engine!
+            await AudioManager.loadLevelAudio(this.settings.jlptLevel, this.currentKanjiPool);
+
             if (availableKanji.length === 0) {
                 throw new Error('No kanji available for this level');
             }
 
-            // Find next unmastered kanji
             let nextKanji = null;
             for (let i = 0; i < availableKanji.length; i++) {
                 const kanji = availableKanji[i];
@@ -309,52 +293,15 @@ class KanjiLearningApp {
                 }
             }
 
-            // If all kanji are mastered, cycle back to first
             if (!nextKanji) {
                 nextKanji = availableKanji[0];
                 this.currentIndex = 0;
                 this.showToast('Congratulations! You\'ve mastered all kanji in this level. Starting over.');
             }
 
-            // =======================================================================
-            // THE INTERCEPTOR: Load deep metadata for API skeleton entries on demand
-            // =======================================================================
-            const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
-            if (nextKanji && !isKana && (!nextKanji.onyomi || nextKanji.onyomi.length === 0) && (!nextKanji.kunyomi || nextKanji.kunyomi.length === 0)) {
-                try {
-                    const loadingText = widget.querySelector('.widget-loading p');
-                    if (loadingText) {
-                        loadingText.textContent = `Hydrating metadata for ${nextKanji.character}...`;
-                    }
-
-                    const details = await KanjiData.fetchKanjiDetails(nextKanji.character);
-                    if (details) {
-                        nextKanji.meanings = details.meanings;
-                        nextKanji.onyomi = details.onyomi;
-                        nextKanji.kunyomi = details.kunyomi;
-                        nextKanji.examples = details.examples;
-
-                        // Save directly into your tracking references
-                        this.currentKanjiPool[this.currentIndex] = nextKanji;
-
-                        const cacheKey = `level_${this.settings.jlptLevel}`;
-                        if (KanjiData.cache.has(cacheKey)) {
-                            const cachedPool = KanjiData.cache.get(cacheKey);
-                            const index = cachedPool.findIndex(k => k.character === nextKanji.character);
-                            if (index !== -1) cachedPool[index] = nextKanji;
-                        }
-                    }
-                } catch (err) {
-                    console.error("On-demand hydration failed:", err);
-                }
-            }
-            // =======================================================================
-
             this.currentKanji = nextKanji;
             this.renderKanji();
             this.renderKanjiJourney();
-
-            this.loadRecentKanji();
 
             if (this.settings.autoPlay) {
                 setTimeout(() => this.playPronunciation(), 1000);
@@ -362,13 +309,7 @@ class KanjiLearningApp {
 
         } catch (error) {
             console.error('Error loading kanji:', error);
-            widget.innerHTML = `
-                <div class="widget-loading">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Error loading kanji. Please check your connection and try again.</p>
-                    <button onclick="app.loadCurrentKanji()" style="margin-top: 1rem; padding: 0.5rem 1rem; border: none; border-radius: 8px; background: var(--primary-color); color: var(--on-primary); cursor: pointer;">Retry</button>
-                </div>
-            `;
+            widget.innerHTML = `<div class="widget-loading"><p>Error loading data.</p><button onclick="app.loadCurrentKanji()">Retry</button></div>`;
         }
     }
     
@@ -389,39 +330,25 @@ class KanjiLearningApp {
         const widget = document.getElementById('kanjiWidget');
         let content = '';
 
-        // Base kanji display
         content += `<div class="kanji-character japanese-text">${this.currentKanji.character}</div>`;
 
         if (this.widgetSize === 'small') {
-            // Small widget: Just kanji
             content += `
                 <div class="widget-actions">
-                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank', 'noopener,noreferrer')" title="Look on Jisho">
-                        <i class="fas fa-book-open"></i>
-                    </button>
-                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()" title="Mark as Mastered">
-                        <i class="fas fa-check"></i>
-                    </button>
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
+                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
                 </div>
             `;
         } else if (this.widgetSize === 'medium') {
-            // Medium widget: Kanji + meaning + audio
             content += `
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>
                 <div class="widget-actions">
-                    <button class="action-btn" onclick="app.playPronunciation()" title="Play Pronunciation">
-                        <i class="fas fa-volume-up"></i>
-                    </button>
-                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank', 'noopener,noreferrer')" title="Look on Jisho">
-                        <i class="fas fa-book-open"></i>
-                    </button>
-                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()" title="Mark as Mastered">
-                        <i class="fas fa-check"></i>
-                    </button>
+                    <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
+                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
                 </div>
             `;
         } else {
-            // Large widget: Full details
             content += `
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>
                 <div class="kanji-readings">
@@ -429,9 +356,9 @@ class KanjiLearningApp {
                         <div class="reading-group">
                             <div class="reading-label japanese-text">On'yomi</div>
                             <div class="reading-value japanese-text">
-                                ${this.currentKanji.onyomi.map(reading => 
-                                    `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')" title="Click to pronounce">${reading}</span>`
-                                ).join(', ')}
+                                ${this.currentKanji.onyomi.map(reading =>
+                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+            ).join(', ')}
                             </div>
                         </div>
                     ` : ''}
@@ -439,9 +366,9 @@ class KanjiLearningApp {
                         <div class="reading-group">
                             <div class="reading-label japanese-text">Kun'yomi</div>
                             <div class="reading-value japanese-text">
-                                ${this.currentKanji.kunyomi.map(reading => 
-                                    `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')" title="Click to pronounce">${reading}</span>`
-                                ).join(', ')}
+                                ${this.currentKanji.kunyomi.map(reading =>
+                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+            ).join(', ')}
                             </div>
                         </div>
                     ` : ''}
@@ -465,21 +392,13 @@ class KanjiLearningApp {
                     <div class="stroke-order-toolbar">
                         <button class="stroke-order-play" onclick="app.playStrokeOrderAnimation()" type="button">Animate</button>
                     </div>
-                    <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()" title="Click to replay animation"></div>
+                    <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()"></div>
                 </div>
                 <div class="widget-actions">
-                    <button class="action-btn" onclick="app.playPronunciation()" title="Play Pronunciation">
-                        <i class="fas fa-volume-up"></i>
-                    </button>
-                    <button class="action-btn hint-btn" onclick="app.showPremiumHint()" title="Premium Hint & Audio" style="background-color: #8A2BE2; color: white;">
-                        <i class="fas fa-lightbulb"></i>
-                    </button>
-                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank', 'noopener,noreferrer')" title="Look on Jisho">
-                        <i class="fas fa-book-open"></i>
-                    </button>
-                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()" title="Mark as Mastered">
-                        <i class="fas fa-check"></i>
-                    </button>
+                    <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
+                    <button class="action-btn hint-btn" onclick="app.showPremiumHint()" style="background-color: #8A2BE2; color: white;"><i class="fas fa-lightbulb"></i></button>
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
+                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
                 </div>
             `;
         }
@@ -540,7 +459,6 @@ class KanjiLearningApp {
 
         let readingToPlay = '';
 
-        // Determine which reading to play based on default audio setting
         switch (this.settings.defaultAudio) {
             case 'kunyomi':
                 readingToPlay = this.currentKanji.kunyomi.length > 0 ?
@@ -560,15 +478,17 @@ class KanjiLearningApp {
         }
 
         if (readingToPlay) {
-            // BUG FIX: Unconditionally use the local offline Audio Manager
+            // THE FIX: Unconditionally use the local Audio Engine
             AudioManager.speak(readingToPlay, 'ja-JP');
 
-            // Visual feedback
             const btn = document.querySelector('.action-btn .fa-volume-up');
             if (btn) {
                 btn.classList.add('pulse-animation');
                 setTimeout(() => btn.classList.remove('pulse-animation'), 300);
             }
+        } else if (this.currentKanji.character) {
+            // Fallback for basic Kana that only have the character itself
+            AudioManager.speak(this.currentKanji.character, 'ja-JP');
         }
     }
 
