@@ -170,7 +170,17 @@ class AudioManager {
             const url = `https://translate.google.com/translate_tts?client=tw-ob&ie=UTF-8&tl=${lang}&q=${encodedText}`;
 
             return new Promise((resolve) => {
-                const audio = new Audio(url);
+                //console.log("Google TTS URL:", url);
+
+                const audio = new Audio();
+
+                // tts testing
+                // audio.onloadedmetadata = () => console.log("METADATA");
+                // audio.oncanplay = () => console.log("CAN PLAY");
+                // audio.onplaying = () => console.log("PLAYING");
+                // audio.onerror = (e) => console.log("ERROR EVENT", e);
+
+                audio.src = url;
 
                 const timeoutId = setTimeout(() => {
                     console.warn('Google TTS timeout');
