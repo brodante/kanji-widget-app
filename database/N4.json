@@ -1,6 +1,1253 @@
 {
     "N4": [
         {
+            "character": "週",
+            "meanings": [
+                "week"
+            ],
+            "onyomi": [
+                "シュウ"
+            ],
+            "kunyomi": [],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "毎週",
+                    "reading": "まいしゅう",
+                    "meaning": "every week",
+                    "audio": "Kanji/N4/000121_1.mp3"
+                },
+                {
+                    "word": "来週",
+                    "reading": "らいしゅう",
+                    "meaning": "next week",
+                    "audio": "Kanji/N4/000121_2.mp3"
+                },
+                {
+                    "word": "今週",
+                    "reading": "こんしゅう",
+                    "meaning": "this week",
+                    "audio": "Kanji/N4/000121_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "シュウ": "Kanji/N4/000121_o1.mp3"
+                },
+                "kunyomi": {}
+            },
+            "base_id": "000121"
+        },
+        {
+            "character": "朝",
+            "meanings": [
+                "(North) Korea",
+                "dynasty",
+                "epoch",
+                "morning",
+                "period",
+                "regime"
+            ],
+            "onyomi": [
+                "チョウ"
+            ],
+            "kunyomi": [
+                "あさ"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "早朝",
+                    "reading": "そうちょう",
+                    "meaning": "early morning",
+                    "audio": "Kanji/N4/000123_1.mp3"
+                },
+                {
+                    "word": "朝刊",
+                    "reading": "ちょうかん",
+                    "meaning": "morning newspaper",
+                    "audio": "Kanji/N4/000123_2.mp3"
+                },
+                {
+                    "word": "明朝",
+                    "reading": "みょうちょう",
+                    "meaning": "tomorrow morning",
+                    "audio": "Kanji/N4/000123_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "チョウ": "Kanji/N4/000123_o1.mp3"
+                },
+                "kunyomi": {
+                    "あさ": "Kanji/N4/000123_k1.mp3"
+                }
+            },
+            "base_id": "000123"
+        },
+        {
+            "character": "昼",
+            "meanings": [
+                "daytime",
+                "noon"
+            ],
+            "onyomi": [
+                "チュウ"
+            ],
+            "kunyomi": [
+                "ひる"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "昼夜",
+                    "reading": "ちゅうや",
+                    "meaning": "day and night",
+                    "audio": "Kanji/N4/000124_1.mp3"
+                },
+                {
+                    "word": "昼下がり",
+                    "reading": "ひるさがり",
+                    "meaning": "early afternoon",
+                    "audio": "Kanji/N4/000124_2.mp3"
+                },
+                {
+                    "word": "昼寐",
+                    "reading": "ひるね",
+                    "meaning": "(afternoon) nap, sleeping during the day",
+                    "audio": "Kanji/N4/000124_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "チュウ": "Kanji/N4/000124_o1.mp3"
+                },
+                "kunyomi": {
+                    "ひる": "Kanji/N4/000124_k1.mp3"
+                }
+            },
+            "base_id": "000124"
+        },
+        {
+            "character": "夜",
+            "meanings": [
+                "evening",
+                "night"
+            ],
+            "onyomi": [
+                "ヤ"
+            ],
+            "kunyomi": [
+                "よ",
+                "よる"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "昼夜",
+                    "reading": "ちゅうや",
+                    "meaning": "day and night",
+                    "audio": "Kanji/N4/000125_1.mp3"
+                },
+                {
+                    "word": "月夜",
+                    "reading": "つきよ",
+                    "meaning": "moonlit night",
+                    "audio": "Kanji/N4/000125_2.mp3"
+                },
+                {
+                    "word": "夜空",
+                    "reading": "よぞら",
+                    "meaning": "night sky",
+                    "audio": "Kanji/N4/000125_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "ヤ": "Kanji/N4/000125_o1.mp3"
+                },
+                "kunyomi": {
+                    "よ": "Kanji/N4/000125_k1.mp3",
+                    "よる": "Kanji/N4/000125_k2.mp3"
+                }
+            },
+            "base_id": "000125"
+        },
+        {
+            "character": "夕",
+            "meanings": [
+                "evening"
+            ],
+            "onyomi": [
+                "セキ"
+            ],
+            "kunyomi": [
+                "ゆう"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "夕刊",
+                    "reading": "ゆうかん",
+                    "meaning": "evening paper",
+                    "audio": "Kanji/N4/000126_1.mp3"
+                },
+                {
+                    "word": "夕立",
+                    "reading": "ゆうだち",
+                    "meaning": "(sudden, heavy) shower (on a summer afternoon or evening), evening shower",
+                    "audio": "Kanji/N4/000126_2.mp3"
+                },
+                {
+                    "word": "夕がた",
+                    "reading": "ゆうがた",
+                    "meaning": "evening, dusk",
+                    "audio": "Kanji/N4/000126_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "セキ": "Kanji/N4/000126_o1.mp3"
+                },
+                "kunyomi": {
+                    "ゆう": "Kanji/N4/000126_k1.mp3"
+                }
+            },
+            "base_id": "000126"
+        },
+        {
+            "character": "目",
+            "meanings": [
+                "care",
+                "class",
+                "experience",
+                "eye",
+                "favor",
+                "insight",
+                "look"
+            ],
+            "onyomi": [
+                "ボク",
+                "モク"
+            ],
+            "kunyomi": [
+                "-め",
+                "ま-",
+                "め"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "縫い目",
+                    "reading": "ぬいめ",
+                    "meaning": "seam, stitch",
+                    "audio": "Kanji/N4/000134_1.mp3"
+                },
+                {
+                    "word": "目覚し時計",
+                    "reading": "めざましどけい",
+                    "meaning": "alarm clock",
+                    "audio": "Kanji/N4/000134_2.mp3"
+                },
+                {
+                    "word": "選択科目",
+                    "reading": "せんたくかもく",
+                    "meaning": "elective subject or course",
+                    "audio": "Kanji/N4/000134_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "ボク": "Kanji/N4/000134_o1.mp3",
+                    "モク": "Kanji/N4/000134_o2.mp3"
+                },
+                "kunyomi": {
+                    "-め": "Kanji/N4/000134_k1.mp3",
+                    "ま-": "Kanji/N4/000134_k2.mp3",
+                    "め": "Kanji/N4/000134_k3.mp3"
+                }
+            },
+            "base_id": "000134"
+        },
+        {
+            "character": "口",
+            "meanings": [
+                "mouth"
+            ],
+            "onyomi": [
+                "ク",
+                "コウ"
+            ],
+            "kunyomi": [
+                "くち"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "非常口",
+                    "reading": "ひじょうぐち",
+                    "meaning": "emergency exit",
+                    "audio": "Kanji/N4/000135_1.mp3"
+                },
+                {
+                    "word": "出入り口",
+                    "reading": "でいりぐち",
+                    "meaning": "exit and entrance",
+                    "audio": "Kanji/N4/000135_2.mp3"
+                },
+                {
+                    "word": "口紅",
+                    "reading": "くちべに",
+                    "meaning": "lipstick",
+                    "audio": "Kanji/N4/000135_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "ク": "Kanji/N4/000135_o1.mp3",
+                    "コウ": "Kanji/N4/000135_o2.mp3"
+                },
+                "kunyomi": {
+                    "くち": "Kanji/N4/000135_k1.mp3"
+                }
+            },
+            "base_id": "000135"
+        },
+        {
+            "character": "手",
+            "meanings": [
+                "hand"
+            ],
+            "onyomi": [
+                "シュ",
+                "ズ"
+            ],
+            "kunyomi": [
+                "-て",
+                "た-",
+                "て",
+                "て-"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "手ぬぐい",
+                    "reading": "てぬぐい",
+                    "meaning": "(hand) towel",
+                    "audio": "Kanji/N4/000137_1.mp3"
+                },
+                {
+                    "word": "手がかり",
+                    "reading": "てがかり",
+                    "meaning": "handhold, hold",
+                    "audio": "Kanji/N4/000137_2.mp3"
+                },
+                {
+                    "word": "手がける",
+                    "reading": "てがける",
+                    "meaning": "to rear, to look after",
+                    "audio": "Kanji/N4/000137_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "シュ": "Kanji/N4/000137_o1.mp3",
+                    "ズ": "Kanji/N4/000137_o2.mp3"
+                },
+                "kunyomi": {
+                    "-て": "Kanji/N4/000137_k1.mp3",
+                    "た-": "Kanji/N4/000137_k2.mp3",
+                    "て": "Kanji/N4/000137_k3.mp3",
+                    "て-": "Kanji/N4/000137_k4.mp3"
+                }
+            },
+            "base_id": "000137"
+        },
+        {
+            "character": "足",
+            "meanings": [
+                "be sufficient",
+                "counter for pairs of footwear",
+                "foot",
+                "leg"
+            ],
+            "onyomi": [
+                "ソク"
+            ],
+            "kunyomi": [
+                "あし",
+                "た.す",
+                "た.りる",
+                "た.る"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "足頸",
+                    "reading": "あしくび",
+                    "meaning": "ankle",
+                    "audio": "Kanji/N4/000138_1.mp3"
+                },
+                {
+                    "word": "寝不足",
+                    "reading": "ねぶそく",
+                    "meaning": "lack of sleep, insufficient sleep",
+                    "audio": "Kanji/N4/000138_2.mp3"
+                },
+                {
+                    "word": "補足",
+                    "reading": "ほそく",
+                    "meaning": "supplement, complement",
+                    "audio": "Kanji/N4/000138_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "ソク": "Kanji/N4/000138_o1.mp3"
+                },
+                "kunyomi": {
+                    "あし": "Kanji/N4/000138_k1.mp3",
+                    "た.す": "Kanji/N4/000138_k2.mp3",
+                    "た.りる": "Kanji/N4/000138_k3.mp3",
+                    "た.る": "Kanji/N4/000138_k4.mp3"
+                }
+            },
+            "base_id": "000138"
+        },
+        {
+            "character": "空",
+            "meanings": [
+                "empty",
+                "sky",
+                "vacant",
+                "vacuum",
+                "void"
+            ],
+            "onyomi": [
+                "クウ"
+            ],
+            "kunyomi": [
+                "あ.き",
+                "あ.く",
+                "あ.ける",
+                "から",
+                "す.かす",
+                "す.く",
+                "そら",
+                "むな.しい"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "空軍",
+                    "reading": "くうぐん",
+                    "meaning": "air force",
+                    "audio": "Kanji/N4/000142_1.mp3"
+                },
+                {
+                    "word": "航空機",
+                    "reading": "こうくうき",
+                    "meaning": "aircraft",
+                    "audio": "Kanji/N4/000142_2.mp3"
+                },
+                {
+                    "word": "航空母艦",
+                    "reading": "こうくうぼかん",
+                    "meaning": "aircraft carrier",
+                    "audio": "Kanji/N4/000142_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "クウ": "Kanji/N4/000142_o1.mp3"
+                },
+                "kunyomi": {
+                    "あ.き": "Kanji/N4/000142_k1.mp3",
+                    "あ.く": "Kanji/N4/000142_k2.mp3",
+                    "あ.ける": "Kanji/N4/000142_k3.mp3",
+                    "から": "Kanji/N4/000142_k4.mp3",
+                    "す.かす": "Kanji/N4/000142_k5.mp3",
+                    "す.く": "Kanji/N4/000142_k6.mp3",
+                    "そら": "Kanji/N4/000142_k7.mp3",
+                    "むな.しい": "Kanji/N4/000142_k8.mp3"
+                }
+            },
+            "base_id": "000142"
+        },
+        {
+            "character": "黒",
+            "meanings": [
+                "black"
+            ],
+            "onyomi": [
+                "コク"
+            ],
+            "kunyomi": [
+                "くろ",
+                "くろ.い",
+                "くろ.ずむ"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "黒板",
+                    "reading": "こくばん",
+                    "meaning": "blackboard",
+                    "audio": "Kanji/N4/000145_1.mp3"
+                },
+                {
+                    "word": "漆黒",
+                    "reading": "しっこく",
+                    "meaning": "jet black",
+                    "audio": "Kanji/N4/000145_2.mp3"
+                },
+                {
+                    "word": "浅黒い",
+                    "reading": "あさぐろい",
+                    "meaning": "dark (skin, complexion, etc.), swarthy",
+                    "audio": "Kanji/N4/000145_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "コク": "Kanji/N4/000145_o1.mp3"
+                },
+                "kunyomi": {
+                    "くろ": "Kanji/N4/000145_k1.mp3",
+                    "くろ.い": "Kanji/N4/000145_k2.mp3",
+                    "くろ.ずむ": "Kanji/N4/000145_k3.mp3"
+                }
+            },
+            "base_id": "000145"
+        },
+        {
+            "character": "赤",
+            "meanings": [
+                "red"
+            ],
+            "onyomi": [
+                "シャク",
+                "セキ"
+            ],
+            "kunyomi": [
+                "あか",
+                "あか-",
+                "あか.い",
+                "あか.らむ",
+                "あか.らめる"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "赤痢",
+                    "reading": "せきり",
+                    "meaning": "dysentery",
+                    "audio": "Kanji/N4/000146_1.mp3"
+                },
+                {
+                    "word": "赤道",
+                    "reading": "せきどう",
+                    "meaning": "equator",
+                    "audio": "Kanji/N4/000146_2.mp3"
+                },
+                {
+                    "word": "赤飯",
+                    "reading": "せきはん",
+                    "meaning": "red rice (beans and mochi) for auspicious occasions",
+                    "audio": "Kanji/N4/000146_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "シャク": "Kanji/N4/000146_o1.mp3",
+                    "セキ": "Kanji/N4/000146_o2.mp3"
+                },
+                "kunyomi": {
+                    "あか": "Kanji/N4/000146_k1.mp3",
+                    "あか-": "Kanji/N4/000146_k2.mp3",
+                    "あか.い": "Kanji/N4/000146_k3.mp3",
+                    "あか.らむ": "Kanji/N4/000146_k4.mp3",
+                    "あか.らめる": "Kanji/N4/000146_k5.mp3"
+                }
+            },
+            "base_id": "000146"
+        },
+        {
+            "character": "青",
+            "meanings": [
+                "blue",
+                "green"
+            ],
+            "onyomi": [
+                "ショウ",
+                "セイ"
+            ],
+            "kunyomi": [
+                "あお",
+                "あお-",
+                "あお.い"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "青空",
+                    "reading": "あおぞら",
+                    "meaning": "blue sky",
+                    "audio": "Kanji/N4/000147_1.mp3"
+                },
+                {
+                    "word": "青銅",
+                    "reading": "せいどう",
+                    "meaning": "bronze",
+                    "audio": "Kanji/N4/000147_2.mp3"
+                },
+                {
+                    "word": "青年",
+                    "reading": "せいねん",
+                    "meaning": "youth, young man",
+                    "audio": "Kanji/N4/000147_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "ショウ": "Kanji/N4/000147_o1.mp3",
+                    "セイ": "Kanji/N4/000147_o2.mp3"
+                },
+                "kunyomi": {
+                    "あお": "Kanji/N4/000147_k1.mp3",
+                    "あお-": "Kanji/N4/000147_k2.mp3",
+                    "あお.い": "Kanji/N4/000147_k3.mp3"
+                }
+            },
+            "base_id": "000147"
+        },
+        {
+            "character": "言",
+            "meanings": [
+                "say",
+                "word"
+            ],
+            "onyomi": [
+                "ゲン",
+                "ゴン"
+            ],
+            "kunyomi": [
+                "い.う",
+                "こと"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "ひとり言",
+                    "reading": "ひとりごと",
+                    "meaning": "soliloquy, monologue",
+                    "audio": "Kanji/N4/000166_1.mp3"
+                },
+                {
+                    "word": "公言",
+                    "reading": "こうげん",
+                    "meaning": "declaration, profession",
+                    "audio": "Kanji/N4/000166_2.mp3"
+                },
+                {
+                    "word": "方言",
+                    "reading": "ほうげん",
+                    "meaning": "dialect, provincialism",
+                    "audio": "Kanji/N4/000166_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "ゲン": "Kanji/N4/000166_o1.mp3",
+                    "ゴン": "Kanji/N4/000166_o2.mp3"
+                },
+                "kunyomi": {
+                    "い.う": "Kanji/N4/000166_k1.mp3",
+                    "こと": "Kanji/N4/000166_k2.mp3"
+                }
+            },
+            "base_id": "000166"
+        },
+        {
+            "character": "買",
+            "meanings": [
+                "buy"
+            ],
+            "onyomi": [
+                "バイ"
+            ],
+            "kunyomi": [
+                "か.う"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "買い取り",
+                    "reading": "かいとり",
+                    "meaning": "purchase on a no-return policy",
+                    "audio": "Kanji/N4/000170_1.mp3"
+                },
+                {
+                    "word": "仲買",
+                    "reading": "なかがい",
+                    "meaning": "brokerage",
+                    "audio": "Kanji/N4/000170_2.mp3"
+                },
+                {
+                    "word": "買い手",
+                    "reading": "かいて",
+                    "meaning": "buyer",
+                    "audio": "Kanji/N4/000170_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "バイ": "Kanji/N4/000170_o1.mp3"
+                },
+                "kunyomi": {
+                    "か.う": "Kanji/N4/000170_k1.mp3"
+                }
+            },
+            "base_id": "000170"
+        },
+        {
+            "character": "飲",
+            "meanings": [
+                "drink",
+                "smoke",
+                "take"
+            ],
+            "onyomi": [
+                "イン",
+                "オン"
+            ],
+            "kunyomi": [
+                "-の.み",
+                "の.む"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "飲みもの",
+                    "reading": "のみもの",
+                    "meaning": "drink, beverage",
+                    "audio": "Kanji/N4/000171_1.mp3"
+                },
+                {
+                    "word": "飲み水",
+                    "reading": "のみみず",
+                    "meaning": "drinking water, potable water",
+                    "audio": "Kanji/N4/000171_2.mp3"
+                },
+                {
+                    "word": "飲用",
+                    "reading": "いんよう",
+                    "meaning": "drinking",
+                    "audio": "Kanji/N4/000171_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "イン": "Kanji/N4/000171_o1.mp3",
+                    "オン": "Kanji/N4/000171_o2.mp3"
+                },
+                "kunyomi": {
+                    "-の.み": "Kanji/N4/000171_k1.mp3",
+                    "の.む": "Kanji/N4/000171_k2.mp3"
+                }
+            },
+            "base_id": "000171"
+        },
+        {
+            "character": "立",
+            "meanings": [
+                "erect",
+                "rise",
+                "set up",
+                "stand up"
+            ],
+            "onyomi": [
+                "リットル",
+                "リツ",
+                "リュウ"
+            ],
+            "kunyomi": [
+                "-た.つ",
+                "-た.て",
+                "-た.てる",
+                "-だ.て",
+                "-だ.てる",
+                "た.ち-",
+                "た.つ",
+                "た.て-",
+                "た.てる",
+                "たて-"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "積み立て",
+                    "reading": "つみたて",
+                    "meaning": "saving, savings",
+                    "audio": "Kanji/N4/000173_1.mp3"
+                },
+                {
+                    "word": "立脚",
+                    "reading": "りっきゃく",
+                    "meaning": "being based on",
+                    "audio": "Kanji/N4/000173_2.mp3"
+                },
+                {
+                    "word": "立春",
+                    "reading": "りっしゅん",
+                    "meaning": "first day of spring (according to the traditional lunisolar calendar, approx. February 4)",
+                    "audio": "Kanji/N4/000173_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "リットル": "Kanji/N4/000173_o1.mp3",
+                    "リツ": "Kanji/N4/000173_o2.mp3",
+                    "リュウ": "Kanji/N4/000173_o3.mp3"
+                },
+                "kunyomi": {
+                    "-た.つ": "Kanji/N4/000173_k1.mp3",
+                    "-た.て": "Kanji/N4/000173_k2.mp3",
+                    "-た.てる": "Kanji/N4/000173_k3.mp3",
+                    "-だ.て": "Kanji/N4/000173_k4.mp3",
+                    "-だ.てる": "Kanji/N4/000173_k5.mp3",
+                    "た.ち-": "Kanji/N4/000173_k6.mp3",
+                    "た.つ": "Kanji/N4/000173_k7.mp3",
+                    "た.て-": "Kanji/N4/000173_k8.mp3",
+                    "た.てる": "Kanji/N4/000173_k9.mp3",
+                    "たて-": "Kanji/N4/000173_k10.mp3"
+                }
+            },
+            "base_id": "000173"
+        },
+        {
+            "character": "駅",
+            "meanings": [
+                "station"
+            ],
+            "onyomi": [
+                "エキ"
+            ],
+            "kunyomi": [],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "駅前",
+                    "reading": "えきまえ",
+                    "meaning": "in front of a station",
+                    "audio": "Kanji/N4/000177_1.mp3"
+                },
+                {
+                    "word": "駅長",
+                    "reading": "えきちょう",
+                    "meaning": "station master",
+                    "audio": "Kanji/N4/000177_2.mp3"
+                },
+                {
+                    "word": "終着駅",
+                    "reading": "しゅうちゃくえき",
+                    "meaning": "terminal station",
+                    "audio": "Kanji/N4/000177_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "エキ": "Kanji/N4/000177_o1.mp3"
+                },
+                "kunyomi": {}
+            },
+            "base_id": "000177"
+        },
+        {
+            "character": "店",
+            "meanings": [
+                "shop",
+                "store"
+            ],
+            "onyomi": [
+                "テン"
+            ],
+            "kunyomi": [
+                "たな",
+                "みせ"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "百貨店",
+                    "reading": "ひゃっかてん",
+                    "meaning": "department store",
+                    "audio": "Kanji/N4/000178_1.mp3"
+                },
+                {
+                    "word": "書店",
+                    "reading": "しょてん",
+                    "meaning": "bookshop, bookstore",
+                    "audio": "Kanji/N4/000178_2.mp3"
+                },
+                {
+                    "word": "支店",
+                    "reading": "してん",
+                    "meaning": "branch office, branch store",
+                    "audio": "Kanji/N4/000178_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "テン": "Kanji/N4/000178_o1.mp3"
+                },
+                "kunyomi": {
+                    "たな": "Kanji/N4/000178_k1.mp3",
+                    "みせ": "Kanji/N4/000178_k2.mp3"
+                }
+            },
+            "base_id": "000178"
+        },
+        {
+            "character": "道",
+            "meanings": [
+                "course",
+                "district",
+                "journey",
+                "moral",
+                "road-way",
+                "street",
+                "teachings"
+            ],
+            "onyomi": [
+                "トウ",
+                "ドウ"
+            ],
+            "kunyomi": [
+                "いう",
+                "みち"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "書道",
+                    "reading": "しょどう",
+                    "meaning": "calligraphy",
+                    "audio": "Kanji/N4/000179_1.mp3"
+                },
+                {
+                    "word": "赤道",
+                    "reading": "せきどう",
+                    "meaning": "equator",
+                    "audio": "Kanji/N4/000179_2.mp3"
+                },
+                {
+                    "word": "花道",
+                    "reading": "かどう",
+                    "meaning": "flower arrangement",
+                    "audio": "Kanji/N4/000179_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "トウ": "Kanji/N4/000179_o1.mp3",
+                    "ドウ": "Kanji/N4/000179_o2.mp3"
+                },
+                "kunyomi": {
+                    "いう": "Kanji/N4/000179_k1.mp3",
+                    "みち": "Kanji/N4/000179_k2.mp3"
+                }
+            },
+            "base_id": "000179"
+        },
+        {
+            "character": "安",
+            "meanings": [
+                "cheap",
+                "contented",
+                "low",
+                "peaceful",
+                "quiet",
+                "relax",
+                "rested"
+            ],
+            "onyomi": [
+                "アン"
+            ],
+            "kunyomi": [
+                "やす",
+                "やす.い",
+                "やす.まる",
+                "やす.らか"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "安物",
+                    "reading": "やすもの",
+                    "meaning": "cheap article, poor quality article",
+                    "audio": "Kanji/N4/000187_1.mp3"
+                },
+                {
+                    "word": "円安",
+                    "reading": "えんやす",
+                    "meaning": "depreciation of the yen, weak yen",
+                    "audio": "Kanji/N4/000187_2.mp3"
+                },
+                {
+                    "word": "ひと安心",
+                    "reading": "ひとあんしん",
+                    "meaning": "feeling of relief (for the time being), peace of mind (for now)",
+                    "audio": "Kanji/N4/000187_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "アン": "Kanji/N4/000187_o1.mp3"
+                },
+                "kunyomi": {
+                    "やす": "Kanji/N4/000187_k1.mp3",
+                    "やす.い": "Kanji/N4/000187_k2.mp3",
+                    "やす.まる": "Kanji/N4/000187_k3.mp3",
+                    "やす.らか": "Kanji/N4/000187_k4.mp3"
+                }
+            },
+            "base_id": "000187"
+        },
+        {
+            "character": "新",
+            "meanings": [
+                "new"
+            ],
+            "onyomi": [
+                "シン"
+            ],
+            "kunyomi": [
+                "あたら.しい",
+                "あら-",
+                "あら.た",
+                "にい-"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "新年",
+                    "reading": "しんねん",
+                    "meaning": "New Year",
+                    "audio": "Kanji/N4/000188_1.mp3"
+                },
+                {
+                    "word": "新鮮",
+                    "reading": "しんせん",
+                    "meaning": "fresh",
+                    "audio": "Kanji/N4/000188_2.mp3"
+                },
+                {
+                    "word": "新聞",
+                    "reading": "しんぶん",
+                    "meaning": "newspaper",
+                    "audio": "Kanji/N4/000188_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "シン": "Kanji/N4/000188_o1.mp3"
+                },
+                "kunyomi": {
+                    "あたら.しい": "Kanji/N4/000188_k1.mp3",
+                    "あら-": "Kanji/N4/000188_k2.mp3",
+                    "あら.た": "Kanji/N4/000188_k3.mp3",
+                    "にい-": "Kanji/N4/000188_k4.mp3"
+                }
+            },
+            "base_id": "000188"
+        },
+        {
+            "character": "古",
+            "meanings": [
+                "old"
+            ],
+            "onyomi": [
+                "コ"
+            ],
+            "kunyomi": [
+                "-ふる.す",
+                "ふる-",
+                "ふる.い"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "太古",
+                    "reading": "たいこ",
+                    "meaning": "ancient times",
+                    "audio": "Kanji/N4/000189_1.mp3"
+                },
+                {
+                    "word": "古典",
+                    "reading": "こてん",
+                    "meaning": "classic (work, esp. book), the classics",
+                    "audio": "Kanji/N4/000189_2.mp3"
+                },
+                {
+                    "word": "古城",
+                    "reading": "こじょう",
+                    "meaning": "old castle, old fortress",
+                    "audio": "Kanji/N4/000189_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "コ": "Kanji/N4/000189_o1.mp3"
+                },
+                "kunyomi": {
+                    "-ふる.す": "Kanji/N4/000189_k1.mp3",
+                    "ふる-": "Kanji/N4/000189_k2.mp3",
+                    "ふる.い": "Kanji/N4/000189_k3.mp3"
+                }
+            },
+            "base_id": "000189"
+        },
+        {
+            "character": "多",
+            "meanings": [
+                "frequent",
+                "many",
+                "much"
+            ],
+            "onyomi": [
+                "タ"
+            ],
+            "kunyomi": [
+                "おお.い",
+                "まさ.に",
+                "まさ.る"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "大多数",
+                    "reading": "だいたすう",
+                    "meaning": "great majority",
+                    "audio": "Kanji/N4/000191_1.mp3"
+                },
+                {
+                    "word": "多湿",
+                    "reading": "たしつ",
+                    "meaning": "high humidity",
+                    "audio": "Kanji/N4/000191_2.mp3"
+                },
+                {
+                    "word": "多才",
+                    "reading": "たさい",
+                    "meaning": "talented",
+                    "audio": "Kanji/N4/000191_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "タ": "Kanji/N4/000191_o1.mp3"
+                },
+                "kunyomi": {
+                    "おお.い": "Kanji/N4/000191_k1.mp3",
+                    "まさ.に": "Kanji/N4/000191_k2.mp3",
+                    "まさ.る": "Kanji/N4/000191_k3.mp3"
+                }
+            },
+            "base_id": "000191"
+        },
+        {
+            "character": "少",
+            "meanings": [
+                "few",
+                "little"
+            ],
+            "onyomi": [
+                "ショウ"
+            ],
+            "kunyomi": [
+                "すく.ない",
+                "すこ.し"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "少くとも",
+                    "reading": "すくなくとも",
+                    "meaning": "at least",
+                    "audio": "Kanji/N4/000192_1.mp3"
+                },
+                {
+                    "word": "少なからず",
+                    "reading": "すくなからず",
+                    "meaning": "considerably, not a little",
+                    "audio": "Kanji/N4/000192_2.mp3"
+                },
+                {
+                    "word": "減少",
+                    "reading": "げんしょう",
+                    "meaning": "decrease, reduction",
+                    "audio": "Kanji/N4/000192_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "ショウ": "Kanji/N4/000192_o1.mp3"
+                },
+                "kunyomi": {
+                    "すく.ない": "Kanji/N4/000192_k1.mp3",
+                    "すこ.し": "Kanji/N4/000192_k2.mp3"
+                }
+            },
+            "base_id": "000192"
+        },
+        {
+            "character": "元",
+            "meanings": [
+                "beginning",
+                "former time",
+                "origin"
+            ],
+            "onyomi": [
+                "ガン",
+                "ゲン"
+            ],
+            "kunyomi": [
+                "もと"
+            ],
+            "jlpt": "N4",
+            "examples": [
+                {
+                    "word": "元号",
+                    "reading": "げんごう",
+                    "meaning": "name of an imperial era (e.g. Heisei, Shōwa), Japanese era name",
+                    "audio": "Kanji/N4/000195_1.mp3"
+                },
+                {
+                    "word": "多元的",
+                    "reading": "たげんてき",
+                    "meaning": "pluralistic, plural",
+                    "audio": "Kanji/N4/000195_2.mp3"
+                },
+                {
+                    "word": "元首",
+                    "reading": "げんしゅ",
+                    "meaning": "sovereign, ruler",
+                    "audio": "Kanji/N4/000195_3.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {
+                    "ガン": "Kanji/N4/000195_o1.mp3",
+                    "ゲン": "Kanji/N4/000195_o2.mp3"
+                },
+                "kunyomi": {
+                    "もと": "Kanji/N4/000195_k1.mp3"
+                }
+            },
+            "base_id": "000195"
+        },
+        {
             "character": "不",
             "meanings": [
                 "bad",
@@ -714,52 +1961,6 @@
             "base_id": "000211"
         },
         {
-            "character": "元",
-            "meanings": [
-                "beginning",
-                "former time",
-                "origin"
-            ],
-            "onyomi": [
-                "ガン",
-                "ゲン"
-            ],
-            "kunyomi": [
-                "もと"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "元号",
-                    "reading": "げんごう",
-                    "meaning": "name of an imperial era (e.g. Heisei, Shōwa), Japanese era name",
-                    "audio": "Kanji/N4/000195_1.mp3"
-                },
-                {
-                    "word": "多元的",
-                    "reading": "たげんてき",
-                    "meaning": "pluralistic, plural",
-                    "audio": "Kanji/N4/000195_2.mp3"
-                },
-                {
-                    "word": "元首",
-                    "reading": "げんしゅ",
-                    "meaning": "sovereign, ruler",
-                    "audio": "Kanji/N4/000195_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "ガン": "Kanji/N4/000195_o1.mp3",
-                    "ゲン": "Kanji/N4/000195_o2.mp3"
-                },
-                "kunyomi": {
-                    "もと": "Kanji/N4/000195_k1.mp3"
-                }
-            },
-            "base_id": "000195"
-        },
-        {
             "character": "兄",
             "meanings": [
                 "big brother",
@@ -1306,96 +2507,6 @@
             "base_id": "000222"
         },
         {
-            "character": "口",
-            "meanings": [
-                "mouth"
-            ],
-            "onyomi": [
-                "ク",
-                "コウ"
-            ],
-            "kunyomi": [
-                "くち"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "非常口",
-                    "reading": "ひじょうぐち",
-                    "meaning": "emergency exit",
-                    "audio": "Kanji/N4/000135_1.mp3"
-                },
-                {
-                    "word": "出入り口",
-                    "reading": "でいりぐち",
-                    "meaning": "exit and entrance",
-                    "audio": "Kanji/N4/000135_2.mp3"
-                },
-                {
-                    "word": "口紅",
-                    "reading": "くちべに",
-                    "meaning": "lipstick",
-                    "audio": "Kanji/N4/000135_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "ク": "Kanji/N4/000135_o1.mp3",
-                    "コウ": "Kanji/N4/000135_o2.mp3"
-                },
-                "kunyomi": {
-                    "くち": "Kanji/N4/000135_k1.mp3"
-                }
-            },
-            "base_id": "000135"
-        },
-        {
-            "character": "古",
-            "meanings": [
-                "old"
-            ],
-            "onyomi": [
-                "コ"
-            ],
-            "kunyomi": [
-                "-ふる.す",
-                "ふる-",
-                "ふる.い"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "太古",
-                    "reading": "たいこ",
-                    "meaning": "ancient times",
-                    "audio": "Kanji/N4/000189_1.mp3"
-                },
-                {
-                    "word": "古典",
-                    "reading": "こてん",
-                    "meaning": "classic (work, esp. book), the classics",
-                    "audio": "Kanji/N4/000189_2.mp3"
-                },
-                {
-                    "word": "古城",
-                    "reading": "こじょう",
-                    "meaning": "old castle, old fortress",
-                    "audio": "Kanji/N4/000189_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "コ": "Kanji/N4/000189_o1.mp3"
-                },
-                "kunyomi": {
-                    "-ふる.す": "Kanji/N4/000189_k1.mp3",
-                    "ふる-": "Kanji/N4/000189_k2.mp3",
-                    "ふる.い": "Kanji/N4/000189_k3.mp3"
-                }
-            },
-            "base_id": "000189"
-        },
-        {
             "character": "台",
             "meanings": [
                 "a stand",
@@ -1937,141 +3048,6 @@
             "base_id": "000234"
         },
         {
-            "character": "夕",
-            "meanings": [
-                "evening"
-            ],
-            "onyomi": [
-                "セキ"
-            ],
-            "kunyomi": [
-                "ゆう"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "夕刊",
-                    "reading": "ゆうかん",
-                    "meaning": "evening paper",
-                    "audio": "Kanji/N4/000126_1.mp3"
-                },
-                {
-                    "word": "夕立",
-                    "reading": "ゆうだち",
-                    "meaning": "(sudden, heavy) shower (on a summer afternoon or evening), evening shower",
-                    "audio": "Kanji/N4/000126_2.mp3"
-                },
-                {
-                    "word": "夕がた",
-                    "reading": "ゆうがた",
-                    "meaning": "evening, dusk",
-                    "audio": "Kanji/N4/000126_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "セキ": "Kanji/N4/000126_o1.mp3"
-                },
-                "kunyomi": {
-                    "ゆう": "Kanji/N4/000126_k1.mp3"
-                }
-            },
-            "base_id": "000126"
-        },
-        {
-            "character": "多",
-            "meanings": [
-                "frequent",
-                "many",
-                "much"
-            ],
-            "onyomi": [
-                "タ"
-            ],
-            "kunyomi": [
-                "おお.い",
-                "まさ.に",
-                "まさ.る"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "大多数",
-                    "reading": "だいたすう",
-                    "meaning": "great majority",
-                    "audio": "Kanji/N4/000191_1.mp3"
-                },
-                {
-                    "word": "多湿",
-                    "reading": "たしつ",
-                    "meaning": "high humidity",
-                    "audio": "Kanji/N4/000191_2.mp3"
-                },
-                {
-                    "word": "多才",
-                    "reading": "たさい",
-                    "meaning": "talented",
-                    "audio": "Kanji/N4/000191_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "タ": "Kanji/N4/000191_o1.mp3"
-                },
-                "kunyomi": {
-                    "おお.い": "Kanji/N4/000191_k1.mp3",
-                    "まさ.に": "Kanji/N4/000191_k2.mp3",
-                    "まさ.る": "Kanji/N4/000191_k3.mp3"
-                }
-            },
-            "base_id": "000191"
-        },
-        {
-            "character": "夜",
-            "meanings": [
-                "evening",
-                "night"
-            ],
-            "onyomi": [
-                "ヤ"
-            ],
-            "kunyomi": [
-                "よ",
-                "よる"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "昼夜",
-                    "reading": "ちゅうや",
-                    "meaning": "day and night",
-                    "audio": "Kanji/N4/000125_1.mp3"
-                },
-                {
-                    "word": "月夜",
-                    "reading": "つきよ",
-                    "meaning": "moonlit night",
-                    "audio": "Kanji/N4/000125_2.mp3"
-                },
-                {
-                    "word": "夜空",
-                    "reading": "よぞら",
-                    "meaning": "night sky",
-                    "audio": "Kanji/N4/000125_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "ヤ": "Kanji/N4/000125_o1.mp3"
-                },
-                "kunyomi": {
-                    "よ": "Kanji/N4/000125_k1.mp3",
-                    "よる": "Kanji/N4/000125_k2.mp3"
-                }
-            },
-            "base_id": "000125"
-        },
-        {
             "character": "妹",
             "meanings": [
                 "younger sister"
@@ -2254,60 +3230,6 @@
             "base_id": "000238"
         },
         {
-            "character": "安",
-            "meanings": [
-                "cheap",
-                "contented",
-                "low",
-                "peaceful",
-                "quiet",
-                "relax",
-                "rested"
-            ],
-            "onyomi": [
-                "アン"
-            ],
-            "kunyomi": [
-                "やす",
-                "やす.い",
-                "やす.まる",
-                "やす.らか"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "安物",
-                    "reading": "やすもの",
-                    "meaning": "cheap article, poor quality article",
-                    "audio": "Kanji/N4/000187_1.mp3"
-                },
-                {
-                    "word": "円安",
-                    "reading": "えんやす",
-                    "meaning": "depreciation of the yen, weak yen",
-                    "audio": "Kanji/N4/000187_2.mp3"
-                },
-                {
-                    "word": "ひと安心",
-                    "reading": "ひとあんしん",
-                    "meaning": "feeling of relief (for the time being), peace of mind (for now)",
-                    "audio": "Kanji/N4/000187_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "アン": "Kanji/N4/000187_o1.mp3"
-                },
-                "kunyomi": {
-                    "やす": "Kanji/N4/000187_k1.mp3",
-                    "やす.い": "Kanji/N4/000187_k2.mp3",
-                    "やす.まる": "Kanji/N4/000187_k3.mp3",
-                    "やす.らか": "Kanji/N4/000187_k4.mp3"
-                }
-            },
-            "base_id": "000187"
-        },
-        {
             "character": "室",
             "meanings": [
                 "apartment",
@@ -2405,51 +3327,6 @@
                 }
             },
             "base_id": "000240"
-        },
-        {
-            "character": "少",
-            "meanings": [
-                "few",
-                "little"
-            ],
-            "onyomi": [
-                "ショウ"
-            ],
-            "kunyomi": [
-                "すく.ない",
-                "すこ.し"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "少くとも",
-                    "reading": "すくなくとも",
-                    "meaning": "at least",
-                    "audio": "Kanji/N4/000192_1.mp3"
-                },
-                {
-                    "word": "少なからず",
-                    "reading": "すくなからず",
-                    "meaning": "considerably, not a little",
-                    "audio": "Kanji/N4/000192_2.mp3"
-                },
-                {
-                    "word": "減少",
-                    "reading": "げんしょう",
-                    "meaning": "decrease, reduction",
-                    "audio": "Kanji/N4/000192_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "ショウ": "Kanji/N4/000192_o1.mp3"
-                },
-                "kunyomi": {
-                    "すく.ない": "Kanji/N4/000192_k1.mp3",
-                    "すこ.し": "Kanji/N4/000192_k2.mp3"
-                }
-            },
-            "base_id": "000192"
         },
         {
             "character": "屋",
@@ -2643,51 +3520,6 @@
                 }
             },
             "base_id": "000244"
-        },
-        {
-            "character": "店",
-            "meanings": [
-                "shop",
-                "store"
-            ],
-            "onyomi": [
-                "テン"
-            ],
-            "kunyomi": [
-                "たな",
-                "みせ"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "百貨店",
-                    "reading": "ひゃっかてん",
-                    "meaning": "department store",
-                    "audio": "Kanji/N4/000178_1.mp3"
-                },
-                {
-                    "word": "書店",
-                    "reading": "しょてん",
-                    "meaning": "bookshop, bookstore",
-                    "audio": "Kanji/N4/000178_2.mp3"
-                },
-                {
-                    "word": "支店",
-                    "reading": "してん",
-                    "meaning": "branch office, branch store",
-                    "audio": "Kanji/N4/000178_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "テン": "Kanji/N4/000178_o1.mp3"
-                },
-                "kunyomi": {
-                    "たな": "Kanji/N4/000178_k1.mp3",
-                    "みせ": "Kanji/N4/000178_k2.mp3"
-                }
-            },
-            "base_id": "000178"
         },
         {
             "character": "度",
@@ -3189,56 +4021,6 @@
             "base_id": "000254"
         },
         {
-            "character": "手",
-            "meanings": [
-                "hand"
-            ],
-            "onyomi": [
-                "シュ",
-                "ズ"
-            ],
-            "kunyomi": [
-                "-て",
-                "た-",
-                "て",
-                "て-"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "手ぬぐい",
-                    "reading": "てぬぐい",
-                    "meaning": "(hand) towel",
-                    "audio": "Kanji/N4/000137_1.mp3"
-                },
-                {
-                    "word": "手がかり",
-                    "reading": "てがかり",
-                    "meaning": "handhold, hold",
-                    "audio": "Kanji/N4/000137_2.mp3"
-                },
-                {
-                    "word": "手がける",
-                    "reading": "てがける",
-                    "meaning": "to rear, to look after",
-                    "audio": "Kanji/N4/000137_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "シュ": "Kanji/N4/000137_o1.mp3",
-                    "ズ": "Kanji/N4/000137_o2.mp3"
-                },
-                "kunyomi": {
-                    "-て": "Kanji/N4/000137_k1.mp3",
-                    "た-": "Kanji/N4/000137_k2.mp3",
-                    "て": "Kanji/N4/000137_k3.mp3",
-                    "て-": "Kanji/N4/000137_k4.mp3"
-                }
-            },
-            "base_id": "000137"
-        },
-        {
             "character": "持",
             "meanings": [
                 "have",
@@ -3422,54 +4204,6 @@
                 "kunyomi": {}
             },
             "base_id": "000258"
-        },
-        {
-            "character": "新",
-            "meanings": [
-                "new"
-            ],
-            "onyomi": [
-                "シン"
-            ],
-            "kunyomi": [
-                "あたら.しい",
-                "あら-",
-                "あら.た",
-                "にい-"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "新年",
-                    "reading": "しんねん",
-                    "meaning": "New Year",
-                    "audio": "Kanji/N4/000188_1.mp3"
-                },
-                {
-                    "word": "新鮮",
-                    "reading": "しんせん",
-                    "meaning": "fresh",
-                    "audio": "Kanji/N4/000188_2.mp3"
-                },
-                {
-                    "word": "新聞",
-                    "reading": "しんぶん",
-                    "meaning": "newspaper",
-                    "audio": "Kanji/N4/000188_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "シン": "Kanji/N4/000188_o1.mp3"
-                },
-                "kunyomi": {
-                    "あたら.しい": "Kanji/N4/000188_k1.mp3",
-                    "あら-": "Kanji/N4/000188_k2.mp3",
-                    "あら.た": "Kanji/N4/000188_k3.mp3",
-                    "にい-": "Kanji/N4/000188_k4.mp3"
-                }
-            },
-            "base_id": "000188"
         },
         {
             "character": "方",
@@ -3815,49 +4549,6 @@
             "base_id": "000265"
         },
         {
-            "character": "昼",
-            "meanings": [
-                "daytime",
-                "noon"
-            ],
-            "onyomi": [
-                "チュウ"
-            ],
-            "kunyomi": [
-                "ひる"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "昼夜",
-                    "reading": "ちゅうや",
-                    "meaning": "day and night",
-                    "audio": "Kanji/N4/000124_1.mp3"
-                },
-                {
-                    "word": "昼下がり",
-                    "reading": "ひるさがり",
-                    "meaning": "early afternoon",
-                    "audio": "Kanji/N4/000124_2.mp3"
-                },
-                {
-                    "word": "昼寐",
-                    "reading": "ひるね",
-                    "meaning": "(afternoon) nap, sleeping during the day",
-                    "audio": "Kanji/N4/000124_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "チュウ": "Kanji/N4/000124_o1.mp3"
-                },
-                "kunyomi": {
-                    "ひる": "Kanji/N4/000124_k1.mp3"
-                }
-            },
-            "base_id": "000124"
-        },
-        {
             "character": "曜",
             "meanings": [
                 "weekday"
@@ -3984,53 +4675,6 @@
                 "kunyomi": {}
             },
             "base_id": "000268"
-        },
-        {
-            "character": "朝",
-            "meanings": [
-                "(North) Korea",
-                "dynasty",
-                "epoch",
-                "morning",
-                "period",
-                "regime"
-            ],
-            "onyomi": [
-                "チョウ"
-            ],
-            "kunyomi": [
-                "あさ"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "早朝",
-                    "reading": "そうちょう",
-                    "meaning": "early morning",
-                    "audio": "Kanji/N4/000123_1.mp3"
-                },
-                {
-                    "word": "朝刊",
-                    "reading": "ちょうかん",
-                    "meaning": "morning newspaper",
-                    "audio": "Kanji/N4/000123_2.mp3"
-                },
-                {
-                    "word": "明朝",
-                    "reading": "みょうちょう",
-                    "meaning": "tomorrow morning",
-                    "audio": "Kanji/N4/000123_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "チョウ": "Kanji/N4/000123_o1.mp3"
-                },
-                "kunyomi": {
-                    "あさ": "Kanji/N4/000123_k1.mp3"
-                }
-            },
-            "base_id": "000123"
         },
         {
             "character": "業",
@@ -5124,60 +5768,6 @@
             "base_id": "000291"
         },
         {
-            "character": "目",
-            "meanings": [
-                "care",
-                "class",
-                "experience",
-                "eye",
-                "favor",
-                "insight",
-                "look"
-            ],
-            "onyomi": [
-                "ボク",
-                "モク"
-            ],
-            "kunyomi": [
-                "-め",
-                "ま-",
-                "め"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "縫い目",
-                    "reading": "ぬいめ",
-                    "meaning": "seam, stitch",
-                    "audio": "Kanji/N4/000134_1.mp3"
-                },
-                {
-                    "word": "目覚し時計",
-                    "reading": "めざましどけい",
-                    "meaning": "alarm clock",
-                    "audio": "Kanji/N4/000134_2.mp3"
-                },
-                {
-                    "word": "選択科目",
-                    "reading": "せんたくかもく",
-                    "meaning": "elective subject or course",
-                    "audio": "Kanji/N4/000134_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "ボク": "Kanji/N4/000134_o1.mp3",
-                    "モク": "Kanji/N4/000134_o2.mp3"
-                },
-                "kunyomi": {
-                    "-め": "Kanji/N4/000134_k1.mp3",
-                    "ま-": "Kanji/N4/000134_k2.mp3",
-                    "め": "Kanji/N4/000134_k3.mp3"
-                }
-            },
-            "base_id": "000134"
-        },
-        {
             "character": "真",
             "meanings": [
                 "Buddhist sect",
@@ -5547,133 +6137,6 @@
                 }
             },
             "base_id": "000299"
-        },
-        {
-            "character": "空",
-            "meanings": [
-                "empty",
-                "sky",
-                "vacant",
-                "vacuum",
-                "void"
-            ],
-            "onyomi": [
-                "クウ"
-            ],
-            "kunyomi": [
-                "あ.き",
-                "あ.く",
-                "あ.ける",
-                "から",
-                "す.かす",
-                "す.く",
-                "そら",
-                "むな.しい"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "空軍",
-                    "reading": "くうぐん",
-                    "meaning": "air force",
-                    "audio": "Kanji/N4/000142_1.mp3"
-                },
-                {
-                    "word": "航空機",
-                    "reading": "こうくうき",
-                    "meaning": "aircraft",
-                    "audio": "Kanji/N4/000142_2.mp3"
-                },
-                {
-                    "word": "航空母艦",
-                    "reading": "こうくうぼかん",
-                    "meaning": "aircraft carrier",
-                    "audio": "Kanji/N4/000142_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "クウ": "Kanji/N4/000142_o1.mp3"
-                },
-                "kunyomi": {
-                    "あ.き": "Kanji/N4/000142_k1.mp3",
-                    "あ.く": "Kanji/N4/000142_k2.mp3",
-                    "あ.ける": "Kanji/N4/000142_k3.mp3",
-                    "から": "Kanji/N4/000142_k4.mp3",
-                    "す.かす": "Kanji/N4/000142_k5.mp3",
-                    "す.く": "Kanji/N4/000142_k6.mp3",
-                    "そら": "Kanji/N4/000142_k7.mp3",
-                    "むな.しい": "Kanji/N4/000142_k8.mp3"
-                }
-            },
-            "base_id": "000142"
-        },
-        {
-            "character": "立",
-            "meanings": [
-                "erect",
-                "rise",
-                "set up",
-                "stand up"
-            ],
-            "onyomi": [
-                "リットル",
-                "リツ",
-                "リュウ"
-            ],
-            "kunyomi": [
-                "-た.つ",
-                "-た.て",
-                "-た.てる",
-                "-だ.て",
-                "-だ.てる",
-                "た.ち-",
-                "た.つ",
-                "た.て-",
-                "た.てる",
-                "たて-"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "積み立て",
-                    "reading": "つみたて",
-                    "meaning": "saving, savings",
-                    "audio": "Kanji/N4/000173_1.mp3"
-                },
-                {
-                    "word": "立脚",
-                    "reading": "りっきゃく",
-                    "meaning": "being based on",
-                    "audio": "Kanji/N4/000173_2.mp3"
-                },
-                {
-                    "word": "立春",
-                    "reading": "りっしゅん",
-                    "meaning": "first day of spring (according to the traditional lunisolar calendar, approx. February 4)",
-                    "audio": "Kanji/N4/000173_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "リットル": "Kanji/N4/000173_o1.mp3",
-                    "リツ": "Kanji/N4/000173_o2.mp3",
-                    "リュウ": "Kanji/N4/000173_o3.mp3"
-                },
-                "kunyomi": {
-                    "-た.つ": "Kanji/N4/000173_k1.mp3",
-                    "-た.て": "Kanji/N4/000173_k2.mp3",
-                    "-た.てる": "Kanji/N4/000173_k3.mp3",
-                    "-だ.て": "Kanji/N4/000173_k4.mp3",
-                    "-だ.てる": "Kanji/N4/000173_k5.mp3",
-                    "た.ち-": "Kanji/N4/000173_k6.mp3",
-                    "た.つ": "Kanji/N4/000173_k7.mp3",
-                    "た.て-": "Kanji/N4/000173_k8.mp3",
-                    "た.てる": "Kanji/N4/000173_k9.mp3",
-                    "たて-": "Kanji/N4/000173_k10.mp3"
-                }
-            },
-            "base_id": "000173"
         },
         {
             "character": "答",
@@ -6266,53 +6729,6 @@
             "base_id": "000312"
         },
         {
-            "character": "言",
-            "meanings": [
-                "say",
-                "word"
-            ],
-            "onyomi": [
-                "ゲン",
-                "ゴン"
-            ],
-            "kunyomi": [
-                "い.う",
-                "こと"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "ひとり言",
-                    "reading": "ひとりごと",
-                    "meaning": "soliloquy, monologue",
-                    "audio": "Kanji/N4/000166_1.mp3"
-                },
-                {
-                    "word": "公言",
-                    "reading": "こうげん",
-                    "meaning": "declaration, profession",
-                    "audio": "Kanji/N4/000166_2.mp3"
-                },
-                {
-                    "word": "方言",
-                    "reading": "ほうげん",
-                    "meaning": "dialect, provincialism",
-                    "audio": "Kanji/N4/000166_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "ゲン": "Kanji/N4/000166_o1.mp3",
-                    "ゴン": "Kanji/N4/000166_o2.mp3"
-                },
-                "kunyomi": {
-                    "い.う": "Kanji/N4/000166_k1.mp3",
-                    "こと": "Kanji/N4/000166_k2.mp3"
-                }
-            },
-            "base_id": "000166"
-        },
-        {
             "character": "計",
             "meanings": [
                 "measure",
@@ -6406,48 +6822,6 @@
                 }
             },
             "base_id": "000314"
-        },
-        {
-            "character": "買",
-            "meanings": [
-                "buy"
-            ],
-            "onyomi": [
-                "バイ"
-            ],
-            "kunyomi": [
-                "か.う"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "買い取り",
-                    "reading": "かいとり",
-                    "meaning": "purchase on a no-return policy",
-                    "audio": "Kanji/N4/000170_1.mp3"
-                },
-                {
-                    "word": "仲買",
-                    "reading": "なかがい",
-                    "meaning": "brokerage",
-                    "audio": "Kanji/N4/000170_2.mp3"
-                },
-                {
-                    "word": "買い手",
-                    "reading": "かいて",
-                    "meaning": "buyer",
-                    "audio": "Kanji/N4/000170_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "バイ": "Kanji/N4/000170_o1.mp3"
-                },
-                "kunyomi": {
-                    "か.う": "Kanji/N4/000170_k1.mp3"
-                }
-            },
-            "base_id": "000170"
         },
         {
             "character": "貸",
@@ -6551,58 +6925,6 @@
             "base_id": "000316"
         },
         {
-            "character": "赤",
-            "meanings": [
-                "red"
-            ],
-            "onyomi": [
-                "シャク",
-                "セキ"
-            ],
-            "kunyomi": [
-                "あか",
-                "あか-",
-                "あか.い",
-                "あか.らむ",
-                "あか.らめる"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "赤痢",
-                    "reading": "せきり",
-                    "meaning": "dysentery",
-                    "audio": "Kanji/N4/000146_1.mp3"
-                },
-                {
-                    "word": "赤道",
-                    "reading": "せきどう",
-                    "meaning": "equator",
-                    "audio": "Kanji/N4/000146_2.mp3"
-                },
-                {
-                    "word": "赤飯",
-                    "reading": "せきはん",
-                    "meaning": "red rice (beans and mochi) for auspicious occasions",
-                    "audio": "Kanji/N4/000146_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "シャク": "Kanji/N4/000146_o1.mp3",
-                    "セキ": "Kanji/N4/000146_o2.mp3"
-                },
-                "kunyomi": {
-                    "あか": "Kanji/N4/000146_k1.mp3",
-                    "あか-": "Kanji/N4/000146_k2.mp3",
-                    "あか.い": "Kanji/N4/000146_k3.mp3",
-                    "あか.らむ": "Kanji/N4/000146_k4.mp3",
-                    "あか.らめる": "Kanji/N4/000146_k5.mp3"
-                }
-            },
-            "base_id": "000146"
-        },
-        {
             "character": "走",
             "meanings": [
                 "run"
@@ -6695,57 +7017,6 @@
                 }
             },
             "base_id": "000318"
-        },
-        {
-            "character": "足",
-            "meanings": [
-                "be sufficient",
-                "counter for pairs of footwear",
-                "foot",
-                "leg"
-            ],
-            "onyomi": [
-                "ソク"
-            ],
-            "kunyomi": [
-                "あし",
-                "た.す",
-                "た.りる",
-                "た.る"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "足頸",
-                    "reading": "あしくび",
-                    "meaning": "ankle",
-                    "audio": "Kanji/N4/000138_1.mp3"
-                },
-                {
-                    "word": "寝不足",
-                    "reading": "ねぶそく",
-                    "meaning": "lack of sleep, insufficient sleep",
-                    "audio": "Kanji/N4/000138_2.mp3"
-                },
-                {
-                    "word": "補足",
-                    "reading": "ほそく",
-                    "meaning": "supplement, complement",
-                    "audio": "Kanji/N4/000138_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "ソク": "Kanji/N4/000138_o1.mp3"
-                },
-                "kunyomi": {
-                    "あし": "Kanji/N4/000138_k1.mp3",
-                    "た.す": "Kanji/N4/000138_k2.mp3",
-                    "た.りる": "Kanji/N4/000138_k3.mp3",
-                    "た.る": "Kanji/N4/000138_k4.mp3"
-                }
-            },
-            "base_id": "000138"
         },
         {
             "character": "転",
@@ -6958,44 +7229,6 @@
             "base_id": "000322"
         },
         {
-            "character": "週",
-            "meanings": [
-                "week"
-            ],
-            "onyomi": [
-                "シュウ"
-            ],
-            "kunyomi": [],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "毎週",
-                    "reading": "まいしゅう",
-                    "meaning": "every week",
-                    "audio": "Kanji/N4/000121_1.mp3"
-                },
-                {
-                    "word": "来週",
-                    "reading": "らいしゅう",
-                    "meaning": "next week",
-                    "audio": "Kanji/N4/000121_2.mp3"
-                },
-                {
-                    "word": "今週",
-                    "reading": "こんしゅう",
-                    "meaning": "this week",
-                    "audio": "Kanji/N4/000121_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "シュウ": "Kanji/N4/000121_o1.mp3"
-                },
-                "kunyomi": {}
-            },
-            "base_id": "000121"
-        },
-        {
             "character": "運",
             "meanings": [
                 "advance",
@@ -7043,58 +7276,6 @@
                 }
             },
             "base_id": "000323"
-        },
-        {
-            "character": "道",
-            "meanings": [
-                "course",
-                "district",
-                "journey",
-                "moral",
-                "road-way",
-                "street",
-                "teachings"
-            ],
-            "onyomi": [
-                "トウ",
-                "ドウ"
-            ],
-            "kunyomi": [
-                "いう",
-                "みち"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "書道",
-                    "reading": "しょどう",
-                    "meaning": "calligraphy",
-                    "audio": "Kanji/N4/000179_1.mp3"
-                },
-                {
-                    "word": "赤道",
-                    "reading": "せきどう",
-                    "meaning": "equator",
-                    "audio": "Kanji/N4/000179_2.mp3"
-                },
-                {
-                    "word": "花道",
-                    "reading": "かどう",
-                    "meaning": "flower arrangement",
-                    "audio": "Kanji/N4/000179_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "トウ": "Kanji/N4/000179_o1.mp3",
-                    "ドウ": "Kanji/N4/000179_o2.mp3"
-                },
-                "kunyomi": {
-                    "いう": "Kanji/N4/000179_k1.mp3",
-                    "みち": "Kanji/N4/000179_k2.mp3"
-                }
-            },
-            "base_id": "000179"
         },
         {
             "character": "重",
@@ -7397,55 +7578,6 @@
             "base_id": "000329"
         },
         {
-            "character": "青",
-            "meanings": [
-                "blue",
-                "green"
-            ],
-            "onyomi": [
-                "ショウ",
-                "セイ"
-            ],
-            "kunyomi": [
-                "あお",
-                "あお-",
-                "あお.い"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "青空",
-                    "reading": "あおぞら",
-                    "meaning": "blue sky",
-                    "audio": "Kanji/N4/000147_1.mp3"
-                },
-                {
-                    "word": "青銅",
-                    "reading": "せいどう",
-                    "meaning": "bronze",
-                    "audio": "Kanji/N4/000147_2.mp3"
-                },
-                {
-                    "word": "青年",
-                    "reading": "せいねん",
-                    "meaning": "youth, young man",
-                    "audio": "Kanji/N4/000147_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "ショウ": "Kanji/N4/000147_o1.mp3",
-                    "セイ": "Kanji/N4/000147_o2.mp3"
-                },
-                "kunyomi": {
-                    "あお": "Kanji/N4/000147_k1.mp3",
-                    "あお-": "Kanji/N4/000147_k2.mp3",
-                    "あお.い": "Kanji/N4/000147_k3.mp3"
-                }
-            },
-            "base_id": "000147"
-        },
-        {
             "character": "音",
             "meanings": [
                 "noise",
@@ -7626,54 +7758,6 @@
             "base_id": "000333"
         },
         {
-            "character": "飲",
-            "meanings": [
-                "drink",
-                "smoke",
-                "take"
-            ],
-            "onyomi": [
-                "イン",
-                "オン"
-            ],
-            "kunyomi": [
-                "-の.み",
-                "の.む"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "飲みもの",
-                    "reading": "のみもの",
-                    "meaning": "drink, beverage",
-                    "audio": "Kanji/N4/000171_1.mp3"
-                },
-                {
-                    "word": "飲み水",
-                    "reading": "のみみず",
-                    "meaning": "drinking water, potable water",
-                    "audio": "Kanji/N4/000171_2.mp3"
-                },
-                {
-                    "word": "飲用",
-                    "reading": "いんよう",
-                    "meaning": "drinking",
-                    "audio": "Kanji/N4/000171_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "イン": "Kanji/N4/000171_o1.mp3",
-                    "オン": "Kanji/N4/000171_o2.mp3"
-                },
-                "kunyomi": {
-                    "-の.み": "Kanji/N4/000171_k1.mp3",
-                    "の.む": "Kanji/N4/000171_k2.mp3"
-                }
-            },
-            "base_id": "000171"
-        },
-        {
             "character": "館",
             "meanings": [
                 "building",
@@ -7719,44 +7803,6 @@
                 }
             },
             "base_id": "000334"
-        },
-        {
-            "character": "駅",
-            "meanings": [
-                "station"
-            ],
-            "onyomi": [
-                "エキ"
-            ],
-            "kunyomi": [],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "駅前",
-                    "reading": "えきまえ",
-                    "meaning": "in front of a station",
-                    "audio": "Kanji/N4/000177_1.mp3"
-                },
-                {
-                    "word": "駅長",
-                    "reading": "えきちょう",
-                    "meaning": "station master",
-                    "audio": "Kanji/N4/000177_2.mp3"
-                },
-                {
-                    "word": "終着駅",
-                    "reading": "しゅうちゃくえき",
-                    "meaning": "terminal station",
-                    "audio": "Kanji/N4/000177_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "エキ": "Kanji/N4/000177_o1.mp3"
-                },
-                "kunyomi": {}
-            },
-            "base_id": "000177"
         },
         {
             "character": "験",
@@ -7898,52 +7944,6 @@
                 }
             },
             "base_id": "000337"
-        },
-        {
-            "character": "黒",
-            "meanings": [
-                "black"
-            ],
-            "onyomi": [
-                "コク"
-            ],
-            "kunyomi": [
-                "くろ",
-                "くろ.い",
-                "くろ.ずむ"
-            ],
-            "jlpt": "N4",
-            "examples": [
-                {
-                    "word": "黒板",
-                    "reading": "こくばん",
-                    "meaning": "blackboard",
-                    "audio": "Kanji/N4/000145_1.mp3"
-                },
-                {
-                    "word": "漆黒",
-                    "reading": "しっこく",
-                    "meaning": "jet black",
-                    "audio": "Kanji/N4/000145_2.mp3"
-                },
-                {
-                    "word": "浅黒い",
-                    "reading": "あさぐろい",
-                    "meaning": "dark (skin, complexion, etc.), swarthy",
-                    "audio": "Kanji/N4/000145_3.mp3"
-                }
-            ],
-            "audio": {
-                "onyomi": {
-                    "コク": "Kanji/N4/000145_o1.mp3"
-                },
-                "kunyomi": {
-                    "くろ": "Kanji/N4/000145_k1.mp3",
-                    "くろ.い": "Kanji/N4/000145_k2.mp3",
-                    "くろ.ずむ": "Kanji/N4/000145_k3.mp3"
-                }
-            },
-            "base_id": "000145"
         }
     ]
 }
