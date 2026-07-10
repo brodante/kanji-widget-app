@@ -164,13 +164,15 @@ class AudioManager {
     static async speakWithGoogle(text, lang = 'ja') {
         try {
             const encodedText = encodeURIComponent(text);
-            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${lang}&client=tw-ob`;
+
+            // THE FIX: Changed from translate.google.com to translate.googleapis.com
+            // This forces the request through the open API gateway, bypassing Firefox's strict referrer blocks entirely.
+            // We also switch back to client=gtx because the API gateway prefers it.
+            const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=${lang}&q=${encodedText}`;
 
             return new Promise((resolve) => {
                 const audio = new Audio(url);
 
-                // FIREFOX FIX: Increased timeout to 4 seconds. 2s was too fast and was 
-                // causing the fallback to fire prematurely on slower connections.
                 const timeoutId = setTimeout(() => {
                     console.warn('Google TTS timeout');
                     resolve(false);
@@ -190,14 +192,12 @@ class AudioManager {
 
                 this.isPlaying = true;
 
-                // FIREFOX FIX: Do not wait for oncanplaythrough. Play immediately!
                 audio.play().catch(playError => {
                     clearTimeout(timeoutId);
 
-                    // NEW: Intercept Autoplay Policy Blocks
                     if (playError.name === 'NotAllowedError') {
                         console.warn('Browser blocked autoplay on refresh. Click anywhere to enable audio.');
-                        resolve(true); // Fake success so it DOES NOT trigger the robotic fallback
+                        resolve(true); // Fake success to prevent robot voice
                     } else {
                         console.warn('Playback intercepted by browser:', playError);
                         resolve(false);
