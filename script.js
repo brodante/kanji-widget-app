@@ -271,6 +271,12 @@ class KanjiLearningApp {
         const widget = document.getElementById('kanjiWidget');
         widget.innerHTML = `<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading Kanji...</p></div>`;
 
+        // FIX 1: Clear the recent list UI immediately so it doesn't show old data during the loading delay
+        const recentContainer = document.getElementById('recentKanji');
+        if (recentContainer) {
+            recentContainer.innerHTML = `<p style="text-align: center; opacity: 0.6;">Loading ${this.settings.jlptLevel}...</p>`;
+        }
+
         try {
             const progress = StorageManager.getProgress();
             const availableKanji = await this.getKanjiPool(this.settings.jlptLevel);
@@ -302,6 +308,9 @@ class KanjiLearningApp {
             this.currentKanji = nextKanji;
             this.renderKanji();
             this.renderKanjiJourney();
+
+            // FIX 2: Force the recent list to redraw using the new, filtered data pool!
+            this.loadRecentKanji();
 
             if (this.settings.autoPlay) {
                 setTimeout(() => this.playPronunciation(), 1000);
