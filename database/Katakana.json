@@ -1,0 +1,1516 @@
+{
+    "Katakana": [
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ア",
+            "meanings": [
+                "a"
+            ],
+            "kunyomi": [
+                "ア"
+            ],
+            "examples": [
+                {
+                    "word": "アイス",
+                    "reading": "アイス",
+                    "meaning": "Ice cream",
+                    "audio": "Katakana/000047_1.mp3"
+                },
+                {
+                    "word": "アニメ",
+                    "reading": "アニメ",
+                    "meaning": "Anime",
+                    "audio": "Katakana/000047_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ア": "Katakana/000047_0.mp3"
+                }
+            },
+            "base_id": "000047",
+            "character_audio": "Katakana/000047_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "イ",
+            "meanings": [
+                "i"
+            ],
+            "kunyomi": [
+                "イ"
+            ],
+            "examples": [
+                {
+                    "word": "インターネット",
+                    "reading": "インターネット",
+                    "meaning": "Internet",
+                    "audio": "Katakana/000048_1.mp3"
+                },
+                {
+                    "word": "イギリス",
+                    "reading": "イギリス",
+                    "meaning": "UK",
+                    "audio": "Katakana/000048_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "イ": "Katakana/000048_0.mp3"
+                }
+            },
+            "base_id": "000048",
+            "character_audio": "Katakana/000048_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ウ",
+            "meanings": [
+                "u"
+            ],
+            "kunyomi": [
+                "ウ"
+            ],
+            "examples": [
+                {
+                    "word": "ウイルス",
+                    "reading": "ウイルス",
+                    "meaning": "Virus",
+                    "audio": "Katakana/000049_1.mp3"
+                },
+                {
+                    "word": "ウィンドウ",
+                    "reading": "ウィンドウ",
+                    "meaning": "Window",
+                    "audio": "Katakana/000049_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ウ": "Katakana/000049_0.mp3"
+                }
+            },
+            "base_id": "000049",
+            "character_audio": "Katakana/000049_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "エ",
+            "meanings": [
+                "e"
+            ],
+            "kunyomi": [
+                "エ"
+            ],
+            "examples": [
+                {
+                    "word": "エレベーター",
+                    "reading": "エレベーター",
+                    "meaning": "Elevator",
+                    "audio": "Katakana/000050_1.mp3"
+                },
+                {
+                    "word": "エンジン",
+                    "reading": "エンジン",
+                    "meaning": "Engine",
+                    "audio": "Katakana/000050_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "エ": "Katakana/000050_0.mp3"
+                }
+            },
+            "base_id": "000050",
+            "character_audio": "Katakana/000050_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "オ",
+            "meanings": [
+                "o"
+            ],
+            "kunyomi": [
+                "オ"
+            ],
+            "examples": [
+                {
+                    "word": "オレンジ",
+                    "reading": "オレンジ",
+                    "meaning": "Orange",
+                    "audio": "Katakana/000051_1.mp3"
+                },
+                {
+                    "word": "オリンピック",
+                    "reading": "オリンピック",
+                    "meaning": "Olympics",
+                    "audio": "Katakana/000051_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "オ": "Katakana/000051_0.mp3"
+                }
+            },
+            "base_id": "000051",
+            "character_audio": "Katakana/000051_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "カ",
+            "meanings": [
+                "ka"
+            ],
+            "kunyomi": [
+                "カ"
+            ],
+            "examples": [
+                {
+                    "word": "カメラ",
+                    "reading": "カメラ",
+                    "meaning": "Camera",
+                    "audio": "Katakana/000052_1.mp3"
+                },
+                {
+                    "word": "カレンダー",
+                    "reading": "カレンダー",
+                    "meaning": "Calendar",
+                    "audio": "Katakana/000052_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "カ": "Katakana/000052_0.mp3"
+                }
+            },
+            "base_id": "000052",
+            "character_audio": "Katakana/000052_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "キ",
+            "meanings": [
+                "ki"
+            ],
+            "kunyomi": [
+                "キ"
+            ],
+            "examples": [
+                {
+                    "word": "キーボード",
+                    "reading": "キーボード",
+                    "meaning": "Keyboard",
+                    "audio": "Katakana/000053_1.mp3"
+                },
+                {
+                    "word": "ギター",
+                    "reading": "ギター",
+                    "meaning": "Guitar",
+                    "audio": "Katakana/000053_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "キ": "Katakana/000053_0.mp3"
+                }
+            },
+            "base_id": "000053",
+            "character_audio": "Katakana/000053_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ク",
+            "meanings": [
+                "ku"
+            ],
+            "kunyomi": [
+                "ク"
+            ],
+            "examples": [
+                {
+                    "word": "クラス",
+                    "reading": "クラス",
+                    "meaning": "Class",
+                    "audio": "Katakana/000054_1.mp3"
+                },
+                {
+                    "word": "クレジットカード",
+                    "reading": "クレジットカード",
+                    "meaning": "Credit card",
+                    "audio": "Katakana/000054_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ク": "Katakana/000054_0.mp3"
+                }
+            },
+            "base_id": "000054",
+            "character_audio": "Katakana/000054_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ケ",
+            "meanings": [
+                "ke"
+            ],
+            "kunyomi": [
+                "ケ"
+            ],
+            "examples": [
+                {
+                    "word": "ケーキ",
+                    "reading": "ケーキ",
+                    "meaning": "Cake",
+                    "audio": "Katakana/000055_1.mp3"
+                },
+                {
+                    "word": "ケース",
+                    "reading": "ケース",
+                    "meaning": "Case",
+                    "audio": "Katakana/000055_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ケ": "Katakana/000055_0.mp3"
+                }
+            },
+            "base_id": "000055",
+            "character_audio": "Katakana/000055_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "コ",
+            "meanings": [
+                "ko"
+            ],
+            "kunyomi": [
+                "コ"
+            ],
+            "examples": [
+                {
+                    "word": "コーヒー",
+                    "reading": "コーヒー",
+                    "meaning": "Coffee",
+                    "audio": "Katakana/000056_1.mp3"
+                },
+                {
+                    "word": "コンピューター",
+                    "reading": "コンピューター",
+                    "meaning": "Computer",
+                    "audio": "Katakana/000056_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "コ": "Katakana/000056_0.mp3"
+                }
+            },
+            "base_id": "000056",
+            "character_audio": "Katakana/000056_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "サ",
+            "meanings": [
+                "sa"
+            ],
+            "kunyomi": [
+                "サ"
+            ],
+            "examples": [
+                {
+                    "word": "サッカー",
+                    "reading": "サッカー",
+                    "meaning": "Soccer",
+                    "audio": "Katakana/000057_1.mp3"
+                },
+                {
+                    "word": "サラダ",
+                    "reading": "サラダ",
+                    "meaning": "Salad",
+                    "audio": "Katakana/000057_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "サ": "Katakana/000057_0.mp3"
+                }
+            },
+            "base_id": "000057",
+            "character_audio": "Katakana/000057_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "シ",
+            "meanings": [
+                "shi"
+            ],
+            "kunyomi": [
+                "シ"
+            ],
+            "examples": [
+                {
+                    "word": "シャツ",
+                    "reading": "シャツ",
+                    "meaning": "Shirt",
+                    "audio": "Katakana/000058_1.mp3"
+                },
+                {
+                    "word": "シャワー",
+                    "reading": "シャワー",
+                    "meaning": "Shower",
+                    "audio": "Katakana/000058_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "シ": "Katakana/000058_0.mp3"
+                }
+            },
+            "base_id": "000058",
+            "character_audio": "Katakana/000058_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ス",
+            "meanings": [
+                "su"
+            ],
+            "kunyomi": [
+                "ス"
+            ],
+            "examples": [
+                {
+                    "word": "スポーツ",
+                    "reading": "スポーツ",
+                    "meaning": "Sports",
+                    "audio": "Katakana/000059_1.mp3"
+                },
+                {
+                    "word": "スマートフォン",
+                    "reading": "スマートフォン",
+                    "meaning": "Smartphone",
+                    "audio": "Katakana/000059_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ス": "Katakana/000059_0.mp3"
+                }
+            },
+            "base_id": "000059",
+            "character_audio": "Katakana/000059_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "セ",
+            "meanings": [
+                "se"
+            ],
+            "kunyomi": [
+                "セ"
+            ],
+            "examples": [
+                {
+                    "word": "セーター",
+                    "reading": "セーター",
+                    "meaning": "Sweater",
+                    "audio": "Katakana/000060_1.mp3"
+                },
+                {
+                    "word": "センター",
+                    "reading": "センター",
+                    "meaning": "Center",
+                    "audio": "Katakana/000060_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "セ": "Katakana/000060_0.mp3"
+                }
+            },
+            "base_id": "000060",
+            "character_audio": "Katakana/000060_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ソ",
+            "meanings": [
+                "so"
+            ],
+            "kunyomi": [
+                "ソ"
+            ],
+            "examples": [
+                {
+                    "word": "ソファ",
+                    "reading": "ソファ",
+                    "meaning": "Sofa",
+                    "audio": "Katakana/000061_1.mp3"
+                },
+                {
+                    "word": "ソース",
+                    "reading": "ソース",
+                    "meaning": "Sauce",
+                    "audio": "Katakana/000061_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ソ": "Katakana/000061_0.mp3"
+                }
+            },
+            "base_id": "000061",
+            "character_audio": "Katakana/000061_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "タ",
+            "meanings": [
+                "ta"
+            ],
+            "kunyomi": [
+                "タ"
+            ],
+            "examples": [
+                {
+                    "word": "タクシー",
+                    "reading": "タクシー",
+                    "meaning": "Taxi",
+                    "audio": "Katakana/000062_1.mp3"
+                },
+                {
+                    "word": "タオル",
+                    "reading": "タオル",
+                    "meaning": "Towel",
+                    "audio": "Katakana/000062_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "タ": "Katakana/000062_0.mp3"
+                }
+            },
+            "base_id": "000062",
+            "character_audio": "Katakana/000062_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "チ",
+            "meanings": [
+                "chi"
+            ],
+            "kunyomi": [
+                "チ"
+            ],
+            "examples": [
+                {
+                    "word": "チーズ",
+                    "reading": "チーズ",
+                    "meaning": "Cheese",
+                    "audio": "Katakana/000063_1.mp3"
+                },
+                {
+                    "word": "チケット",
+                    "reading": "チケット",
+                    "meaning": "Ticket",
+                    "audio": "Katakana/000063_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "チ": "Katakana/000063_0.mp3"
+                }
+            },
+            "base_id": "000063",
+            "character_audio": "Katakana/000063_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ツ",
+            "meanings": [
+                "tsu"
+            ],
+            "kunyomi": [
+                "ツ"
+            ],
+            "examples": [
+                {
+                    "word": "ツアー",
+                    "reading": "ツアー",
+                    "meaning": "Tour",
+                    "audio": "Katakana/000064_1.mp3"
+                },
+                {
+                    "word": "スーツ",
+                    "reading": "スーツ",
+                    "meaning": "Suit",
+                    "audio": "Katakana/000064_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ツ": "Katakana/000064_0.mp3"
+                }
+            },
+            "base_id": "000064",
+            "character_audio": "Katakana/000064_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "テ",
+            "meanings": [
+                "te"
+            ],
+            "kunyomi": [
+                "テ"
+            ],
+            "examples": [
+                {
+                    "word": "テレビ",
+                    "reading": "テレビ",
+                    "meaning": "TV",
+                    "audio": "Katakana/000065_1.mp3"
+                },
+                {
+                    "word": "テーブル",
+                    "reading": "テーブル",
+                    "meaning": "Table",
+                    "audio": "Katakana/000065_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "テ": "Katakana/000065_0.mp3"
+                }
+            },
+            "base_id": "000065",
+            "character_audio": "Katakana/000065_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ト",
+            "meanings": [
+                "to"
+            ],
+            "kunyomi": [
+                "ト"
+            ],
+            "examples": [
+                {
+                    "word": "トイレ",
+                    "reading": "トイレ",
+                    "meaning": "Toilet",
+                    "audio": "Katakana/000066_1.mp3"
+                },
+                {
+                    "word": "トマト",
+                    "reading": "トマト",
+                    "meaning": "Tomato",
+                    "audio": "Katakana/000066_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ト": "Katakana/000066_0.mp3"
+                }
+            },
+            "base_id": "000066",
+            "character_audio": "Katakana/000066_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ナ",
+            "meanings": [
+                "na"
+            ],
+            "kunyomi": [
+                "ナ"
+            ],
+            "examples": [
+                {
+                    "word": "ナイフ",
+                    "reading": "ナイフ",
+                    "meaning": "Knife",
+                    "audio": "Katakana/000067_1.mp3"
+                },
+                {
+                    "word": "バナナ",
+                    "reading": "バナナ",
+                    "meaning": "Banana",
+                    "audio": "Katakana/000067_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ナ": "Katakana/000067_0.mp3"
+                }
+            },
+            "base_id": "000067",
+            "character_audio": "Katakana/000067_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ニ",
+            "meanings": [
+                "ni"
+            ],
+            "kunyomi": [
+                "ニ"
+            ],
+            "examples": [
+                {
+                    "word": "ニュース",
+                    "reading": "ニュース",
+                    "meaning": "News",
+                    "audio": "Katakana/000068_1.mp3"
+                },
+                {
+                    "word": "テニス",
+                    "reading": "テニス",
+                    "meaning": "Tennis",
+                    "audio": "Katakana/000068_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ニ": "Katakana/000068_0.mp3"
+                }
+            },
+            "base_id": "000068",
+            "character_audio": "Katakana/000068_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ヌ",
+            "meanings": [
+                "nu"
+            ],
+            "kunyomi": [
+                "ヌ"
+            ],
+            "examples": [
+                {
+                    "word": "ヌードル",
+                    "reading": "ヌードル",
+                    "meaning": "Noodle",
+                    "audio": "Katakana/000069_1.mp3"
+                },
+                {
+                    "word": "カヌー",
+                    "reading": "カヌー",
+                    "meaning": "Canoe",
+                    "audio": "Katakana/000069_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ヌ": "Katakana/000069_0.mp3"
+                }
+            },
+            "base_id": "000069",
+            "character_audio": "Katakana/000069_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ネ",
+            "meanings": [
+                "ne"
+            ],
+            "kunyomi": [
+                "ネ"
+            ],
+            "examples": [
+                {
+                    "word": "ネクタイ",
+                    "reading": "ネクタイ",
+                    "meaning": "Necktie",
+                    "audio": "Katakana/000070_1.mp3"
+                },
+                {
+                    "word": "ネット",
+                    "reading": "ネット",
+                    "meaning": "Net",
+                    "audio": "Katakana/000070_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ネ": "Katakana/000070_0.mp3"
+                }
+            },
+            "base_id": "000070",
+            "character_audio": "Katakana/000070_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ノ",
+            "meanings": [
+                "no"
+            ],
+            "kunyomi": [
+                "ノ"
+            ],
+            "examples": [
+                {
+                    "word": "ノート",
+                    "reading": "ノート",
+                    "meaning": "Notebook",
+                    "audio": "Katakana/000071_1.mp3"
+                },
+                {
+                    "word": "ノック",
+                    "reading": "ノック",
+                    "meaning": "Knock",
+                    "audio": "Katakana/000071_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ノ": "Katakana/000071_0.mp3"
+                }
+            },
+            "base_id": "000071",
+            "character_audio": "Katakana/000071_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ハ",
+            "meanings": [
+                "ha"
+            ],
+            "kunyomi": [
+                "ハ"
+            ],
+            "examples": [
+                {
+                    "word": "ハンバーガー",
+                    "reading": "ハンバーガー",
+                    "meaning": "Hamburger",
+                    "audio": "Katakana/000072_1.mp3"
+                },
+                {
+                    "word": "バス",
+                    "reading": "バス",
+                    "meaning": "Bus",
+                    "audio": "Katakana/000072_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ハ": "Katakana/000072_0.mp3"
+                }
+            },
+            "base_id": "000072",
+            "character_audio": "Katakana/000072_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ヒ",
+            "meanings": [
+                "hi"
+            ],
+            "kunyomi": [
+                "ヒ"
+            ],
+            "examples": [
+                {
+                    "word": "ヒーター",
+                    "reading": "ヒーター",
+                    "meaning": "Heater",
+                    "audio": "Katakana/000073_1.mp3"
+                },
+                {
+                    "word": "ヒーロー",
+                    "reading": "ヒーロー",
+                    "meaning": "Hero",
+                    "audio": "Katakana/000073_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ヒ": "Katakana/000073_0.mp3"
+                }
+            },
+            "base_id": "000073",
+            "character_audio": "Katakana/000073_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "フ",
+            "meanings": [
+                "fu"
+            ],
+            "kunyomi": [
+                "フ"
+            ],
+            "examples": [
+                {
+                    "word": "フィルム",
+                    "reading": "フィルム",
+                    "meaning": "Film",
+                    "audio": "Katakana/000074_1.mp3"
+                },
+                {
+                    "word": "フォーク",
+                    "reading": "フォーク",
+                    "meaning": "Fork",
+                    "audio": "Katakana/000074_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "フ": "Katakana/000074_0.mp3"
+                }
+            },
+            "base_id": "000074",
+            "character_audio": "Katakana/000074_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ヘ",
+            "meanings": [
+                "he"
+            ],
+            "kunyomi": [
+                "ヘ"
+            ],
+            "examples": [
+                {
+                    "word": "ヘリコプター",
+                    "reading": "ヘリコプター",
+                    "meaning": "Helicopter",
+                    "audio": "Katakana/000075_1.mp3"
+                },
+                {
+                    "word": "ヘルメット",
+                    "reading": "ヘルメット",
+                    "meaning": "Helmet",
+                    "audio": "Katakana/000075_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ヘ": "Katakana/000075_0.mp3"
+                }
+            },
+            "base_id": "000075",
+            "character_audio": "Katakana/000075_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ホ",
+            "meanings": [
+                "ho"
+            ],
+            "kunyomi": [
+                "ホ"
+            ],
+            "examples": [
+                {
+                    "word": "ホテル",
+                    "reading": "ホテル",
+                    "meaning": "Hotel",
+                    "audio": "Katakana/000076_1.mp3"
+                },
+                {
+                    "word": "ホット",
+                    "reading": "ホット",
+                    "meaning": "Hot",
+                    "audio": "Katakana/000076_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ホ": "Katakana/000076_0.mp3"
+                }
+            },
+            "base_id": "000076",
+            "character_audio": "Katakana/000076_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "マ",
+            "meanings": [
+                "ma"
+            ],
+            "kunyomi": [
+                "マ"
+            ],
+            "examples": [
+                {
+                    "word": "マウス",
+                    "reading": "マウス",
+                    "meaning": "Mouse",
+                    "audio": "Katakana/000077_1.mp3"
+                },
+                {
+                    "word": "マスク",
+                    "reading": "マスク",
+                    "meaning": "Mask",
+                    "audio": "Katakana/000077_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "マ": "Katakana/000077_0.mp3"
+                }
+            },
+            "base_id": "000077",
+            "character_audio": "Katakana/000077_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ミ",
+            "meanings": [
+                "mi"
+            ],
+            "kunyomi": [
+                "ミ"
+            ],
+            "examples": [
+                {
+                    "word": "ミルク",
+                    "reading": "ミルク",
+                    "meaning": "Milk",
+                    "audio": "Katakana/000078_1.mp3"
+                },
+                {
+                    "word": "ミラー",
+                    "reading": "ミラー",
+                    "meaning": "Mirror",
+                    "audio": "Katakana/000078_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ミ": "Katakana/000078_0.mp3"
+                }
+            },
+            "base_id": "000078",
+            "character_audio": "Katakana/000078_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ム",
+            "meanings": [
+                "mu"
+            ],
+            "kunyomi": [
+                "ム"
+            ],
+            "examples": [
+                {
+                    "word": "ムービー",
+                    "reading": "ムービー",
+                    "meaning": "Movie",
+                    "audio": "Katakana/000079_1.mp3"
+                },
+                {
+                    "word": "チーム",
+                    "reading": "チーム",
+                    "meaning": "Team",
+                    "audio": "Katakana/000079_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ム": "Katakana/000079_0.mp3"
+                }
+            },
+            "base_id": "000079",
+            "character_audio": "Katakana/000079_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "メ",
+            "meanings": [
+                "me"
+            ],
+            "kunyomi": [
+                "メ"
+            ],
+            "examples": [
+                {
+                    "word": "メール",
+                    "reading": "メール",
+                    "meaning": "Email",
+                    "audio": "Katakana/000080_1.mp3"
+                },
+                {
+                    "word": "メモ",
+                    "reading": "メモ",
+                    "meaning": "Memo",
+                    "audio": "Katakana/000080_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "メ": "Katakana/000080_0.mp3"
+                }
+            },
+            "base_id": "000080",
+            "character_audio": "Katakana/000080_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "モ",
+            "meanings": [
+                "mo"
+            ],
+            "kunyomi": [
+                "モ"
+            ],
+            "examples": [
+                {
+                    "word": "モニター",
+                    "reading": "モニター",
+                    "meaning": "Monitor",
+                    "audio": "Katakana/000081_1.mp3"
+                },
+                {
+                    "word": "モーター",
+                    "reading": "モーター",
+                    "meaning": "Motor",
+                    "audio": "Katakana/000081_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "モ": "Katakana/000081_0.mp3"
+                }
+            },
+            "base_id": "000081",
+            "character_audio": "Katakana/000081_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ヤ",
+            "meanings": [
+                "ya"
+            ],
+            "kunyomi": [
+                "ヤ"
+            ],
+            "examples": [
+                {
+                    "word": "タイヤ",
+                    "reading": "タイヤ",
+                    "meaning": "Tire",
+                    "audio": "Katakana/000082_1.mp3"
+                },
+                {
+                    "word": "ダイヤ",
+                    "reading": "ダイヤ",
+                    "meaning": "Diamond",
+                    "audio": "Katakana/000082_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ヤ": "Katakana/000082_0.mp3"
+                }
+            },
+            "base_id": "000082",
+            "character_audio": "Katakana/000082_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ユ",
+            "meanings": [
+                "yu"
+            ],
+            "kunyomi": [
+                "ユ"
+            ],
+            "examples": [
+                {
+                    "word": "ユニフォーム",
+                    "reading": "ユニフォーム",
+                    "meaning": "Uniform",
+                    "audio": "Katakana/000083_1.mp3"
+                },
+                {
+                    "word": "ユーモア",
+                    "reading": "ユーモア",
+                    "meaning": "Humor",
+                    "audio": "Katakana/000083_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ユ": "Katakana/000083_0.mp3"
+                }
+            },
+            "base_id": "000083",
+            "character_audio": "Katakana/000083_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ヨ",
+            "meanings": [
+                "yo"
+            ],
+            "kunyomi": [
+                "ヨ"
+            ],
+            "examples": [
+                {
+                    "word": "ヨーロッパ",
+                    "reading": "ヨーロッパ",
+                    "meaning": "Europe",
+                    "audio": "Katakana/000084_1.mp3"
+                },
+                {
+                    "word": "ヨガ",
+                    "reading": "ヨガ",
+                    "meaning": "Yoga",
+                    "audio": "Katakana/000084_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ヨ": "Katakana/000084_0.mp3"
+                }
+            },
+            "base_id": "000084",
+            "character_audio": "Katakana/000084_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ラ",
+            "meanings": [
+                "ra"
+            ],
+            "kunyomi": [
+                "ラ"
+            ],
+            "examples": [
+                {
+                    "word": "ラジオ",
+                    "reading": "ラジオ",
+                    "meaning": "Radio",
+                    "audio": "Katakana/000085_1.mp3"
+                },
+                {
+                    "word": "ラーメン",
+                    "reading": "ラーメン",
+                    "meaning": "Ramen",
+                    "audio": "Katakana/000085_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ラ": "Katakana/000085_0.mp3"
+                }
+            },
+            "base_id": "000085",
+            "character_audio": "Katakana/000085_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "リ",
+            "meanings": [
+                "ri"
+            ],
+            "kunyomi": [
+                "リ"
+            ],
+            "examples": [
+                {
+                    "word": "リモコン",
+                    "reading": "リモコン",
+                    "meaning": "Remote control",
+                    "audio": "Katakana/000086_1.mp3"
+                },
+                {
+                    "word": "リスト",
+                    "reading": "リスト",
+                    "meaning": "List",
+                    "audio": "Katakana/000086_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "リ": "Katakana/000086_0.mp3"
+                }
+            },
+            "base_id": "000086",
+            "character_audio": "Katakana/000086_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ル",
+            "meanings": [
+                "ru"
+            ],
+            "kunyomi": [
+                "ル"
+            ],
+            "examples": [
+                {
+                    "word": "ルール",
+                    "reading": "ルール",
+                    "meaning": "Rule",
+                    "audio": "Katakana/000087_1.mp3"
+                },
+                {
+                    "word": "ルーター",
+                    "reading": "ルーター",
+                    "meaning": "Router",
+                    "audio": "Katakana/000087_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ル": "Katakana/000087_0.mp3"
+                }
+            },
+            "base_id": "000087",
+            "character_audio": "Katakana/000087_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "レ",
+            "meanings": [
+                "re"
+            ],
+            "kunyomi": [
+                "レ"
+            ],
+            "examples": [
+                {
+                    "word": "レストラン",
+                    "reading": "レストラン",
+                    "meaning": "Restaurant",
+                    "audio": "Katakana/000088_1.mp3"
+                },
+                {
+                    "word": "レシート",
+                    "reading": "レシート",
+                    "meaning": "Receipt",
+                    "audio": "Katakana/000088_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "レ": "Katakana/000088_0.mp3"
+                }
+            },
+            "base_id": "000088",
+            "character_audio": "Katakana/000088_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ロ",
+            "meanings": [
+                "ro"
+            ],
+            "kunyomi": [
+                "ロ"
+            ],
+            "examples": [
+                {
+                    "word": "ロボット",
+                    "reading": "ロボット",
+                    "meaning": "Robot",
+                    "audio": "Katakana/000089_1.mp3"
+                },
+                {
+                    "word": "ロッカー",
+                    "reading": "ロッカー",
+                    "meaning": "Locker",
+                    "audio": "Katakana/000089_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ロ": "Katakana/000089_0.mp3"
+                }
+            },
+            "base_id": "000089",
+            "character_audio": "Katakana/000089_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ワ",
+            "meanings": [
+                "wa"
+            ],
+            "kunyomi": [
+                "ワ"
+            ],
+            "examples": [
+                {
+                    "word": "ワイン",
+                    "reading": "ワイン",
+                    "meaning": "Wine",
+                    "audio": "Katakana/000090_1.mp3"
+                },
+                {
+                    "word": "ワイシャツ",
+                    "reading": "ワイシャツ",
+                    "meaning": "Dress shirt",
+                    "audio": "Katakana/000090_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ワ": "Katakana/000090_0.mp3"
+                }
+            },
+            "base_id": "000090",
+            "character_audio": "Katakana/000090_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ヲ",
+            "meanings": [
+                "wo"
+            ],
+            "kunyomi": [
+                "ヲ"
+            ],
+            "examples": [
+                {
+                    "word": "ヲタク",
+                    "reading": "ヲタク",
+                    "meaning": "Otaku",
+                    "audio": "Katakana/000091_1.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ヲ": "Katakana/000091_0.mp3"
+                }
+            },
+            "base_id": "000091",
+            "character_audio": "Katakana/000091_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Katakana",
+            "character": "ン",
+            "meanings": [
+                "n"
+            ],
+            "kunyomi": [
+                "ン"
+            ],
+            "examples": [
+                {
+                    "word": "ペン",
+                    "reading": "ペン",
+                    "meaning": "Pen",
+                    "audio": "Katakana/000092_1.mp3"
+                },
+                {
+                    "word": "ボタン",
+                    "reading": "ボタン",
+                    "meaning": "Button",
+                    "audio": "Katakana/000092_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ン": "Katakana/000092_0.mp3"
+                }
+            },
+            "base_id": "000092",
+            "character_audio": "Katakana/000092_0.mp3"
+        }
+    ]
+}

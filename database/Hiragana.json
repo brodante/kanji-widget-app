@@ -1,0 +1,1516 @@
+{
+    "Hiragana": [
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "あ",
+            "meanings": [
+                "a"
+            ],
+            "kunyomi": [
+                "あ"
+            ],
+            "examples": [
+                {
+                    "word": "ありがとう",
+                    "reading": "ありがとう",
+                    "meaning": "Thank you",
+                    "audio": "Hiragana/000001_1.mp3"
+                },
+                {
+                    "word": "雨",
+                    "reading": "あめ",
+                    "meaning": "Rain",
+                    "audio": "Hiragana/000001_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "あ": "Hiragana/000001_0.mp3"
+                }
+            },
+            "base_id": "000001",
+            "character_audio": "Hiragana/000001_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "い",
+            "meanings": [
+                "i"
+            ],
+            "kunyomi": [
+                "い"
+            ],
+            "examples": [
+                {
+                    "word": "犬",
+                    "reading": "いぬ",
+                    "meaning": "Dog",
+                    "audio": "Hiragana/000002_1.mp3"
+                },
+                {
+                    "word": "今",
+                    "reading": "いま",
+                    "meaning": "Now",
+                    "audio": "Hiragana/000002_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "い": "Hiragana/000002_0.mp3"
+                }
+            },
+            "base_id": "000002",
+            "character_audio": "Hiragana/000002_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "う",
+            "meanings": [
+                "u"
+            ],
+            "kunyomi": [
+                "う"
+            ],
+            "examples": [
+                {
+                    "word": "海",
+                    "reading": "うみ",
+                    "meaning": "Sea",
+                    "audio": "Hiragana/000003_1.mp3"
+                },
+                {
+                    "word": "歌",
+                    "reading": "うた",
+                    "meaning": "Song",
+                    "audio": "Hiragana/000003_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "う": "Hiragana/000003_0.mp3"
+                }
+            },
+            "base_id": "000003",
+            "character_audio": "Hiragana/000003_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "え",
+            "meanings": [
+                "e"
+            ],
+            "kunyomi": [
+                "え"
+            ],
+            "examples": [
+                {
+                    "word": "駅",
+                    "reading": "えき",
+                    "meaning": "Station",
+                    "audio": "Hiragana/000004_1.mp3"
+                },
+                {
+                    "word": "鉛筆",
+                    "reading": "えんぴつ",
+                    "meaning": "Pencil",
+                    "audio": "Hiragana/000004_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "え": "Hiragana/000004_0.mp3"
+                }
+            },
+            "base_id": "000004",
+            "character_audio": "Hiragana/000004_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "お",
+            "meanings": [
+                "o"
+            ],
+            "kunyomi": [
+                "お"
+            ],
+            "examples": [
+                {
+                    "word": "おはよう",
+                    "reading": "おはよう",
+                    "meaning": "Good morning",
+                    "audio": "Hiragana/000005_1.mp3"
+                },
+                {
+                    "word": "お茶",
+                    "reading": "おちゃ",
+                    "meaning": "Tea",
+                    "audio": "Hiragana/000005_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "お": "Hiragana/000005_0.mp3"
+                }
+            },
+            "base_id": "000005",
+            "character_audio": "Hiragana/000005_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "か",
+            "meanings": [
+                "ka"
+            ],
+            "kunyomi": [
+                "か"
+            ],
+            "examples": [
+                {
+                    "word": "傘",
+                    "reading": "かさ",
+                    "meaning": "Umbrella",
+                    "audio": "Hiragana/000006_1.mp3"
+                },
+                {
+                    "word": "家族",
+                    "reading": "かぞく",
+                    "meaning": "Family",
+                    "audio": "Hiragana/000006_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "か": "Hiragana/000006_0.mp3"
+                }
+            },
+            "base_id": "000006",
+            "character_audio": "Hiragana/000006_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "き",
+            "meanings": [
+                "ki"
+            ],
+            "kunyomi": [
+                "き"
+            ],
+            "examples": [
+                {
+                    "word": "木",
+                    "reading": "き",
+                    "meaning": "Tree",
+                    "audio": "Hiragana/000007_1.mp3"
+                },
+                {
+                    "word": "今日",
+                    "reading": "きょう",
+                    "meaning": "Today",
+                    "audio": "Hiragana/000007_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "き": "Hiragana/000007_0.mp3"
+                }
+            },
+            "base_id": "000007",
+            "character_audio": "Hiragana/000007_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "く",
+            "meanings": [
+                "ku"
+            ],
+            "kunyomi": [
+                "く"
+            ],
+            "examples": [
+                {
+                    "word": "靴",
+                    "reading": "くつ",
+                    "meaning": "Shoes",
+                    "audio": "Hiragana/000008_1.mp3"
+                },
+                {
+                    "word": "車",
+                    "reading": "くるま",
+                    "meaning": "Car",
+                    "audio": "Hiragana/000008_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "く": "Hiragana/000008_0.mp3"
+                }
+            },
+            "base_id": "000008",
+            "character_audio": "Hiragana/000008_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "け",
+            "meanings": [
+                "ke"
+            ],
+            "kunyomi": [
+                "け"
+            ],
+            "examples": [
+                {
+                    "word": "今朝",
+                    "reading": "けさ",
+                    "meaning": "This morning",
+                    "audio": "Hiragana/000009_1.mp3"
+                },
+                {
+                    "word": "結婚",
+                    "reading": "けっこん",
+                    "meaning": "Marriage",
+                    "audio": "Hiragana/000009_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "け": "Hiragana/000009_0.mp3"
+                }
+            },
+            "base_id": "000009",
+            "character_audio": "Hiragana/000009_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "こ",
+            "meanings": [
+                "ko"
+            ],
+            "kunyomi": [
+                "こ"
+            ],
+            "examples": [
+                {
+                    "word": "子供",
+                    "reading": "こども",
+                    "meaning": "Child",
+                    "audio": "Hiragana/000010_1.mp3"
+                },
+                {
+                    "word": "心",
+                    "reading": "こころ",
+                    "meaning": "Heart",
+                    "audio": "Hiragana/000010_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "こ": "Hiragana/000010_0.mp3"
+                }
+            },
+            "base_id": "000010",
+            "character_audio": "Hiragana/000010_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "さ",
+            "meanings": [
+                "sa"
+            ],
+            "kunyomi": [
+                "さ"
+            ],
+            "examples": [
+                {
+                    "word": "桜",
+                    "reading": "さくら",
+                    "meaning": "Cherry blossom",
+                    "audio": "Hiragana/000011_1.mp3"
+                },
+                {
+                    "word": "魚",
+                    "reading": "さかな",
+                    "meaning": "Fish",
+                    "audio": "Hiragana/000011_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "さ": "Hiragana/000011_0.mp3"
+                }
+            },
+            "base_id": "000011",
+            "character_audio": "Hiragana/000011_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "し",
+            "meanings": [
+                "shi"
+            ],
+            "kunyomi": [
+                "し"
+            ],
+            "examples": [
+                {
+                    "word": "写真",
+                    "reading": "しゃしん",
+                    "meaning": "Photo",
+                    "audio": "Hiragana/000012_1.mp3"
+                },
+                {
+                    "word": "仕事",
+                    "reading": "しごと",
+                    "meaning": "Work",
+                    "audio": "Hiragana/000012_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "し": "Hiragana/000012_0.mp3"
+                }
+            },
+            "base_id": "000012",
+            "character_audio": "Hiragana/000012_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "す",
+            "meanings": [
+                "su"
+            ],
+            "kunyomi": [
+                "す"
+            ],
+            "examples": [
+                {
+                    "word": "寿司",
+                    "reading": "すし",
+                    "meaning": "Sushi",
+                    "audio": "Hiragana/000013_1.mp3"
+                },
+                {
+                    "word": "水泳",
+                    "reading": "すいえい",
+                    "meaning": "Swimming",
+                    "audio": "Hiragana/000013_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "す": "Hiragana/000013_0.mp3"
+                }
+            },
+            "base_id": "000013",
+            "character_audio": "Hiragana/000013_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "せ",
+            "meanings": [
+                "se"
+            ],
+            "kunyomi": [
+                "せ"
+            ],
+            "examples": [
+                {
+                    "word": "先生",
+                    "reading": "せんせい",
+                    "meaning": "Teacher",
+                    "audio": "Hiragana/000014_1.mp3"
+                },
+                {
+                    "word": "世界",
+                    "reading": "せかい",
+                    "meaning": "World",
+                    "audio": "Hiragana/000014_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "せ": "Hiragana/000014_0.mp3"
+                }
+            },
+            "base_id": "000014",
+            "character_audio": "Hiragana/000014_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "そ",
+            "meanings": [
+                "so"
+            ],
+            "kunyomi": [
+                "そ"
+            ],
+            "examples": [
+                {
+                    "word": "空",
+                    "reading": "そら",
+                    "meaning": "Sky",
+                    "audio": "Hiragana/000015_1.mp3"
+                },
+                {
+                    "word": "外",
+                    "reading": "そと",
+                    "meaning": "Outside",
+                    "audio": "Hiragana/000015_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "そ": "Hiragana/000015_0.mp3"
+                }
+            },
+            "base_id": "000015",
+            "character_audio": "Hiragana/000015_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "た",
+            "meanings": [
+                "ta"
+            ],
+            "kunyomi": [
+                "た"
+            ],
+            "examples": [
+                {
+                    "word": "食べ物",
+                    "reading": "たべもの",
+                    "meaning": "Food",
+                    "audio": "Hiragana/000016_1.mp3"
+                },
+                {
+                    "word": "卵",
+                    "reading": "たまご",
+                    "meaning": "Egg",
+                    "audio": "Hiragana/000016_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "た": "Hiragana/000016_0.mp3"
+                }
+            },
+            "base_id": "000016",
+            "character_audio": "Hiragana/000016_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ち",
+            "meanings": [
+                "chi"
+            ],
+            "kunyomi": [
+                "ち"
+            ],
+            "examples": [
+                {
+                    "word": "地下鉄",
+                    "reading": "ちかてつ",
+                    "meaning": "Subway",
+                    "audio": "Hiragana/000017_1.mp3"
+                },
+                {
+                    "word": "近い",
+                    "reading": "ちかい",
+                    "meaning": "Near",
+                    "audio": "Hiragana/000017_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ち": "Hiragana/000017_0.mp3"
+                }
+            },
+            "base_id": "000017",
+            "character_audio": "Hiragana/000017_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "つ",
+            "meanings": [
+                "tsu"
+            ],
+            "kunyomi": [
+                "つ"
+            ],
+            "examples": [
+                {
+                    "word": "月",
+                    "reading": "つき",
+                    "meaning": "Moon",
+                    "audio": "Hiragana/000018_1.mp3"
+                },
+                {
+                    "word": "机",
+                    "reading": "つくえ",
+                    "meaning": "Desk",
+                    "audio": "Hiragana/000018_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "つ": "Hiragana/000018_0.mp3"
+                }
+            },
+            "base_id": "000018",
+            "character_audio": "Hiragana/000018_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "て",
+            "meanings": [
+                "te"
+            ],
+            "kunyomi": [
+                "て"
+            ],
+            "examples": [
+                {
+                    "word": "手",
+                    "reading": "て",
+                    "meaning": "Hand",
+                    "audio": "Hiragana/000019_1.mp3"
+                },
+                {
+                    "word": "手紙",
+                    "reading": "てがみ",
+                    "meaning": "Letter",
+                    "audio": "Hiragana/000019_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "て": "Hiragana/000019_0.mp3"
+                }
+            },
+            "base_id": "000019",
+            "character_audio": "Hiragana/000019_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "と",
+            "meanings": [
+                "to"
+            ],
+            "kunyomi": [
+                "と"
+            ],
+            "examples": [
+                {
+                    "word": "友達",
+                    "reading": "ともだち",
+                    "meaning": "Friend",
+                    "audio": "Hiragana/000020_1.mp3"
+                },
+                {
+                    "word": "時計",
+                    "reading": "とけい",
+                    "meaning": "Clock",
+                    "audio": "Hiragana/000020_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "と": "Hiragana/000020_0.mp3"
+                }
+            },
+            "base_id": "000020",
+            "character_audio": "Hiragana/000020_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "な",
+            "meanings": [
+                "na"
+            ],
+            "kunyomi": [
+                "な"
+            ],
+            "examples": [
+                {
+                    "word": "名前",
+                    "reading": "なまえ",
+                    "meaning": "Name",
+                    "audio": "Hiragana/000021_1.mp3"
+                },
+                {
+                    "word": "夏",
+                    "reading": "なつ",
+                    "meaning": "Summer",
+                    "audio": "Hiragana/000021_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "な": "Hiragana/000021_0.mp3"
+                }
+            },
+            "base_id": "000021",
+            "character_audio": "Hiragana/000021_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "に",
+            "meanings": [
+                "ni"
+            ],
+            "kunyomi": [
+                "に"
+            ],
+            "examples": [
+                {
+                    "word": "肉",
+                    "reading": "にく",
+                    "meaning": "Meat",
+                    "audio": "Hiragana/000022_1.mp3"
+                },
+                {
+                    "word": "日本",
+                    "reading": "にほん",
+                    "meaning": "Japan",
+                    "audio": "Hiragana/000022_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "に": "Hiragana/000022_0.mp3"
+                }
+            },
+            "base_id": "000022",
+            "character_audio": "Hiragana/000022_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ぬ",
+            "meanings": [
+                "nu"
+            ],
+            "kunyomi": [
+                "ぬ"
+            ],
+            "examples": [
+                {
+                    "word": "ぬいぐるみ",
+                    "reading": "ぬいぐるみ",
+                    "meaning": "Stuffed toy",
+                    "audio": "Hiragana/000023_1.mp3"
+                },
+                {
+                    "word": "塗る",
+                    "reading": "ぬる",
+                    "meaning": "To paint",
+                    "audio": "Hiragana/000023_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ぬ": "Hiragana/000023_0.mp3"
+                }
+            },
+            "base_id": "000023",
+            "character_audio": "Hiragana/000023_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ね",
+            "meanings": [
+                "ne"
+            ],
+            "kunyomi": [
+                "ね"
+            ],
+            "examples": [
+                {
+                    "word": "猫",
+                    "reading": "ねこ",
+                    "meaning": "Cat",
+                    "audio": "Hiragana/000024_1.mp3"
+                },
+                {
+                    "word": "眠い",
+                    "reading": "ねむい",
+                    "meaning": "Sleepy",
+                    "audio": "Hiragana/000024_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ね": "Hiragana/000024_0.mp3"
+                }
+            },
+            "base_id": "000024",
+            "character_audio": "Hiragana/000024_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "の",
+            "meanings": [
+                "no"
+            ],
+            "kunyomi": [
+                "の"
+            ],
+            "examples": [
+                {
+                    "word": "飲み物",
+                    "reading": "のみもの",
+                    "meaning": "Drink",
+                    "audio": "Hiragana/000025_1.mp3"
+                },
+                {
+                    "word": "乗り物",
+                    "reading": "のりもの",
+                    "meaning": "Vehicle",
+                    "audio": "Hiragana/000025_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "の": "Hiragana/000025_0.mp3"
+                }
+            },
+            "base_id": "000025",
+            "character_audio": "Hiragana/000025_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "は",
+            "meanings": [
+                "ha"
+            ],
+            "kunyomi": [
+                "は"
+            ],
+            "examples": [
+                {
+                    "word": "花",
+                    "reading": "はな",
+                    "meaning": "Flower",
+                    "audio": "Hiragana/000026_1.mp3"
+                },
+                {
+                    "word": "春",
+                    "reading": "はる",
+                    "meaning": "Spring",
+                    "audio": "Hiragana/000026_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "は": "Hiragana/000026_0.mp3"
+                }
+            },
+            "base_id": "000026",
+            "character_audio": "Hiragana/000026_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ひ",
+            "meanings": [
+                "hi"
+            ],
+            "kunyomi": [
+                "ひ"
+            ],
+            "examples": [
+                {
+                    "word": "人",
+                    "reading": "ひと",
+                    "meaning": "Person",
+                    "audio": "Hiragana/000027_1.mp3"
+                },
+                {
+                    "word": "飛行機",
+                    "reading": "ひこうき",
+                    "meaning": "Airplane",
+                    "audio": "Hiragana/000027_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ひ": "Hiragana/000027_0.mp3"
+                }
+            },
+            "base_id": "000027",
+            "character_audio": "Hiragana/000027_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ふ",
+            "meanings": [
+                "fu"
+            ],
+            "kunyomi": [
+                "ふ"
+            ],
+            "examples": [
+                {
+                    "word": "冬",
+                    "reading": "ふゆ",
+                    "meaning": "Winter",
+                    "audio": "Hiragana/000028_1.mp3"
+                },
+                {
+                    "word": "船",
+                    "reading": "ふね",
+                    "meaning": "Ship",
+                    "audio": "Hiragana/000028_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ふ": "Hiragana/000028_0.mp3"
+                }
+            },
+            "base_id": "000028",
+            "character_audio": "Hiragana/000028_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "へ",
+            "meanings": [
+                "he"
+            ],
+            "kunyomi": [
+                "へ"
+            ],
+            "examples": [
+                {
+                    "word": "部屋",
+                    "reading": "へや",
+                    "meaning": "Room",
+                    "audio": "Hiragana/000029_1.mp3"
+                },
+                {
+                    "word": "平和",
+                    "reading": "へいわ",
+                    "meaning": "Peace",
+                    "audio": "Hiragana/000029_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "へ": "Hiragana/000029_0.mp3"
+                }
+            },
+            "base_id": "000029",
+            "character_audio": "Hiragana/000029_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ほ",
+            "meanings": [
+                "ho"
+            ],
+            "kunyomi": [
+                "ほ"
+            ],
+            "examples": [
+                {
+                    "word": "星",
+                    "reading": "ほし",
+                    "meaning": "Star",
+                    "audio": "Hiragana/000030_1.mp3"
+                },
+                {
+                    "word": "本",
+                    "reading": "ほん",
+                    "meaning": "Book",
+                    "audio": "Hiragana/000030_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ほ": "Hiragana/000030_0.mp3"
+                }
+            },
+            "base_id": "000030",
+            "character_audio": "Hiragana/000030_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ま",
+            "meanings": [
+                "ma"
+            ],
+            "kunyomi": [
+                "ま"
+            ],
+            "examples": [
+                {
+                    "word": "窓",
+                    "reading": "まど",
+                    "meaning": "Window",
+                    "audio": "Hiragana/000031_1.mp3"
+                },
+                {
+                    "word": "毎日",
+                    "reading": "まいにち",
+                    "meaning": "Every day",
+                    "audio": "Hiragana/000031_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ま": "Hiragana/000031_0.mp3"
+                }
+            },
+            "base_id": "000031",
+            "character_audio": "Hiragana/000031_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "み",
+            "meanings": [
+                "mi"
+            ],
+            "kunyomi": [
+                "み"
+            ],
+            "examples": [
+                {
+                    "word": "水",
+                    "reading": "みず",
+                    "meaning": "Water",
+                    "audio": "Hiragana/000032_1.mp3"
+                },
+                {
+                    "word": "道",
+                    "reading": "みち",
+                    "meaning": "Road/Street",
+                    "audio": "Hiragana/000032_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "み": "Hiragana/000032_0.mp3"
+                }
+            },
+            "base_id": "000032",
+            "character_audio": "Hiragana/000032_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "む",
+            "meanings": [
+                "mu"
+            ],
+            "kunyomi": [
+                "む"
+            ],
+            "examples": [
+                {
+                    "word": "虫",
+                    "reading": "むし",
+                    "meaning": "Insect",
+                    "audio": "Hiragana/000033_1.mp3"
+                },
+                {
+                    "word": "昔",
+                    "reading": "むかし",
+                    "meaning": "Old times",
+                    "audio": "Hiragana/000033_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "む": "Hiragana/000033_0.mp3"
+                }
+            },
+            "base_id": "000033",
+            "character_audio": "Hiragana/000033_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "め",
+            "meanings": [
+                "me"
+            ],
+            "kunyomi": [
+                "め"
+            ],
+            "examples": [
+                {
+                    "word": "目",
+                    "reading": "め",
+                    "meaning": "Eye",
+                    "audio": "Hiragana/000034_1.mp3"
+                },
+                {
+                    "word": "眼鏡",
+                    "reading": "めがね",
+                    "meaning": "Glasses",
+                    "audio": "Hiragana/000034_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "め": "Hiragana/000034_0.mp3"
+                }
+            },
+            "base_id": "000034",
+            "character_audio": "Hiragana/000034_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "も",
+            "meanings": [
+                "mo"
+            ],
+            "kunyomi": [
+                "も"
+            ],
+            "examples": [
+                {
+                    "word": "森",
+                    "reading": "もり",
+                    "meaning": "Forest",
+                    "audio": "Hiragana/000035_1.mp3"
+                },
+                {
+                    "word": "桃",
+                    "reading": "もも",
+                    "meaning": "Peach",
+                    "audio": "Hiragana/000035_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "も": "Hiragana/000035_0.mp3"
+                }
+            },
+            "base_id": "000035",
+            "character_audio": "Hiragana/000035_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "や",
+            "meanings": [
+                "ya"
+            ],
+            "kunyomi": [
+                "や"
+            ],
+            "examples": [
+                {
+                    "word": "山",
+                    "reading": "やま",
+                    "meaning": "Mountain",
+                    "audio": "Hiragana/000036_1.mp3"
+                },
+                {
+                    "word": "野菜",
+                    "reading": "やさい",
+                    "meaning": "Vegetable",
+                    "audio": "Hiragana/000036_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "や": "Hiragana/000036_0.mp3"
+                }
+            },
+            "base_id": "000036",
+            "character_audio": "Hiragana/000036_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ゆ",
+            "meanings": [
+                "yu"
+            ],
+            "kunyomi": [
+                "ゆ"
+            ],
+            "examples": [
+                {
+                    "word": "雪",
+                    "reading": "ゆき",
+                    "meaning": "Snow",
+                    "audio": "Hiragana/000037_1.mp3"
+                },
+                {
+                    "word": "夢",
+                    "reading": "ゆめ",
+                    "meaning": "Dream",
+                    "audio": "Hiragana/000037_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ゆ": "Hiragana/000037_0.mp3"
+                }
+            },
+            "base_id": "000037",
+            "character_audio": "Hiragana/000037_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "よ",
+            "meanings": [
+                "yo"
+            ],
+            "kunyomi": [
+                "よ"
+            ],
+            "examples": [
+                {
+                    "word": "夜",
+                    "reading": "よる",
+                    "meaning": "Night",
+                    "audio": "Hiragana/000038_1.mp3"
+                },
+                {
+                    "word": "呼ぶ",
+                    "reading": "よぶ",
+                    "meaning": "To call",
+                    "audio": "Hiragana/000038_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "よ": "Hiragana/000038_0.mp3"
+                }
+            },
+            "base_id": "000038",
+            "character_audio": "Hiragana/000038_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ら",
+            "meanings": [
+                "ra"
+            ],
+            "kunyomi": [
+                "ら"
+            ],
+            "examples": [
+                {
+                    "word": "来週",
+                    "reading": "らいしゅう",
+                    "meaning": "Next week",
+                    "audio": "Hiragana/000039_1.mp3"
+                },
+                {
+                    "word": "楽",
+                    "reading": "らく",
+                    "meaning": "Comfortable",
+                    "audio": "Hiragana/000039_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ら": "Hiragana/000039_0.mp3"
+                }
+            },
+            "base_id": "000039",
+            "character_audio": "Hiragana/000039_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "り",
+            "meanings": [
+                "ri"
+            ],
+            "kunyomi": [
+                "り"
+            ],
+            "examples": [
+                {
+                    "word": "林檎",
+                    "reading": "りんご",
+                    "meaning": "Apple",
+                    "audio": "Hiragana/000040_1.mp3"
+                },
+                {
+                    "word": "料理",
+                    "reading": "りょうり",
+                    "meaning": "Cooking",
+                    "audio": "Hiragana/000040_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "り": "Hiragana/000040_0.mp3"
+                }
+            },
+            "base_id": "000040",
+            "character_audio": "Hiragana/000040_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "る",
+            "meanings": [
+                "ru"
+            ],
+            "kunyomi": [
+                "る"
+            ],
+            "examples": [
+                {
+                    "word": "留守",
+                    "reading": "るす",
+                    "meaning": "Absence",
+                    "audio": "Hiragana/000041_1.mp3"
+                },
+                {
+                    "word": "走る",
+                    "reading": "はしる",
+                    "meaning": "To run",
+                    "audio": "Hiragana/000041_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "る": "Hiragana/000041_0.mp3"
+                }
+            },
+            "base_id": "000041",
+            "character_audio": "Hiragana/000041_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "れ",
+            "meanings": [
+                "re"
+            ],
+            "kunyomi": [
+                "れ"
+            ],
+            "examples": [
+                {
+                    "word": "冷蔵庫",
+                    "reading": "れいぞうこ",
+                    "meaning": "Refrigerator",
+                    "audio": "Hiragana/000042_1.mp3"
+                },
+                {
+                    "word": "練習",
+                    "reading": "れんしゅう",
+                    "meaning": "Practice",
+                    "audio": "Hiragana/000042_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "れ": "Hiragana/000042_0.mp3"
+                }
+            },
+            "base_id": "000042",
+            "character_audio": "Hiragana/000042_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ろ",
+            "meanings": [
+                "ro"
+            ],
+            "kunyomi": [
+                "ろ"
+            ],
+            "examples": [
+                {
+                    "word": "六",
+                    "reading": "ろく",
+                    "meaning": "Six",
+                    "audio": "Hiragana/000043_1.mp3"
+                },
+                {
+                    "word": "廊下",
+                    "reading": "ろうか",
+                    "meaning": "Corridor",
+                    "audio": "Hiragana/000043_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ろ": "Hiragana/000043_0.mp3"
+                }
+            },
+            "base_id": "000043",
+            "character_audio": "Hiragana/000043_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "わ",
+            "meanings": [
+                "wa"
+            ],
+            "kunyomi": [
+                "わ"
+            ],
+            "examples": [
+                {
+                    "word": "私",
+                    "reading": "わたし",
+                    "meaning": "I/Me",
+                    "audio": "Hiragana/000044_1.mp3"
+                },
+                {
+                    "word": "笑う",
+                    "reading": "わらう",
+                    "meaning": "To laugh",
+                    "audio": "Hiragana/000044_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "わ": "Hiragana/000044_0.mp3"
+                }
+            },
+            "base_id": "000044",
+            "character_audio": "Hiragana/000044_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "を",
+            "meanings": [
+                "wo"
+            ],
+            "kunyomi": [
+                "を"
+            ],
+            "examples": [
+                {
+                    "word": "本を読む",
+                    "reading": "ほんをよむ",
+                    "meaning": "Read a book",
+                    "audio": "Hiragana/000045_1.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "を": "Hiragana/000045_0.mp3"
+                }
+            },
+            "base_id": "000045",
+            "character_audio": "Hiragana/000045_0.mp3"
+        },
+        {
+            "onyomi": [],
+            "jlpt": "Hiragana",
+            "character": "ん",
+            "meanings": [
+                "n"
+            ],
+            "kunyomi": [
+                "ん"
+            ],
+            "examples": [
+                {
+                    "word": "パン",
+                    "reading": "ぱん",
+                    "meaning": "Bread",
+                    "audio": "Hiragana/000046_1.mp3"
+                },
+                {
+                    "word": "三",
+                    "reading": "さん",
+                    "meaning": "Three",
+                    "audio": "Hiragana/000046_2.mp3"
+                }
+            ],
+            "audio": {
+                "onyomi": {},
+                "kunyomi": {
+                    "ん": "Hiragana/000046_0.mp3"
+                }
+            },
+            "base_id": "000046",
+            "character_audio": "Hiragana/000046_0.mp3"
+        }
+    ]
+}

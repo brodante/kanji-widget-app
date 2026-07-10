@@ -2,8 +2,6 @@ class AudioManager {
     static synth = null;
     static isSupported = false;
     static audioCache = new Map();
-
-    // Local Database Variables
     static localAudioMap = new Map();
     static currentLoadedLevel = null;
     static isPlaying = false;
@@ -16,87 +14,66 @@ class AudioManager {
                 this.synth.onvoiceschanged = () => { };
             }
         } else {
-            console.warn('Speech synthesis not supported in this browser');
+            console.warn('Speech synthesis not supported');
             this.isSupported = false;
         }
     }
 
-    /**
-     * DYNAMIC LOADER: Only loads the audio paths for the currently selected level.
-     * Call this when the app starts, and whenever the user changes the level.
-     */
-    static async loadLevelAudio(level) {
-        if (this.currentLoadedLevel === level) return; // Prevent redundant loading
+    static async loadLevelAudio(level, kanjiPool = []) {
+        // Prevent reloading if we already have the data
+        if (this.currentLoadedLevel === level && this.localAudioMap.size > 0) return;
 
-        try {
-            // UPDATED PATH: Pointing to the new tts folder
-            const response = await fetch('tts/audio_index.json');
-            if (!response.ok) throw new Error('Index file missing');
-            const index = await response.json();
+        this.localAudioMap.clear();
 
-            // 1. Clear the old level's data from memory
-            this.localAudioMap.clear();
+        if (kanjiPool && kanjiPool.length > 0) {
+            const clean = (text) => text.replace(/\./g, '').replace(/-/g, '');
 
-            // 2. Determine the folder prefix based on the selected level
-            let folderPrefix = level; // "Hiragana" or "Katakana"
-            if (level !== 'Hiragana' && level !== 'Katakana') {
-                folderPrefix = `Kanji/${level}`; // e.g., "Kanji/N5"
-            }
+            for (const kanji of kanjiPool) {
+                // 1. Base Character (Specifically for Hiragana/Katakana)
+                if (kanji.character_audio) {
+                    this.localAudioMap.set(clean(kanji.character), kanji.character_audio);
+                }
 
-            // 3. Scan the index and ONLY load items that belong in this folder
-            for (const [char, data] of Object.entries(index)) {
-
-                // Check if this character's audio lives in the target folder
-                let isMatch = false;
-                if (data.character_audio && data.character_audio.startsWith(folderPrefix)) isMatch = true;
-                else if (Object.values(data.examples || {})[0]?.startsWith(folderPrefix)) isMatch = true;
-                else if (Object.values(data.onyomi || {})[0]?.startsWith(folderPrefix)) isMatch = true;
-
-                // If it belongs to this level, flatten its data into the instant-lookup map
-                if (isMatch) {
-                    if (data.character_audio) {
-                        this.localAudioMap.set(char, data.character_audio);
-                    }
-
-                    // Clean the dots/hyphens for reliable matching
-                    const clean = (text) => text.replace(/\./g, '').replace(/-/g, '');
-
-                    for (const [reading, path] of Object.entries(data.onyomi || {})) {
+                // 2. Onyomi & Kunyomi Readings
+                if (kanji.audio) {
+                    for (const [reading, path] of Object.entries(kanji.audio.onyomi || {})) {
                         this.localAudioMap.set(clean(reading), path);
                     }
-                    for (const [reading, path] of Object.entries(data.kunyomi || {})) {
+                    for (const [reading, path] of Object.entries(kanji.audio.kunyomi || {})) {
                         this.localAudioMap.set(clean(reading), path);
                     }
-                    for (const [word, path] of Object.entries(data.examples || {})) {
-                        this.localAudioMap.set(clean(word), path);
+                }
+
+                // 3. Example Words (Key must be the word itself)
+                if (kanji.examples) {
+                    for (const ex of kanji.examples) {
+                        if (ex.audio) {
+                            this.localAudioMap.set(clean(ex.word), ex.audio);
+                        }
                     }
                 }
             }
-
-            this.currentLoadedLevel = level;
-            console.log(`Audio Engine: Switched to [${level}]. Loaded ${this.localAudioMap.size} local MP3 paths.`);
-        } catch (error) {
-            console.warn('Failed to load local audio index. Will rely on robot fallback:', error);
+            console.log(`Audio Engine: Switched to [${level}]. Loaded ${this.localAudioMap.size} embedded MP3 paths.`);
+        } else {
+            console.warn("Audio Engine: kanjiPool was empty or not provided!");
         }
+
+        this.currentLoadedLevel = level;
     }
 
-    /**
-     * MAIN PLAYBACK METHOD
-     */
     static async speak(text, lang = 'ja-JP') {
         if (!text) return false;
 
-        // Clean text to match the dictionary keys
         const cleanText = text.replace(/\./g, '').replace(/-/g, '');
         const relativePath = this.localAudioMap.get(cleanText);
 
         if (relativePath) {
-            // UPDATED PATH: Pointing to the new tts folder structure
-            const fullPath = `tts/audio/${relativePath}`;
+            // Uses the professional assets/ folder structure
+            const fullPath = `assets/audio/${relativePath}`;
             const success = await this.playStaticAudio(fullPath);
 
             if (!success) {
-                console.warn(`Local audio blocked or missing for: ${cleanText}. Using fallback.`);
+                console.warn(`Local audio failed for: ${cleanText}. Using fallback.`);
                 return await this.speakFallback(cleanText, lang);
             }
             return true;
@@ -106,9 +83,6 @@ class AudioManager {
         }
     }
 
-    /**
-     * PLAYS THE LOCAL MP3 FILE
-     */
     static async playStaticAudio(audioUrl) {
         return new Promise((resolve) => {
             const cacheKey = `static_${audioUrl}`;
@@ -144,27 +118,20 @@ class AudioManager {
         });
     }
 
-    /**
-     * ROBOTIC FALLBACK (Web Speech API)
-     */
     static async speakFallback(text, lang = 'ja-JP') {
         if (!this.isSupported || !this.synth) return false;
-
         try {
             this.synth.cancel();
             const voices = await this.waitForVoices();
             const utterance = new SpeechSynthesisUtterance(text);
-
             utterance.lang = lang;
             utterance.rate = 0.95;
 
-            // Find best Japanese voice
             const jpVoices = voices.filter(v => v.lang.startsWith('ja'));
             const bestVoice = jpVoices.find(v => v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Siri'));
             if (bestVoice || jpVoices[0]) utterance.voice = bestVoice || jpVoices[0];
 
             utterance.onend = () => { this.isPlaying = false; };
-
             this.isPlaying = true;
             this.synth.speak(utterance);
             return true;
@@ -192,11 +159,7 @@ class AudioManager {
         this.isPlaying = false;
     }
 
-    // Legacy wrappers to ensure the rest of your app doesn't break
-    static speakExample(word, reading) { return this.speak(reading || word); }
-    static speakKanjiReading(kanji, readings) { return readings && readings.length > 0 ? this.speak(readings[0]) : false; }
-    static async speakPolite(text) { return this.speak(text); }
-    static hasJapaneseSupport() { return true; }
+    static setApiKey(key) { }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
