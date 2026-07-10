@@ -165,10 +165,9 @@ class AudioManager {
         try {
             const encodedText = encodeURIComponent(text);
 
-            // THE FIX: Changed from translate.google.com to translate.googleapis.com
             // This forces the request through the open API gateway, bypassing Firefox's strict referrer blocks entirely.
             // We also switch back to client=gtx because the API gateway prefers it.
-            const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=${lang}&q=${encodedText}`;
+            const url = `https://translate.google.com/translate_tts?client=tw-ob&ie=UTF-8&tl=${lang}&q=${encodedText}`;
 
             return new Promise((resolve) => {
                 const audio = new Audio(url);
