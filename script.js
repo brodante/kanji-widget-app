@@ -308,12 +308,12 @@ class KanjiLearningApp {
             this.currentKanji = nextKanji;
             this.renderKanji();
             this.renderKanjiJourney();
-
+            this.updateProgress();
             // FIX 2: Force the recent list to redraw using the new, filtered data pool!
             this.loadRecentKanji();
 
             if (this.settings.autoPlay) {
-                setTimeout(() => this.playPronunciation(), 1000);
+                setTimeout(() => this.playPronunciation(), 500);
             }
 
         } catch (error) {
@@ -527,8 +527,12 @@ class KanjiLearningApp {
         if (!container || !summary || !progressStats || !header) return;
 
         const progress = StorageManager.getProgress();
-        const masteredCount = progress.mastered.length;
+        //const masteredCount = progress.mastered.length;
         const pool = this.currentKanjiPool.length > 0 ? this.currentKanjiPool : [];
+
+        const currentLevelChars = new Set(pool.map(k => k.character));
+        const masteredCount = progress.mastered.filter(char => currentLevelChars.has(char)).length;
+
         const totalCount = pool.length;
         const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
 
@@ -895,16 +899,24 @@ class KanjiLearningApp {
 
     updateProgress() {
         const progress = StorageManager.getProgress();
-        const masteredCount = progress.mastered.length;
+
+        // FIX: Create a quick lookup set of the characters currently on screen
+        const currentLevelChars = new Set(this.currentKanjiPool.map(k => k.character));
+
+        // FIX: Only count mastered items if they exist in the CURRENT level pool
+        const masteredInThisLevel = progress.mastered.filter(char => currentLevelChars.has(char)).length;
+
         const totalCount = this.currentKanjiPool.length || 0;
         const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
 
         const progressStats = document.getElementById('progressStats');
         if (progressStats) {
-            progressStats.textContent = `${masteredCount} mastered | ${totalCount} total (${levelLabel})`;
+            // Update UI to use the filtered local count
+            progressStats.textContent = `${masteredInThisLevel} mastered | ${totalCount} total (${levelLabel})`;
         }
 
-        const progressPercentage = totalCount > 0 ? Math.min((masteredCount / totalCount) * 100, 100) : 0;
+        // The Math.min fail-safe you already had will now work perfectly
+        const progressPercentage = totalCount > 0 ? Math.min((masteredInThisLevel / totalCount) * 100, 100) : 0;
         document.getElementById('progressFill').style.width = `${progressPercentage}%`;
     }
     
