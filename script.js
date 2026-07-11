@@ -439,21 +439,27 @@ class KanjiLearningApp {
         widget.classList.add('pulse-animation');
         setTimeout(() => widget.classList.remove('pulse-animation'), 300);
 
+        // Store this specific character in memory in case the user wants to undo it
+        const masteredChar = this.currentKanji.character;
+        this.lastMasteredChar = masteredChar;
+
         // Save progress
-        StorageManager.markAsMastered(this.currentKanji.character);
-        
+        StorageManager.markAsMastered(masteredChar);
+
         // Add to recent
         StorageManager.addToRecent({
-            character: this.currentKanji.character,
+            character: masteredChar,
             meanings: this.currentKanji.meanings,
             timestamp: Date.now()
         });
 
-        this.showToast(`Great! "${this.currentKanji.character}" marked as mastered!`);
+        // Trigger the upgraded HTML Toast with an Undo button
+        const undoBtnHtml = `<button onclick="app.undoMaster()" style="margin-left: 15px; padding: 4px 10px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Undo <i class="fas fa-undo"></i></button>`;
+        this.showToast(`Great! "${masteredChar}" marked as mastered! ${undoBtnHtml}`, true);
 
         // Update progress display
         this.updateProgress();
-        this.updateStreak(); // Check and increment streak when a kanji is completed
+        this.updateStreak();
         this.renderKanjiJourney();
         this.loadRecentKanji();
 
@@ -461,6 +467,33 @@ class KanjiLearningApp {
         setTimeout(() => {
             this.loadCurrentKanji();
         }, 1000);
+    }
+
+    undoMaster() {
+        if (!this.lastMasteredChar) return;
+
+        // 1. Remove from Mastered array
+        const progress = StorageManager.getProgress();
+        progress.mastered = progress.mastered.filter(char => char !== this.lastMasteredChar);
+        StorageManager.saveProgress(progress);
+
+        // 2. Remove from Recent array
+        let recent = StorageManager.getRecent();
+        recent = recent.filter(item => item.character !== this.lastMasteredChar);
+        localStorage.setItem(StorageManager.keys.RECENT, JSON.stringify(recent));
+
+        // 3. UI Updates
+        this.showToast(`Undo successful. "${this.lastMasteredChar}" returned to your queue.`);
+
+        // Instantly bring it back to the main widget screen
+        this.showSpecificKanji(this.lastMasteredChar);
+
+        this.updateProgress();
+        this.renderKanjiJourney();
+        this.loadRecentKanji();
+
+        // Clear the memory
+        this.lastMasteredChar = null;
     }
 
     playPronunciation() {
@@ -1426,17 +1459,37 @@ class KanjiLearningApp {
         }
     }
 
-    showToast(message) {
+    showToast(message, isHTML = false) {
         const toast = document.getElementById('toast');
         const messageEl = document.getElementById('toastMessage');
-        
-        messageEl.textContent = message;
+
+        if (isHTML) {
+            messageEl.innerHTML = message;
+        } else {
+            messageEl.textContent = message;
+        }
+
         toast.classList.add('show');
-        
-        setTimeout(() => {
+
+        // Clear any existing timeout so the toast doesn't disappear early if spammed
+        if (this.toastTimeout) clearTimeout(this.toastTimeout);
+
+        // Bumped to 4 seconds to give the user time to click 'Undo'
+        this.toastTimeout = setTimeout(() => {
             toast.classList.remove('show');
-        }, 3000);
+        }, 4000);
     }
+    // showToast(message) {
+    //     const toast = document.getElementById('toast');
+    //     const messageEl = document.getElementById('toastMessage');
+        
+    //     messageEl.textContent = message;
+    //     toast.classList.add('show');
+        
+    //     setTimeout(() => {
+    //         toast.classList.remove('show');
+    //     }, 3000);
+    // }
 }
 
 // Initialize app when DOM is loaded
