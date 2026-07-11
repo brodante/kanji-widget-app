@@ -1515,3 +1515,18 @@ input:focus {
         opacity: 0.9;
     }
 }
+
+/* 1. Smooth Progress Bar Animation */
+.progress-fill {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. Tactile Button Clicks */
+.action-btn:active,
+.icon-btn:active,
+.premium-kana-btn:active,
+.level-option:active,
+.journey-pill:active {
+    transform: scale(0.92);
+    transition: transform 0.1s ease;
+}
