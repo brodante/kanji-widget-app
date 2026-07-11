@@ -25,7 +25,7 @@ Due to the static nature of the application and its local data architecture, no 
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/brodante/kanji-widget-app.git](https://github.com/brodante/kanji-widget-app.git)
+   git clone https://github.com/brodante/kanji-widget-app.git
    ```
 
 2. Run locally:
