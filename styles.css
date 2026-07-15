@@ -1122,6 +1122,8 @@ input:focus {
 
 /* Clean layout grid wrapper for the truncated journey view */
 .compact-fade-wrapper {
+    padding: 6px;
+    margin: -6px;
     position: relative;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
@@ -1529,4 +1531,11 @@ input:focus {
 .journey-pill:active {
     transform: scale(0.92);
     transition: transform 0.1s ease;
+}
+
+/* Prevent Kanji from colliding with action buttons on mobile screens */
+@media (max-width: 600px) {
+    .kanji-character {
+        margin-top: 30px;
+    }
 }
