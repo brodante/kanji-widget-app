@@ -251,6 +251,10 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    /* IF causes stroke animation error remove the webkit and user-select lines */
+    /* Disables the tap highlight color on mobile devices */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 .kanji-widget:hover {
