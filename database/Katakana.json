@@ -13,13 +13,13 @@
             "examples": [
                 {
                     "word": "アイス",
-                    "reading": "アイス",
+                    "reading": "あいす",
                     "meaning": "Ice cream",
                     "audio": "Katakana/000047_1.mp3"
                 },
                 {
                     "word": "アニメ",
-                    "reading": "アニメ",
+                    "reading": "あにめ",
                     "meaning": "Anime",
                     "audio": "Katakana/000047_2.mp3"
                 }
@@ -46,13 +46,13 @@
             "examples": [
                 {
                     "word": "インターネット",
-                    "reading": "インターネット",
+                    "reading": "いんたーねっと",
                     "meaning": "Internet",
                     "audio": "Katakana/000048_1.mp3"
                 },
                 {
                     "word": "イギリス",
-                    "reading": "イギリス",
+                    "reading": "いぎりす",
                     "meaning": "UK",
                     "audio": "Katakana/000048_2.mp3"
                 }
@@ -79,13 +79,13 @@
             "examples": [
                 {
                     "word": "ウイルス",
-                    "reading": "ウイルス",
+                    "reading": "ういるす",
                     "meaning": "Virus",
                     "audio": "Katakana/000049_1.mp3"
                 },
                 {
                     "word": "ウィンドウ",
-                    "reading": "ウィンドウ",
+                    "reading": "うぃんどう",
                     "meaning": "Window",
                     "audio": "Katakana/000049_2.mp3"
                 }
@@ -112,13 +112,13 @@
             "examples": [
                 {
                     "word": "エレベーター",
-                    "reading": "エレベーター",
+                    "reading": "えれべーたー",
                     "meaning": "Elevator",
                     "audio": "Katakana/000050_1.mp3"
                 },
                 {
                     "word": "エンジン",
-                    "reading": "エンジン",
+                    "reading": "えんじん",
                     "meaning": "Engine",
                     "audio": "Katakana/000050_2.mp3"
                 }
@@ -145,13 +145,13 @@
             "examples": [
                 {
                     "word": "オレンジ",
-                    "reading": "オレンジ",
+                    "reading": "おれんじ",
                     "meaning": "Orange",
                     "audio": "Katakana/000051_1.mp3"
                 },
                 {
                     "word": "オリンピック",
-                    "reading": "オリンピック",
+                    "reading": "おりんぴっく",
                     "meaning": "Olympics",
                     "audio": "Katakana/000051_2.mp3"
                 }
@@ -178,13 +178,13 @@
             "examples": [
                 {
                     "word": "カメラ",
-                    "reading": "カメラ",
+                    "reading": "かめら",
                     "meaning": "Camera",
                     "audio": "Katakana/000052_1.mp3"
                 },
                 {
                     "word": "カレンダー",
-                    "reading": "カレンダー",
+                    "reading": "かれんだー",
                     "meaning": "Calendar",
                     "audio": "Katakana/000052_2.mp3"
                 }
@@ -211,13 +211,13 @@
             "examples": [
                 {
                     "word": "キーボード",
-                    "reading": "キーボード",
+                    "reading": "きーぼーど",
                     "meaning": "Keyboard",
                     "audio": "Katakana/000053_1.mp3"
                 },
                 {
                     "word": "ギター",
-                    "reading": "ギター",
+                    "reading": "ぎたー",
                     "meaning": "Guitar",
                     "audio": "Katakana/000053_2.mp3"
                 }
@@ -244,13 +244,13 @@
             "examples": [
                 {
                     "word": "クラス",
-                    "reading": "クラス",
+                    "reading": "くらす",
                     "meaning": "Class",
                     "audio": "Katakana/000054_1.mp3"
                 },
                 {
                     "word": "クレジットカード",
-                    "reading": "クレジットカード",
+                    "reading": "くれじっとかーど",
                     "meaning": "Credit card",
                     "audio": "Katakana/000054_2.mp3"
                 }
@@ -277,13 +277,13 @@
             "examples": [
                 {
                     "word": "ケーキ",
-                    "reading": "ケーキ",
+                    "reading": "けーき",
                     "meaning": "Cake",
                     "audio": "Katakana/000055_1.mp3"
                 },
                 {
                     "word": "ケース",
-                    "reading": "ケース",
+                    "reading": "けーす",
                     "meaning": "Case",
                     "audio": "Katakana/000055_2.mp3"
                 }
@@ -310,13 +310,13 @@
             "examples": [
                 {
                     "word": "コーヒー",
-                    "reading": "コーヒー",
+                    "reading": "こーひー",
                     "meaning": "Coffee",
                     "audio": "Katakana/000056_1.mp3"
                 },
                 {
                     "word": "コンピューター",
-                    "reading": "コンピューター",
+                    "reading": "こんぴゅーたー",
                     "meaning": "Computer",
                     "audio": "Katakana/000056_2.mp3"
                 }
@@ -343,13 +343,13 @@
             "examples": [
                 {
                     "word": "サッカー",
-                    "reading": "サッカー",
+                    "reading": "さっかー",
                     "meaning": "Soccer",
                     "audio": "Katakana/000057_1.mp3"
                 },
                 {
                     "word": "サラダ",
-                    "reading": "サラダ",
+                    "reading": "さらだ",
                     "meaning": "Salad",
                     "audio": "Katakana/000057_2.mp3"
                 }
@@ -376,13 +376,13 @@
             "examples": [
                 {
                     "word": "シャツ",
-                    "reading": "シャツ",
+                    "reading": "しゃつ",
                     "meaning": "Shirt",
                     "audio": "Katakana/000058_1.mp3"
                 },
                 {
                     "word": "シャワー",
-                    "reading": "シャワー",
+                    "reading": "しゃわー",
                     "meaning": "Shower",
                     "audio": "Katakana/000058_2.mp3"
                 }
@@ -409,13 +409,13 @@
             "examples": [
                 {
                     "word": "スポーツ",
-                    "reading": "スポーツ",
+                    "reading": "すぽーつ",
                     "meaning": "Sports",
                     "audio": "Katakana/000059_1.mp3"
                 },
                 {
                     "word": "スマートフォン",
-                    "reading": "スマートフォン",
+                    "reading": "すまーとふぉん",
                     "meaning": "Smartphone",
                     "audio": "Katakana/000059_2.mp3"
                 }
@@ -442,13 +442,13 @@
             "examples": [
                 {
                     "word": "セーター",
-                    "reading": "セーター",
+                    "reading": "せーたー",
                     "meaning": "Sweater",
                     "audio": "Katakana/000060_1.mp3"
                 },
                 {
                     "word": "センター",
-                    "reading": "センター",
+                    "reading": "せんたー",
                     "meaning": "Center",
                     "audio": "Katakana/000060_2.mp3"
                 }
@@ -475,13 +475,13 @@
             "examples": [
                 {
                     "word": "ソファ",
-                    "reading": "ソファ",
+                    "reading": "そふぁ",
                     "meaning": "Sofa",
                     "audio": "Katakana/000061_1.mp3"
                 },
                 {
                     "word": "ソース",
-                    "reading": "ソース",
+                    "reading": "そーす",
                     "meaning": "Sauce",
                     "audio": "Katakana/000061_2.mp3"
                 }
@@ -508,13 +508,13 @@
             "examples": [
                 {
                     "word": "タクシー",
-                    "reading": "タクシー",
+                    "reading": "たくしー",
                     "meaning": "Taxi",
                     "audio": "Katakana/000062_1.mp3"
                 },
                 {
                     "word": "タオル",
-                    "reading": "タオル",
+                    "reading": "たおる",
                     "meaning": "Towel",
                     "audio": "Katakana/000062_2.mp3"
                 }
@@ -541,13 +541,13 @@
             "examples": [
                 {
                     "word": "チーズ",
-                    "reading": "チーズ",
+                    "reading": "ちーず",
                     "meaning": "Cheese",
                     "audio": "Katakana/000063_1.mp3"
                 },
                 {
                     "word": "チケット",
-                    "reading": "チケット",
+                    "reading": "ちけっと",
                     "meaning": "Ticket",
                     "audio": "Katakana/000063_2.mp3"
                 }
@@ -574,13 +574,13 @@
             "examples": [
                 {
                     "word": "ツアー",
-                    "reading": "ツアー",
+                    "reading": "つあー",
                     "meaning": "Tour",
                     "audio": "Katakana/000064_1.mp3"
                 },
                 {
                     "word": "スーツ",
-                    "reading": "スーツ",
+                    "reading": "すーつ",
                     "meaning": "Suit",
                     "audio": "Katakana/000064_2.mp3"
                 }
@@ -607,13 +607,13 @@
             "examples": [
                 {
                     "word": "テレビ",
-                    "reading": "テレビ",
+                    "reading": "てれび",
                     "meaning": "TV",
                     "audio": "Katakana/000065_1.mp3"
                 },
                 {
                     "word": "テーブル",
-                    "reading": "テーブル",
+                    "reading": "てーぶる",
                     "meaning": "Table",
                     "audio": "Katakana/000065_2.mp3"
                 }
@@ -640,13 +640,13 @@
             "examples": [
                 {
                     "word": "トイレ",
-                    "reading": "トイレ",
+                    "reading": "といれ",
                     "meaning": "Toilet",
                     "audio": "Katakana/000066_1.mp3"
                 },
                 {
                     "word": "トマト",
-                    "reading": "トマト",
+                    "reading": "とまと",
                     "meaning": "Tomato",
                     "audio": "Katakana/000066_2.mp3"
                 }
@@ -673,13 +673,13 @@
             "examples": [
                 {
                     "word": "ナイフ",
-                    "reading": "ナイフ",
+                    "reading": "ないふ",
                     "meaning": "Knife",
                     "audio": "Katakana/000067_1.mp3"
                 },
                 {
                     "word": "バナナ",
-                    "reading": "バナナ",
+                    "reading": "ばなな",
                     "meaning": "Banana",
                     "audio": "Katakana/000067_2.mp3"
                 }
@@ -706,13 +706,13 @@
             "examples": [
                 {
                     "word": "ニュース",
-                    "reading": "ニュース",
+                    "reading": "にゅーす",
                     "meaning": "News",
                     "audio": "Katakana/000068_1.mp3"
                 },
                 {
                     "word": "テニス",
-                    "reading": "テニス",
+                    "reading": "てにす",
                     "meaning": "Tennis",
                     "audio": "Katakana/000068_2.mp3"
                 }
@@ -739,13 +739,13 @@
             "examples": [
                 {
                     "word": "ヌードル",
-                    "reading": "ヌードル",
+                    "reading": "ぬーどる",
                     "meaning": "Noodle",
                     "audio": "Katakana/000069_1.mp3"
                 },
                 {
                     "word": "カヌー",
-                    "reading": "カヌー",
+                    "reading": "かぬー",
                     "meaning": "Canoe",
                     "audio": "Katakana/000069_2.mp3"
                 }
@@ -772,13 +772,13 @@
             "examples": [
                 {
                     "word": "ネクタイ",
-                    "reading": "ネクタイ",
+                    "reading": "ねくたい",
                     "meaning": "Necktie",
                     "audio": "Katakana/000070_1.mp3"
                 },
                 {
                     "word": "ネット",
-                    "reading": "ネット",
+                    "reading": "ねっと",
                     "meaning": "Net",
                     "audio": "Katakana/000070_2.mp3"
                 }
@@ -805,13 +805,13 @@
             "examples": [
                 {
                     "word": "ノート",
-                    "reading": "ノート",
+                    "reading": "のーと",
                     "meaning": "Notebook",
                     "audio": "Katakana/000071_1.mp3"
                 },
                 {
                     "word": "ノック",
-                    "reading": "ノック",
+                    "reading": "のっく",
                     "meaning": "Knock",
                     "audio": "Katakana/000071_2.mp3"
                 }
@@ -838,13 +838,13 @@
             "examples": [
                 {
                     "word": "ハンバーガー",
-                    "reading": "ハンバーガー",
+                    "reading": "はんばーがー",
                     "meaning": "Hamburger",
                     "audio": "Katakana/000072_1.mp3"
                 },
                 {
                     "word": "バス",
-                    "reading": "バス",
+                    "reading": "ばす",
                     "meaning": "Bus",
                     "audio": "Katakana/000072_2.mp3"
                 }
@@ -871,13 +871,13 @@
             "examples": [
                 {
                     "word": "ヒーター",
-                    "reading": "ヒーター",
+                    "reading": "ひーたー",
                     "meaning": "Heater",
                     "audio": "Katakana/000073_1.mp3"
                 },
                 {
                     "word": "ヒーロー",
-                    "reading": "ヒーロー",
+                    "reading": "ひーろー",
                     "meaning": "Hero",
                     "audio": "Katakana/000073_2.mp3"
                 }
@@ -904,13 +904,13 @@
             "examples": [
                 {
                     "word": "フィルム",
-                    "reading": "フィルム",
+                    "reading": "ふぃるむ",
                     "meaning": "Film",
                     "audio": "Katakana/000074_1.mp3"
                 },
                 {
                     "word": "フォーク",
-                    "reading": "フォーク",
+                    "reading": "ふぉーく",
                     "meaning": "Fork",
                     "audio": "Katakana/000074_2.mp3"
                 }
@@ -937,13 +937,13 @@
             "examples": [
                 {
                     "word": "ヘリコプター",
-                    "reading": "ヘリコプター",
+                    "reading": "へりこぷたー",
                     "meaning": "Helicopter",
                     "audio": "Katakana/000075_1.mp3"
                 },
                 {
                     "word": "ヘルメット",
-                    "reading": "ヘルメット",
+                    "reading": "へるめっと",
                     "meaning": "Helmet",
                     "audio": "Katakana/000075_2.mp3"
                 }
@@ -970,13 +970,13 @@
             "examples": [
                 {
                     "word": "ホテル",
-                    "reading": "ホテル",
+                    "reading": "ほてる",
                     "meaning": "Hotel",
                     "audio": "Katakana/000076_1.mp3"
                 },
                 {
                     "word": "ホット",
-                    "reading": "ホット",
+                    "reading": "ほっと",
                     "meaning": "Hot",
                     "audio": "Katakana/000076_2.mp3"
                 }
@@ -1003,13 +1003,13 @@
             "examples": [
                 {
                     "word": "マウス",
-                    "reading": "マウス",
+                    "reading": "まうす",
                     "meaning": "Mouse",
                     "audio": "Katakana/000077_1.mp3"
                 },
                 {
                     "word": "マスク",
-                    "reading": "マスク",
+                    "reading": "ますく",
                     "meaning": "Mask",
                     "audio": "Katakana/000077_2.mp3"
                 }
@@ -1036,13 +1036,13 @@
             "examples": [
                 {
                     "word": "ミルク",
-                    "reading": "ミルク",
+                    "reading": "みるく",
                     "meaning": "Milk",
                     "audio": "Katakana/000078_1.mp3"
                 },
                 {
                     "word": "ミラー",
-                    "reading": "ミラー",
+                    "reading": "みらー",
                     "meaning": "Mirror",
                     "audio": "Katakana/000078_2.mp3"
                 }
@@ -1069,13 +1069,13 @@
             "examples": [
                 {
                     "word": "ムービー",
-                    "reading": "ムービー",
+                    "reading": "むーびー",
                     "meaning": "Movie",
                     "audio": "Katakana/000079_1.mp3"
                 },
                 {
                     "word": "チーム",
-                    "reading": "チーム",
+                    "reading": "ちーむ",
                     "meaning": "Team",
                     "audio": "Katakana/000079_2.mp3"
                 }
@@ -1102,13 +1102,13 @@
             "examples": [
                 {
                     "word": "メール",
-                    "reading": "メール",
+                    "reading": "めーる",
                     "meaning": "Email",
                     "audio": "Katakana/000080_1.mp3"
                 },
                 {
                     "word": "メモ",
-                    "reading": "メモ",
+                    "reading": "めも",
                     "meaning": "Memo",
                     "audio": "Katakana/000080_2.mp3"
                 }
@@ -1135,13 +1135,13 @@
             "examples": [
                 {
                     "word": "モニター",
-                    "reading": "モニター",
+                    "reading": "もにたー",
                     "meaning": "Monitor",
                     "audio": "Katakana/000081_1.mp3"
                 },
                 {
                     "word": "モーター",
-                    "reading": "モーター",
+                    "reading": "もーたー",
                     "meaning": "Motor",
                     "audio": "Katakana/000081_2.mp3"
                 }
@@ -1168,13 +1168,13 @@
             "examples": [
                 {
                     "word": "タイヤ",
-                    "reading": "タイヤ",
+                    "reading": "たいや",
                     "meaning": "Tire",
                     "audio": "Katakana/000082_1.mp3"
                 },
                 {
                     "word": "ダイヤ",
-                    "reading": "ダイヤ",
+                    "reading": "だいや",
                     "meaning": "Diamond",
                     "audio": "Katakana/000082_2.mp3"
                 }
@@ -1201,13 +1201,13 @@
             "examples": [
                 {
                     "word": "ユニフォーム",
-                    "reading": "ユニフォーム",
+                    "reading": "ゆにふぉーむ",
                     "meaning": "Uniform",
                     "audio": "Katakana/000083_1.mp3"
                 },
                 {
                     "word": "ユーモア",
-                    "reading": "ユーモア",
+                    "reading": "ゆーもあ",
                     "meaning": "Humor",
                     "audio": "Katakana/000083_2.mp3"
                 }
@@ -1234,13 +1234,13 @@
             "examples": [
                 {
                     "word": "ヨーロッパ",
-                    "reading": "ヨーロッパ",
+                    "reading": "よーろっぱ",
                     "meaning": "Europe",
                     "audio": "Katakana/000084_1.mp3"
                 },
                 {
                     "word": "ヨガ",
-                    "reading": "ヨガ",
+                    "reading": "よが",
                     "meaning": "Yoga",
                     "audio": "Katakana/000084_2.mp3"
                 }
@@ -1267,13 +1267,13 @@
             "examples": [
                 {
                     "word": "ラジオ",
-                    "reading": "ラジオ",
+                    "reading": "らじお",
                     "meaning": "Radio",
                     "audio": "Katakana/000085_1.mp3"
                 },
                 {
                     "word": "ラーメン",
-                    "reading": "ラーメン",
+                    "reading": "らーめん",
                     "meaning": "Ramen",
                     "audio": "Katakana/000085_2.mp3"
                 }
@@ -1300,13 +1300,13 @@
             "examples": [
                 {
                     "word": "リモコン",
-                    "reading": "リモコン",
+                    "reading": "りもこん",
                     "meaning": "Remote control",
                     "audio": "Katakana/000086_1.mp3"
                 },
                 {
                     "word": "リスト",
-                    "reading": "リスト",
+                    "reading": "りすと",
                     "meaning": "List",
                     "audio": "Katakana/000086_2.mp3"
                 }
@@ -1333,13 +1333,13 @@
             "examples": [
                 {
                     "word": "ルール",
-                    "reading": "ルール",
+                    "reading": "るーる",
                     "meaning": "Rule",
                     "audio": "Katakana/000087_1.mp3"
                 },
                 {
                     "word": "ルーター",
-                    "reading": "ルーター",
+                    "reading": "るーたー",
                     "meaning": "Router",
                     "audio": "Katakana/000087_2.mp3"
                 }
@@ -1366,13 +1366,13 @@
             "examples": [
                 {
                     "word": "レストラン",
-                    "reading": "レストラン",
+                    "reading": "れすとらん",
                     "meaning": "Restaurant",
                     "audio": "Katakana/000088_1.mp3"
                 },
                 {
                     "word": "レシート",
-                    "reading": "レシート",
+                    "reading": "れしーと",
                     "meaning": "Receipt",
                     "audio": "Katakana/000088_2.mp3"
                 }
@@ -1399,13 +1399,13 @@
             "examples": [
                 {
                     "word": "ロボット",
-                    "reading": "ロボット",
+                    "reading": "ろぼっと",
                     "meaning": "Robot",
                     "audio": "Katakana/000089_1.mp3"
                 },
                 {
                     "word": "ロッカー",
-                    "reading": "ロッカー",
+                    "reading": "ろっかー",
                     "meaning": "Locker",
                     "audio": "Katakana/000089_2.mp3"
                 }
@@ -1432,13 +1432,13 @@
             "examples": [
                 {
                     "word": "ワイン",
-                    "reading": "ワイン",
+                    "reading": "わいん",
                     "meaning": "Wine",
                     "audio": "Katakana/000090_1.mp3"
                 },
                 {
                     "word": "ワイシャツ",
-                    "reading": "ワイシャツ",
+                    "reading": "わいしゃつ",
                     "meaning": "Dress shirt",
                     "audio": "Katakana/000090_2.mp3"
                 }
@@ -1465,7 +1465,7 @@
             "examples": [
                 {
                     "word": "ヲタク",
-                    "reading": "ヲタク",
+                    "reading": "をたく",
                     "meaning": "Otaku",
                     "audio": "Katakana/000091_1.mp3"
                 }
@@ -1492,13 +1492,13 @@
             "examples": [
                 {
                     "word": "ペン",
-                    "reading": "ペン",
+                    "reading": "ぺん",
                     "meaning": "Pen",
                     "audio": "Katakana/000092_1.mp3"
                 },
                 {
                     "word": "ボタン",
-                    "reading": "ボタン",
+                    "reading": "ぼたん",
                     "meaning": "Button",
                     "audio": "Katakana/000092_2.mp3"
                 }

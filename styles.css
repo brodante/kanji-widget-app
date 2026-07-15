@@ -353,40 +353,58 @@ body {
     text-align: center;
 }
 
+/* 1. The Main Row Container */
 .example-item {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    /* Aligns text to the top when wrapping occurs */
+    align-items: center;
+    gap: 1rem;
     padding: 0.8rem 0;
     border-bottom: 1px solid rgba(150, 150, 150, 0.2);
-    gap: 1.5rem;
-    /* Forces a safe gap between the Japanese word and English meaning */
+    width: 100%;
+    /* Prevents the row from bleeding off the screen */
 }
 
+/* 2. Target the invisible wrapper holding the Japanese text */
+.example-item> :first-child {
+    display: flex;
+    flex-wrap: wrap;
+    /* THE MAGIC: Drops furigana to the next line if squeezed! */
+    align-items: baseline;
+    column-gap: 0.75rem;
+    row-gap: 0.2rem;
+    flex: 1 1 auto;
+    /* Allows the left side to shrink and wrap */
+}
+
+/* 3. The Japanese Word */
 .example-word {
     font-size: 1.35rem !important;
-    /* Kept your larger size */
     font-weight: bold;
     color: var(--on-surface);
-    flex-shrink: 0;
-    /* Prevents the Japanese kanji from getting squished */
+    white-space: nowrap;
 }
 
-.example-reading {
-    font-size: 1.05rem !important;
+/* 4. The Furigana */
+.example-reading,
+.reading-hiragana {
+    font-size: 0.95rem !important;
     color: var(--primary-color);
-    margin-top: 0.15rem;
+    opacity: 0.95;
+    font-weight: 500 !important;
+    white-space: nowrap;
 }
 
+/* 5. The English Meaning */
 .example-meaning {
+    flex: 0 0 auto;
+    /* Prevents the English side from getting crushed */
+    max-width: 45%;
+    /* Locks the right boundary */
     font-size: 1.1rem !important;
-    /* Kept your larger size */
     color: var(--on-surface-variant);
     text-align: right;
-    max-width: 50%;
-    /* The magic line: Forces it to wrap at half the parent div! */
-    word-wrap: break-word;
+    word-break: break-word;
     line-height: 1.4;
 }
 
