@@ -1016,12 +1016,21 @@ class KanjiLearningApp {
         tooltip.textContent = `${Math.round(progressPercentage)}%`;
         // --------------------------------------------
 
-        // The Milestone "Pick Up" Trigger
+        // The Milestone Triggers
         const progressBar = document.querySelector('.progress-bar');
+
+        // 50% Trigger
         if (progressPercentage >= 50) {
             progressBar.classList.add('past-midpoint');
         } else {
             progressBar.classList.remove('past-midpoint');
+        }
+
+        // 100% Trigger
+        if (progressPercentage === 100) {
+            progressBar.classList.add('is-complete');
+        } else {
+            progressBar.classList.remove('is-complete');
         }
     }
     

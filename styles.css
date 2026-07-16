@@ -807,6 +807,49 @@ body {
     /* Centered on the end edge */
 }
 
+/* ========================================== */
+/* FOREST CONCEPT 1: EVOLUTION                */
+/* ========================================== */
+
+/* 1. Base Thumb (1 Tree) */
+[data-theme="forest"] .progress-fill::after {
+    background-image: url('assets/icons/forest-point.svg');
+    width: 32px;
+    height: 32px;
+    right: -16px;
+    transition: background-image 0.2s ease, opacity 0.2s ease, width 0.2s ease;
+}
+
+/* 2. Stationary 50% Mark (2 Trees) */
+[data-theme="forest"] .progress-bar::before {
+    background-image: url('assets/icons/forest-mid.svg');
+    width: 40px;
+    height: 40px;
+}
+
+/* 3. When passing 50%, thumb BECOMES the 2 Trees */
+[data-theme="forest"] .progress-bar.past-midpoint .progress-fill::after {
+    background-image: url('assets/icons/forest-mid.svg');
+    width: 40px;
+    /* Scales up slightly to match */
+    height: 40px;
+    right: -20px;
+}
+
+/* 4. Stationary 100% Mark (3 Trees) */
+[data-theme="forest"] .progress-bar::after {
+    background-image: url('assets/icons/forest-end.svg');
+    width: 48px;
+    height: 48px;
+    right: -24px;
+    z-index: 6;
+}
+
+/* 5. At 100%, moving thumb vanishes, leaving only the stationary 3 Trees */
+[data-theme="forest"] .progress-bar.is-complete .progress-fill::after {
+    opacity: 0;
+}
+
 /* Kanji Journey */
 .journey-section {
     background-color: var(--surface);
