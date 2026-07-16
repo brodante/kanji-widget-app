@@ -229,12 +229,21 @@ class KanjiLearningApp {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Space' || e.key === 'Enter') {
+            // Prevent shortcuts from firing if you are typing in the settings input box
+            if (e.target.tagName === 'INPUT') return;
+
+            if (e.code === 'Space' || e.key === 'Enter') {
                 e.preventDefault();
                 this.markAsMastered();
             } else if (e.key === 'p' || e.key === 'P') {
                 e.preventDefault();
                 this.playPronunciation();
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                this.navigateDeck('next');
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                this.navigateDeck('prev');
             }
         });
     }
@@ -538,6 +547,48 @@ class KanjiLearningApp {
         if (reading) {
             await AudioManager.speak(reading, 'ja-JP');
             this.showToast(`Playing pronunciation: ${reading}`);
+        }
+    }
+
+    navigateDeck(direction) {
+        if (!this.currentKanjiPool || this.currentKanjiPool.length === 0) return;
+
+        const progress = StorageManager.getProgress();
+        let newIndex = this.currentIndex;
+        let found = false;
+
+        // Loop through the pool to find the next/prev unmastered kanji
+        for (let i = 1; i < this.currentKanjiPool.length; i++) {
+            // Calculate the next index, wrapping around to the start/end of the array if necessary
+            let step = direction === 'next' ? i : -i;
+            newIndex = (this.currentIndex + step + this.currentKanjiPool.length) % this.currentKanjiPool.length;
+            
+            const candidate = this.currentKanjiPool[newIndex];
+            
+            if (!progress.mastered.includes(candidate.character)) {
+                this.currentIndex = newIndex;
+                this.currentKanji = candidate;
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            // Add a rapid visual flash so the user feels the transition
+            const widget = document.getElementById('kanjiWidget');
+            widget.style.opacity = '0.5';
+            setTimeout(() => widget.style.opacity = '1', 150);
+
+            // Re-render the UI with the newly selected Kanji
+            this.renderKanji();
+            
+            // Auto-play audio on skip if the setting is active
+            if (this.settings.autoPlay) {
+                // Set to 300ms so it plays much faster during rapid flashcard skipping
+                setTimeout(() => this.playPronunciation(), 300); 
+            }
+        } else {
+            this.showToast("No other unmastered Kanji left in this level!");
         }
     }
 
@@ -950,7 +1001,28 @@ class KanjiLearningApp {
 
         // The Math.min fail-safe you already had will now work perfectly
         const progressPercentage = totalCount > 0 ? Math.min((masteredInThisLevel / totalCount) * 100, 100) : 0;
-        document.getElementById('progressFill').style.width = `${progressPercentage}%`;
+
+        // Grab the fill element and set its width
+        const progressFill = document.getElementById('progressFill');
+        progressFill.style.width = `${progressPercentage}%`;
+
+        // --- NEW: Generate and Update the Tooltip ---
+        let tooltip = progressFill.querySelector('.progress-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('span');
+            tooltip.className = 'progress-tooltip';
+            progressFill.appendChild(tooltip);
+        }
+        tooltip.textContent = `${Math.round(progressPercentage)}%`;
+        // --------------------------------------------
+
+        // The Milestone "Pick Up" Trigger
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressPercentage >= 50) {
+            progressBar.classList.add('past-midpoint');
+        } else {
+            progressBar.classList.remove('past-midpoint');
+        }
     }
     
     // Analyzes the date to see if the streak is active, broken, or needs incrementing

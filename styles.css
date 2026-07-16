@@ -251,6 +251,10 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    /* IF causes stroke animation error remove the webkit and user-select lines */
+    /* Disables the tap highlight color on mobile devices */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 .kanji-widget:hover {
@@ -349,40 +353,58 @@ body {
     text-align: center;
 }
 
+/* 1. The Main Row Container */
 .example-item {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    /* Aligns text to the top when wrapping occurs */
+    align-items: center;
+    gap: 1rem;
     padding: 0.8rem 0;
     border-bottom: 1px solid rgba(150, 150, 150, 0.2);
-    gap: 1.5rem;
-    /* Forces a safe gap between the Japanese word and English meaning */
+    width: 100%;
+    /* Prevents the row from bleeding off the screen */
 }
 
+/* 2. Target the invisible wrapper holding the Japanese text */
+.example-item> :first-child {
+    display: flex;
+    flex-wrap: wrap;
+    /* THE MAGIC: Drops furigana to the next line if squeezed! */
+    align-items: baseline;
+    column-gap: 0.75rem;
+    row-gap: 0.2rem;
+    flex: 1 1 auto;
+    /* Allows the left side to shrink and wrap */
+}
+
+/* 3. The Japanese Word */
 .example-word {
     font-size: 1.35rem !important;
-    /* Kept your larger size */
     font-weight: bold;
     color: var(--on-surface);
-    flex-shrink: 0;
-    /* Prevents the Japanese kanji from getting squished */
+    white-space: nowrap;
 }
 
-.example-reading {
-    font-size: 1.05rem !important;
+/* 4. The Furigana */
+.example-reading,
+.reading-hiragana {
+    font-size: 0.95rem !important;
     color: var(--primary-color);
-    margin-top: 0.15rem;
+    opacity: 0.95;
+    font-weight: 500 !important;
+    white-space: nowrap;
 }
 
+/* 5. The English Meaning */
 .example-meaning {
+    flex: 0 0 auto;
+    /* Prevents the English side from getting crushed */
+    max-width: 45%;
+    /* Locks the right boundary */
     font-size: 1.1rem !important;
-    /* Kept your larger size */
     color: var(--on-surface-variant);
     text-align: right;
-    max-width: 50%;
-    /* The magic line: Forces it to wrap at half the parent div! */
-    word-wrap: break-word;
+    word-break: break-word;
     line-height: 1.4;
 }
 
@@ -503,19 +525,286 @@ body {
     opacity: 0.8;
 }
 
+/* ========================================== */
+/* MASTER PROGRESS BAR SYSTEM                 */
+/* ========================================== */
+
 .progress-bar {
     width: 100%;
     height: 8px;
-    background-color: rgba(var(--primary-color), 0.2);
+    background-color: rgba(var(--primary-color-rgb), 0.2);
     border-radius: 4px;
-    overflow: hidden;
+    position: relative;
+    overflow: visible;
+    /* CRUCIAL: Replaces 'overflow: hidden' so icons can hang off the edge */
 }
 
+/* 50% Milestone (Midpoint) */
+.progress-bar::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+    /* Background layer */
+    opacity: 0.8;
+}
+
+/* 100% Milestone (Endpoint) */
+/* 100% Milestone (Endpoint) */
+.progress-bar::after {
+    content: "";
+    position: absolute;
+    right: -29px;
+    /* Adjusted to keep the larger icon perfectly centered */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 58px;
+    /* Increased by 150% */
+    height: 58px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+}
+
+/* The Moving Fill Line */
 .progress-fill {
     height: 100%;
     background-color: var(--primary-color);
-    transition: width 0.3s ease;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Smoother animation */
     width: 0%;
+    border-radius: 4px;
+    position: relative;
+    z-index: 5;
+    /* Pulls the actual bar IN FRONT of the 50% mark */
+}
+
+/* 1. Create the carried mid-mark (trailing just behind the big point) */
+.progress-fill::before {
+    content: "";
+    position: absolute;
+    right: -15px;
+    /* Tucked tightly behind the main 56px point */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    /* Increased by ~20% */
+    height: 40px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 4;
+    /* Safely tucked behind the thumb (z-index 10) */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* The Moving Point (Thumb Icon) */
+.progress-fill::after {
+    content: "";
+    position: absolute;
+    right: -28px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 10;
+    /* Highest layer: ALWAYS in front of everything */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    /* Adds a tiny shadow to the moving icon */
+    transition: background-image 0.3s ease;
+}
+
+/* 4. ...and reveal the carried mark trailing behind the point! */
+.progress-bar.past-midpoint .progress-fill::before {
+    opacity: 0.92;
+    /* Beautiful, slightly faded depth effect */
+}
+
+.progress-bar.past-midpoint::before {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.progress-bar.past-midpoint .progress-fill::before {
+    opacity: 1;
+}
+
+/* ========================================== */
+/* HOVER PERCENTAGE TOOLTIP                   */
+/* ========================================== */
+
+.progress-tooltip {
+    position: absolute;
+    right: 0;
+    /* Anchors exactly to the tip of the moving bar */
+    bottom: 200%;
+    /* Pushes it above the icons */
+    transform: translateX(50%) translateY(10px);
+    /* Centers it and pushes it slightly down for the animation */
+    background: var(--primary-color);
+    color: var(--on-primary);
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--elevation-2);
+    z-index: 20;
+    pointer-events: none;
+    /* Stops the tooltip from glitching your mouse hover */
+    white-space: nowrap;
+}
+
+/* Tiny triangle arrow pointing down from the tooltip */
+.progress-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    /* Bottom of the tooltip */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    /* Matches the tooltip color and creates a triangle */
+    border-color: var(--primary-color) transparent transparent transparent;
+}
+
+/* The Hover & Click Animation */
+/* We target the whole bar so the hit-box is generous for mobile tapping! */
+.progress-bar:hover .progress-tooltip,
+.progress-bar:active .progress-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(50%) translateY(0);
+    /* Floats up into place! */
+}
+
+/* ========================================== */
+/* THEME-SPECIFIC MILESTONE ICONS             */
+/* ========================================== */
+
+/* Yotsuba Theme Setup */
+[data-theme="yotsuba"] .progress-fill::before {
+    background-image: url('assets/icons/clover-mid.png');
+}
+
+[data-theme="yotsuba"] .progress-fill::after {
+    background-image: url('assets/icons/clover-point.png');
+}
+
+[data-theme="yotsuba"] .progress-bar::before {
+    background-image: url('assets/icons/clover-mid.png');
+}
+
+[data-theme="yotsuba"] .progress-bar::after {
+    background-image: url('assets/icons/clover-end.png');
+    border-radius: 50%;
+    /* Smooths out the corners of the JPG */
+}
+
+/* Candy Theme Setup */
+/* ========================================== */
+/* CANDY THEME SETUP (Custom Sizing)          */
+/* ========================================== */
+
+/* 1. The main moving point (50% smaller) */
+[data-theme="candy"] .progress-fill::after {
+    background-image: url('assets/icons/candy-point.svg');
+    width: 28px;
+    height: 28px;
+    right: -14px;
+    /* Recalculated to keep the smaller icon perfectly centered */
+}
+
+/* 2. The stationary 50% mark (10% larger) */
+[data-theme="candy"] .progress-bar::before {
+    background-image: url('assets/icons/candy-mid.svg');
+    width: 35px;
+    /* Increased by ~10% (from 32px) */
+    height: 45px;
+}
+
+/* 3. The carried 50% mark (10% larger) */
+[data-theme="candy"] .progress-fill::before {
+    background-image: url('assets/icons/candy-mid.svg');
+    width: 44px;
+    /* Increased by 10% (from 40px) */
+    height: 56px;
+    right: -25px;
+    /* Adjusted to tuck perfectly behind the tiny thumb! */
+}
+
+/* 4. The 100% finish line (Inherits the master 58px size) */
+[data-theme="candy"] .progress-bar::after {
+    background-image: url('assets/icons/candy-end.svg');
+}
+
+
+/* ========================================== */
+/* DARK THEME SETUP (Car & Trailer)           */
+/* ========================================== */
+
+/* 1. The Car (Main Point) */
+[data-theme="dark"] .progress-fill::after {
+    background-image: url('assets/icons/dark-point.svg');
+    /* The Car */
+    width: 55px;
+    height: 55px;
+    right: -22px;
+    /* Keeps the car perfectly centered on the progress line */
+}
+
+/* 2. The Waiting Trailer (Stationary 50% Mark) */
+[data-theme="dark"] .progress-bar::before {
+    background-image: url('assets/icons/dark-mid.svg');
+    /* The Trailer */
+    width: 30px;
+    /* Starts smaller */
+    height: 30px;
+}
+
+/* 3. The Hitched Trailer (Carried 50% Mark) */
+[data-theme="dark"] .progress-fill::before {
+    background-image: url('assets/icons/dark-mid.svg');
+    /* The Trailer (Attached) */
+    width: 40px;
+    /* Increased in size when attached! */
+    height: 40px;
+    /* This positive value pushes the trailer to the left, behind the car */
+    right: 25px;
+    z-index: 4;
+    /* Ensures the hitch goes slightly beneath the car */
+    /*opacity: 1;*/
+    /* Keeps it fully solid instead of faded for this theme */
+}
+[data-theme="dark"] .progress-bar.past-midpoint .progress-fill::before {
+    opacity: 1;
+}
+
+/* 4. The Gas Station (100% Finish Line) */
+[data-theme="dark"] .progress-bar::after {
+    background-image: url('assets/icons/dark-end.svg');
+    /* The Gas Station */
+    width: 45px;
+    /* Nice and large */
+    height: 45px;
+    right: -32px;
+    top: -50%;
+    /* Centered on the end edge */
 }
 
 /* Kanji Journey */
@@ -1122,6 +1411,8 @@ input:focus {
 
 /* Clean layout grid wrapper for the truncated journey view */
 .compact-fade-wrapper {
+    padding: 6px;
+    margin: -6px;
     position: relative;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
@@ -1529,4 +1820,11 @@ input:focus {
 .journey-pill:active {
     transform: scale(0.92);
     transition: transform 0.1s ease;
+}
+
+/* Prevent Kanji from colliding with action buttons on mobile screens */
+@media (max-width: 600px) {
+    .kanji-character {
+        margin-top: 30px;
+    }
 }
