@@ -1002,6 +1002,14 @@ class KanjiLearningApp {
         // The Math.min fail-safe you already had will now work perfectly
         const progressPercentage = totalCount > 0 ? Math.min((masteredInThisLevel / totalCount) * 100, 100) : 0;
         document.getElementById('progressFill').style.width = `${progressPercentage}%`;
+
+        // The Milestone "Pick Up" Trigger
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressPercentage >= 50) {
+            progressBar.classList.add('past-midpoint');
+        } else {
+            progressBar.classList.remove('past-midpoint');
+        }
     }
     
     // Analyzes the date to see if the streak is active, broken, or needs incrementing

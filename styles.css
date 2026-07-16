@@ -525,20 +525,182 @@ body {
     opacity: 0.8;
 }
 
+/* ========================================== */
+/* MASTER PROGRESS BAR SYSTEM                 */
+/* ========================================== */
+
 .progress-bar {
     width: 100%;
     height: 8px;
-    background-color: rgba(var(--primary-color), 0.2);
+    background-color: rgba(var(--primary-color-rgb), 0.2);
     border-radius: 4px;
-    overflow: hidden;
+    position: relative;
+    overflow: visible;
+    /* CRUCIAL: Replaces 'overflow: hidden' so icons can hang off the edge */
 }
 
+/* 50% Milestone (Midpoint) */
+.progress-bar::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+    /* Background layer */
+    opacity: 0.8;
+}
+
+/* 100% Milestone (Endpoint) */
+/* 100% Milestone (Endpoint) */
+.progress-bar::after {
+    content: "";
+    position: absolute;
+    right: -29px;
+    /* Adjusted to keep the larger icon perfectly centered */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 58px;
+    /* Increased by 150% */
+    height: 58px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+}
+
+/* The Moving Fill Line */
 .progress-fill {
     height: 100%;
     background-color: var(--primary-color);
-    transition: width 0.3s ease;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Smoother animation */
     width: 0%;
+    border-radius: 4px;
+    position: relative;
+    z-index: 5;
+    /* Pulls the actual bar IN FRONT of the 50% mark */
 }
+
+/* 1. Create the carried mid-mark (trailing just behind the big point) */
+.progress-fill::before {
+    content: "";
+    position: absolute;
+    right: -15px;
+    /* Tucked tightly behind the main 56px point */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    /* Increased by ~20% */
+    height: 40px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 4;
+    /* Safely tucked behind the thumb (z-index 10) */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* The Moving Point (Thumb Icon) */
+.progress-fill::after {
+    content: "";
+    position: absolute;
+    right: -28px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 10;
+    /* Highest layer: ALWAYS in front of everything */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    /* Adds a tiny shadow to the moving icon */
+    transition: background-image 0.3s ease;
+}
+
+/* 4. ...and reveal the carried mark trailing behind the point! */
+.progress-bar.past-midpoint .progress-fill::before {
+    opacity: 0.92;
+    /* Beautiful, slightly faded depth effect */
+}
+
+.progress-bar.past-midpoint::before {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.progress-bar.past-midpoint .progress-fill::before {
+    opacity: 1;
+}
+
+/* ========================================== */
+/* THEME-SPECIFIC MILESTONE ICONS             */
+/* ========================================== */
+
+/* Yotsuba Theme Setup */
+[data-theme="yotsuba"] .progress-fill::before {
+    background-image: url('assets/icons/clover-mid.png');
+}
+
+[data-theme="yotsuba"] .progress-fill::after {
+    background-image: url('assets/icons/clover-point.png');
+}
+
+[data-theme="yotsuba"] .progress-bar::before {
+    background-image: url('assets/icons/clover-mid.png');
+}
+
+[data-theme="yotsuba"] .progress-bar::after {
+    background-image: url('assets/icons/clover-end.png');
+    border-radius: 50%;
+    /* Smooths out the corners of the JPG */
+}
+
+/* Candy Theme Setup */
+/* ========================================== */
+/* CANDY THEME SETUP (Custom Sizing)          */
+/* ========================================== */
+
+/* 1. The main moving point (50% smaller) */
+[data-theme="candy"] .progress-fill::after {
+    background-image: url('assets/icons/candy-point.svg');
+    width: 28px;
+    height: 28px;
+    right: -14px;
+    /* Recalculated to keep the smaller icon perfectly centered */
+}
+
+/* 2. The stationary 50% mark (10% larger) */
+[data-theme="candy"] .progress-bar::before {
+    background-image: url('assets/icons/candy-mid.svg');
+    width: 35px;
+    /* Increased by ~10% (from 32px) */
+    height: 45px;
+}
+
+/* 3. The carried 50% mark (10% larger) */
+[data-theme="candy"] .progress-fill::before {
+    background-image: url('assets/icons/candy-mid.svg');
+    width: 44px;
+    /* Increased by 10% (from 40px) */
+    height: 56px;
+    right: -25px;
+    /* Adjusted to tuck perfectly behind the tiny thumb! */
+}
+
+/* 4. The 100% finish line (Inherits the master 58px size) */
+[data-theme="candy"] .progress-bar::after {
+    background-image: url('assets/icons/candy-end.svg');
+}
+
 
 /* Kanji Journey */
 .journey-section {
