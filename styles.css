@@ -808,7 +808,7 @@ body {
 }
 
 /* ========================================== */
-/* FOREST CONCEPT 1: EVOLUTION                */
+/* FOREST THEME                               */
 /* ========================================== */
 
 /* 1. Base Thumb (1 Tree) */
@@ -848,6 +848,157 @@ body {
 /* 5. At 100%, moving thumb vanishes, leaving only the stationary 3 Trees */
 [data-theme="forest"] .progress-bar.is-complete .progress-fill::after {
     opacity: 0;
+}
+/* ========================================== */
+/* PAPER THEME SETUP (The Ink Dip)            */
+/* ========================================== */
+
+/* 1. Base Thumb (The Fountain Pen) */
+[data-theme="paper"] .progress-fill::after {
+    background-image: url('assets/icons/paper-point.svg');
+    width: 35px;
+    height: 35px;
+    right: -17px;
+    transition: opacity 0.2s ease;
+}
+
+/* 2. Stationary 50% Mark (The Full Inkwell) */
+[data-theme="paper"] .progress-bar::before {
+    background-image: url('assets/icons/paper-mid.svg');
+    width: 44px;
+    /* Starts about 10% larger than base */
+    height: 44px;
+    opacity: 1;
+    /* Adds a smooth animation for when the size and opacity change */
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+}
+
+/* 3. At 50%, the pen "uses" the ink! Inkwell shrinks and fades. */
+[data-theme="paper"] .progress-bar.past-midpoint::before {
+    width: 35px;
+    /* Shrinks down by ~20% total */
+    height: 35px;
+    opacity: 0.4;
+    /* Becomes translucent to look used/empty */
+}
+
+/* 4. We aren't carrying anything in this theme, so we hide the trailer layer */
+[data-theme="paper"] .progress-fill::before {
+    display: none;
+}
+
+/* 5. Stationary 100% Mark (The Letter) */
+[data-theme="paper"] .progress-bar::after {
+    background-image: url('assets/icons/paper-end.svg');
+    width: 40px;
+    height: 40px;
+    right: -25px;
+    z-index: 4;
+    /* Pulls the letter to the front so the pen slides cleanly behind it */
+}
+
+/* 6. At 100%, the pen vanishes (like it's sealing the letter!) 
+[data-theme="paper"] .progress-bar.is-complete .progress-fill::after {
+    opacity: 0;
+} 
+*/
+
+/* ========================================== */
+/* MIDNIGHT THEME SETUP (Deep Space Tow)      */
+/* ========================================== */
+
+/* 1. The Rocket (Main Point) */
+[data-theme="midnight"] .progress-fill::after {
+    background-image: url('assets/icons/midnight-point.svg');
+    width: 40px;
+    height: 40px;
+    right: -20px;
+    /* Keeps the rocket perfectly centered on the line */
+    z-index: 5;
+}
+
+/* 2. The Waiting Satellite (Stationary 50% Mark) */
+[data-theme="midnight"] .progress-bar::before {
+    background-image: url('assets/icons/midnight-mid.svg');
+    width: 32px;
+    height: 32px;
+}
+
+/* 3. The Towed Satellite (Carried 50% Mark) */
+[data-theme="midnight"] .progress-fill::before {
+    background-image: url('assets/icons/midnight-mid.svg');
+    width: 32px;
+    height: 32px;
+    /* This positive value pushes the satellite to the left, tethering it behind the rocket */
+    right: 25px;
+    z-index: 4;
+    opacity: 0;
+    /* Stays hidden in the void until 50% */
+    transition: opacity 0.3s ease;
+}
+
+/* 3.5 Reveal the towed satellite ONLY when the rocket hits 50% */
+[data-theme="midnight"] .progress-bar.past-midpoint .progress-fill::before {
+    opacity: 1;
+    /* Docking complete! Solidifies the satellite so it can be towed */
+}
+
+/* 4. The Space Station (100% Finish Line) */
+[data-theme="midnight"] .progress-bar::after {
+    background-image: url('assets/icons/midnight-end.svg');
+    width: 60px;
+    /* Nice and large for the final destination */
+    height: 60px;
+    right: -30px;
+}
+
+/* ========================================== */
+/* MIDNIGHT THEME SETUP (Deep Space Tow)      */
+/* ========================================== */
+
+/* 1. The Rocket (Main Point) */
+[data-theme="midnight"] .progress-fill::after {
+    background-image: url('assets/icons/midnight-point.svg');
+    width: 40px;
+    height: 40px;
+    right: -20px;
+    /* Keeps the rocket perfectly centered on the line */
+    z-index: 5;
+}
+
+/* 2. The Waiting Satellite (Stationary 50% Mark) */
+[data-theme="midnight"] .progress-bar::before {
+    background-image: url('assets/icons/midnight-mid.svg');
+    width: 32px;
+    height: 32px;
+}
+
+/* 3. The Towed Satellite (Carried 50% Mark) */
+[data-theme="midnight"] .progress-fill::before {
+    background-image: url('assets/icons/midnight-mid.svg');
+    width: 32px;
+    height: 32px;
+    /* This positive value pushes the satellite to the left, tethering it behind the rocket */
+    right: 25px;
+    z-index: 4;
+    opacity: 0;
+    /* Stays hidden in the void until 50% */
+    transition: opacity 0.3s ease;
+}
+
+/* 3.5 Reveal the towed satellite ONLY when the rocket hits 50% */
+[data-theme="midnight"] .progress-bar.past-midpoint .progress-fill::before {
+    opacity: 1;
+    /* Docking complete! Solidifies the satellite so it can be towed */
+}
+
+/* 4. The Space Station (100% Finish Line) */
+[data-theme="midnight"] .progress-bar::after {
+    background-image: url('assets/icons/midnight-end.svg');
+    width: 60px;
+    /* Nice and large for the final destination */
+    height: 60px;
+    right: -30px;
 }
 
 /* Kanji Journey */
