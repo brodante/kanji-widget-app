@@ -1001,7 +1001,20 @@ class KanjiLearningApp {
 
         // The Math.min fail-safe you already had will now work perfectly
         const progressPercentage = totalCount > 0 ? Math.min((masteredInThisLevel / totalCount) * 100, 100) : 0;
-        document.getElementById('progressFill').style.width = `${progressPercentage}%`;
+
+        // Grab the fill element and set its width
+        const progressFill = document.getElementById('progressFill');
+        progressFill.style.width = `${progressPercentage}%`;
+
+        // --- NEW: Generate and Update the Tooltip ---
+        let tooltip = progressFill.querySelector('.progress-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('span');
+            tooltip.className = 'progress-tooltip';
+            progressFill.appendChild(tooltip);
+        }
+        tooltip.textContent = `${Math.round(progressPercentage)}%`;
+        // --------------------------------------------
 
         // The Milestone "Pick Up" Trigger
         const progressBar = document.querySelector('.progress-bar');

@@ -642,6 +642,58 @@ body {
 }
 
 /* ========================================== */
+/* HOVER PERCENTAGE TOOLTIP                   */
+/* ========================================== */
+
+.progress-tooltip {
+    position: absolute;
+    right: 0;
+    /* Anchors exactly to the tip of the moving bar */
+    bottom: 200%;
+    /* Pushes it above the icons */
+    transform: translateX(50%) translateY(10px);
+    /* Centers it and pushes it slightly down for the animation */
+    background: var(--primary-color);
+    color: var(--on-primary);
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--elevation-2);
+    z-index: 20;
+    pointer-events: none;
+    /* Stops the tooltip from glitching your mouse hover */
+    white-space: nowrap;
+}
+
+/* Tiny triangle arrow pointing down from the tooltip */
+.progress-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    /* Bottom of the tooltip */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    /* Matches the tooltip color and creates a triangle */
+    border-color: var(--primary-color) transparent transparent transparent;
+}
+
+/* The Hover & Click Animation */
+/* We target the whole bar so the hit-box is generous for mobile tapping! */
+.progress-bar:hover .progress-tooltip,
+.progress-bar:active .progress-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(50%) translateY(0);
+    /* Floats up into place! */
+}
+
+/* ========================================== */
 /* THEME-SPECIFIC MILESTONE ICONS             */
 /* ========================================== */
 
