@@ -754,6 +754,59 @@ body {
 }
 
 
+/* ========================================== */
+/* DARK THEME SETUP (Car & Trailer)           */
+/* ========================================== */
+
+/* 1. The Car (Main Point) */
+[data-theme="dark"] .progress-fill::after {
+    background-image: url('assets/icons/dark-point.svg');
+    /* The Car */
+    width: 55px;
+    height: 55px;
+    right: -22px;
+    /* Keeps the car perfectly centered on the progress line */
+}
+
+/* 2. The Waiting Trailer (Stationary 50% Mark) */
+[data-theme="dark"] .progress-bar::before {
+    background-image: url('assets/icons/dark-mid.svg');
+    /* The Trailer */
+    width: 30px;
+    /* Starts smaller */
+    height: 30px;
+}
+
+/* 3. The Hitched Trailer (Carried 50% Mark) */
+[data-theme="dark"] .progress-fill::before {
+    background-image: url('assets/icons/dark-mid.svg');
+    /* The Trailer (Attached) */
+    width: 40px;
+    /* Increased in size when attached! */
+    height: 40px;
+    /* This positive value pushes the trailer to the left, behind the car */
+    right: 25px;
+    z-index: 4;
+    /* Ensures the hitch goes slightly beneath the car */
+    /*opacity: 1;*/
+    /* Keeps it fully solid instead of faded for this theme */
+}
+[data-theme="dark"] .progress-bar.past-midpoint .progress-fill::before {
+    opacity: 1;
+}
+
+/* 4. The Gas Station (100% Finish Line) */
+[data-theme="dark"] .progress-bar::after {
+    background-image: url('assets/icons/dark-end.svg');
+    /* The Gas Station */
+    width: 45px;
+    /* Nice and large */
+    height: 45px;
+    right: -32px;
+    top: -50%;
+    /* Centered on the end edge */
+}
+
 /* Kanji Journey */
 .journey-section {
     background-color: var(--surface);
