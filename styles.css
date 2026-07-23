@@ -1320,6 +1320,205 @@ body {
     /* Runs the 1-second wiggle animation, loops infinitely */
     animation: sun-wiggle 1s ease-in-out infinite; 
 }
+/* ========================================== */
+/* NORD THEME SETUP (The Melting Journey)     */
+/* ========================================== */
+
+/* Cold arctic blue progress line and fill */
+[data-theme="nord"] .progress-bar {
+    background-color: rgba(60, 90, 110, 0.4);
+}
+
+[data-theme="nord"] .progress-fill {
+    background-color: #A0E0F0;
+}
+
+/* 1. Melting Start Shelf (The Transform Loop) */
+[data-theme="nord"] .progress-bar::before {
+    content: "";
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    left: -25px;
+    top: 50%;
+    /* FIX: Shifted it UP so the blue lake aligns with the progress line */
+    transform: translateY(calc(-50% - 19px));
+    background-image: url('assets/icons/ice-shelf.svg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    animation: start-shelf-melts 10s linear infinite !important;
+}
+/* 2. Polar Bear (Moving Point) */
+[data-theme="nord"] .progress-fill::after {
+    background-image: url('assets/icons/polar-bear-4-feet.svg');
+    width: 44px;
+    height: 44px;
+    right: -5px;
+    z-index: 5;
+    transform-origin: bottom center;
+    /* Proper base transform so it doesn't teleport */
+    transform: translateY(-50%);
+}
+
+/* 3. Towed Penguin (Revealed Past 50%) */
+[data-theme="nord"] .progress-fill::before {
+    background-image: url('assets/icons/arctic-penguin.svg');
+    width: 33px;
+    height: 33px;
+    right: 30px;
+    z-index: 4;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    transform-origin: bottom center;
+    /* Proper base transform so it doesn't teleport */
+    transform: translateY(-50%);
+}
+
+/* 3.5 Reveal towed penguin only PAST 50% */
+[data-theme="nord"] .progress-bar.past-midpoint .progress-fill::before {
+    opacity: 1;
+}
+
+/* 4. The Sad Melting Glacier (Stationary 100% End) */
+[data-theme="nord"] .progress-bar::after {
+    /* Start with the normal glacier */
+    background-image: url('assets/icons/glacier.svg');
+    width: 40px;
+    height: 40px;
+    right: -25px;
+    transform-origin: bottom center;
+    /* Keeping this centered, or tweak the -50% if this one is also misaligned! */
+    transform: translateY(-50%);
+    z-index: 4;
+}
+
+
+/* ========================================== */
+/* NORD THEME ANIMATIONS (Pit Stop & Warning) */
+/* ========================================== */
+
+@keyframes start-shelf-melts {
+
+    0%,
+    100% {
+        background-image: url('assets/icons/ice-shelf.svg');
+        opacity: 1;
+    }
+
+    40% {
+        background-image: url('assets/icons/ice-shelf.svg');
+        opacity: 1;
+    }
+
+    50% {
+        background-image: url('assets/icons/ice-shelf.svg');
+        opacity: 0.2;
+    }
+
+    55% {
+        background-image: url('assets/icons/ice-shelf-broken.svg');
+        opacity: 0.2;
+    }
+
+    65% {
+        background-image: url('assets/icons/ice-shelf-broken.svg');
+        opacity: 1;
+    }
+
+    95% {
+        background-image: url('assets/icons/ice-shelf-broken.svg');
+        opacity: 1;
+    }
+
+    99% {
+        background-image: url('assets/icons/ice-shelf-broken.svg');
+        opacity: 0;
+    }
+}
+
+@keyframes animals-sad-end {
+
+    0%,
+    100% {
+        transform: translateY(-50%) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(-48%) rotate(2deg) scale(0.95);
+        opacity: 0.7;
+    }
+}
+
+/* 3. 100% Sad Pit Stop - Glacier Cracks (No Movement) */
+@keyframes glacier-crack {
+
+    0%,
+    100% {
+        /* Locked perfectly in place */
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+        background-image: url('assets/icons/glacier.svg');
+    }
+
+    45%,
+    55% {
+        /* Still locked in place, just swapping the image and dimming slightly */
+        transform: translateY(-50%) scale(1);
+        opacity: 0.8;
+        background-image: url('assets/icons/glacier-broken.svg');
+    }
+}
+
+@keyframes warning-fade {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    20%,
+    80% {
+        opacity: 0.8;
+    }
+}
+
+
+/* APPLYING THE ANIMATIONS AT 100% COMPLETE */
+
+/* 1. Bear Point */
+[data-theme="nord"] .progress-bar.is-complete .progress-fill::after {
+    animation: animals-sad-end 1.5s ease-in-out 0.6s infinite !important;
+}
+
+/* 2. Carried Penguin */
+[data-theme="nord"] .progress-bar.is-complete .progress-fill::before {
+    animation: animals-sad-end 1.4s ease-in-out 0.6s infinite !important;
+}
+
+/* 3. Melting Glacier (is-complete) */
+[data-theme="nord"] .progress-bar.is-complete::after {
+    /* Changed to the new cracking animation, 2s smooth loop */
+    animation: glacier-crack 2s ease-in-out 0.6s infinite !important;
+}
+
+/* 4. Global Warming Warning Message - Float & Fade */
+[data-theme="nord"]:has(.progress-bar.is-complete)::after {
+    content: "Our home is melting. Save our ice.";
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: #A0E0F0;
+    opacity: 0;
+    pointer-events: none;
+    animation: warning-fade 5s ease-in-out infinite !important;
+}
+
 
 /* Kanji Journey */
 .journey-section {
