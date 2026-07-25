@@ -1320,6 +1320,9 @@ body {
     /* Runs the 1-second wiggle animation, loops infinitely */
     animation: sun-wiggle 1s ease-in-out infinite; 
 }
+
+
+
 /* ========================================== */
 /* NORD THEME SETUP (The Melting Journey)     */
 /* ========================================== */
@@ -1331,20 +1334,21 @@ body {
 
 [data-theme="nord"] .progress-fill {
     background-color: #A0E0F0;
+    z-index: auto !important;
 }
 
 /* 1. Melting Start Shelf (The Transform Loop) */
 [data-theme="nord"] .progress-bar::before {
     content: "";
     position: absolute;
-    width: 52px;
-    height: 52px;
-    left: -25px;
+    width: 100px;
+    height: 100px;
+    left: -30px;
     top: 50%;
     /* FIX: Shifted it UP so the blue lake aligns with the progress line */
-    transform: translateY(calc(-50% - 19px));
+    transform: translateY(calc(-50% - 9px));
     background-image: url('assets/icons/ice-shelf.svg');
-    background-position: center center;
+    background-position: bottom center;
     background-repeat: no-repeat;
     background-size: contain;
     animation: start-shelf-melts 10s linear infinite !important;
@@ -1358,11 +1362,11 @@ body {
     z-index: 5;
     transform-origin: bottom center;
     /* Proper base transform so it doesn't teleport */
-    transform: translateY(-50%);
+    transform: translateY(calc(-100% + 8px));
 }
 
 /* 3. Towed Penguin (Revealed Past 50%) */
-[data-theme="nord"] .progress-fill::before {
+[data-theme="nord"] .progress-bar .progress-fill::before {
     background-image: url('assets/icons/arctic-penguin.svg');
     width: 33px;
     height: 33px;
@@ -1371,10 +1375,9 @@ body {
     opacity: 0;
     transition: opacity 0.3s ease;
     transform-origin: bottom center;
-    /* Proper base transform so it doesn't teleport */
-    transform: translateY(-50%);
+    /* FIX: Removed !important so the bowing animation is allowed to run! */
+    transform: translateY(calc(-100% + 0px));
 }
-
 /* 3.5 Reveal towed penguin only PAST 50% */
 [data-theme="nord"] .progress-bar.past-midpoint .progress-fill::before {
     opacity: 1;
@@ -1384,15 +1387,50 @@ body {
 [data-theme="nord"] .progress-bar::after {
     /* Start with the normal glacier */
     background-image: url('assets/icons/glacier.svg');
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     right: -25px;
     transform-origin: bottom center;
     /* Keeping this centered, or tweak the -50% if this one is also misaligned! */
     transform: translateY(-50%);
-    z-index: 4;
+    z-index: 3;
 }
 
+/* Hide by default on all other themes */
+.nord-warning-text {
+    display: none;
+    text-align: center;
+    color: #A0E0F0;
+    /* FIX: Matching icy blue theme color */
+    font-size: 18px;
+    /* FIX: Bigger text */
+    font-style: italic;
+    font-weight: 700;
+    /* FIX: Thicker text */
+    letter-spacing: 0.5px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6);
+    text-decoration: none;
+    /* Removes the default ugly link underline */
+    transition: all 0.3s ease;
+    /* Smooth animation for the hover effect */
+}
+
+/* Reveal ONLY when Nord is active */
+[data-theme="nord"] .nord-warning-text {
+    display: block;
+}
+
+/* Hover effect so users know it's a clickable link */
+.nord-warning-text:hover {
+    color: #ffffff;
+    /* Brightens to white on hover */
+    text-decoration: underline;
+    /* Adds underline on hover */
+    transform: scale(1.02);
+    /* Slight pop out effect */
+}
 
 /* ========================================== */
 /* NORD THEME ANIMATIONS (Pit Stop & Warning) */
@@ -1437,16 +1475,34 @@ body {
     }
 }
 
-@keyframes animals-sad-end {
+/* 2. 100% Sad Pit Stop - Bear */
+@keyframes bear-sad-end {
 
     0%,
     100% {
-        transform: translateY(-50%) rotate(0deg) scale(1);
+        transform: translateY(calc(-100% + 7px)) rotate(0deg) scale(1);
         opacity: 1;
     }
 
     50% {
-        transform: translateY(-48%) rotate(2deg) scale(0.95);
+        transform: translateY(calc(-100% + 8px)) rotate(2deg) scale(0.95);
+        opacity: 0.7;
+    }
+}
+
+/* 2.5 100% Sad Pit Stop - Penguin */
+@keyframes penguin-sad-end {
+
+    0%,
+    100% {
+        /* FIX: Matches the new setup height exactly so it doesn't glitch! */
+        transform: translateY(calc(-100% - 0px)) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        /* Bows down slightly (adds 2px of upward movement) */
+        transform: translateY(calc(-100% + 2px)) rotate(2deg) scale(0.95);
         opacity: 0.7;
     }
 }
@@ -1488,13 +1544,16 @@ body {
 /* APPLYING THE ANIMATIONS AT 100% COMPLETE */
 
 /* 1. Bear Point */
+/* 1. Bear Point (is-complete) */
 [data-theme="nord"] .progress-bar.is-complete .progress-fill::after {
-    animation: animals-sad-end 1.5s ease-in-out 0.6s infinite !important;
+    /* Triggers the Bear's specific animation */
+    animation: bear-sad-end 1.5s ease-in-out 0.6s infinite !important;
 }
 
-/* 2. Carried Penguin */
+/* 2. Carried Penguin (is-complete) */
 [data-theme="nord"] .progress-bar.is-complete .progress-fill::before {
-    animation: animals-sad-end 1.4s ease-in-out 0.6s infinite !important;
+    /* Triggers the Penguin's specific animation */
+    animation: penguin-sad-end 1.4s ease-in-out 0.6s infinite !important;
 }
 
 /* 3. Melting Glacier (is-complete) */
@@ -1503,7 +1562,8 @@ body {
     animation: glacier-crack 2s ease-in-out 0.6s infinite !important;
 }
 
-/* 4. Global Warming Warning Message - Float & Fade */
+
+/* 4. Global Warming Warning Message - Float & Fade 
 [data-theme="nord"]:has(.progress-bar.is-complete)::after {
     content: "Our home is melting. Save our ice.";
     position: absolute;
@@ -1518,7 +1578,7 @@ body {
     pointer-events: none;
     animation: warning-fade 5s ease-in-out infinite !important;
 }
-
+*/
 
 /* Kanji Journey */
 .journey-section {

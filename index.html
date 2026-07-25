@@ -109,11 +109,12 @@
                 </div>
             </div>
 
-            <!-- Progress Section -->
+<!-- Progress Section -->
             <div class="progress-section">
                 <div class="progress-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <h3>Learning Progress</h3>
+                        <!-- Reverted back to the normal stats line -->
                         <div id="progressStats" class="progress-stats">0 mastered | 0 total (N5 level)</div>
                     </div>
                     <div class="streak-badge" id="streakBadge" title="Daily Learning Streak">
@@ -121,17 +122,17 @@
                         <span id="streakCount">0</span>
                     </div>
                 </div>
+            
+                <!-- FIX: Moved down here to its own line, removed the pipe, and added quotes! -->
+                <!-- FIX: Changed from a div to a clickable anchor link pointing to the WWF -->
+                <a href="https://www.worldwildlife.org/habitats/polar-regions" target="_blank" rel="noopener noreferrer"
+                    class="nord-warning-text">
+                    "Our home is melting. Save our ice."
+                </a>
+            
                 <div class="progress-bar">
                     <div id="progressFill" class="progress-fill"></div>
                 </div>
-            </div>
-
-            <div class="journey-section">
-                <div class="journey-header">
-                    <h3>Kanji Journey</h3>
-                    <span id="journeySummary" class="journey-summary">0 mastered</span>
-                </div>
-                <div id="kanjiJourney" class="journey-grid"></div>
             </div>
 
             <!-- Recent Kanji -->
