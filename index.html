@@ -109,36 +109,36 @@
                 </div>
             </div>
 
-            <!-- Progress Section -->
+<!-- Progress Section -->
             <div class="progress-section">
-                <div class="progress-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3>Learning Progress</h3>
-                        <div id="progressStats" class="progress-stats">0 mastered | 0 total (N5 level)</div>
+                <!-- FIX 1: Removed Flexbox. Made it relative so the badge can be pinned inside it. -->
+                <div class="progress-header" style="position: relative; text-align: left;">
+            
+                    <!-- FIX 2: Added padding-right as a bumper so zoomed text won't hit the badge -->
+                    <div style="padding-right: 80px;">
+                        <h3 style="margin-top: 0; text-align: left;">Learning Progress</h3>
+                        <!-- Reverted back to the normal stats line -->
+                        <div id="progressStats" class="progress-stats" style="text-align: left;">0 mastered | 0 total (N5 level)
+                        </div>
                     </div>
-                    <div class="streak-badge" id="streakBadge" title="Daily Learning Streak">
+            
+                    <!-- FIX 3: Pinned absolutely to the top right corner -->
+                    <div class="streak-badge" id="streakBadge" title="Daily Learning Streak"
+                        style="position: absolute; top: 0; right: 0;">
                         <i class="fas fa-fire"></i>
                         <span id="streakCount">0</span>
                     </div>
                 </div>
+            
+                <!-- FIX: Moved down here to its own line, removed the pipe, and added quotes! -->
+                <!-- FIX: Changed from a div to a clickable anchor link pointing to the WWF -->
+                <a href="https://www.worldwildlife.org/habitats/polar-regions" target="_blank" rel="noopener noreferrer"
+                    class="nord-warning-text">
+                    "Our home is melting. Save our ice."
+                </a>
+            
                 <div class="progress-bar">
                     <div id="progressFill" class="progress-fill"></div>
-                </div>
-            </div>
-
-            <div class="journey-section">
-                <div class="journey-header">
-                    <h3>Kanji Journey</h3>
-                    <span id="journeySummary" class="journey-summary">0 mastered</span>
-                </div>
-                <div id="kanjiJourney" class="journey-grid"></div>
-            </div>
-
-            <!-- Recent Kanji -->
-            <div class="recent-section">
-                <h3>Recently Studied</h3>
-                <div id="recentKanji" class="recent-grid">
-                    <!-- Recent kanji will be populated here -->
                 </div>
             </div>
         </main>
