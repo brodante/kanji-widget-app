@@ -1351,7 +1351,8 @@ body {
     background-position: bottom center;
     background-repeat: no-repeat;
     background-size: contain;
-    animation: start-shelf-melts 10s linear infinite !important;
+    /*alternate for boomerang effect*/
+    animation: start-shelf-melts 8s linear infinite !important;
 }
 /* 2. Polar Bear (Moving Point) */
 [data-theme="nord"] .progress-fill::after {
@@ -1438,40 +1439,43 @@ body {
 
 @keyframes start-shelf-melts {
 
+    /* 1. Hold the normal ice */
     0%,
-    100% {
-        background-image: url('assets/icons/ice-shelf.svg');
-        opacity: 1;
-    }
-
     40% {
         background-image: url('assets/icons/ice-shelf.svg');
         opacity: 1;
     }
 
-    50% {
+    /* 2. Fade it out smoothly */
+    45% {
         background-image: url('assets/icons/ice-shelf.svg');
-        opacity: 0.2;
+        opacity: 0;
     }
 
-    55% {
-        background-image: url('assets/icons/ice-shelf-broken.svg');
-        opacity: 0.2;
-    }
-
-    65% {
-        background-image: url('assets/icons/ice-shelf-broken.svg');
-        opacity: 1;
-    }
-
-    95% {
-        background-image: url('assets/icons/ice-shelf-broken.svg');
-        opacity: 1;
-    }
-
-    99% {
+    /* 3. Swap the image while it's invisible to prevent flickering */
+    50% {
         background-image: url('assets/icons/ice-shelf-broken.svg');
         opacity: 0;
+    }
+
+    /* 4. Fade the broken ice in and hold it */
+    55%,
+    85% {
+        background-image: url('assets/icons/ice-shelf-broken.svg');
+        opacity: 1;
+    }
+
+    /* 5. Fade the broken ice out */
+    90% {
+        background-image: url('assets/icons/ice-shelf-broken.svg');
+        opacity: 0;
+    }
+
+    /* 6. Swap back to normal ice and fade in for a seamless loop */
+    95%,
+    100% {
+        background-image: url('assets/icons/ice-shelf.svg');
+        opacity: 1;
     }
 }
 
@@ -2043,6 +2047,7 @@ body {
 
 .toast.show {
     opacity: 1;
+    pointer-events: auto;
 }
 
 /* Animations */
