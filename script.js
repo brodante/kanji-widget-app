@@ -78,9 +78,7 @@ class KanjiLearningApp {
         });
 
         // Theme toggle button (The "Quick Switcher")
-        // This flips between your default light (candy) and default dark (dracula)
-        // Theme toggle button (The "Quick Switcher")
-        // Theme toggle button (The "Quick Switcher")
+        // This flips between your default light (candy) and default dark (lumen)
         document.getElementById('themeToggle').addEventListener('click', () => {
             const current = localStorage.getItem('theme') || 'candy';
 
@@ -93,8 +91,8 @@ class KanjiLearningApp {
                 const lastLight = localStorage.getItem('lastLightTheme') || 'candy';
                 this.setTheme(lastLight);
             } else {
-                // We were in light mode, switch to the last used dark theme (or default to dark)
-                const lastDark = localStorage.getItem('lastDarkTheme') || 'midnight';
+                // We were in light mode, switch to the last used dark theme (or default to lumen)
+                const lastDark = localStorage.getItem('lastDarkTheme') || 'lumen';
                 this.setTheme(lastDark);
             }
         });
@@ -432,7 +430,6 @@ class KanjiLearningApp {
                 </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
-                    <button class="action-btn hint-btn" onclick="app.showPremiumHint()" style="background-color: #8A2BE2; color: white;"><i class="fas fa-lightbulb"></i></button>
                     <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
                     <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
                 </div>
@@ -445,18 +442,18 @@ class KanjiLearningApp {
         }
     }
 
-    changeWidgetSize(size) {
-        this.widgetSize = size;
-        const widget = document.getElementById('kanjiWidget');
+    // changeWidgetSize(size) {
+    //     this.widgetSize = size;
+    //     const widget = document.getElementById('kanjiWidget');
         
-        // Remove existing size classes
-        widget.classList.remove('small-widget', 'medium-widget', 'large-widget');
+    //     // Remove existing size classes
+    //     widget.classList.remove('small-widget', 'medium-widget', 'large-widget');
         
-        // Add new size class
-        widget.classList.add(`${size}-widget`);
+    //     // Add new size class
+    //     widget.classList.add(`${size}-widget`);
         
-        this.renderKanji();
-    }
+    //     this.renderKanji();
+    // }
 
     async markAsMastered() {
         if (!this.currentKanji) return;
@@ -767,36 +764,36 @@ class KanjiLearningApp {
         const foundKanji = pool.find(item => item.character === character);
 
         if (foundKanji) {
-            // THE FIX: Hydrate skeleton API data BEFORE rendering!
-            const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
-            if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
+            // // THE FIX: Hydrate skeleton API data BEFORE rendering!
+            // const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
+            // if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
 
-                // Show temporary loading state on the widget
-                const widget = document.getElementById('kanjiWidget');
-                if (widget) {
-                    widget.innerHTML = `<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Fetching readings for ${character}...</p></div>`;
-                }
+            //     // Show temporary loading state on the widget
+            //     const widget = document.getElementById('kanjiWidget');
+            //     if (widget) {
+            //         widget.innerHTML = `<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Fetching readings for ${character}...</p></div>`;
+            //     }
 
-                try {
-                    const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
-                    if (details) {
-                        foundKanji.meanings = details.meanings;
-                        foundKanji.onyomi = details.onyomi;
-                        foundKanji.kunyomi = details.kunyomi;
-                        foundKanji.examples = details.examples;
+            //     try {
+            //         const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
+            //         if (details) {
+            //             foundKanji.meanings = details.meanings;
+            //             foundKanji.onyomi = details.onyomi;
+            //             foundKanji.kunyomi = details.kunyomi;
+            //             foundKanji.examples = details.examples;
 
-                        // Save it back to the cache so we only fetch it once
-                        const cacheKey = `level_${this.settings.jlptLevel}`;
-                        if (KanjiData.cache.has(cacheKey)) {
-                            const cachedPool = KanjiData.cache.get(cacheKey);
-                            const index = cachedPool.findIndex(k => k.character === foundKanji.character);
-                            if (index !== -1) cachedPool[index] = foundKanji;
-                        }
-                    }
-                } catch (err) {
-                    console.error("Hydration failed:", err);
-                }
-            }
+            //             // Save it back to the cache so we only fetch it once
+            //             const cacheKey = `level_${this.settings.jlptLevel}`;
+            //             if (KanjiData.cache.has(cacheKey)) {
+            //                 const cachedPool = KanjiData.cache.get(cacheKey);
+            //                 const index = cachedPool.findIndex(k => k.character === foundKanji.character);
+            //                 if (index !== -1) cachedPool[index] = foundKanji;
+            //             }
+            //         }
+            //     } catch (err) {
+            //         console.error("Hydration failed:", err);
+            //     }
+            // }
 
             this.currentKanji = foundKanji;
             this.renderKanji();
@@ -1179,20 +1176,20 @@ class KanjiLearningApp {
 
             if (foundKanji) {
                 // THE FIX: Hydrate before rendering!
-                const isKana = foundKanji.jlpt === 'Hiragana' || foundKanji.jlpt === 'Katakana';
-                if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
-                    try {
-                        const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
-                        if (details) {
-                            foundKanji.meanings = details.meanings;
-                            foundKanji.onyomi = details.onyomi;
-                            foundKanji.kunyomi = details.kunyomi;
-                            foundKanji.examples = details.examples;
-                        }
-                    } catch (err) {
-                        console.error("Hydration failed from recent:", err);
-                    }
-                }
+                // const isKana = foundKanji.jlpt === 'Hiragana' || foundKanji.jlpt === 'Katakana';
+                // if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
+                //     try {
+                //         const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
+                //         if (details) {
+                //             foundKanji.meanings = details.meanings;
+                //             foundKanji.onyomi = details.onyomi;
+                //             foundKanji.kunyomi = details.kunyomi;
+                //             foundKanji.examples = details.examples;
+                //         }
+                //     } catch (err) {
+                //         console.error("Hydration failed from recent:", err);
+                //     }
+                // }
 
                 this.currentKanji = foundKanji;
                 this.renderKanji();
@@ -1219,70 +1216,6 @@ class KanjiLearningApp {
         }
     }
     
-    async showPremiumHint() {
-        // Prevent API waste on basic Kana
-        if (this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana') {
-            this.showToast('Premium data is only available for Kanji characters!');
-            return;
-        }
-
-        if (!this.settings.kanjiAliveKey) {
-            this.showToast('Enter a free KanjiAlive RapidAPI Key in Settings to unlock Premium Data & Human Audio!');
-            this.openSettings();
-            return;
-        }
-
-        const widget = document.getElementById('kanjiWidget');
-        let hintBox = document.getElementById('premiumHintBox');
-
-        // Create the box if it doesn't exist
-        if (!hintBox) {
-            hintBox = document.createElement('div');
-            hintBox.id = 'premiumHintBox';
-            hintBox.className = 'premium-hint-box';
-            const actions = widget.querySelector('.widget-actions');
-            actions.parentNode.insertBefore(hintBox, actions);
-        }
-
-        hintBox.innerHTML = `<div style="text-align: center; padding: 1rem;"><i class="fas fa-spinner fa-spin"></i> Loading Premium Data...</div>`;
-        hintBox.style.display = 'block';
-
-        const data = await AudioManager.fetchKanjiAliveData(this.currentKanji.character);
-
-        // FIXED: Removed the check for the non-existent 'hint' property
-        // We now build a rich UI using the deep English meaning and Radical structure they provide
-        if (data && data.kanji && data.kanji.meaning) {
-            hintBox.innerHTML = `
-                <div class="premium-hint-content">
-                    <div class="hint-header"><i class="fas fa-gem"></i> KanjiAlive Premium Data</div>
-                    <p style="margin-bottom: 0.5rem;"><strong>Deep Meaning:</strong> ${data.kanji.meaning.english}</p>
-                    
-                    ${data.radical && data.radical.character ? `
-                    <div class="radical-hint" style="display: flex; align-items: center; gap: 0.8rem; background: rgba(138, 43, 226, 0.08); padding: 0.6rem; border-radius: 8px;">
-                        <span style="font-size: 2rem; color: #8A2BE2; line-height: 1;">${data.radical.character}</span>
-                        <div>
-                            <div style="font-weight: bold; color: var(--text-color);">Radical: ${data.radical.name.hiragana} (${data.radical.name.romaji})</div>
-                            <div style="font-size: 0.85rem; opacity: 0.8;">${data.radical.meaning.english}</div>
-                        </div>
-                    </div>` : ''}
-                </div>
-                <button class="close-hint" onclick="document.getElementById('premiumHintBox').style.display='none'"><i class="fas fa-times"></i></button>
-            `;
-
-            // Instantly play the crystal-clear native human pronunciation!
-            if (data.examples && data.examples.length > 0 && data.examples[0].audio && data.examples[0].audio.mp3) {
-                const premiumAudio = new Audio(data.examples[0].audio.mp3);
-                premiumAudio.play();
-                this.showToast('Playing Native Speaker Audio...');
-            }
-        } else {
-            hintBox.innerHTML = `
-                <div class="premium-hint-content"><p>No premium data found for this character.</p></div>
-                <button class="close-hint" onclick="document.getElementById('premiumHintBox').style.display='none'"><i class="fas fa-times"></i></button>
-            `;
-        }
-    }
-
     openSettings() {
         const modal = document.getElementById('settingsModal');
         modal.classList.add('show');
@@ -1378,27 +1311,27 @@ class KanjiLearningApp {
         }
 
         // PREMIUM UPGRADE: Load the KanjiAlive key into the UI and Audio Manager
-        if (this.settings.kanjiAliveKey !== undefined) {
-            const keyInput = document.getElementById('kanjiAliveKey');
-            if (keyInput) {
-                keyInput.value = this.settings.kanjiAliveKey;
-            }
-            // Give the key directly to our audio manager
-            if (window.AudioManager) {
-                AudioManager.setApiKey(this.settings.kanjiAliveKey);
-            }
-        }
+        // if (this.settings.kanjiAliveKey !== undefined) {
+        //     const keyInput = document.getElementById('kanjiAliveKey');
+        //     if (keyInput) {
+        //         keyInput.value = this.settings.kanjiAliveKey;
+        //     }
+        //     // Give the key directly to our audio manager
+        //     if (window.AudioManager) {
+        //         AudioManager.setApiKey(this.settings.kanjiAliveKey);
+        //     }
+        // }
     }
 
     saveSettings() {
         // PREMIUM UPGRADE: Grab the key from the UI before saving
-        const keyInput = document.getElementById('kanjiAliveKey');
-        if (keyInput) {
-            this.settings.kanjiAliveKey = keyInput.value.trim();
-            if (window.AudioManager) {
-                AudioManager.setApiKey(this.settings.kanjiAliveKey);
-            }
-        }
+        // const keyInput = document.getElementById('kanjiAliveKey');
+        // if (keyInput) {
+        //     this.settings.kanjiAliveKey = keyInput.value.trim();
+        //     if (window.AudioManager) {
+        //         AudioManager.setApiKey(this.settings.kanjiAliveKey);
+        //     }
+        // }
 
         localStorage.setItem('kanjiSettings', JSON.stringify(this.settings));
     }
@@ -1598,17 +1531,6 @@ class KanjiLearningApp {
             toast.classList.remove('show');
         }, 4000);
     }
-    // showToast(message) {
-    //     const toast = document.getElementById('toast');
-    //     const messageEl = document.getElementById('toastMessage');
-        
-    //     messageEl.textContent = message;
-    //     toast.classList.add('show');
-        
-    //     setTimeout(() => {
-    //         toast.classList.remove('show');
-    //     }, 3000);
-    // }
 }
 
 // Initialize app when DOM is loaded
@@ -2049,23 +1971,84 @@ function initObakeGhost() {
 // 糸 (ITO) THEME: NEON THREADS CURSOR
 // ==========================================
 
+let itoState = {
+    currentTubes: ["#f967fb", "#53bc28", "#6958d5"],
+    currentLights: ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"],
+    targetTubes: ["#f967fb", "#53bc28", "#6958d5"],
+    targetLights: ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"],
+    progress: 1,
+    clickBound: false
+};
+
+// Math Helpers
+const getRandomHex = () => "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+const hexToRgb = (hex) => {
+    const bigint = parseInt(hex.replace('#', ''), 16);
+    return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+};
+const rgbToHex = (r, g, b) => "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+const lerpColor = (c1, c2, t) => {
+    const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
+    const r = Math.round(r1.r + (r2.r - r1.r) * t);
+    const g = Math.round(r1.g + (r2.g - r1.g) * t);
+    const b = Math.round(r1.b + (r2.b - r1.b) * t);
+    return rgbToHex(r, g, b);
+};
+
+window.triggerColorTransition = () => {
+    if (itoState.progress >= 1) {
+        itoState.targetTubes = [getRandomHex(), getRandomHex(), getRandomHex()];
+        itoState.targetLights = [getRandomHex(), getRandomHex(), getRandomHex(), getRandomHex()];
+        itoState.progress = 0;
+    }
+};
+
+window.smoothColorLoop = () => {
+    // HARD KILL SWITCH: If the theme isn't Ito, immediately kill the loop process!
+    if (document.documentElement.getAttribute('data-theme') !== 'ito') return;
+
+    if (itoAppInstance && itoState.progress < 1) {
+        const easeT = itoState.progress < 0.5
+            ? 2 * itoState.progress * itoState.progress
+            : 1 - Math.pow(-2 * itoState.progress + 2, 2) / 2;
+
+        const nextTubes = itoState.currentTubes.map((c, i) => lerpColor(c, itoState.targetTubes[i], easeT));
+        const nextLights = itoState.currentLights.map((c, i) => lerpColor(c, itoState.targetLights[i], easeT));
+
+        // Fail-safe to ensure the library's internal tubes object still exists
+        if (itoAppInstance.tubes) {
+            itoAppInstance.tubes.setColors(nextTubes);
+            itoAppInstance.tubes.setLightsColors(nextLights);
+        }
+
+        itoState.progress += 0.015;
+
+        if (itoState.progress >= 1) {
+            itoState.progress = 1;
+            itoState.currentTubes = [...itoState.targetTubes];
+            itoState.currentLights = [...itoState.targetLights];
+        }
+    }
+
+    itoAnimationId = requestAnimationFrame(window.smoothColorLoop);
+};
+
 async function initItoTubes() {
     const container = document.getElementById('ito-canvas-container');
 
-    // If the canvas already exists, just restart the loops that were killed!
-    if (container.innerHTML !== '') {
-        if (!itoAnimationId && itoAppInstance) {
-            window.smoothColorLoop();
-        }
-        if (!itoIntervalId && itoAppInstance) {
-            itoIntervalId = setInterval(() => {
-                if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
-                    triggerColorTransition();
-                }
-            }, 5000);
-        }
-        return;
+    // THE FIX: The Nuke and Rebuild Strategy
+    // Because this is a 3rd party black-box library, we cannot safely pause/resume it.
+    // We completely wipe it and let it boot fresh into a visible container.
+    container.innerHTML = '';
+
+    if (itoAnimationId) { cancelAnimationFrame(itoAnimationId); itoAnimationId = null; }
+    if (itoIntervalId) { clearInterval(itoIntervalId); itoIntervalId = null; }
+
+    // If the library supports an internal memory cleanup method, call it.
+    if (itoAppInstance && typeof itoAppInstance.destroy === 'function') {
+        itoAppInstance.destroy();
     }
+    itoAppInstance = null;
 
     const canvas = document.createElement('canvas');
     canvas.style.width = '100vw';
@@ -2076,91 +2059,29 @@ async function initItoTubes() {
         const module = await import("https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js");
         const TubesCursor = module.default;
 
-        // 1. Color State Tracking
-        let currentTubes = ["#f967fb", "#53bc28", "#6958d5"];
-        let currentLights = ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"];
-
-        let targetTubes = [...currentTubes];
-        let targetLights = [...currentLights];
-
-        let colorProgress = 1;
-
-        // Initialize the WebGL engine
         itoAppInstance = TubesCursor(canvas, {
             tubes: {
-                colors: currentTubes,
-                lights: {
-                    intensity: 200,
-                    colors: currentLights
-                }
+                colors: itoState.currentTubes,
+                lights: { intensity: 200, colors: itoState.currentLights }
             }
         });
-
-        // 2. Math Helpers for Smooth Fading
-        const getRandomHex = () => "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-
-        const hexToRgb = (hex) => {
-            const bigint = parseInt(hex.replace('#', ''), 16);
-            return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
-        };
-
-        const rgbToHex = (r, g, b) => "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
-
-        const lerpColor = (c1, c2, t) => {
-            const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
-            const r = Math.round(r1.r + (r2.r - r1.r) * t);
-            const g = Math.round(r1.g + (r2.g - r1.g) * t);
-            const b = Math.round(r1.b + (r2.b - r1.b) * t);
-            return rgbToHex(r, g, b);
-        };
-
-        window.triggerColorTransition = () => {
-            if (colorProgress >= 1) {
-                targetTubes = [getRandomHex(), getRandomHex(), getRandomHex()];
-                targetLights = [getRandomHex(), getRandomHex(), getRandomHex(), getRandomHex()];
-                colorProgress = 0;
-            }
-        };
-
-        // 3. The Custom Render Loop for Transitions
-        window.smoothColorLoop = () => {
-            if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
-                if (colorProgress < 1) {
-                    const easeT = colorProgress < 0.5
-                        ? 2 * colorProgress * colorProgress
-                        : 1 - Math.pow(-2 * colorProgress + 2, 2) / 2;
-
-                    const nextTubes = currentTubes.map((c, i) => lerpColor(c, targetTubes[i], easeT));
-                    const nextLights = currentLights.map((c, i) => lerpColor(c, targetLights[i], easeT));
-
-                    itoAppInstance.tubes.setColors(nextTubes);
-                    itoAppInstance.tubes.setLightsColors(nextLights);
-
-                    colorProgress += 0.015;
-
-                    if (colorProgress >= 1) {
-                        colorProgress = 1;
-                        currentTubes = [...targetTubes];
-                        currentLights = [...targetLights];
-                    }
-                }
-            }
-            itoAnimationId = requestAnimationFrame(window.smoothColorLoop);
-        };
 
         window.smoothColorLoop();
 
-        // 4. Interactive & Automatic Triggers
-        window.addEventListener('click', (e) => {
-            if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
-                if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.level-option')) return;
-                triggerColorTransition();
-            }
-        });
+        // Bind click event only once per page load to prevent 100x overlaps
+        if (!itoState.clickBound) {
+            window.addEventListener('click', (e) => {
+                if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
+                    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.level-option') || e.target.closest('.modal-content')) return;
+                    window.triggerColorTransition();
+                }
+            });
+            itoState.clickBound = true;
+        }
 
         itoIntervalId = setInterval(() => {
             if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
-                triggerColorTransition();
+                window.triggerColorTransition();
             }
         }, 5000);
     } catch (err) {

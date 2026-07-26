@@ -37,9 +37,10 @@ class KanjiData {
      * this will no longer be triggered, but we keep the function here returning null 
      * so your existing script.js does not throw an undefined error.
      */
-    static async fetchKanjiDetails(character) {
+    /*static async fetchKanjiDetails(character) {
         return null;
     }
+    */
 }
 
 // Export for use in other modules
