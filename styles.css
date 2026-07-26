@@ -1350,19 +1350,17 @@ body {
 
 /* ========================================== */
 /* UPDATED ANIMATION FOR SHINIER TWINKLE      */
+/* OPTIMIZED ANIMATION FOR 144HZ PERFORMANCE  */
 /* ========================================== */
 @keyframes twinkle-stars-shiny {
     0% {
         opacity: 0.3;
-        filter: brightness(1) blur(0px);
+        transform: scale(1) translateZ(0);
     }
 
     100% {
         opacity: 1;
-        /* Pushed to full opacity */
-        filter: brightness(1.3) blur(0.5px);
-        /* Adds bloom and brightness at peak */
-        transform: scale(1.01);
+        transform: scale(1.02) translateZ(0);
     }
 }
 
@@ -1633,6 +1631,30 @@ body {
         /* Slightly shorter tail so it doesn't overwhelm a small screen */
     }
 }
+
+/* ========================================== */
+/* ANDROID SCROLL JANK & HARDWARE ACCELERATION*/
+/* ========================================== */
+
+/* 1. Force the background elements onto their own GPU rendering layer */
+.midnight-stars,
+.midnight-meteor,
+.midnight-comet,
+.midnight-named-stars {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* 2. Optimize the frosted glass panels so they don't repaint on scroll */
+[data-theme="midnight"] .kanji-widget,
+[data-theme="midnight"] .progress-section,
+[data-theme="midnight"] .journey-section {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
 
 
 /* ========================================== */
