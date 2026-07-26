@@ -30,7 +30,14 @@
         gtag('config', 'G-Q6XNG2ETFL');
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
+    
+    <!-- NEW: Post-Processing Addons for Dracula's Glow and VHS Glitch -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     <!-- Fonts & Icons -->
     <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Material+Icons&display=swap"
@@ -58,6 +65,8 @@
     <div id="nami-canvas-container" class="nami-background"></div>
     <!-- Lumen Theme WebGL Container -->
     <div id="lumen-canvas-container" class="lumen-background"></div>
+    <!-- お化け Theme WebGL Container -->
+    <div id="obake-canvas-container" class="obake-background"></div>
     <!-- Midnight Theme Cosmic Background Elements -->
     <div class="midnight-stars"></div>
     
@@ -218,8 +227,8 @@
                     </optgroup>
                     <optgroup label="Dark Themes">
                         <option value="dark">Default Dark</option>
-                        <option value="nami">波 (Moon Lake)</option>
-                        <option value="dracula">Dracula</option>
+                        <option value="nami">月の湖 (Moon Lake)</option>
+                        <option value="obake">お化け (Spectral Ghost)</option>
                         <option value="nord">Nord (Arctic)</option>
                         <option value="midnight">Midnight</option>
                         <option value="forest">Forest (Earthy)</option>

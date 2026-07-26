@@ -3221,3 +3221,89 @@ input:focus {
         transform: translateY(0);
     }
 }
+/* ========================================== */
+/* お化け (OBAKE) THEME SETUP (Spectral Ghost) */
+/* ========================================== */
+
+[data-theme="obake"] {
+    --primary-color: #bb86fc;
+    /* Soft, glowing amethyst */
+    --primary-variant: #9965f4;
+    --secondary-color: #03dac6;
+    /* Soft teal for the eyes */
+    --background: #050508;
+    /* Deep void blue-black */
+    --surface: #111116;
+    --error: #cf6679;
+    --on-primary: #000000;
+    --on-secondary: #000000;
+    --on-background: #e0e0e0;
+    --on-surface: #e0e0e0;
+    --shadow: rgba(187, 134, 252, 0.15);
+}
+
+.obake-background {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+}
+
+[data-theme="obake"] .obake-background {
+    display: block;
+}
+
+[data-theme="obake"] .kanji-widget,
+[data-theme="obake"] .progress-section,
+[data-theme="obake"] .journey-section {
+    background-color: rgba(10, 10, 15, 0.6) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(187, 134, 252, 0.1);
+    /* Soft purple border */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
+[data-theme="obake"] .progress-bar {
+    background-color: rgba(187, 134, 252, 0.15);
+}
+
+[data-theme="obake"] .progress-fill {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 12px rgba(187, 134, 252, 0.4);
+    /* Soft glow */
+}
+/* ========================================== */
+/* OBAKE THEME: HEADER POLISH                 */
+/* ========================================== */
+
+/* 1. Frosted Glass Header */
+[data-theme="obake"] .app-header {
+    background-color: rgba(10, 10, 15, 0.4) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(187, 134, 252, 0.15);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    color: var(--on-background);
+}
+
+/* 2. Glowing Text and Icons */
+[data-theme="obake"] .app-header h1,
+[data-theme="obake"] .app-header .icon-btn i {
+    color: var(--primary-color) !important;
+    text-shadow: 0 0 12px rgba(187, 134, 252, 0.4);
+}
+
+/* 3. Level Switcher Button Restyling */
+[data-theme="obake"] #levelToggleBtn {
+    background: rgba(187, 134, 252, 0.12) !important;
+    border: 1px solid rgba(187, 134, 252, 0.3) !important;
+    color: var(--primary-color) !important;
+    box-shadow: 0 0 10px rgba(187, 134, 252, 0.15);
+}

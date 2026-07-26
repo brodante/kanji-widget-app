@@ -68,6 +68,9 @@ class KanjiLearningApp {
             else if (e.target.value === 'lumen') {
                 initLumenWave();
             }
+            else if (themeName === 'obake') {
+                initObakeGhost();
+            }
         });
 
         // Theme toggle button (The "Quick Switcher")
@@ -1317,7 +1320,7 @@ class KanjiLearningApp {
         localStorage.setItem('theme', themeName);
 
         // Define which themes are "dark"
-        const darkThemes = ['dark', 'dracula', 'nord', 'midnight', 'forest'];
+        const darkThemes = ['dark', 'nord', 'midnight', 'forest', 'nami', 'lumen', 'obake'];
 
         // Save history so the toggle remembers
         if (darkThemes.includes(themeName)) {
@@ -1331,10 +1334,11 @@ class KanjiLearningApp {
             initNamiWave();
         }
         else if (themeName === 'lumen') {
-            // Because initLumenWave is global, your class can easily call it here!
             initLumenWave();
         }
-
+        else if (themeName === 'obake') {
+            initObakeGhost();
+        }
         // Update the dropdown selector
         const select = document.getElementById('themeSelect');
         if (select) select.value = themeName;
@@ -1801,5 +1805,213 @@ function initLumenWave() {
         renderer.setSize(width, height);
         // Update the shader's resolution uniform so the wave doesn't stretch
         uniforms.resolution.value.set(width, height);
+    });
+}
+// ==========================================
+// お化け (OBAKE) THEME: SPECTRAL GHOST
+// ==========================================
+let obakeAnimationId = null;
+
+function initObakeGhost() {
+    const container = document.getElementById('obake-canvas-container');
+    if (container.innerHTML !== '') return;
+
+    // 1. Setup Scene & Camera
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 20;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.9;
+    renderer.setClearColor(0x000000, 0);
+    container.appendChild(renderer.domElement);
+
+    // 2. Setup Post-Processing (Bloom + VHS Glitch)
+    const composer = new THREE.EffectComposer(renderer);
+    const renderPass = new THREE.RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.3, 1.25, 0.0);
+    composer.addPass(bloomPass);
+
+    const analogDecayShader = {
+        uniforms: {
+            tDiffuse: { value: null }, uTime: { value: 0.0 }, uAnalogGrain: { value: 0.4 },
+            uAnalogBleeding: { value: 1.0 }, uAnalogVSync: { value: 1.0 }, uAnalogScanlines: { value: 1.0 },
+            uAnalogVignette: { value: 1.0 }, uAnalogJitter: { value: 0.4 }, uAnalogIntensity: { value: 0.6 }
+        },
+        vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: `
+            uniform sampler2D tDiffuse; uniform float uTime; uniform float uAnalogGrain;
+            uniform float uAnalogBleeding; uniform float uAnalogVSync; uniform float uAnalogScanlines;
+            uniform float uAnalogVignette; uniform float uAnalogJitter; uniform float uAnalogIntensity;
+            varying vec2 vUv;
+            float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123); }
+            float gaussian(float z, float u, float o) { return (1.0 / (o * sqrt(2.0 * 3.1415))) * exp(-(((z - u) * (z - u)) / (2.0 * (o * o)))); }
+            vec3 grain(vec2 uv, float time, float intensity) {
+                float seed = dot(uv, vec2(12.9898, 78.233));
+                float noise = fract(sin(seed) * 43758.5453 + time * 2.0);
+                return vec3(gaussian(noise, 0.0, 0.25)) * intensity;
+            }
+            void main() {
+                vec2 uv = vUv; float time = uTime * 1.8; vec2 jitteredUV = uv;
+                if (uAnalogJitter > 0.01) {
+                    jitteredUV.x += (random(vec2(floor(time * 60.0))) - 0.5) * 0.003 * uAnalogJitter * uAnalogIntensity;
+                    jitteredUV.y += (random(vec2(floor(time * 30.0) + 1.0)) - 0.5) * 0.001 * uAnalogJitter * uAnalogIntensity;
+                }
+                if (uAnalogVSync > 0.01) {
+                    float vsyncRoll = sin(time * 2.0 + uv.y * 100.0) * 0.02 * uAnalogVSync * uAnalogIntensity;
+                    jitteredUV.y += vsyncRoll * step(0.95, random(vec2(floor(time * 4.0))));
+                }
+                vec4 color = texture2D(tDiffuse, jitteredUV);
+                if (uAnalogBleeding > 0.01) {
+                    float bleed = 0.012 * uAnalogBleeding * uAnalogIntensity;
+                    float phase = time * 1.5 + uv.y * 20.0;
+                    color.r = texture2D(tDiffuse, jitteredUV + vec2(sin(phase) * bleed, 0.0)).r;
+                    color.b = texture2D(tDiffuse, jitteredUV + vec2(-sin(phase * 1.1) * bleed * 0.8, 0.0)).b;
+                }
+                if (uAnalogGrain > 0.01) color.rgb += grain(uv, time, 0.075 * uAnalogGrain * uAnalogIntensity) * (1.0 - color.rgb);
+                if (uAnalogScanlines > 0.01) {
+                    float freq = 600.0 + uAnalogScanlines * 400.0;
+                    color.rgb *= (1.0 - (sin(uv.y * freq) * 0.5 + 0.5) * 0.1 * uAnalogScanlines * uAnalogIntensity);
+                }
+                if (uAnalogVignette > 0.01) {
+                    vec2 vigUV = (uv - 0.5) * 2.0;
+                    color.rgb *= 1.0 - dot(vigUV, vigUV) * 0.3 * uAnalogVignette * uAnalogIntensity;
+                }
+                gl_FragColor = color;
+            }
+        `
+    };
+    const analogDecayPass = new THREE.ShaderPass(analogDecayShader);
+    composer.addPass(analogDecayPass);
+
+    // 3. Build the Ghost
+    const ghostGroup = new THREE.Group();
+    scene.add(ghostGroup);
+
+    const ghostGeometry = new THREE.SphereGeometry(2, 40, 40);
+    const positions = ghostGeometry.getAttribute("position").array;
+    for (let i = 0; i < positions.length; i += 3) {
+        if (positions[i + 1] < -0.2) {
+            const x = positions[i]; const z = positions[i + 2];
+            positions[i + 1] = -2.0 + Math.sin(x * 5) * 0.35 + Math.cos(z * 4) * 0.25 + Math.sin((x + z) * 3) * 0.15;
+        }
+    }
+    ghostGeometry.computeVertexNormals();
+
+    const ghostMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0f2027, transparent: true, opacity: 0.88,
+        emissive: 0xbb86fc, emissiveIntensity: 5.8, // NEW: Soft glowing purple
+        roughness: 0.02, side: THREE.DoubleSide
+    });
+    const ghostBody = new THREE.Mesh(ghostGeometry, ghostMaterial);
+    ghostGroup.add(ghostBody);
+
+    // Ghost Eyes
+    const eyeGeom = new THREE.SphereGeometry(0.3, 12, 12);
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x03dac6 }); // Soft Teal eyes
+    const leftEye = new THREE.Mesh(eyeGeom, eyeMat); leftEye.position.set(-0.7, 0.6, 2.0);
+    const rightEye = new THREE.Mesh(eyeGeom, eyeMat); rightEye.position.set(0.7, 0.6, 2.0);
+    ghostGroup.add(leftEye); ghostGroup.add(rightEye);
+
+    // 4. Fireflies
+    const fireflies = [];
+    const fireflyGroup = new THREE.Group();
+    scene.add(fireflyGroup);
+
+    for (let i = 0; i < 20; i++) {
+        const fireflyGeometry = new THREE.SphereGeometry(0.03, 4, 4);
+        const fireflyMaterial = new THREE.MeshBasicMaterial({ color: 0xffff44, transparent: true, opacity: 0.9 });
+        const firefly = new THREE.Mesh(fireflyGeometry, fireflyMaterial);
+
+        firefly.position.set((Math.random() - 0.5) * 40, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 20);
+
+        const glowGeometry = new THREE.SphereGeometry(0.12, 8, 8);
+        const glowMaterial = new THREE.MeshBasicMaterial({ color: 0xffff88, transparent: true, opacity: 0.4, side: THREE.BackSide });
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        firefly.add(glow);
+
+        firefly.userData = {
+            velocity: new THREE.Vector3((Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.04),
+            phase: Math.random() * Math.PI * 2,
+            pulseSpeed: 2 + Math.random() * 3,
+            glowMaterial: glowMaterial,
+            fireflyMaterial: fireflyMaterial
+        };
+        fireflyGroup.add(firefly);
+        fireflies.push(firefly);
+    }
+
+    // Lighting
+    scene.add(new THREE.AmbientLight(0x0a0a2e, 0.08));
+    const rimLight1 = new THREE.DirectionalLight(0x4a90e2, 1.8); rimLight1.position.set(-8, 6, -4); scene.add(rimLight1);
+    const rimLight2 = new THREE.DirectionalLight(0x50e3c2, 1.26); rimLight2.position.set(8, -4, -6); scene.add(rimLight2);
+
+    // 5. Mouse Tracking Logic (Reverted to original perfect tracking)
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener("mousemove", (e) => {
+        if (document.documentElement.getAttribute('data-theme') === 'obake') {
+            // Unrestricted, smooth tracking across the entire screen
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        }
+    });
+
+    // 6. The Render Loop
+    const clock = new THREE.Clock();
+    function render() {
+        if (document.documentElement.getAttribute('data-theme') === 'obake') {
+            const time = clock.getElapsedTime();
+            analogDecayPass.uniforms.uTime.value = time;
+
+            // Original pure math: Ghost cleanly snuggles up to the cursor's exact coordinates
+            ghostGroup.position.x += (mouse.x * 11 - ghostGroup.position.x) * 0.075;
+            ghostGroup.position.y += (mouse.y * 7 - ghostGroup.position.y) * 0.075;
+
+            // Hover and wobble animation
+            ghostGroup.position.y += Math.sin(time * 2.4) * 0.03 + Math.cos(time * 1.1) * 0.018;
+            ghostBody.rotation.y = Math.sin(time * 1.4) * 0.05 * 0.35;
+
+            const pulse = Math.sin(time * 1.6) * 0.6;
+            ghostMaterial.emissiveIntensity = 5.8 + pulse + Math.sin(time * 0.6) * 0.12;
+
+            // Firefly animation
+            fireflies.forEach(firefly => {
+                const data = firefly.userData;
+                const pulsePhase = time + data.phase;
+                const fireflyPulse = Math.sin(pulsePhase * data.pulseSpeed) * 0.4 + 0.6;
+
+                data.glowMaterial.opacity = 2.6 * 0.4 * fireflyPulse;
+                data.fireflyMaterial.opacity = 2.6 * 0.9 * fireflyPulse;
+
+                data.velocity.x += (Math.random() - 0.5) * 0.002;
+                data.velocity.y += (Math.random() - 0.5) * 0.002;
+                data.velocity.z += (Math.random() - 0.5) * 0.002;
+                data.velocity.clampLength(0, 0.04); // Speed limit
+
+                firefly.position.add(data.velocity);
+
+                // Keep fireflies on screen
+                if (Math.abs(firefly.position.x) > 30) data.velocity.x *= -0.5;
+                if (Math.abs(firefly.position.y) > 20) data.velocity.y *= -0.5;
+                if (Math.abs(firefly.position.z) > 15) data.velocity.z *= -0.5;
+            });
+
+            composer.render();
+        }
+        obakeAnimationId = requestAnimationFrame(render);
+    }
+    render();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        composer.setSize(window.innerWidth, window.innerHeight);
     });
 }
