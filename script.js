@@ -81,7 +81,7 @@ class KanjiLearningApp {
             const current = localStorage.getItem('theme') || 'candy';
 
             // NEW: Added 'lumen' to the end of this list!
-            const darkThemes = ['dark', 'nami', 'dracula', 'nord', 'midnight', 'forest', 'lumen'];
+            const darkThemes = ['dark', 'nami', 'obake', 'nord', 'midnight', 'forest', 'lumen'];
             const isDark = darkThemes.includes(current);
 
             if (isDark) {
