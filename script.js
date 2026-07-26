@@ -1,3 +1,18 @@
+// ==========================================
+// GLOBAL ANIMATION TRACKERS
+// ==========================================
+let namiAnimationId = null;
+
+let lumenAnimationId = null;
+
+let obakeAnimationId = null;
+
+
+let itoAppInstance = null;
+let itoInitialized = false;
+let itoAnimationId = null;
+let itoIntervalId = null;
+
 class KanjiLearningApp {
     constructor() {
         this.currentKanji = null;
@@ -57,20 +72,9 @@ class KanjiLearningApp {
         //     this.changeWidgetSize(e.target.value);
         // });
 
-        // Theme selector (The main control)
+        
         document.getElementById('themeSelect').addEventListener('change', (e) => {
             this.setTheme(e.target.value);
-
-            // Boot the respective WebGL canvas if selected
-            if (themeName === 'nami') {
-                initNamiWave();
-            }
-            else if (e.target.value === 'lumen') {
-                initLumenWave();
-            }
-            else if (themeName === 'obake') {
-                initObakeGhost();
-            }
         });
 
         // Theme toggle button (The "Quick Switcher")
@@ -81,7 +85,7 @@ class KanjiLearningApp {
             const current = localStorage.getItem('theme') || 'candy';
 
             // NEW: Added 'lumen' to the end of this list!
-            const darkThemes = ['dark', 'nami', 'obake', 'nord', 'midnight', 'forest', 'lumen'];
+            const darkThemes = ['dark', 'nami', 'obake', 'nord', 'midnight', 'forest', 'lumen', 'ito'];
             const isDark = darkThemes.includes(current);
 
             if (isDark) {
@@ -1320,7 +1324,7 @@ class KanjiLearningApp {
         localStorage.setItem('theme', themeName);
 
         // Define which themes are "dark"
-        const darkThemes = ['dark', 'nord', 'midnight', 'forest', 'nami', 'lumen', 'obake'];
+        const darkThemes = ['dark', 'nord', 'midnight', 'forest', 'nami', 'lumen', 'obake', 'ito'];
 
         // Save history so the toggle remembers
         if (darkThemes.includes(themeName)) {
@@ -1329,9 +1333,12 @@ class KanjiLearningApp {
             localStorage.setItem('lastLightTheme', themeName);
         }
 
-        if (window.namiAnimationId) cancelAnimationFrame(window.namiAnimationId);
-        if (window.lumenAnimationId) cancelAnimationFrame(window.lumenAnimationId);
-        if (window.obakeAnimationId) cancelAnimationFrame(window.obakeAnimationId);
+        // NEW FIX: Bulletproof WebGL & Timer Kill Switches!
+        if (typeof namiAnimationId !== 'undefined' && namiAnimationId) { cancelAnimationFrame(namiAnimationId); namiAnimationId = null; }
+        if (typeof lumenAnimationId !== 'undefined' && lumenAnimationId) { cancelAnimationFrame(lumenAnimationId); lumenAnimationId = null; }
+        if (typeof obakeAnimationId !== 'undefined' && obakeAnimationId) { cancelAnimationFrame(obakeAnimationId); obakeAnimationId = null; }
+        if (typeof itoAnimationId !== 'undefined' && itoAnimationId) { cancelAnimationFrame(itoAnimationId); itoAnimationId = null; }
+        if (typeof itoIntervalId !== 'undefined' && itoIntervalId) { clearInterval(itoIntervalId); itoIntervalId = null; }
 
         // NEW: Automatically boot the WebGL wave.
         if (themeName === 'nami') {
@@ -1342,6 +1349,9 @@ class KanjiLearningApp {
         }
         else if (themeName === 'obake') {
             initObakeGhost();
+        }
+        else if (themeName === 'ito') {
+            initItoTubes();
         }
         // Update the dropdown selector
         const select = document.getElementById('themeSelect');
@@ -1621,12 +1631,13 @@ if ('serviceWorker' in navigator) {
 // ==========================================
 // 波 (NAMI) THEME: MOON LAKE SHADER
 // ==========================================
-let namiAnimationId = null;
 
 function initNamiWave() {
     const container = document.getElementById('nami-canvas-container');
-    if (container.innerHTML !== '') return; // Prevent double-loading
-
+    if (container.innerHTML !== '') {
+        if (!namiAnimationId && window.namiRenderLoop) window.namiRenderLoop();
+        return;
+    }
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 2, 6);
@@ -1686,7 +1697,7 @@ function initNamiWave() {
 
     const clock = new THREE.Clock();
 
-    function render() {
+    window.namiRenderLoop = function () {
         if (document.documentElement.getAttribute('data-theme') === 'nami') {
             const time = clock.getElapsedTime();
             waveMaterial.uniforms.uTime.value = time;
@@ -1695,9 +1706,9 @@ function initNamiWave() {
             camera.lookAt(0, 0, 0);
             renderer.render(scene, camera);
         }
-        namiAnimationId = requestAnimationFrame(render);
-    }
-    render();
+        namiAnimationId = requestAnimationFrame(window.namiRenderLoop);
+    };
+    window.namiRenderLoop();
 
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -1709,13 +1720,15 @@ function initNamiWave() {
 // ==========================================
 // LUMEN THEME: CHROMATIC ABERRATION WAVE
 // ==========================================
-let lumenAnimationId = null;
 
 function initLumenWave() {
     const container = document.getElementById('lumen-canvas-container');
 
-    // Prevent initializing multiple times
-    if (container.innerHTML !== '') return;
+    // Restart the loop if it already exists!
+    if (container.innerHTML !== '') {
+        if (!lumenAnimationId && window.lumenRenderLoop) window.lumenRenderLoop();
+        return;
+    }
 
     // 1. Setup Scene, Orthographic Camera, and Renderer
     const scene = new THREE.Scene();
@@ -1735,7 +1748,7 @@ function initLumenWave() {
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
-    
+
     // 2. Create the flat geometry covering the screen
     const position = [
         -1.0, -1.0, 0.0,
@@ -1801,14 +1814,14 @@ function initLumenWave() {
     scene.add(mesh);
 
     // 5. Battery-Optimized Render Loop
-    function render() {
+    window.lumenRenderLoop = function () {
         if (document.documentElement.getAttribute('data-theme') === 'lumen') {
             uniforms.time.value += 0.01; // Progress the animation time
             renderer.render(scene, camera);
         }
-        lumenAnimationId = requestAnimationFrame(render);
-    }
-    render();
+        lumenAnimationId = requestAnimationFrame(window.lumenRenderLoop);
+    };
+    window.lumenRenderLoop();
 
     // 6. Handle Window Resizing smoothly
     window.addEventListener('resize', () => {
@@ -1822,11 +1835,14 @@ function initLumenWave() {
 // ==========================================
 // お化け (OBAKE) THEME: SPECTRAL GHOST
 // ==========================================
-let obakeAnimationId = null;
 
 function initObakeGhost() {
     const container = document.getElementById('obake-canvas-container');
-    if (container.innerHTML !== '') return;
+    // Restart the loop if it already exists!
+    if (container.innerHTML !== '') {
+        if (!obakeAnimationId && window.obakeRenderLoop) window.obakeRenderLoop();
+        return;
+    }
 
     // 1. Setup Scene & Camera
     const scene = new THREE.Scene();
@@ -1978,7 +1994,7 @@ function initObakeGhost() {
 
     // 6. The Render Loop
     const clock = new THREE.Clock();
-    function render() {
+    window.obakeRenderLoop = function () {
         if (document.documentElement.getAttribute('data-theme') === 'obake') {
             const time = clock.getElapsedTime();
             analogDecayPass.uniforms.uTime.value = time;
@@ -2018,9 +2034,9 @@ function initObakeGhost() {
 
             composer.render();
         }
-        obakeAnimationId = requestAnimationFrame(render);
-    }
-    render();
+        obakeAnimationId = requestAnimationFrame(window.obakeRenderLoop);
+    };
+    window.obakeRenderLoop();
 
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -2028,4 +2044,126 @@ function initObakeGhost() {
         renderer.setSize(window.innerWidth, window.innerHeight);
         composer.setSize(window.innerWidth, window.innerHeight);
     });
+}
+// ==========================================
+// 糸 (ITO) THEME: NEON THREADS CURSOR
+// ==========================================
+
+async function initItoTubes() {
+    const container = document.getElementById('ito-canvas-container');
+
+    // If the canvas already exists, just restart the loops that were killed!
+    if (container.innerHTML !== '') {
+        if (!itoAnimationId && itoAppInstance) {
+            window.smoothColorLoop();
+        }
+        if (!itoIntervalId && itoAppInstance) {
+            itoIntervalId = setInterval(() => {
+                if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
+                    triggerColorTransition();
+                }
+            }, 5000);
+        }
+        return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    container.appendChild(canvas);
+
+    try {
+        const module = await import("https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js");
+        const TubesCursor = module.default;
+
+        // 1. Color State Tracking
+        let currentTubes = ["#f967fb", "#53bc28", "#6958d5"];
+        let currentLights = ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"];
+
+        let targetTubes = [...currentTubes];
+        let targetLights = [...currentLights];
+
+        let colorProgress = 1;
+
+        // Initialize the WebGL engine
+        itoAppInstance = TubesCursor(canvas, {
+            tubes: {
+                colors: currentTubes,
+                lights: {
+                    intensity: 200,
+                    colors: currentLights
+                }
+            }
+        });
+
+        // 2. Math Helpers for Smooth Fading
+        const getRandomHex = () => "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+
+        const hexToRgb = (hex) => {
+            const bigint = parseInt(hex.replace('#', ''), 16);
+            return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+        };
+
+        const rgbToHex = (r, g, b) => "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+
+        const lerpColor = (c1, c2, t) => {
+            const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
+            const r = Math.round(r1.r + (r2.r - r1.r) * t);
+            const g = Math.round(r1.g + (r2.g - r1.g) * t);
+            const b = Math.round(r1.b + (r2.b - r1.b) * t);
+            return rgbToHex(r, g, b);
+        };
+
+        window.triggerColorTransition = () => {
+            if (colorProgress >= 1) {
+                targetTubes = [getRandomHex(), getRandomHex(), getRandomHex()];
+                targetLights = [getRandomHex(), getRandomHex(), getRandomHex(), getRandomHex()];
+                colorProgress = 0;
+            }
+        };
+
+        // 3. The Custom Render Loop for Transitions
+        window.smoothColorLoop = () => {
+            if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
+                if (colorProgress < 1) {
+                    const easeT = colorProgress < 0.5
+                        ? 2 * colorProgress * colorProgress
+                        : 1 - Math.pow(-2 * colorProgress + 2, 2) / 2;
+
+                    const nextTubes = currentTubes.map((c, i) => lerpColor(c, targetTubes[i], easeT));
+                    const nextLights = currentLights.map((c, i) => lerpColor(c, targetLights[i], easeT));
+
+                    itoAppInstance.tubes.setColors(nextTubes);
+                    itoAppInstance.tubes.setLightsColors(nextLights);
+
+                    colorProgress += 0.015;
+
+                    if (colorProgress >= 1) {
+                        colorProgress = 1;
+                        currentTubes = [...targetTubes];
+                        currentLights = [...targetLights];
+                    }
+                }
+            }
+            itoAnimationId = requestAnimationFrame(window.smoothColorLoop);
+        };
+
+        window.smoothColorLoop();
+
+        // 4. Interactive & Automatic Triggers
+        window.addEventListener('click', (e) => {
+            if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
+                if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.level-option')) return;
+                triggerColorTransition();
+            }
+        });
+
+        itoIntervalId = setInterval(() => {
+            if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
+                triggerColorTransition();
+            }
+        }, 5000);
+    } catch (err) {
+        console.error("Failed to load Ito Tubes theme:", err);
+    }
 }

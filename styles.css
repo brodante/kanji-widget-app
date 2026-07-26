@@ -3340,3 +3340,84 @@ input:focus {
     animation: fadeInCredit 0.5s ease forwards 0.2s;
     /* Uses the same animation keyframes as Yuki's */
 }
+
+/* ========================================== */
+/* 糸 (ITO) THEME SETUP (Neon Tubes)          */
+/* ========================================== */
+
+[data-theme="ito"] {
+    --primary-color: #f967fb;
+    /* Neon Pink */
+    --primary-variant: #6958d5;
+    /* Cyber Purple */
+    --secondary-color: #53bc28;
+    /* Acid Green */
+    --background: #000000;
+    --surface: #0a0a0f;
+    --error: #FF1744;
+    --on-primary: #000000;
+    --on-secondary: #000000;
+    --on-background: #ffffff;
+    --on-surface: #e0e0e0;
+    --shadow: rgba(249, 103, 251, 0.15);
+}
+
+.ito-background {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    /* Lets clicks pass through to the document */
+}
+
+[data-theme="ito"] .ito-background {
+    display: block;
+}
+
+/* Frosted Glass UI panels */
+[data-theme="ito"] .kanji-widget,
+[data-theme="ito"] .progress-section,
+[data-theme="ito"] .journey-section,
+[data-theme="ito"] .app-header {
+    background-color: rgba(10, 10, 15, 0.5) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(249, 103, 251, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Header Text Glow */
+[data-theme="ito"] .app-header h1,
+[data-theme="ito"] .app-header .icon-btn i {
+    color: var(--primary-color) !important;
+    text-shadow: 0 0 12px rgba(249, 103, 251, 0.5);
+}
+
+/* Footer Credit Reveal */
+.soju-credit {
+    display: none;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.soju-credit a {
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.soju-credit a:hover {
+    text-decoration: underline;
+    text-shadow: 0 0 8px rgba(249, 103, 251, 0.4);
+}
+
+[data-theme="ito"] .soju-credit {
+    display: block;
+    animation: fadeInCredit 0.5s ease forwards 0.2s;
+}
