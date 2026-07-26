@@ -3308,3 +3308,35 @@ input:focus {
     color: var(--primary-color) !important;
     box-shadow: 0 0 10px rgba(187, 134, 252, 0.15);
 }
+/* ========================================== */
+/* FILIP FOOTER CREDIT (Obake Theme Exclusive)*/
+/* ========================================== */
+
+/* Hide by default on all other themes */
+.filip-credit {
+    display: none;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Style the link to match your theme */
+.filip-credit a {
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.filip-credit a:hover {
+    text-decoration: underline;
+    text-shadow: 0 0 8px rgba(187, 134, 252, 0.4);
+    /* Soft amethyst glow on hover */
+}
+
+/* Reveal ONLY when Obake theme is active */
+[data-theme="obake"] .filip-credit {
+    display: block;
+    animation: fadeInCredit 0.5s ease forwards 0.2s;
+    /* Uses the same animation keyframes as Yuki's */
+}
