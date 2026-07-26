@@ -1329,6 +1329,10 @@ class KanjiLearningApp {
             localStorage.setItem('lastLightTheme', themeName);
         }
 
+        if (window.namiAnimationId) cancelAnimationFrame(window.namiAnimationId);
+        if (window.lumenAnimationId) cancelAnimationFrame(window.lumenAnimationId);
+        if (window.obakeAnimationId) cancelAnimationFrame(window.obakeAnimationId);
+
         // NEW: Automatically boot the WebGL wave.
         if (themeName === 'nami') {
             initNamiWave();
@@ -1630,7 +1634,9 @@ function initNamiWave() {
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Caps it at 1 for mobile to save battery and GPU, allows up to 2 on Desktop
+    const pixelCap = window.innerWidth < 768 ? 1 : Math.min(window.devicePixelRatio, 2);
+    renderer.setPixelRatio(pixelCap);
     container.appendChild(renderer.domElement);
 
     const geometry = new THREE.PlaneGeometry(30, 15, 128, 128);
@@ -1718,12 +1724,18 @@ function initLumenWave() {
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // NEW: Cap the pixel ratio at 1 for mobile devices (screens narrower than 768px)
+    // to save battery and GPU, but allow up to 2 on Desktop for crispness.
+    const pixelCap = window.innerWidth < 768 ? 1 : Math.min(window.devicePixelRatio, 2);
+    renderer.setPixelRatio(pixelCap);
+
     renderer.setSize(window.innerWidth, window.innerHeight);
     // Sets the clear color to transparent so it blends with your CSS background
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
+    
     // 2. Create the flat geometry covering the screen
     const position = [
         -1.0, -1.0, 0.0,
@@ -1823,7 +1835,9 @@ function initObakeGhost() {
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Caps it at 1 for mobile to save battery and GPU, allows up to 2 on Desktop
+    const pixelCap = window.innerWidth < 768 ? 1 : Math.min(window.devicePixelRatio, 2);
+    renderer.setPixelRatio(pixelCap);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.9;
     renderer.setClearColor(0x000000, 0);
