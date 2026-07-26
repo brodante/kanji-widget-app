@@ -2349,6 +2349,7 @@ body {
     padding: 0.5rem;
     border-radius: 12px;
     background: rgba(var(--primary-color-rgb), 0.05);
+    color: var(--primary-color);
 
     /* NEW: Make it look and feel clickable */
     cursor: pointer;

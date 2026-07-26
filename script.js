@@ -879,7 +879,7 @@ class KanjiLearningApp {
 
         svg.setAttribute('viewBox', svg.getAttribute('viewBox') || '0 0 109 109');
         svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-        svg.style.color = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#6200EE';
+        //svg.style.color = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#6200EE';
 
         const paths = Array.from(svg.querySelectorAll('path'));
         paths.forEach((path) => {
