@@ -1,4 +1,4 @@
-# KanjiWidgets
+# [KanjiWidgets](https://brodante.github.io/kanji-widget-app/)
 
 KanjiWidgets is a high-performance, offline-capable Japanese learning web application designed for comprehensive daily practice. Spanning from basic Hiragana and Katakana through advanced JLPT N1, the application provides instant access to native audio, stroke order animations, and detailed progress tracking.
 
