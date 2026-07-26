@@ -29,6 +29,7 @@
         gtag('js', new Date());
         gtag('config', 'G-Q6XNG2ETFL');
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <!-- Fonts & Icons -->
     <link
@@ -53,6 +54,10 @@
     <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180x180.png">
 </head>
 <body>
+    <!-- 波 (Waves) Theme WebGL Container -->
+    <div id="nami-canvas-container" class="nami-background"></div>
+    <!-- Lumen Theme WebGL Container -->
+    <div id="lumen-canvas-container" class="lumen-background"></div>
     <!-- Midnight Theme Cosmic Background Elements -->
     <div class="midnight-stars"></div>
     
@@ -213,10 +218,12 @@
                     </optgroup>
                     <optgroup label="Dark Themes">
                         <option value="dark">Default Dark</option>
+                        <option value="nami">波 (Moon Lake)</option>
                         <option value="dracula">Dracula</option>
                         <option value="nord">Nord (Arctic)</option>
                         <option value="midnight">Midnight</option>
                         <option value="forest">Forest (Earthy)</option>
+                        <option value="lumen">Lumen (WebGL Wave)</option>
                     </optgroup>
                 </select>
             </div>

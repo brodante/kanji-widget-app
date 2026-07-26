@@ -60,14 +60,25 @@ class KanjiLearningApp {
         // Theme selector (The main control)
         document.getElementById('themeSelect').addEventListener('change', (e) => {
             this.setTheme(e.target.value);
+
+            // Boot the respective WebGL canvas if selected
+            if (themeName === 'nami') {
+                initNamiWave();
+            }
+            else if (e.target.value === 'lumen') {
+                initLumenWave();
+            }
         });
 
         // Theme toggle button (The "Quick Switcher")
         // This flips between your default light (candy) and default dark (dracula)
         // Theme toggle button (The "Quick Switcher")
+        // Theme toggle button (The "Quick Switcher")
         document.getElementById('themeToggle').addEventListener('click', () => {
             const current = localStorage.getItem('theme') || 'candy';
-            const darkThemes = ['dark', 'dracula', 'nord', 'midnight', 'forest'];
+
+            // NEW: Added 'lumen' to the end of this list!
+            const darkThemes = ['dark', 'nami', 'dracula', 'nord', 'midnight', 'forest', 'lumen'];
             const isDark = darkThemes.includes(current);
 
             if (isDark) {
@@ -1315,6 +1326,15 @@ class KanjiLearningApp {
             localStorage.setItem('lastLightTheme', themeName);
         }
 
+        // NEW: Automatically boot the WebGL wave.
+        if (themeName === 'nami') {
+            initNamiWave();
+        }
+        else if (themeName === 'lumen') {
+            // Because initLumenWave is global, your class can easily call it here!
+            initLumenWave();
+        }
+
         // Update the dropdown selector
         const select = document.getElementById('themeSelect');
         if (select) select.value = themeName;
@@ -1588,5 +1608,90 @@ if ('serviceWorker' in navigator) {
             .catch(registrationError => {
                 console.log('SW registration failed: ', registrationError);
             });
+    });
+}
+// ==========================================
+// 波 (NAMI) THEME: MOON LAKE SHADER
+// ==========================================
+let namiAnimationId = null;
+
+function initNamiWave() {
+    const container = document.getElementById('nami-canvas-container');
+    if (container.innerHTML !== '') return; // Prevent double-loading
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 2, 6);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const geometry = new THREE.PlaneGeometry(30, 15, 128, 128);
+    geometry.rotateX(-Math.PI / 2);
+
+    const waveMaterial = new THREE.ShaderMaterial({
+        uniforms: { uTime: { value: 0 } },
+        vertexShader: `
+            uniform float uTime;
+            varying vec2 vUv;
+            varying float vElevation;
+
+            void main() {
+                vUv = uv;
+                vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+                float elevation = sin(modelPosition.x * 0.6 + uTime * 1.5) * 0.4
+                                + sin(modelPosition.z * 0.5 + uTime * 1.2) * 0.4;
+                modelPosition.y += elevation;
+                vElevation = elevation;
+                gl_Position = projectionMatrix * viewMatrix * modelPosition;
+            }
+        `,
+        fragmentShader: `
+            varying vec2 vUv;
+            varying float vElevation;
+
+            void main() {
+                float mixStrength = (vElevation + 1.0) * 0.5;
+                vec3 colorCyan = vec3(0.0, 0.898, 1.0);
+                vec3 colorMagenta = vec3(1.0, 0.0, 1.0);
+                vec3 finalColor = mix(colorCyan, colorMagenta, mixStrength);
+                
+                float edgeAlpha = smoothstep(0.0, 0.2, vUv.y) * smoothstep(1.0, 0.8, vUv.y) *
+                                  smoothstep(0.0, 0.2, vUv.x) * smoothstep(1.0, 0.8, vUv.x);
+                
+                float glow = smoothstep(0.0, 0.5, vElevation) * 0.6;
+                gl_FragColor = vec4(finalColor + glow, edgeAlpha * 0.85); 
+            }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+    });
+
+    const waveMesh = new THREE.Mesh(geometry, waveMaterial);
+    scene.add(waveMesh);
+
+    const clock = new THREE.Clock();
+
+    function render() {
+        if (document.documentElement.getAttribute('data-theme') === 'nami') {
+            const time = clock.getElapsedTime();
+            waveMaterial.uniforms.uTime.value = time;
+            camera.position.x = Math.sin(time * 0.2) * 1.5;
+            camera.position.z = 6 + Math.cos(time * 0.2) * 1.5;
+            camera.lookAt(0, 0, 0);
+            renderer.render(scene, camera);
+        }
+        namiAnimationId = requestAnimationFrame(render);
+    }
+    render();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
     });
 }
