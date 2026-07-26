@@ -3111,3 +3111,113 @@ input:focus {
     display: flex;
     flex-direction: column;
 }
+
+
+/* ========================================== */
+/* LUMEN THEME SETUP (Chromatic WebGL Wave)   */
+/* ========================================== */
+
+/* 1. The Color Palette (High contrast to make the RGB wave pop) */
+[data-theme="lumen"] {
+    --primary-color: #FFFFFF;
+    /* Pure white light */
+    --primary-variant: #CCCCCC;
+    --secondary-color: #FF0055;
+    /* A subtle punchy accent */
+    --background: #000000;
+    /* Pitch Black */
+    --surface: #0A0A0A;
+    /* Deepest grey */
+    --error: #FF1744;
+    --on-primary: #000000;
+    --on-secondary: #FFFFFF;
+    --on-background: #FFFFFF;
+    --on-surface: #FFFFFF;
+    --shadow: rgba(255, 255, 255, 0.1);
+}
+
+/* 2. The Canvas Container */
+.lumen-background {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    /* Behind the app, in front of the body */
+    pointer-events: none;
+}
+
+[data-theme="lumen"] .lumen-background {
+    display: block;
+}
+
+/* 3. Apply Premium Frosted Glass */
+[data-theme="lumen"] .kanji-widget,
+[data-theme="lumen"] .progress-section,
+[data-theme="lumen"] .journey-section {
+    background-color: rgba(10, 10, 10, 0.5) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    /* Sharp white glass edge */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
+/* 4. Lumen Progress Bar */
+[data-theme="lumen"] .progress-bar {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="lumen"] .progress-fill {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    /* White glowing core */
+}
+/* ========================================== */
+/* YUKI FOOTER CREDIT (Lumen Theme Exclusive) */
+/* ========================================== */
+
+/* Hide by default on all other themes */
+.yuki-credit {
+    display: none;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Style the link to match your theme but stand out slightly */
+.yuki-credit a {
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.yuki-credit a:hover {
+    text-decoration: underline;
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+    /* Slight cyan glow on hover */
+}
+
+/* Reveal ONLY when Lumen theme is active */
+[data-theme="lumen"] .yuki-credit {
+    display: block;
+    animation: fadeInCredit 0.5s ease forwards 0.2s;
+    /* Slight delay so it fades in smoothly */
+}
+
+@keyframes fadeInCredit {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 0.85;
+        transform: translateY(0);
+    }
+}

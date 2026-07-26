@@ -1695,3 +1695,111 @@ function initNamiWave() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 }
+
+// ==========================================
+// LUMEN THEME: CHROMATIC ABERRATION WAVE
+// ==========================================
+let lumenAnimationId = null;
+
+function initLumenWave() {
+    const container = document.getElementById('lumen-canvas-container');
+
+    // Prevent initializing multiple times
+    if (container.innerHTML !== '') return;
+
+    // 1. Setup Scene, Orthographic Camera, and Renderer
+    const scene = new THREE.Scene();
+
+    // An Orthographic camera is used here because this is a 2D flat shader effect
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    // Sets the clear color to transparent so it blends with your CSS background
+    renderer.setClearColor(0x000000, 0);
+    container.appendChild(renderer.domElement);
+
+    // 2. Create the flat geometry covering the screen
+    const position = [
+        -1.0, -1.0, 0.0,
+        1.0, -1.0, 0.0,
+        -1.0, 1.0, 0.0,
+        1.0, -1.0, 0.0,
+        -1.0, 1.0, 0.0,
+        1.0, 1.0, 0.0
+    ];
+    const positions = new THREE.BufferAttribute(new Float32Array(position), 3);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", positions);
+
+    // 3. Define the Uniforms (Variables passed to the shader)
+    const uniforms = {
+        resolution: { type: "v2", value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+        time: { type: "f", value: 0.0 },
+        xScale: { type: "f", value: 1.0 },
+        yScale: { type: "f", value: 0.5 },
+        distortion: { type: "f", value: 0.050 }
+    };
+
+    // 4. Create the Shader Material (Yuki's CodePen Math)
+    const material = new THREE.RawShaderMaterial({
+        uniforms: uniforms,
+        side: THREE.DoubleSide,
+        transparent: true,
+        vertexShader: `
+        attribute vec3 position;
+        void main() {
+        gl_Position = vec4(position, 1.0);
+        }
+        `,
+        fragmentShader: `
+        precision highp float;
+        uniform vec2 resolution;
+        uniform float time;
+        uniform float xScale;
+        uniform float yScale;
+        uniform float distortion;
+
+        void main() {
+            // Normalize pixel coordinates
+            vec2 p = (gl_FragCoord.xy * 2.0 - resolution) / min(resolution.x, resolution.y);
+
+            // Calculate distortion for chromatic aberration
+            float d = length(p) * distortion;
+            float rx = p.x * (1.0 + d);
+            float gx = p.x;
+            float bx = p.x * (1.0 - d);
+
+            // Calculate the sine waves for RGB channels
+            float r = 0.05 / abs(p.y + sin((rx + time) * xScale) * yScale);
+            float g = 0.05 / abs(p.y + sin((gx + time) * xScale) * yScale);
+            float b = 0.05 / abs(p.y + sin((bx + time) * xScale) * yScale);
+            
+            gl_FragColor = vec4(r, g, b, 1.0);
+        }
+        `
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    // 5. Battery-Optimized Render Loop
+    function render() {
+        if (document.documentElement.getAttribute('data-theme') === 'lumen') {
+            uniforms.time.value += 0.01; // Progress the animation time
+            renderer.render(scene, camera);
+        }
+        lumenAnimationId = requestAnimationFrame(render);
+    }
+    render();
+
+    // 6. Handle Window Resizing smoothly
+    window.addEventListener('resize', () => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        renderer.setSize(width, height);
+        // Update the shader's resolution uniform so the wave doesn't stretch
+        uniforms.resolution.value.set(width, height);
+    });
+}
