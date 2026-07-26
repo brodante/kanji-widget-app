@@ -1,3 +1,18 @@
+// ==========================================
+// GLOBAL ANIMATION TRACKERS
+// ==========================================
+let namiAnimationId = null;
+
+let lumenAnimationId = null;
+
+let obakeAnimationId = null;
+
+
+let itoAppInstance = null;
+let itoInitialized = false;
+let itoAnimationId = null;
+let itoIntervalId = null;
+
 class KanjiLearningApp {
     constructor() {
         this.currentKanji = null;
@@ -57,31 +72,18 @@ class KanjiLearningApp {
         //     this.changeWidgetSize(e.target.value);
         // });
 
-        // Theme selector (The main control)
+        
         document.getElementById('themeSelect').addEventListener('change', (e) => {
             this.setTheme(e.target.value);
-
-            // Boot the respective WebGL canvas if selected
-            if (themeName === 'nami') {
-                initNamiWave();
-            }
-            else if (e.target.value === 'lumen') {
-                initLumenWave();
-            }
-            else if (themeName === 'obake') {
-                initObakeGhost();
-            }
         });
 
         // Theme toggle button (The "Quick Switcher")
-        // This flips between your default light (candy) and default dark (dracula)
-        // Theme toggle button (The "Quick Switcher")
-        // Theme toggle button (The "Quick Switcher")
+        // This flips between your default light (candy) and default dark (lumen)
         document.getElementById('themeToggle').addEventListener('click', () => {
             const current = localStorage.getItem('theme') || 'candy';
 
             // NEW: Added 'lumen' to the end of this list!
-            const darkThemes = ['dark', 'nami', 'obake', 'nord', 'midnight', 'forest', 'lumen'];
+            const darkThemes = ['dark', 'nami', 'obake', 'nord', 'midnight', 'forest', 'lumen', 'ito'];
             const isDark = darkThemes.includes(current);
 
             if (isDark) {
@@ -89,8 +91,8 @@ class KanjiLearningApp {
                 const lastLight = localStorage.getItem('lastLightTheme') || 'candy';
                 this.setTheme(lastLight);
             } else {
-                // We were in light mode, switch to the last used dark theme (or default to dark)
-                const lastDark = localStorage.getItem('lastDarkTheme') || 'midnight';
+                // We were in light mode, switch to the last used dark theme (or default to lumen)
+                const lastDark = localStorage.getItem('lastDarkTheme') || 'lumen';
                 this.setTheme(lastDark);
             }
         });
@@ -428,7 +430,6 @@ class KanjiLearningApp {
                 </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
-                    <button class="action-btn hint-btn" onclick="app.showPremiumHint()" style="background-color: #8A2BE2; color: white;"><i class="fas fa-lightbulb"></i></button>
                     <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
                     <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
                 </div>
@@ -441,18 +442,18 @@ class KanjiLearningApp {
         }
     }
 
-    changeWidgetSize(size) {
-        this.widgetSize = size;
-        const widget = document.getElementById('kanjiWidget');
+    // changeWidgetSize(size) {
+    //     this.widgetSize = size;
+    //     const widget = document.getElementById('kanjiWidget');
         
-        // Remove existing size classes
-        widget.classList.remove('small-widget', 'medium-widget', 'large-widget');
+    //     // Remove existing size classes
+    //     widget.classList.remove('small-widget', 'medium-widget', 'large-widget');
         
-        // Add new size class
-        widget.classList.add(`${size}-widget`);
+    //     // Add new size class
+    //     widget.classList.add(`${size}-widget`);
         
-        this.renderKanji();
-    }
+    //     this.renderKanji();
+    // }
 
     async markAsMastered() {
         if (!this.currentKanji) return;
@@ -763,36 +764,36 @@ class KanjiLearningApp {
         const foundKanji = pool.find(item => item.character === character);
 
         if (foundKanji) {
-            // THE FIX: Hydrate skeleton API data BEFORE rendering!
-            const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
-            if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
+            // // THE FIX: Hydrate skeleton API data BEFORE rendering!
+            // const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
+            // if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
 
-                // Show temporary loading state on the widget
-                const widget = document.getElementById('kanjiWidget');
-                if (widget) {
-                    widget.innerHTML = `<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Fetching readings for ${character}...</p></div>`;
-                }
+            //     // Show temporary loading state on the widget
+            //     const widget = document.getElementById('kanjiWidget');
+            //     if (widget) {
+            //         widget.innerHTML = `<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Fetching readings for ${character}...</p></div>`;
+            //     }
 
-                try {
-                    const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
-                    if (details) {
-                        foundKanji.meanings = details.meanings;
-                        foundKanji.onyomi = details.onyomi;
-                        foundKanji.kunyomi = details.kunyomi;
-                        foundKanji.examples = details.examples;
+            //     try {
+            //         const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
+            //         if (details) {
+            //             foundKanji.meanings = details.meanings;
+            //             foundKanji.onyomi = details.onyomi;
+            //             foundKanji.kunyomi = details.kunyomi;
+            //             foundKanji.examples = details.examples;
 
-                        // Save it back to the cache so we only fetch it once
-                        const cacheKey = `level_${this.settings.jlptLevel}`;
-                        if (KanjiData.cache.has(cacheKey)) {
-                            const cachedPool = KanjiData.cache.get(cacheKey);
-                            const index = cachedPool.findIndex(k => k.character === foundKanji.character);
-                            if (index !== -1) cachedPool[index] = foundKanji;
-                        }
-                    }
-                } catch (err) {
-                    console.error("Hydration failed:", err);
-                }
-            }
+            //             // Save it back to the cache so we only fetch it once
+            //             const cacheKey = `level_${this.settings.jlptLevel}`;
+            //             if (KanjiData.cache.has(cacheKey)) {
+            //                 const cachedPool = KanjiData.cache.get(cacheKey);
+            //                 const index = cachedPool.findIndex(k => k.character === foundKanji.character);
+            //                 if (index !== -1) cachedPool[index] = foundKanji;
+            //             }
+            //         }
+            //     } catch (err) {
+            //         console.error("Hydration failed:", err);
+            //     }
+            // }
 
             this.currentKanji = foundKanji;
             this.renderKanji();
@@ -1175,20 +1176,20 @@ class KanjiLearningApp {
 
             if (foundKanji) {
                 // THE FIX: Hydrate before rendering!
-                const isKana = foundKanji.jlpt === 'Hiragana' || foundKanji.jlpt === 'Katakana';
-                if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
-                    try {
-                        const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
-                        if (details) {
-                            foundKanji.meanings = details.meanings;
-                            foundKanji.onyomi = details.onyomi;
-                            foundKanji.kunyomi = details.kunyomi;
-                            foundKanji.examples = details.examples;
-                        }
-                    } catch (err) {
-                        console.error("Hydration failed from recent:", err);
-                    }
-                }
+                // const isKana = foundKanji.jlpt === 'Hiragana' || foundKanji.jlpt === 'Katakana';
+                // if (!isKana && (!foundKanji.onyomi || foundKanji.onyomi.length === 0) && (!foundKanji.kunyomi || foundKanji.kunyomi.length === 0)) {
+                //     try {
+                //         const details = await KanjiData.fetchKanjiDetails(foundKanji.character);
+                //         if (details) {
+                //             foundKanji.meanings = details.meanings;
+                //             foundKanji.onyomi = details.onyomi;
+                //             foundKanji.kunyomi = details.kunyomi;
+                //             foundKanji.examples = details.examples;
+                //         }
+                //     } catch (err) {
+                //         console.error("Hydration failed from recent:", err);
+                //     }
+                // }
 
                 this.currentKanji = foundKanji;
                 this.renderKanji();
@@ -1215,70 +1216,6 @@ class KanjiLearningApp {
         }
     }
     
-    async showPremiumHint() {
-        // Prevent API waste on basic Kana
-        if (this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana') {
-            this.showToast('Premium data is only available for Kanji characters!');
-            return;
-        }
-
-        if (!this.settings.kanjiAliveKey) {
-            this.showToast('Enter a free KanjiAlive RapidAPI Key in Settings to unlock Premium Data & Human Audio!');
-            this.openSettings();
-            return;
-        }
-
-        const widget = document.getElementById('kanjiWidget');
-        let hintBox = document.getElementById('premiumHintBox');
-
-        // Create the box if it doesn't exist
-        if (!hintBox) {
-            hintBox = document.createElement('div');
-            hintBox.id = 'premiumHintBox';
-            hintBox.className = 'premium-hint-box';
-            const actions = widget.querySelector('.widget-actions');
-            actions.parentNode.insertBefore(hintBox, actions);
-        }
-
-        hintBox.innerHTML = `<div style="text-align: center; padding: 1rem;"><i class="fas fa-spinner fa-spin"></i> Loading Premium Data...</div>`;
-        hintBox.style.display = 'block';
-
-        const data = await AudioManager.fetchKanjiAliveData(this.currentKanji.character);
-
-        // FIXED: Removed the check for the non-existent 'hint' property
-        // We now build a rich UI using the deep English meaning and Radical structure they provide
-        if (data && data.kanji && data.kanji.meaning) {
-            hintBox.innerHTML = `
-                <div class="premium-hint-content">
-                    <div class="hint-header"><i class="fas fa-gem"></i> KanjiAlive Premium Data</div>
-                    <p style="margin-bottom: 0.5rem;"><strong>Deep Meaning:</strong> ${data.kanji.meaning.english}</p>
-                    
-                    ${data.radical && data.radical.character ? `
-                    <div class="radical-hint" style="display: flex; align-items: center; gap: 0.8rem; background: rgba(138, 43, 226, 0.08); padding: 0.6rem; border-radius: 8px;">
-                        <span style="font-size: 2rem; color: #8A2BE2; line-height: 1;">${data.radical.character}</span>
-                        <div>
-                            <div style="font-weight: bold; color: var(--text-color);">Radical: ${data.radical.name.hiragana} (${data.radical.name.romaji})</div>
-                            <div style="font-size: 0.85rem; opacity: 0.8;">${data.radical.meaning.english}</div>
-                        </div>
-                    </div>` : ''}
-                </div>
-                <button class="close-hint" onclick="document.getElementById('premiumHintBox').style.display='none'"><i class="fas fa-times"></i></button>
-            `;
-
-            // Instantly play the crystal-clear native human pronunciation!
-            if (data.examples && data.examples.length > 0 && data.examples[0].audio && data.examples[0].audio.mp3) {
-                const premiumAudio = new Audio(data.examples[0].audio.mp3);
-                premiumAudio.play();
-                this.showToast('Playing Native Speaker Audio...');
-            }
-        } else {
-            hintBox.innerHTML = `
-                <div class="premium-hint-content"><p>No premium data found for this character.</p></div>
-                <button class="close-hint" onclick="document.getElementById('premiumHintBox').style.display='none'"><i class="fas fa-times"></i></button>
-            `;
-        }
-    }
-
     openSettings() {
         const modal = document.getElementById('settingsModal');
         modal.classList.add('show');
@@ -1320,7 +1257,7 @@ class KanjiLearningApp {
         localStorage.setItem('theme', themeName);
 
         // Define which themes are "dark"
-        const darkThemes = ['dark', 'nord', 'midnight', 'forest', 'nami', 'lumen', 'obake'];
+        const darkThemes = ['dark', 'nord', 'midnight', 'forest', 'nami', 'lumen', 'obake', 'ito'];
 
         // Save history so the toggle remembers
         if (darkThemes.includes(themeName)) {
@@ -1328,6 +1265,13 @@ class KanjiLearningApp {
         } else {
             localStorage.setItem('lastLightTheme', themeName);
         }
+
+        // NEW FIX: Bulletproof WebGL & Timer Kill Switches!
+        if (typeof namiAnimationId !== 'undefined' && namiAnimationId) { cancelAnimationFrame(namiAnimationId); namiAnimationId = null; }
+        if (typeof lumenAnimationId !== 'undefined' && lumenAnimationId) { cancelAnimationFrame(lumenAnimationId); lumenAnimationId = null; }
+        if (typeof obakeAnimationId !== 'undefined' && obakeAnimationId) { cancelAnimationFrame(obakeAnimationId); obakeAnimationId = null; }
+        if (typeof itoAnimationId !== 'undefined' && itoAnimationId) { cancelAnimationFrame(itoAnimationId); itoAnimationId = null; }
+        if (typeof itoIntervalId !== 'undefined' && itoIntervalId) { clearInterval(itoIntervalId); itoIntervalId = null; }
 
         // NEW: Automatically boot the WebGL wave.
         if (themeName === 'nami') {
@@ -1338,6 +1282,9 @@ class KanjiLearningApp {
         }
         else if (themeName === 'obake') {
             initObakeGhost();
+        }
+        else if (themeName === 'ito') {
+            initItoTubes();
         }
         // Update the dropdown selector
         const select = document.getElementById('themeSelect');
@@ -1364,27 +1311,27 @@ class KanjiLearningApp {
         }
 
         // PREMIUM UPGRADE: Load the KanjiAlive key into the UI and Audio Manager
-        if (this.settings.kanjiAliveKey !== undefined) {
-            const keyInput = document.getElementById('kanjiAliveKey');
-            if (keyInput) {
-                keyInput.value = this.settings.kanjiAliveKey;
-            }
-            // Give the key directly to our audio manager
-            if (window.AudioManager) {
-                AudioManager.setApiKey(this.settings.kanjiAliveKey);
-            }
-        }
+        // if (this.settings.kanjiAliveKey !== undefined) {
+        //     const keyInput = document.getElementById('kanjiAliveKey');
+        //     if (keyInput) {
+        //         keyInput.value = this.settings.kanjiAliveKey;
+        //     }
+        //     // Give the key directly to our audio manager
+        //     if (window.AudioManager) {
+        //         AudioManager.setApiKey(this.settings.kanjiAliveKey);
+        //     }
+        // }
     }
 
     saveSettings() {
         // PREMIUM UPGRADE: Grab the key from the UI before saving
-        const keyInput = document.getElementById('kanjiAliveKey');
-        if (keyInput) {
-            this.settings.kanjiAliveKey = keyInput.value.trim();
-            if (window.AudioManager) {
-                AudioManager.setApiKey(this.settings.kanjiAliveKey);
-            }
-        }
+        // const keyInput = document.getElementById('kanjiAliveKey');
+        // if (keyInput) {
+        //     this.settings.kanjiAliveKey = keyInput.value.trim();
+        //     if (window.AudioManager) {
+        //         AudioManager.setApiKey(this.settings.kanjiAliveKey);
+        //     }
+        // }
 
         localStorage.setItem('kanjiSettings', JSON.stringify(this.settings));
     }
@@ -1584,17 +1531,6 @@ class KanjiLearningApp {
             toast.classList.remove('show');
         }, 4000);
     }
-    // showToast(message) {
-    //     const toast = document.getElementById('toast');
-    //     const messageEl = document.getElementById('toastMessage');
-        
-    //     messageEl.textContent = message;
-    //     toast.classList.add('show');
-        
-    //     setTimeout(() => {
-    //         toast.classList.remove('show');
-    //     }, 3000);
-    // }
 }
 
 // Initialize app when DOM is loaded
@@ -1617,12 +1553,13 @@ if ('serviceWorker' in navigator) {
 // ==========================================
 // 波 (NAMI) THEME: MOON LAKE SHADER
 // ==========================================
-let namiAnimationId = null;
 
 function initNamiWave() {
     const container = document.getElementById('nami-canvas-container');
-    if (container.innerHTML !== '') return; // Prevent double-loading
-
+    if (container.innerHTML !== '') {
+        if (!namiAnimationId && window.namiRenderLoop) window.namiRenderLoop();
+        return;
+    }
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 2, 6);
@@ -1630,7 +1567,9 @@ function initNamiWave() {
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Caps it at 1 for mobile to save battery and GPU, allows up to 2 on Desktop
+    const pixelCap = window.innerWidth < 768 ? 1 : Math.min(window.devicePixelRatio, 2);
+    renderer.setPixelRatio(pixelCap);
     container.appendChild(renderer.domElement);
 
     const geometry = new THREE.PlaneGeometry(30, 15, 128, 128);
@@ -1680,7 +1619,7 @@ function initNamiWave() {
 
     const clock = new THREE.Clock();
 
-    function render() {
+    window.namiRenderLoop = function () {
         if (document.documentElement.getAttribute('data-theme') === 'nami') {
             const time = clock.getElapsedTime();
             waveMaterial.uniforms.uTime.value = time;
@@ -1689,9 +1628,9 @@ function initNamiWave() {
             camera.lookAt(0, 0, 0);
             renderer.render(scene, camera);
         }
-        namiAnimationId = requestAnimationFrame(render);
-    }
-    render();
+        namiAnimationId = requestAnimationFrame(window.namiRenderLoop);
+    };
+    window.namiRenderLoop();
 
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -1703,13 +1642,15 @@ function initNamiWave() {
 // ==========================================
 // LUMEN THEME: CHROMATIC ABERRATION WAVE
 // ==========================================
-let lumenAnimationId = null;
 
 function initLumenWave() {
     const container = document.getElementById('lumen-canvas-container');
 
-    // Prevent initializing multiple times
-    if (container.innerHTML !== '') return;
+    // Restart the loop if it already exists!
+    if (container.innerHTML !== '') {
+        if (!lumenAnimationId && window.lumenRenderLoop) window.lumenRenderLoop();
+        return;
+    }
 
     // 1. Setup Scene, Orthographic Camera, and Renderer
     const scene = new THREE.Scene();
@@ -1718,11 +1659,17 @@ function initLumenWave() {
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // NEW: Cap the pixel ratio at 1 for mobile devices (screens narrower than 768px)
+    // to save battery and GPU, but allow up to 2 on Desktop for crispness.
+    const pixelCap = window.innerWidth < 768 ? 1 : Math.min(window.devicePixelRatio, 2);
+    renderer.setPixelRatio(pixelCap);
+
     renderer.setSize(window.innerWidth, window.innerHeight);
     // Sets the clear color to transparent so it blends with your CSS background
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
+
 
     // 2. Create the flat geometry covering the screen
     const position = [
@@ -1789,14 +1736,14 @@ function initLumenWave() {
     scene.add(mesh);
 
     // 5. Battery-Optimized Render Loop
-    function render() {
+    window.lumenRenderLoop = function () {
         if (document.documentElement.getAttribute('data-theme') === 'lumen') {
             uniforms.time.value += 0.01; // Progress the animation time
             renderer.render(scene, camera);
         }
-        lumenAnimationId = requestAnimationFrame(render);
-    }
-    render();
+        lumenAnimationId = requestAnimationFrame(window.lumenRenderLoop);
+    };
+    window.lumenRenderLoop();
 
     // 6. Handle Window Resizing smoothly
     window.addEventListener('resize', () => {
@@ -1810,11 +1757,14 @@ function initLumenWave() {
 // ==========================================
 // お化け (OBAKE) THEME: SPECTRAL GHOST
 // ==========================================
-let obakeAnimationId = null;
 
 function initObakeGhost() {
     const container = document.getElementById('obake-canvas-container');
-    if (container.innerHTML !== '') return;
+    // Restart the loop if it already exists!
+    if (container.innerHTML !== '') {
+        if (!obakeAnimationId && window.obakeRenderLoop) window.obakeRenderLoop();
+        return;
+    }
 
     // 1. Setup Scene & Camera
     const scene = new THREE.Scene();
@@ -1823,7 +1773,9 @@ function initObakeGhost() {
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Caps it at 1 for mobile to save battery and GPU, allows up to 2 on Desktop
+    const pixelCap = window.innerWidth < 768 ? 1 : Math.min(window.devicePixelRatio, 2);
+    renderer.setPixelRatio(pixelCap);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.9;
     renderer.setClearColor(0x000000, 0);
@@ -1964,7 +1916,7 @@ function initObakeGhost() {
 
     // 6. The Render Loop
     const clock = new THREE.Clock();
-    function render() {
+    window.obakeRenderLoop = function () {
         if (document.documentElement.getAttribute('data-theme') === 'obake') {
             const time = clock.getElapsedTime();
             analogDecayPass.uniforms.uTime.value = time;
@@ -2004,9 +1956,9 @@ function initObakeGhost() {
 
             composer.render();
         }
-        obakeAnimationId = requestAnimationFrame(render);
-    }
-    render();
+        obakeAnimationId = requestAnimationFrame(window.obakeRenderLoop);
+    };
+    window.obakeRenderLoop();
 
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -2014,4 +1966,125 @@ function initObakeGhost() {
         renderer.setSize(window.innerWidth, window.innerHeight);
         composer.setSize(window.innerWidth, window.innerHeight);
     });
+}
+// ==========================================
+// 糸 (ITO) THEME: NEON THREADS CURSOR
+// ==========================================
+
+let itoState = {
+    currentTubes: ["#f967fb", "#53bc28", "#6958d5"],
+    currentLights: ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"],
+    targetTubes: ["#f967fb", "#53bc28", "#6958d5"],
+    targetLights: ["#83f36e", "#fe8a2e", "#ff008a", "#60aed5"],
+    progress: 1,
+    clickBound: false
+};
+
+// Math Helpers
+const getRandomHex = () => "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+const hexToRgb = (hex) => {
+    const bigint = parseInt(hex.replace('#', ''), 16);
+    return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+};
+const rgbToHex = (r, g, b) => "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+const lerpColor = (c1, c2, t) => {
+    const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
+    const r = Math.round(r1.r + (r2.r - r1.r) * t);
+    const g = Math.round(r1.g + (r2.g - r1.g) * t);
+    const b = Math.round(r1.b + (r2.b - r1.b) * t);
+    return rgbToHex(r, g, b);
+};
+
+window.triggerColorTransition = () => {
+    if (itoState.progress >= 1) {
+        itoState.targetTubes = [getRandomHex(), getRandomHex(), getRandomHex()];
+        itoState.targetLights = [getRandomHex(), getRandomHex(), getRandomHex(), getRandomHex()];
+        itoState.progress = 0;
+    }
+};
+
+window.smoothColorLoop = () => {
+    // HARD KILL SWITCH: If the theme isn't Ito, immediately kill the loop process!
+    if (document.documentElement.getAttribute('data-theme') !== 'ito') return;
+
+    if (itoAppInstance && itoState.progress < 1) {
+        const easeT = itoState.progress < 0.5
+            ? 2 * itoState.progress * itoState.progress
+            : 1 - Math.pow(-2 * itoState.progress + 2, 2) / 2;
+
+        const nextTubes = itoState.currentTubes.map((c, i) => lerpColor(c, itoState.targetTubes[i], easeT));
+        const nextLights = itoState.currentLights.map((c, i) => lerpColor(c, itoState.targetLights[i], easeT));
+
+        // Fail-safe to ensure the library's internal tubes object still exists
+        if (itoAppInstance.tubes) {
+            itoAppInstance.tubes.setColors(nextTubes);
+            itoAppInstance.tubes.setLightsColors(nextLights);
+        }
+
+        itoState.progress += 0.015;
+
+        if (itoState.progress >= 1) {
+            itoState.progress = 1;
+            itoState.currentTubes = [...itoState.targetTubes];
+            itoState.currentLights = [...itoState.targetLights];
+        }
+    }
+
+    itoAnimationId = requestAnimationFrame(window.smoothColorLoop);
+};
+
+async function initItoTubes() {
+    const container = document.getElementById('ito-canvas-container');
+
+    // THE FIX: The Nuke and Rebuild Strategy
+    // Because this is a 3rd party black-box library, we cannot safely pause/resume it.
+    // We completely wipe it and let it boot fresh into a visible container.
+    container.innerHTML = '';
+
+    if (itoAnimationId) { cancelAnimationFrame(itoAnimationId); itoAnimationId = null; }
+    if (itoIntervalId) { clearInterval(itoIntervalId); itoIntervalId = null; }
+
+    // If the library supports an internal memory cleanup method, call it.
+    if (itoAppInstance && typeof itoAppInstance.destroy === 'function') {
+        itoAppInstance.destroy();
+    }
+    itoAppInstance = null;
+
+    const canvas = document.createElement('canvas');
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    container.appendChild(canvas);
+
+    try {
+        const module = await import("https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js");
+        const TubesCursor = module.default;
+
+        itoAppInstance = TubesCursor(canvas, {
+            tubes: {
+                colors: itoState.currentTubes,
+                lights: { intensity: 200, colors: itoState.currentLights }
+            }
+        });
+
+        window.smoothColorLoop();
+
+        // Bind click event only once per page load to prevent 100x overlaps
+        if (!itoState.clickBound) {
+            window.addEventListener('click', (e) => {
+                if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
+                    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.level-option') || e.target.closest('.modal-content')) return;
+                    window.triggerColorTransition();
+                }
+            });
+            itoState.clickBound = true;
+        }
+
+        itoIntervalId = setInterval(() => {
+            if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
+                window.triggerColorTransition();
+            }
+        }, 5000);
+    } catch (err) {
+        console.error("Failed to load Ito Tubes theme:", err);
+    }
 }

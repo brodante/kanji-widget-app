@@ -176,9 +176,9 @@ class StorageManager {
             showFurigana: true,
             theme: 'light',
             widgetSize: 'medium',
-            dailyGoal: 10,
-            reminderTime: '19:00',
-            enableNotifications: false,
+            //dailyGoal: 10,
+            //reminderTime: '19:00',
+            //enableNotifications: false,
             kanjiFont: 'Noto Sans JP',
             fontSize: 'medium',
             defaultAudio: 'kunyomi',
@@ -325,24 +325,24 @@ class StorageManager {
     }
 
     // Check storage quota
-    static getStorageInfo() {
-        if ('storage' in navigator && 'estimate' in navigator.storage) {
-            return navigator.storage.estimate();
-        }
+    // static getStorageInfo() {
+    //     if ('storage' in navigator && 'estimate' in navigator.storage) {
+    //         return navigator.storage.estimate();
+    //     }
         
-        // Fallback: estimate localStorage usage
-        let total = 0;
-        for (let key in localStorage) {
-            if (localStorage.hasOwnProperty(key)) {
-                total += localStorage[key].length + key.length;
-            }
-        }
+    //     // Fallback: estimate localStorage usage
+    //     let total = 0;
+    //     for (let key in localStorage) {
+    //         if (localStorage.hasOwnProperty(key)) {
+    //             total += localStorage[key].length + key.length;
+    //         }
+    //     }
         
-        return Promise.resolve({
-            usage: total,
-            quota: 5 * 1024 * 1024 // 5MB typical localStorage limit
-        });
-    }
+    //     return Promise.resolve({
+    //         usage: total,
+    //         quota: 5 * 1024 * 1024 // 5MB typical localStorage limit
+    //     });
+    // }
 }
 
 // Initialize storage when script loads

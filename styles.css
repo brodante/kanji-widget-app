@@ -91,6 +91,8 @@ body {
     justify-content: space-between;
     align-items: center;
     box-shadow: var(--elevation-1);
+    position: relative;
+    z-index: 100;
 }
 
 .app-header h1 {
@@ -423,12 +425,6 @@ body {
     /* Slightly sharper font weight */
     margin-top: 0.2rem;
 }
-
-/* .example-meaning {
-    color: var(--on-surface);
-    opacity: 0.8;
-    font-size: 0.95rem;
-} */
 
 .widget-actions {
     position: absolute;
@@ -1094,11 +1090,6 @@ body {
     /* Pulls the letter to the front so the pen slides cleanly behind it */
 }
 
-/* 6. At 100%, the pen vanishes (like it's sealing the letter!) 
-[data-theme="paper"] .progress-bar.is-complete .progress-fill::after {
-    opacity: 0;
-} 
-*/
 /* ========================================== */
 /* PAPER 100% ANIMATION (Infinite Stamp)      */
 /* ========================================== */
@@ -1989,24 +1980,6 @@ body {
     animation: glacier-crack 2s ease-in-out 0.6s infinite !important;
 }
 
-
-/* 4. Global Warming Warning Message - Float & Fade 
-[data-theme="nord"]:has(.progress-bar.is-complete)::after {
-    content: "Our home is melting. Save our ice.";
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: sans-serif;
-    font-size: 14px;
-    letter-spacing: 1px;
-    color: #A0E0F0;
-    opacity: 0;
-    pointer-events: none;
-    animation: warning-fade 5s ease-in-out infinite !important;
-}
-*/
-
 /* Kanji Journey */
 .journey-section {
     background-color: var(--surface);
@@ -2811,68 +2784,6 @@ input:focus {
 }
 
 /* ========================================== */
-/* Premium Hint Box Styling */
-/* ========================================== */
-.premium-hint-box {
-    display: none;
-    background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(138, 43, 226, 0.03));
-    border: 1px solid rgba(138, 43, 226, 0.2);
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    margin-bottom: 1rem;
-    position: relative;
-    animation: fadeIn 0.3s ease;
-}
-
-.premium-hint-content {
-    font-size: 0.95rem;
-    color: var(--on-surface);
-    line-height: 1.5;
-    text-align: left;
-}
-
-.hint-header {
-    font-weight: bold;
-    color: #8A2BE2;
-    /* A nice purple for the premium feel */
-    margin-bottom: 0.6rem;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.radical-hint {
-    margin-top: 0.6rem;
-    font-size: 0.85rem;
-    opacity: 0.8;
-    background: rgba(var(--on-surface-rgb), 0.05);
-    padding: 0.4rem;
-    border-radius: 6px;
-}
-
-.close-hint {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    background: none;
-    border: none;
-    color: var(--on-surface);
-    opacity: 0.4;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    font-size: 1.1rem;
-}
-
-.close-hint:hover {
-    opacity: 1;
-}
-
-.action-btn.hint-btn:hover {
-    background-color: #6A1B9A !important;
-    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
-}
-
-/* ========================================== */
 /* Quick Level Dropdown Menu */
 /* ========================================== */
 .level-dropdown {
@@ -3307,4 +3218,117 @@ input:focus {
     border: 1px solid rgba(187, 134, 252, 0.3) !important;
     color: var(--primary-color) !important;
     box-shadow: 0 0 10px rgba(187, 134, 252, 0.15);
+}
+/* ========================================== */
+/* FILIP FOOTER CREDIT (Obake Theme Exclusive)*/
+/* ========================================== */
+
+/* Hide by default on all other themes */
+.filip-credit {
+    display: none;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Style the link to match your theme */
+.filip-credit a {
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.filip-credit a:hover {
+    text-decoration: underline;
+    text-shadow: 0 0 8px rgba(187, 134, 252, 0.4);
+    /* Soft amethyst glow on hover */
+}
+
+/* Reveal ONLY when Obake theme is active */
+[data-theme="obake"] .filip-credit {
+    display: block;
+    animation: fadeInCredit 0.5s ease forwards 0.2s;
+    /* Uses the same animation keyframes as Yuki's */
+}
+
+/* ========================================== */
+/* 糸 (ITO) THEME SETUP (Neon Tubes)          */
+/* ========================================== */
+
+[data-theme="ito"] {
+    --primary-color: #f967fb;
+    /* Neon Pink */
+    --primary-variant: #6958d5;
+    /* Cyber Purple */
+    --secondary-color: #53bc28;
+    /* Acid Green */
+    --background: #000000;
+    --surface: #0a0a0f;
+    --error: #FF1744;
+    --on-primary: #000000;
+    --on-secondary: #000000;
+    --on-background: #ffffff;
+    --on-surface: #e0e0e0;
+    --shadow: rgba(249, 103, 251, 0.15);
+}
+
+.ito-background {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    /* Lets clicks pass through to the document */
+}
+
+[data-theme="ito"] .ito-background {
+    display: block;
+}
+
+/* Frosted Glass UI panels */
+[data-theme="ito"] .kanji-widget,
+[data-theme="ito"] .progress-section,
+[data-theme="ito"] .journey-section,
+[data-theme="ito"] .app-header {
+    background-color: rgba(10, 10, 15, 0.5) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(249, 103, 251, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Header Text Glow */
+[data-theme="ito"] .app-header h1,
+[data-theme="ito"] .app-header .icon-btn i {
+    color: var(--primary-color) !important;
+    text-shadow: 0 0 12px rgba(249, 103, 251, 0.5);
+}
+
+/* Footer Credit Reveal */
+.soju-credit {
+    display: none;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.soju-credit a {
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.soju-credit a:hover {
+    text-decoration: underline;
+    text-shadow: 0 0 8px rgba(249, 103, 251, 0.4);
+}
+
+[data-theme="ito"] .soju-credit {
+    display: block;
+    animation: fadeInCredit 0.5s ease forwards 0.2s;
 }
