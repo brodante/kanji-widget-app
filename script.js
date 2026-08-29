@@ -91,8 +91,8 @@ class KanjiLearningApp {
                 const lastLight = localStorage.getItem('lastLightTheme') || 'candy';
                 this.setTheme(lastLight);
             } else {
-                // We were in light mode, switch to the last used dark theme (or default to lumen)
-                const lastDark = localStorage.getItem('lastDarkTheme') || 'lumen';
+                // We were in light mode, switch to the last used dark theme (or default to nami rn)
+                const lastDark = localStorage.getItem('lastDarkTheme') || 'nami';
                 this.setTheme(lastDark);
             }
         });
@@ -1300,7 +1300,7 @@ class KanjiLearningApp {
 
     // Loads the saved theme on startup (Defaulting to 'candy' for new users)
     applyTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'midnight';
+        const savedTheme = localStorage.getItem('theme') || 'nami';
         this.setTheme(savedTheme);
     }
 
