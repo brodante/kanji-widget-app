@@ -80,6 +80,8 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
 }
 
 /* Header Styles */
@@ -3014,18 +3016,6 @@ input:focus {
     /* Glow effect */
 }
 
-/* 5. Push the app container safely in front of the canvas */
-.app-container {
-    position: relative;
-    /* Must be relative for z-index to work! */
-    z-index: 1;
-    /* Ensures widgets sit on top of the wave */
-    max-width: 800px;
-    margin: 0 auto;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
 
 
 /* ========================================== */
