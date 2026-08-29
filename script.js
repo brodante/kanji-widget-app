@@ -31,6 +31,9 @@ class KanjiLearningApp {
             kanjiAliveKey: ''
         };
         
+        // Cache frequently-used DOM elements once instead of re-querying repeatedly
+        this.kanjiWidgetEl = document.getElementById('kanjiWidget');
+
         this.init();
     }
 
