@@ -386,9 +386,10 @@ class KanjiLearningApp {
                 </div>
             `;
         } else {
+            const isMastered = StorageManager.getProgress().mastered.includes(this.currentKanji.character);
             content += `
-                <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>
-                <div class="kanji-readings">
+                ${isMastered ? `<button class="unmark-badge" onclick="app.unmarkCurrentKanji()" title="Unmark as mastered"><i class="fas fa-times"></i></button>` : ''}
+                <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>                <div class="kanji-readings">
                     ${this.currentKanji.onyomi.length > 0 ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">On'yomi</div>
@@ -548,6 +549,24 @@ class KanjiLearningApp {
 
         // Clear the memory
         this.lastMasteredChar = null;
+    }
+
+        unmarkCurrentKanji() {
+        if (!this.currentKanji) return;
+
+        const character = this.currentKanji.character;
+        const progress = StorageManager.getProgress();
+
+        if (!progress.mastered.includes(character)) return; // nothing to unmark
+
+        progress.mastered = progress.mastered.filter(char => char !== character);
+        StorageManager.saveProgress(progress);
+
+        this.showToast(`"${character}" unmarked — moved back to pending.`);
+
+        this.renderKanji();       // refresh so the ✕ button hides again
+        this.updateProgress();
+        this.renderKanjiJourney();
     }
 
     playPronunciation() {

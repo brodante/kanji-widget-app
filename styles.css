@@ -2899,6 +2899,29 @@ input:focus {
     animation: none;
 }
 
+.unmark-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(120, 120, 120, 0.18);
+    color: var(--on-surface);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.unmark-badge:hover {
+    background: rgba(255, 82, 82, 0.85);
+    color: white;
+    transform: scale(1.08);
+}
+
 @keyframes flicker {
     0% {
         transform: scale(1) rotate(-2deg);
