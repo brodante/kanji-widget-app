@@ -31,6 +31,9 @@ class KanjiLearningApp {
             kanjiAliveKey: ''
         };
         
+        // Cache frequently-used DOM elements once instead of re-querying repeatedly
+        this.kanjiWidgetEl = document.getElementById('kanjiWidget');
+
         this.init();
     }
 
@@ -383,9 +386,10 @@ class KanjiLearningApp {
                 </div>
             `;
         } else {
+            const isMastered = StorageManager.getProgress().mastered.includes(this.currentKanji.character);
             content += `
-                <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>
-                <div class="kanji-readings">
+                ${isMastered ? `<button class="unmark-badge" onclick="app.unmarkCurrentKanji()" title="Unmark as mastered"><i class="fas fa-times"></i></button>` : ''}
+                <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>                <div class="kanji-readings">
                     ${this.currentKanji.onyomi.length > 0 ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">On'yomi</div>
@@ -487,10 +491,37 @@ class KanjiLearningApp {
         this.renderKanjiJourney();
         this.loadRecentKanji();
 
-        // Load next kanji
+        // Load next kanji: continue forward from wherever we currently are.
+        // Only fall back to loadCurrentKanji() (which restarts from the
+        // lowest-numbered unmastered kanji) once nothing unmastered remains ahead.
         setTimeout(() => {
-            this.loadCurrentKanji();
+            this.advanceAfterMastery();
         }, 1000);
+    }
+
+    advanceAfterMastery() {
+        const progress = StorageManager.getProgress();
+        const pool = this.currentKanjiPool;
+        if (!pool || pool.length === 0) return;
+
+        for (let i = 1; i < pool.length; i++) {
+            const idx = (this.currentIndex + i) % pool.length;
+            const candidate = pool[idx];
+            if (!progress.mastered.includes(candidate.character)) {
+                this.currentIndex = idx;
+                this.currentKanji = candidate;
+                this.renderKanji();
+
+                if (this.settings.autoPlay) {
+                    setTimeout(() => this.playPronunciation(), 300);
+                }
+                return;
+            }
+        }
+
+        // Nothing unmastered left anywhere in the level — reuse the existing
+        // "level complete" flow (congrats toast + reset to the start).
+        this.loadCurrentKanji();
     }
 
     undoMaster() {
@@ -518,6 +549,24 @@ class KanjiLearningApp {
 
         // Clear the memory
         this.lastMasteredChar = null;
+    }
+
+        unmarkCurrentKanji() {
+        if (!this.currentKanji) return;
+
+        const character = this.currentKanji.character;
+        const progress = StorageManager.getProgress();
+
+        if (!progress.mastered.includes(character)) return; // nothing to unmark
+
+        progress.mastered = progress.mastered.filter(char => char !== character);
+        StorageManager.saveProgress(progress);
+
+        this.showToast(`"${character}" unmarked — moved back to pending.`);
+
+        this.renderKanji();       // refresh so the ✕ button hides again
+        this.updateProgress();
+        this.renderKanjiJourney();
     }
 
     playPronunciation() {
@@ -761,7 +810,8 @@ class KanjiLearningApp {
 
         const pool = this.currentKanjiPool.length > 0 ? this.currentKanjiPool : await this.getKanjiPool(this.settings.jlptLevel);
         this.currentKanjiPool = pool;
-        const foundKanji = pool.find(item => item.character === character);
+        const foundIndex = pool.findIndex(item => item.character === character);
+        const foundKanji = foundIndex !== -1 ? pool[foundIndex] : null;
 
         if (foundKanji) {
             // // THE FIX: Hydrate skeleton API data BEFORE rendering!
@@ -795,6 +845,7 @@ class KanjiLearningApp {
             //     }
             // }
 
+            this.currentIndex = foundIndex;   // keep position tracking in sync with the tap
             this.currentKanji = foundKanji;
             this.renderKanji();
             this.showToast(`Showing ${character}`);
