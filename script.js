@@ -13,6 +13,86 @@ let itoInitialized = false;
 let itoAnimationId = null;
 let itoIntervalId = null;
 
+// ==========================================
+// SEARCH HELPERS (lightweight kana/romaji matching)
+// ==========================================
+
+// Katakana -> Hiragana, so onyomi (stored in katakana) and kunyomi
+// (stored in hiragana) can be compared on equal footing.
+function katakanaToHiragana(str) {
+    return str.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+}
+
+// Small greedy romaji -> hiragana converter. Covers standard mora,
+// youon (kya/sha/etc.), and sokuon (doubled consonant -> っ). Not a
+// full IME — good enough for matching search queries against readings.
+const ROMAJI_TO_HIRAGANA = {
+    kya: 'きゃ', kyu: 'きゅ', kyo: 'きょ', sha: 'しゃ', shu: 'しゅ', sho: 'しょ',
+    cha: 'ちゃ', chu: 'ちゅ', cho: 'ちょ', nya: 'にゃ', nyu: 'にゅ', nyo: 'にょ',
+    hya: 'ひゃ', hyu: 'ひゅ', hyo: 'ひょ', mya: 'みゃ', myu: 'みゅ', myo: 'みょ',
+    rya: 'りゃ', ryu: 'りゅ', ryo: 'りょ', gya: 'ぎゃ', gyu: 'ぎゅ', gyo: 'ぎょ',
+    bya: 'びゃ', byu: 'びゅ', byo: 'びょ', pya: 'ぴゃ', pyu: 'ぴゅ', pyo: 'ぴょ',
+    ja: 'じゃ', ju: 'じゅ', jo: 'じょ',
+    a: 'あ', i: 'い', u: 'う', e: 'え', o: 'お',
+    ka: 'か', ki: 'き', ku: 'く', ke: 'け', ko: 'こ',
+    sa: 'さ', shi: 'し', su: 'す', se: 'せ', so: 'そ',
+    ta: 'た', chi: 'ち', tsu: 'つ', te: 'て', to: 'と',
+    na: 'な', ni: 'に', nu: 'ぬ', ne: 'ね', no: 'の',
+    ha: 'は', hi: 'ひ', fu: 'ふ', he: 'へ', ho: 'ほ',
+    ma: 'ま', mi: 'み', mu: 'む', me: 'め', mo: 'も',
+    ya: 'や', yu: 'ゆ', yo: 'よ',
+    ra: 'ら', ri: 'り', ru: 'る', re: 'れ', ro: 'ろ',
+    wa: 'わ', wo: 'を', n: 'ん',
+    ga: 'が', gi: 'ぎ', gu: 'ぐ', ge: 'げ', go: 'ご',
+    za: 'ざ', ji: 'じ', zu: 'ず', ze: 'ぜ', zo: 'ぞ',
+    da: 'だ', di: 'ぢ', du: 'づ', de: 'で', do: 'ど',
+    ba: 'ば', bi: 'び', bu: 'ぶ', be: 'べ', bo: 'ぼ',
+    pa: 'ぱ', pi: 'ぴ', pu: 'ぷ', pe: 'ぺ', po: 'ぽ',
+};
+
+function romajiToHiragana(input) {
+    const s = input.toLowerCase();
+    let result = '';
+    let i = 0;
+    while (i < s.length) {
+        // Doubled consonant -> small tsu (sokuon), e.g. "kk" in "gakkou"
+        if (i + 1 < s.length && s[i] === s[i + 1] && 'kstpgzdbcfh'.includes(s[i])) {
+            result += 'っ';
+            i += 1;
+            continue;
+        }
+        let matched = false;
+        for (let len = 3; len >= 1; len--) {
+            const chunk = s.slice(i, i + len);
+            if (ROMAJI_TO_HIRAGANA[chunk]) {
+                result += ROMAJI_TO_HIRAGANA[chunk];
+                i += chunk.length;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            // Standalone "n" not followed by a vowel/y -> ん; otherwise keep as-is
+            if (s[i] === 'n' && (i + 1 >= s.length || !'aiueoy'.includes(s[i + 1]))) {
+                result += 'ん';
+            } else {
+                result += s[i];
+            }
+            i += 1;
+        }
+    }
+    return result;
+}
+
+// True if a reading (kana) matches the query directly, or via its
+// katakana/hiragana-normalized form, or via a romaji conversion of the query.
+function readingMatches(reading, lowerQuery, romajiHiragana) {
+    const normalized = katakanaToHiragana(reading.toLowerCase());
+    if (normalized.includes(lowerQuery)) return true;
+    if (romajiHiragana && normalized.includes(romajiHiragana)) return true;
+    return false;
+}
+
 class KanjiLearningApp {
     constructor() {
         this.currentKanji = null;
@@ -135,6 +215,44 @@ class KanjiLearningApp {
                     // Audio is now handled automatically inside this method:
                     this.loadCurrentKanji();
                 });
+            });
+        }
+
+        
+        // Kanji/Kana Search
+        const searchToggleBtn = document.getElementById('searchToggleBtn');
+        const searchPanel = document.getElementById('searchPanel');
+        const searchInput = document.getElementById('kanjiSearchInput');
+        const searchCloseBtn = document.getElementById('searchCloseBtn');
+
+        if (searchToggleBtn && searchPanel && searchInput && searchCloseBtn) {
+            searchToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                searchPanel.classList.toggle('show');
+                if (searchPanel.classList.contains('show')) {
+                    searchInput.focus();
+                }
+            });
+
+            searchCloseBtn.addEventListener('click', () => {
+                searchPanel.classList.remove('show');
+            });
+
+            // Close panel when clicking anywhere outside it
+            document.addEventListener('click', (e) => {
+                if (!searchToggleBtn.contains(e.target) && !searchPanel.contains(e.target)) {
+                    searchPanel.classList.remove('show');
+                }
+            });
+
+            // Debounced live search as the user types
+            let searchDebounceTimer = null;
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value;
+                clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(() => {
+                    this.handleKanjiSearch(query);
+                }, 150);
             });
         }
 
@@ -522,6 +640,109 @@ class KanjiLearningApp {
         // Nothing unmastered left anywhere in the level — reuse the existing
         // "level complete" flow (congrats toast + reset to the start).
         this.loadCurrentKanji();
+    }
+
+
+    async handleKanjiSearch(query) {
+        const resultsContainer = document.getElementById('searchResults');
+        if (!resultsContainer) return;
+
+        const trimmed = query.trim();
+        if (trimmed.length === 0) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+
+        resultsContainer.innerHTML = `<div class="search-loading">Searching…</div>`;
+
+                const levels = ['Hiragana', 'Katakana', 'N5', 'N4', 'N3', 'N2', 'N1'];
+        const lowerQuery = trimmed.toLowerCase();
+        const matches = [];
+        const MAX_RESULTS = 30;
+
+        // Only attempt romaji conversion when the query looks like plain
+        // latin letters (e.g. "ima") — never run it on kanji/kana input.
+        const romajiHiragana = /^[a-z]+$/i.test(trimmed) ? romajiToHiragana(lowerQuery) : null;
+
+        for (const level of levels) {
+            const pool = await KanjiData.getKanjiByLevel(level);
+            for (const kanji of pool) {
+                const meanings = kanji.meanings || [];
+                const onyomi = kanji.onyomi || [];
+                const kunyomi = kanji.kunyomi || [];
+                const examples = kanji.examples || [];
+
+                const isMatch =
+                    trimmed.includes(kanji.character) ||                       // handles single AND compound queries, e.g. "今夜" matches both 今 and 夜
+                    examples.some(ex => ex.word && (trimmed.includes(ex.word) || ex.word.includes(trimmed))) || // e.g. searching a compound example word
+                    meanings.some(m => m.toLowerCase().includes(lowerQuery)) ||
+                    onyomi.some(r => readingMatches(r, lowerQuery, romajiHiragana)) ||
+                    kunyomi.some(r => readingMatches(r, lowerQuery, romajiHiragana));
+
+                if (isMatch) {
+                    matches.push({ level, kanji });
+                    if (matches.length >= MAX_RESULTS) break;
+                }
+            }
+            if (matches.length >= MAX_RESULTS) break;
+        }
+
+        // Ignore a stale response if the input has changed since this search started
+        if (document.getElementById('kanjiSearchInput').value.trim() !== trimmed) return;
+
+        if (matches.length === 0) {
+            resultsContainer.innerHTML = `<div class="search-empty">No matches for "${trimmed}"</div>`;
+            return;
+        }
+
+        resultsContainer.innerHTML = matches.map(({ level, kanji }) => {
+            const readings = [...(kanji.onyomi || []), ...(kanji.kunyomi || [])].slice(0, 4).join('、');
+            const meaning = (kanji.meanings || []).slice(0, 2).join(', ');
+            return `
+                <button class="search-result-item" onclick="app.jumpToSearchResult('${kanji.character}', '${level}')">
+                    <span class="search-result-level">${level}</span>
+                    <span class="search-result-char japanese-text">${kanji.character}</span>
+                    <span class="search-result-info">
+                        <span class="search-result-readings japanese-text">${readings}</span>
+                        <span class="search-result-meaning">${meaning}</span>
+                    </span>
+                </button>
+            `;
+        }).join('');
+    }
+
+    async jumpToSearchResult(character, level) {
+        // If the result is in a different level than what's active, switch
+        // levels the same way the level-dropdown does (settings, pool, audio).
+        if (level !== this.settings.jlptLevel) {
+            this.settings.jlptLevel = level;
+            const jlptSelect = document.getElementById('jlptLevel');
+            if (jlptSelect) jlptSelect.value = level;
+            this.saveSettings();
+            this.updateLevelIcon();
+
+            this.currentKanjiPool = await this.getKanjiPool(level);
+            await AudioManager.loadLevelAudio(level, this.currentKanjiPool);
+        }
+
+        const idx = this.currentKanjiPool.findIndex(k => k.character === character);
+        if (idx === -1) return;
+
+        this.currentIndex = idx;
+        this.currentKanji = this.currentKanjiPool[idx];
+
+        this.renderKanji();
+        this.updateProgress();
+        this.renderKanjiJourney();
+        this.loadRecentKanji();
+
+        this.showToast(`Showing ${character}`);
+        this.kanjiWidgetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Close and reset the search panel now that a result was picked
+        document.getElementById('searchPanel')?.classList.remove('show');
+        document.getElementById('kanjiSearchInput').value = '';
+        document.getElementById('searchResults').innerHTML = '';
     }
 
     undoMaster() {

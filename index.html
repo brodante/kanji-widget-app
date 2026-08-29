@@ -88,6 +88,10 @@
         <header class="app-header">
             <h1><i class="fas fa-language"></i> KanjiWidgets</h1>
             <div class="header-controls">
+                <!-- KANJI/KANA SEARCH -->
+                <button id="searchToggleBtn" class="icon-btn" title="Search Kanji">
+                <i class="fas fa-search"></i>
+                </button>
                 <!-- NEW LEVEL SWITCHER -->
                 <div class="level-switcher-container" style="position: relative;">
                     <button id="levelToggleBtn" class="icon-btn japanese-text" title="Switch Level"
@@ -116,6 +120,18 @@
                 <button id="themeToggle" class="icon-btn" title="Toggle Theme">
                     <i class="fas fa-moon"></i>
                 </button>
+            </div>
+            <!-- SEARCH PANEL -->
+            <div id="searchPanel" class="search-panel">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-input-icon"></i>
+                    <input type="text" id="kanjiSearchInput" class="search-input"
+                        placeholder="Search by kanji, kana, meaning, or reading..." autocomplete="off">
+                    <button id="searchCloseBtn" class="search-close-btn" title="Close search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="searchResults" class="search-results"></div>
             </div>
         </header>
 
