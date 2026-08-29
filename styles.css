@@ -1129,6 +1129,8 @@ body {
     animation: wax-stamp 1.5s ease-out 0.6s infinite !important;
     z-index: 10;
 }
+
+
 /* ========================================== */
 /* MIDNIGHT THEME SETUP (Deep Space Tow)      */
 /* ========================================== */
@@ -1370,6 +1372,7 @@ body {
     z-index: -10;
     
     animation: shooting-star-fullscreen 8s linear infinite; /* Increased to 8s for a longer flight */
+    animation-fill-mode: backwards;
 }
 
 /* Reveal stars and meteors only on midnight theme */
@@ -1492,7 +1495,7 @@ body {
     /* Lower on the screen */
     background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, #FDE047 100%);
     /* Yellow tail */
-    animation: shooting-star-fullscreen 14s linear infinite 5s;
+    animation: shooting-star-fullscreen 14s linear infinite 5s backwards;
     /* Slower, with a 5s delay */
 }
 
