@@ -224,8 +224,11 @@
             </button>
         </div>
         <div class="modal-body">
-            <div class="setting-group"
-                style="margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1.5rem;">
+            <div class="settings-section-header">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Learning</span>
+            </div>
+            <div class="setting-group">
                 <label style="color: var(--primary-color); font-weight: bold; margin-bottom: 0.8rem;">Basic Alphabets
                     (Start Here):</label>
                 <div style="display: flex; gap: 1rem; width: 100%;">
@@ -250,6 +253,11 @@
                     <option value="N2">N2</option>
                     <option value="N1">N1 (Advanced)</option>
                 </select>
+            </div>
+
+            <div class="settings-section-header">
+                <i class="fas fa-palette"></i>
+                <span>Appearance</span>
             </div>
             <div class="setting-group">
                 <label for="themeSelect">Color Theme:</label>
@@ -280,10 +288,6 @@
                         <i class="fas fa-wand-magic-sparkles"></i> Customize
                     </button>
                 </div>
-            </div>
-            <div class="setting-group setting-row">
-                <label for="autoPlay">Auto-play pronunciation:</label>
-                <input type="checkbox" id="autoPlay">
             </div>
             <div class="setting-group setting-row">
                 <label for="showFurigana">Show Furigana <span style="font-size: 0.75rem; opacity: 0.6;">(Coming
@@ -357,6 +361,15 @@
                     <option value="extra-large">Extra Large</option>
                 </select>
             </div>
+
+            <div class="settings-section-header">
+                <i class="fas fa-volume-high"></i>
+                <span>Audio</span>
+            </div>
+            <div class="setting-group setting-row">
+                <label for="autoPlay">Auto-play pronunciation:</label>
+                <input type="checkbox" id="autoPlay">
+            </div>
             <div class="setting-group">
                 <label for="defaultAudio">Default Audio Type:</label>
                 <select id="defaultAudio">
@@ -364,6 +377,11 @@
                     <option value="onyomi">On'yomi (Chinese reading)</option>
                     <option value="first">First available reading</option>
                 </select>
+            </div>
+
+            <div class="settings-section-header">
+                <i class="fas fa-cloud-arrow-up"></i>
+                <span>Backup &amp; Data</span>
             </div>
             <div class="setting-group">
                 <label for="localBackupFreq">Local Backup Frequency:</label>
@@ -388,6 +406,11 @@
                     <button id="createBackup" class="backup-btn">Create Local Backup</button>
                     <button id="restoreBackup" class="backup-btn">Import Backup</button>
                 </div>
+            </div>
+
+            <div class="settings-section-header danger-zone-header">
+                <i class="fas fa-triangle-exclamation"></i>
+                <span>Danger Zone</span>
             </div>
             <div class="setting-group">
                 <button id="resetProgress" class="reset-btn">Reset All Progress</button>
@@ -433,7 +456,13 @@
                         </div>
                         <div class="setting-group">
                             <label for="customThemeAccent">Accent Color:</label>
-                            <input type="color" id="customThemeAccent" value="#6200EE">
+                            <div class="accent-color-row">
+                                <input type="color" id="customThemeAccent" value="#6200EE">
+                                <label class="auto-accent-toggle" for="autoAccentToggle">
+                                    <input type="checkbox" id="autoAccentToggle">
+                                    <span>Auto-pick from image</span>
+                                </label>
+                            </div>
                         </div>
                         <div class="setting-group setting-row">
                             <label for="customThemeMode">Base Mode:</label>

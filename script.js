@@ -327,8 +327,10 @@ class KanjiLearningApp {
                 if (blob) {
                     const url = URL.createObjectURL(blob);
                     document.getElementById('customThemePreview').style.backgroundImage = `url(${url})`;
+                    document.getElementById('customThemePreview').dataset.imageUrl = url;
                 }
             }
+            document.getElementById('autoAccentToggle').checked = false; // always starts unchecked
             document.getElementById('customThemeModal').classList.add('show');
         });
 
@@ -349,11 +351,34 @@ class KanjiLearningApp {
         });
 
         // Live preview of the picked image, before saving
-        document.getElementById('customThemeImageInput').addEventListener('change', (e) => {
+        document.getElementById('customThemeImageInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const url = URL.createObjectURL(file);
-            document.getElementById('customThemePreview').style.backgroundImage = `url(${url})`;
+            const previewEl = document.getElementById('customThemePreview');
+            previewEl.style.backgroundImage = `url(${url})`;
+            previewEl.dataset.imageUrl = url;
+
+            if (document.getElementById('autoAccentToggle').checked) {
+                const mode = document.getElementById('customThemeMode').value;
+                const color = await autoPickAccentFromImage(mode);
+                if (color) document.getElementById('customThemeAccent').value = color;
+            }
+        });
+
+        // Auto-pick an accent color from the current image when checked
+        document.getElementById('autoAccentToggle').addEventListener('change', async (e) => {
+            if (!e.target.checked) return;
+
+            const mode = document.getElementById('customThemeMode').value;
+            const color = await autoPickAccentFromImage(mode);
+            if (color) {
+                document.getElementById('customThemeAccent').value = color;
+                this.showToast('Accent color picked from your image!');
+            } else {
+                this.showToast('Pick an image first!');
+                e.target.checked = false;
+            }
         });
 
         // Live label for the blur slider (actual blur is applied on Save)
@@ -361,11 +386,14 @@ class KanjiLearningApp {
             document.getElementById('customThemeBlurValue').textContent = `${e.target.value}px`;
         });
 
-        document.getElementById('saveCustomTheme').addEventListener('click', async () => {
+            document.getElementById('saveCustomTheme').addEventListener('click', async () => {
             const fileInput = document.getElementById('customThemeImageInput');
             const blurPx = document.getElementById('customThemeBlur').value;
-            const accentHex = document.getElementById('customThemeAccent').value;
+            const rawAccentHex = document.getElementById('customThemeAccent').value;
             const mode = document.getElementById('customThemeMode').value;
+
+            const { hex: accentHex, adjusted } = sanitizeAccentColor(rawAccentHex, mode);
+            document.getElementById('customThemeAccent').value = accentHex; // reflect the clamped color back in the picker
 
             if (fileInput.files && fileInput.files[0]) {
                 await saveCustomThemeImage(1, fileInput.files[0]);
@@ -375,7 +403,9 @@ class KanjiLearningApp {
 
             this.setTheme('custom-1');
             document.getElementById('customThemeModal').classList.remove('show');
-            this.showToast('Custom theme saved and applied!');
+            this.showToast(adjusted
+                ? 'Theme saved! Accent color adjusted slightly for visibility.'
+                : 'Custom theme saved and applied!');
         });
 
         // Settings changes
@@ -2398,7 +2428,118 @@ const hexToRgb = (hex) => {
     const bigint = parseInt(hex.replace('#', ''), 16);
     return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
 };
+
 const rgbToHex = (r, g, b) => "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+
+// Convert hex -> {h, s, l} so we can safely reason about a color's lightness
+const hexToHsl = (hex) => {
+    const { r, g, b } = hexToRgb(hex);
+    const rn = r / 255, gn = g / 255, bn = b / 255;
+    const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case rn: h = (gn - bn) / d + (gn < bn ? 6 : 0); break;
+            case gn: h = (bn - rn) / d + 2; break;
+            case bn: h = (rn - gn) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return { h: h * 360, s: s * 100, l: l * 100 };
+};
+
+const hslToHex = (h, s, l) => {
+    s /= 100; l /= 100;
+    const k = n => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    const toHex = x => Math.round(x * 255).toString(16).padStart(2, '0');
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+};
+
+// Nudges an accent color's lightness into a safe range for the given mode,
+// so icons/buttons using --primary-color never disappear against the
+// surface color. Hue and saturation are left untouched.
+function sanitizeAccentColor(hex, mode) {
+    const { h, s, l } = hexToHsl(hex);
+    let safeL = l;
+
+    if (mode === 'dark') {
+        if (l < 35) safeL = 55;       // too dark to read on a dark surface
+        else if (l > 92) safeL = 80;  // near-white can blend with light icon fills
+    } else {
+        if (l > 65) safeL = 45;       // too light to read on a light surface
+        else if (l < 10) safeL = 25;  // near-black can blend with dark text/icons
+    }
+
+    if (safeL === l) return { hex, adjusted: false };
+    return { hex: hslToHex(h, s, safeL), adjusted: true };
+}
+
+// Scans a downscaled copy of the image for the most "vibrant" pixel
+// (high saturation, avoiding near-black/near-white) to use as an accent color.
+function extractVibrantColor(imgElement) {
+    const canvas = document.createElement('canvas');
+    const size = 40; // small on purpose — this is a rough pick, not precision color science
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(imgElement, 0, 0, size, size);
+
+    let data;
+    try {
+        data = ctx.getImageData(0, 0, size, size).data;
+    } catch (err) {
+        return null; // shouldn't happen for local blob: URLs, but guard just in case
+    }
+
+    let best = null;
+    let bestScore = -1;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const alpha = data[i + 3];
+        if (alpha < 200) continue; // skip transparent pixels
+
+        const hex = rgbToHex(data[i], data[i + 1], data[i + 2]);
+        const { s, l } = hexToHsl(hex);
+        if (l < 15 || l > 90) continue; // skip near-black/near-white pixels
+
+        const score = s * (1 - Math.abs(l - 55) / 55); // favor saturated, mid-lightness pixels
+        if (score > bestScore) {
+            bestScore = score;
+            best = hex;
+        }
+    }
+
+    return best;
+}
+
+function loadImageElement(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+// Ties extraction + the existing contrast safety net together.
+// Returns a safe hex string, or null if there's no image to work with.
+async function autoPickAccentFromImage(mode) {
+    const previewEl = document.getElementById('customThemePreview');
+    const url = previewEl?.dataset.imageUrl;
+    if (!url) return null;
+
+    const img = await loadImageElement(url);
+    const extracted = extractVibrantColor(img);
+    if (!extracted) return null;
+
+    return sanitizeAccentColor(extracted, mode).hex;
+}
+
 const lerpColor = (c1, c2, t) => {
     const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
     const r = Math.round(r1.r + (r2.r - r1.r) * t);

@@ -2176,6 +2176,33 @@ body {
     margin-bottom: 1.5rem;
 }
 
+.settings-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.6rem 0 0.9rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid rgba(var(--primary-color-rgb), 0.35);
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.settings-section-header:first-child {
+    margin-top: 0;
+}
+
+.settings-section-header i {
+    font-size: 0.85rem;
+}
+
+.settings-section-header.danger-zone-header {
+    color: #E53935;
+    border-bottom-color: rgba(229, 57, 53, 0.35);
+}
+
 .setting-group label {
     display: block;
     margin-bottom: 0.75rem;
@@ -2809,6 +2836,30 @@ input:focus {
     background-position: center;
     background-color: rgba(150, 150, 150, 0.12);
     border: 1px dashed rgba(150, 150, 150, 0.3);
+}
+
+.accent-color-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.auto-accent-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    opacity: 0.85;
+    cursor: pointer;
+    user-select: none;
+}
+
+.auto-accent-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
 }
 
 /* Full-screen background image layer for the custom theme. Scaled up
