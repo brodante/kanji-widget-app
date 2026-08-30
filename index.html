@@ -433,7 +433,13 @@
                         </div>
                         <div class="setting-group">
                             <label for="customThemeAccent">Accent Color:</label>
-                            <input type="color" id="customThemeAccent" value="#6200EE">
+                            <div class="accent-color-row">
+                                <input type="color" id="customThemeAccent" value="#6200EE">
+                                <label class="auto-accent-toggle" for="autoAccentToggle">
+                                    <input type="checkbox" id="autoAccentToggle">
+                                    <span>Auto-pick from image</span>
+                                </label>
+                            </div>
                         </div>
                         <div class="setting-group setting-row">
                             <label for="customThemeMode">Base Mode:</label>
