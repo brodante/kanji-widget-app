@@ -381,6 +381,14 @@ class KanjiLearningApp {
             }
         });
 
+        // Accent color presets — quick picks, still fully overridable
+        document.querySelectorAll('.accent-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                document.getElementById('customThemeAccent').value = swatch.dataset.color;
+                document.getElementById('autoAccentToggle').checked = false; // manual pick overrides auto-pick
+            });
+        });
+
         // Live label for the blur slider (actual blur is applied on Save)
         document.getElementById('customThemeBlur').addEventListener('input', (e) => {
             document.getElementById('customThemeBlurValue').textContent = `${e.target.value}px`;

@@ -2862,6 +2862,31 @@ input:focus {
     accent-color: var(--primary-color);
 }
 
+.accent-swatches {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.7rem;
+}
+
+.accent-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(150, 150, 150, 0.25);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.accent-swatch:hover {
+    transform: scale(1.15);
+    border-color: rgba(150, 150, 150, 0.6);
+}
+
+.accent-swatch:active {
+    transform: scale(0.95);
+}
+
 /* Full-screen background image layer for the custom theme. Scaled up
    slightly so the blur filter doesn't reveal soft edges at the viewport border. */
 .custom-theme-background {
