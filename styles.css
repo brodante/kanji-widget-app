@@ -2699,6 +2699,173 @@ input:focus {
 .premium-kana-btn:active {
     transform: translateY(0);
 }
+
+/* ========================================== */
+/* CUSTOM THEME BUILDER                        */
+/* ========================================== */
+
+.theme-select-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.theme-select-row select {
+    flex: 1;
+}
+
+/* Glowy, attention-grabbing button next to the theme dropdown */
+.customize-theme-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.9rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: white;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--primary-color), #ff5fa2);
+    box-shadow: 0 0 8px rgba(var(--primary-color-rgb), 0.6);
+    animation: customize-btn-glow 2.4s ease-in-out infinite;
+    transition: transform 0.15s ease;
+}
+
+.customize-theme-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+}
+
+.customize-theme-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+@keyframes customize-btn-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 6px rgba(var(--primary-color-rgb), 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 16px rgba(var(--primary-color-rgb), 0.9);
+    }
+}
+
+/* Slot tabs */
+.theme-slot-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.theme-slot-tab {
+    flex: 1;
+    padding: 0.6rem;
+    border: 1px solid rgba(150, 150, 150, 0.25);
+    border-radius: 8px;
+    background: none;
+    color: var(--on-surface);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.theme-slot-tab.active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.1);
+}
+
+.theme-slot-tab.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.theme-slot-locked-note {
+    font-size: 0.8rem;
+    opacity: 0.65;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.theme-slot-builder {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.custom-theme-preview {
+    margin-top: 0.6rem;
+    width: 100%;
+    height: 120px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(150, 150, 150, 0.12);
+    border: 1px dashed rgba(150, 150, 150, 0.3);
+}
+
+/* Full-screen background image layer for the custom theme. Scaled up
+   slightly so the blur filter doesn't reveal soft edges at the viewport border. */
+.custom-theme-background {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -10;
+    pointer-events: none;
+    background-image: var(--custom-bg-image, none);
+    background-size: cover;
+    background-position: center;
+    filter: blur(var(--custom-blur, 10px));
+    transform: scale(1.15);
+}
+
+[data-theme="custom-1"] .custom-theme-background {
+    display: block;
+}
+
+[data-theme="custom-1"] {
+    --primary-color: var(--custom-accent, #6200EE);
+    --primary-color-rgb: var(--custom-accent-rgb, 98, 0, 238);
+    --background: transparent;
+}
+
+[data-theme="custom-1"][data-custom-mode="dark"] {
+    --surface: #1E1E1E;
+    --custom-panel-rgb: 20, 20, 30;
+    --on-primary: #000000;
+    --on-secondary: #000000;
+    --on-background: #FFFFFF;
+    --on-surface: #FFFFFF;
+}
+
+[data-theme="custom-1"][data-custom-mode="light"] {
+    --surface: #FFFFFF;
+    --custom-panel-rgb: 255, 255, 255;
+    --on-primary: #FFFFFF;
+    --on-secondary: #000000;
+    --on-background: #000000;
+    --on-surface: #000000;
+}
+
+[data-theme="custom-1"] .kanji-widget,
+[data-theme="custom-1"] .progress-section,
+[data-theme="custom-1"] .journey-section,
+[data-theme="custom-1"] .recent-section {
+    background-color: rgba(var(--custom-panel-rgb, 30, 30, 30), 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
 /* Premium Kana Gojuon Grid Layout */
 #kanjiJourney.kana-layout,
 #kanjiJourney.kana-layout .compact-fade-wrapper {

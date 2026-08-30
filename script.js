@@ -93,6 +93,47 @@ function readingMatches(reading, lowerQuery, romajiHiragana) {
     return false;
 }
 
+// ==========================================
+// CUSTOM THEME IMAGE STORAGE (IndexedDB)
+// ==========================================
+// Images can easily be several MB — localStorage's ~5-10MB *text-only*
+// quota is shared with all saved progress, so storing images there risks
+// corrupting unrelated data. IndexedDB has no such practical limit and
+// stores binary Blobs natively (no base64 bloat).
+const CUSTOM_THEME_DB_NAME = 'KanjiWidgetsCustomThemes';
+const CUSTOM_THEME_STORE = 'images';
+
+function openCustomThemeDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(CUSTOM_THEME_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+            request.result.createObjectStore(CUSTOM_THEME_STORE);
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function saveCustomThemeImage(slot, blob) {
+    const db = await openCustomThemeDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(CUSTOM_THEME_STORE, 'readwrite');
+        tx.objectStore(CUSTOM_THEME_STORE).put(blob, `slot${slot}`);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+async function getCustomThemeImage(slot) {
+    const db = await openCustomThemeDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(CUSTOM_THEME_STORE, 'readonly');
+        const req = tx.objectStore(CUSTOM_THEME_STORE).get(`slot${slot}`);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+    });
+}
+
 class KanjiLearningApp {
     constructor() {
         this.currentKanji = null;
@@ -270,6 +311,71 @@ class KanjiLearningApp {
             if (e.target.id === 'settingsModal') {
                 this.closeSettings();
             }
+        });
+        // Custom Theme Builder
+        document.getElementById('customThemeBtn').addEventListener('click', async () => {
+            // Prefill the builder with whatever's already saved for Slot 1
+            const settingsRaw = localStorage.getItem('customTheme:slot1:settings');
+            if (settingsRaw) {
+                const settings = JSON.parse(settingsRaw);
+                document.getElementById('customThemeBlur').value = settings.blur;
+                document.getElementById('customThemeBlurValue').textContent = `${settings.blur}px`;
+                document.getElementById('customThemeAccent').value = settings.accent;
+                document.getElementById('customThemeMode').value = settings.mode;
+
+                const blob = await getCustomThemeImage(1);
+                if (blob) {
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('customThemePreview').style.backgroundImage = `url(${url})`;
+                }
+            }
+            document.getElementById('customThemeModal').classList.add('show');
+        });
+
+        document.getElementById('closeCustomTheme').addEventListener('click', () => {
+            document.getElementById('customThemeModal').classList.remove('show');
+        });
+
+        document.getElementById('customThemeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'customThemeModal') {
+                document.getElementById('customThemeModal').classList.remove('show');
+            }
+        });
+
+        document.querySelectorAll('.theme-slot-tab.locked').forEach(tab => {
+            tab.addEventListener('click', () => {
+                this.showToast('This slot is coming in a future update!');
+            });
+        });
+
+        // Live preview of the picked image, before saving
+        document.getElementById('customThemeImageInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            document.getElementById('customThemePreview').style.backgroundImage = `url(${url})`;
+        });
+
+        // Live label for the blur slider (actual blur is applied on Save)
+        document.getElementById('customThemeBlur').addEventListener('input', (e) => {
+            document.getElementById('customThemeBlurValue').textContent = `${e.target.value}px`;
+        });
+
+        document.getElementById('saveCustomTheme').addEventListener('click', async () => {
+            const fileInput = document.getElementById('customThemeImageInput');
+            const blurPx = document.getElementById('customThemeBlur').value;
+            const accentHex = document.getElementById('customThemeAccent').value;
+            const mode = document.getElementById('customThemeMode').value;
+
+            if (fileInput.files && fileInput.files[0]) {
+                await saveCustomThemeImage(1, fileInput.files[0]);
+            }
+
+            localStorage.setItem('customTheme:slot1:settings', JSON.stringify({ blur: blurPx, accent: accentHex, mode }));
+
+            this.setTheme('custom-1');
+            document.getElementById('customThemeModal').classList.remove('show');
+            this.showToast('Custom theme saved and applied!');
         });
 
         // Settings changes
@@ -1558,16 +1664,50 @@ class KanjiLearningApp {
         else if (themeName === 'ito') {
             initItoTubes();
         }
+        else if (themeName.startsWith('custom-')) {
+            const slot = themeName.replace('custom-', '');
+            this.loadCustomTheme(slot);
+        }
         // Update the dropdown selector
         const select = document.getElementById('themeSelect');
         if (select) select.value = themeName;
 
-        // Update the top toggle icon
+        // Update the top toggle icon (custom themes carry their own saved mode)
         const icon = document.querySelector('#themeToggle i');
         if (icon) {
-            const isDark = darkThemes.includes(themeName);
+            let isDark = darkThemes.includes(themeName);
+            if (themeName.startsWith('custom-')) {
+                const slot = themeName.replace('custom-', '');
+                const saved = localStorage.getItem(`customTheme:slot${slot}:settings`);
+                isDark = saved ? JSON.parse(saved).mode === 'dark' : true;
+            }
             icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
         }
+    }
+
+    async loadCustomTheme(slot) {
+        const settingsRaw = localStorage.getItem(`customTheme:slot${slot}:settings`);
+        if (!settingsRaw) return; // nothing saved for this slot yet
+
+        const settings = JSON.parse(settingsRaw);
+        const blob = await getCustomThemeImage(slot);
+        const imageUrl = blob ? URL.createObjectURL(blob) : null;
+
+        this.applyCustomThemeStyles(imageUrl, settings.blur, settings.accent, settings.mode);
+    }
+
+    applyCustomThemeStyles(imageUrl, blurPx, accentHex, mode) {
+        const root = document.documentElement;
+        root.setAttribute('data-custom-mode', mode);
+
+        if (imageUrl) {
+            root.style.setProperty('--custom-bg-image', `url(${imageUrl})`);
+        }
+        root.style.setProperty('--custom-blur', `${blurPx}px`);
+
+        const rgb = hexToRgb(accentHex);
+        root.style.setProperty('--custom-accent', accentHex);
+        root.style.setProperty('--custom-accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
     }
 
     // Loads the saved theme on startup (Defaulting to 'candy' for new users)
