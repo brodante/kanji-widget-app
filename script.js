@@ -322,6 +322,9 @@ class KanjiLearningApp {
                 document.getElementById('customThemeBlurValue').textContent = `${settings.blur}px`;
                 document.getElementById('customThemeAccent').value = settings.accent;
                 document.getElementById('customThemeMode').value = settings.mode;
+                if (settings.customCSS) {
+                    document.getElementById('customThemeUserCSSInput').value = settings.customCSS;
+                }
 
                 const blob = await getCustomThemeImage(1);
                 if (blob) {
@@ -399,6 +402,7 @@ class KanjiLearningApp {
             const blurPx = document.getElementById('customThemeBlur').value;
             const rawAccentHex = document.getElementById('customThemeAccent').value;
             const mode = document.getElementById('customThemeMode').value;
+            const customCSS = document.getElementById('customThemeUserCSSInput').value;
 
             const { hex: accentHex, adjusted } = sanitizeAccentColor(rawAccentHex, mode);
             document.getElementById('customThemeAccent').value = accentHex; // reflect the clamped color back in the picker
@@ -407,7 +411,7 @@ class KanjiLearningApp {
                 await saveCustomThemeImage(1, fileInput.files[0]);
             }
 
-            localStorage.setItem('customTheme:slot1:settings', JSON.stringify({ blur: blurPx, accent: accentHex, mode }));
+            localStorage.setItem('customTheme:slot1:settings', JSON.stringify({ blur: blurPx, accent: accentHex, mode, customCSS }));
 
             this.setTheme('custom-1');
             document.getElementById('customThemeModal').classList.remove('show');
@@ -1731,6 +1735,7 @@ class KanjiLearningApp {
         const imageUrl = blob ? URL.createObjectURL(blob) : null;
 
         this.applyCustomThemeStyles(imageUrl, settings.blur, settings.accent, settings.mode);
+        this.applyCustomCSS(settings.customCSS);
     }
 
     applyCustomThemeStyles(imageUrl, blurPx, accentHex, mode) {
@@ -1745,6 +1750,21 @@ class KanjiLearningApp {
         const rgb = hexToRgb(accentHex);
         root.style.setProperty('--custom-accent', accentHex);
         root.style.setProperty('--custom-accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+    }
+
+    // Applies user-typed CSS *declarations only* (no selectors, no braces) to
+    // the background image layer. Braces are stripped before injection so the
+    // user can never break out of the wrapping .custom-theme-background rule
+    // and affect the rest of the page.
+    applyCustomCSS(rawCss) {
+        let styleTag = document.getElementById('customThemeUserCSS');
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = 'customThemeUserCSS';
+            document.head.appendChild(styleTag);
+        }
+        const safeCss = (rawCss || '').replace(/[{}]/g, '');
+        styleTag.textContent = `.custom-theme-background {\n${safeCss}\n}`;
     }
 
     // Loads the saved theme on startup (Defaulting to 'candy' for new users)
