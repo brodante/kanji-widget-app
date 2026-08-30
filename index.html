@@ -471,13 +471,22 @@
                                 <button type="button" class="accent-swatch" data-color="#F59E0B" style="background-color:#F59E0B" title="Amber"></button>
                                 <button type="button" class="accent-swatch" data-color="#8B5CF6" style="background-color:#8B5CF6" title="Violet"></button>
                             </div>
-                        </div>
+                                                </div>
                         <div class="setting-group setting-row">
                             <label for="customThemeMode">Base Mode:</label>
                             <select id="customThemeMode">
                                 <option value="dark">Dark</option>
                                 <option value="light">Light</option>
                             </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="customThemeUserCSSInput">Custom CSS (optional):</label>
+                            <div class="custom-css-hint">Only affects the background image layer — one property per line, no selectors or braces.</div>
+                            <textarea id="customThemeUserCSSInput" class="custom-css-textarea" spellcheck="false">filter: blur(10px) brightness(1) saturate(1);
+                                background-position: center;
+                                background-size: cover;
+                                opacity: 1;
+                            </textarea>
                         </div>
                         <div class="setting-group">
                             <button type="button" id="saveCustomTheme" class="backup-btn">Save &amp; Apply</button>
