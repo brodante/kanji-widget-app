@@ -818,8 +818,7 @@ class KanjiLearningApp {
 
                 const isMatch =
                     trimmed.includes(kanji.character) ||                       // handles single AND compound queries, e.g. "今夜" matches both 今 and 夜
-                    examples.some(ex => ex.word && (trimmed.includes(ex.word) || ex.word.includes(trimmed))) || // e.g. searching a compound example word
-                    meanings.some(m => m.toLowerCase().includes(lowerQuery)) ||
+                    examples.some(ex => ex.word === trimmed) || // exact compound-word match only — avoids flooding results for common single kanji                    meanings.some(m => m.toLowerCase().includes(lowerQuery)) ||
                     onyomi.some(r => readingMatches(r, lowerQuery, romajiHiragana)) ||
                     kunyomi.some(r => readingMatches(r, lowerQuery, romajiHiragana));
 
