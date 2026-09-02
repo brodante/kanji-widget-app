@@ -2907,6 +2907,42 @@ input:focus {
     resize: vertical;
 }
 
+.custom-css-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+}
+
+.custom-css-toggle-label {
+    font-weight: 500;
+    color: var(--on-surface);
+}
+
+/* Hidden by default so people who don't know CSS never even see it */
+.custom-css-panel {
+    display: none;
+    margin-top: 0.7rem;
+}
+
+.custom-css-panel.show {
+    display: block;
+}
+
+.custom-css-file-label {
+    display: block;
+    font-size: 0.78rem;
+    opacity: 0.75;
+    margin-bottom: 0.4rem;
+}
+
+.custom-css-file-input {
+    width: 100%;
+    margin-bottom: 0.7rem;
+    font-size: 0.8rem;
+    color: var(--on-surface);
+}
+
 /* Full-screen background image layer for the custom theme. Scaled up
    slightly so the blur filter doesn't reveal soft edges at the viewport border. */
 .custom-theme-background {

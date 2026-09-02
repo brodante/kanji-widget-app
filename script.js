@@ -316,6 +316,9 @@ class KanjiLearningApp {
         document.getElementById('customThemeBtn').addEventListener('click', async () => {
             // Prefill the builder with whatever's already saved for Slot 1
             const settingsRaw = localStorage.getItem('customTheme:slot1:settings');
+            document.getElementById('customThemeCSSToggle').checked = false;
+            document.getElementById('customThemeCSSPanel').classList.remove('show');
+
             if (settingsRaw) {
                 const settings = JSON.parse(settingsRaw);
                 document.getElementById('customThemeBlur').value = settings.blur;
@@ -324,6 +327,10 @@ class KanjiLearningApp {
                 document.getElementById('customThemeMode').value = settings.mode;
                 if (settings.customCSS) {
                     document.getElementById('customThemeUserCSSInput').value = settings.customCSS;
+                }
+                if (settings.customCSSEnabled) {
+                    document.getElementById('customThemeCSSToggle').checked = true;
+                    document.getElementById('customThemeCSSPanel').classList.add('show');
                 }
 
                 const blob = await getCustomThemeImage(1);
@@ -392,6 +399,23 @@ class KanjiLearningApp {
             });
         });
 
+        // Custom CSS toggle: panel starts hidden so non-technical users never see raw CSS
+        document.getElementById('customThemeCSSToggle').addEventListener('change', (e) => {
+            document.getElementById('customThemeCSSPanel').classList.toggle('show', e.target.checked);
+        });
+
+        // Browse and load a .css file straight into the textarea
+        document.getElementById('customThemeCSSFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                document.getElementById('customThemeUserCSSInput').value = reader.result;
+            };
+            reader.readAsText(file);
+        });
+
         // Live label for the blur slider (actual blur is applied on Save)
         document.getElementById('customThemeBlur').addEventListener('input', (e) => {
             document.getElementById('customThemeBlurValue').textContent = `${e.target.value}px`;
@@ -402,6 +426,7 @@ class KanjiLearningApp {
             const blurPx = document.getElementById('customThemeBlur').value;
             const rawAccentHex = document.getElementById('customThemeAccent').value;
             const mode = document.getElementById('customThemeMode').value;
+            const customCSSEnabled = document.getElementById('customThemeCSSToggle').checked;
             const customCSS = document.getElementById('customThemeUserCSSInput').value;
 
             const { hex: accentHex, adjusted } = sanitizeAccentColor(rawAccentHex, mode);
@@ -411,7 +436,7 @@ class KanjiLearningApp {
                 await saveCustomThemeImage(1, fileInput.files[0]);
             }
 
-            localStorage.setItem('customTheme:slot1:settings', JSON.stringify({ blur: blurPx, accent: accentHex, mode, customCSS }));
+            localStorage.setItem('customTheme:slot1:settings', JSON.stringify({ blur: blurPx, accent: accentHex, mode, customCSS, customCSSEnabled }));
 
             this.setTheme('custom-1');
             document.getElementById('customThemeModal').classList.remove('show');
@@ -1735,7 +1760,7 @@ class KanjiLearningApp {
         const imageUrl = blob ? URL.createObjectURL(blob) : null;
 
         this.applyCustomThemeStyles(imageUrl, settings.blur, settings.accent, settings.mode);
-        this.applyCustomCSS(settings.customCSS);
+        this.applyCustomCSS(settings.customCSSEnabled ? settings.customCSS : '');
     }
 
     applyCustomThemeStyles(imageUrl, blurPx, accentHex, mode) {

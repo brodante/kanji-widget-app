@@ -480,13 +480,23 @@
                             </select>
                         </div>
                         <div class="setting-group">
-                            <label for="customThemeUserCSSInput">Custom CSS (optional):</label>
-                            <div class="custom-css-hint">Only affects the background image layer — one property per line, no selectors or braces.</div>
-                            <textarea id="customThemeUserCSSInput" class="custom-css-textarea" spellcheck="false">filter: blur(10px) brightness(1) saturate(1);
+                            <div class="custom-css-toggle-row">
+                                <span class="custom-css-toggle-label">Custom CSS (optional)</span>
+                                <label class="auto-accent-toggle" for="customThemeCSSToggle">
+                                    <input type="checkbox" id="customThemeCSSToggle">
+                                    <span>Enable</span>
+                                </label>
+                            </div>
+                            <div id="customThemeCSSPanel" class="custom-css-panel">
+                                <div class="custom-css-hint">Only affects the background image layer — one property per line, no selectors or braces.</div>
+                                <label for="customThemeCSSFileInput" class="custom-css-file-label">Browse a .css file (optional):</label>
+                                <input type="file" id="customThemeCSSFileInput" accept=".css,text/css" class="custom-css-file-input">
+                                <textarea id="customThemeUserCSSInput" class="custom-css-textarea" spellcheck="false">filter: blur(10px) brightness(1) saturate(1);
                                 background-position: center;
                                 background-size: cover;
                                 opacity: 1;
-                            </textarea>
+                                </textarea>
+                            </div>
                         </div>
                         <div class="setting-group">
                             <button type="button" id="saveCustomTheme" class="backup-btn">Save &amp; Apply</button>
