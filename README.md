@@ -1,42 +1,51 @@
 # [KanjiWidgets](https://brodante.github.io/kanji-widget-app/)
 
-KanjiWidgets is a high-performance, offline-capable Japanese learning web application designed for comprehensive daily practice. Spanning from basic Hiragana and Katakana through advanced JLPT N1, the application provides instant access to native audio, stroke order animations, and detailed progress tracking.
+A Japanese learning app I built because I got tired of switching between five different apps just to review kanji, hear the pronunciation, and track what I'd actually learned. It's plain HTML/CSS/JS. No framework, no build step. Runs entirely in the browser.
 
-Built with a focus on speed and offline reliability, the architecture utilizes a local database of over 7,000 native pronunciation audio files and JSON datasets, eliminating API latency and ensuring a seamless user experience.
+![preview](preview.PNG)
 
-## Core Features
+## What it does
 
-* Offline Audio Engine: Custom asynchronous audio manager handling local MP3 blobs and fallback logic for zero-latency playback.
-* Comprehensive Curriculum: Full progression tracking across Hiragana, Katakana, and JLPT N5-N1.
-* Dynamic Stroke Order: Integrated SVG path animations mapping accurate character drawing sequences.
-* Advanced Typography & Theming: Extensive UI customization featuring multiple professional Japanese typefaces (Mincho, Gothic, Brush, Handwriting) and custom color themes.
-* Data Persistence: Local storage integration for mastery tracking, daily streaks, and JSON state exports/imports.
-* Premium API Integration: Optional configuration for the KanjiAlive API to fetch deep etymology, radical breakdowns, and studio-quality human pronunciation.
+- Covers Hiragana, Katakana, and JLPT N5 through N1 (that's around 2,200 kanji plus the kana sets)
+- Native-ish audio for every reading, with a fallback chain: Kanji Alive API first if you set one up, Google Translate TTS next, then the browser's built-in speech synthesis as a last resort so it never just goes silent
+- Stroke order animations so you can actually see how a character is supposed to be drawn, not just stare at the finished shape
+- A dictionary view for each level. Mastered characters show up clearly, everything else stays greyed out until you've studied it, and tapping any of them jumps straight there
+- Search that understands more than exact matches. Type a kanji, an English meaning, a kana reading, or even romaji (typing `ima` finds 今) and it'll find it
+- Progress tracking: streaks, mastered/pending counts, a "recently studied" list scoped to whatever level you're currently on
+- A theme system with about a dozen built-in themes, some with actual animated backgrounds (there's one with a slow-drifting starfield and shooting meteors), plus a full custom theme builder where you can upload your own background image, adjust its blur, pick or auto-extract an accent color from the image, and even drop in your own CSS if you want to go further
+- Local backup/restore as JSON, so your progress isn't trapped in one browser
 
-## Architecture & Technologies
+## Running it
 
-* Frontend: Vanilla HTML5, CSS3, and JavaScript (ES6+). No heavyweight frameworks or external dependencies.
-* Storage: Browser LocalStorage for state management and progress data.
-* PWA Ready: Configured as a Progressive Web App for native-like mobile installation and offline functionality.
+No build process, no dependencies beyond Node if you want the dev server:
 
-## Installation & Usage
+```bash
+git clone https://github.com/brodante/kanji-widget-app.git
+cd kanji-widget-app
+npm install
+npm start
+```
 
-Due to the static nature of the application and its local data architecture, no backend server or Node.js environment is required.
+Or just open `index.html` directly in a browser. It'll work, though serving it locally avoids some CORS quirks with the audio.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/brodante/kanji-widget-app.git
-   ```
+Heads up: the audio files aren't in this repo, they'd add well over 100MB. See `AUDIO-SETUP.md` for how the fallback audio works and how to plug in your own Kanji Alive API key if you want the higher quality pronunciations.
 
-2. Run locally:
-   Open `index.html` directly in any modern browser, or serve via a local development server for optimal performance.
+## How it's put together
 
-## Acknowledgements
+Everything lives in a handful of files: `script.js` for the app logic, `styles.css` for every theme, `index.html` for the structure, plus small dedicated modules for storage (`storage-manager.js`) and audio (`audio-manager.js`). Kanji/kana data sits in `database/` as plain JSON, one file per level. It's a PWA, so it installs and works offline once you've loaded it.
 
-This application utilizes open-source data provided by the Japanese learning community:
-* KanjiVG: SVG stroke order coordinate data.
-* KanjiAlive API: Deep etymology, radical breakdowns, and premium audio data.
-* Jisho.org: Dictionary routing and reference integration.
+I've been going through it piece by piece, fixing bugs, cleaning up dead code, adding features, rather than rewriting it all at once. Some of it's still rough around the edges. That's fine, it's a side project.
+
+There's also a rough plan floating around for an actual Android app (native Kotlin, not just a wrapper) at some point. See `android-setup.md` for early notes.
+
+## Credits
+
+Stroke order data comes from [KanjiVG](https://kanjivg.tagaini.net/). Optional premium audio and etymology data comes from the [Kanji Alive API](https://kanjialive-api.p.rapidapi.com/). Some dictionary references point back to [Jisho.org](https://jisho.org/).
+
+## License
+
+GPLv3. See `LICENSE`.
 
 ---
+
 Made with 愛 by [d4nte](https://github.com/brodante).
