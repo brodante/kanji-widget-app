@@ -134,6 +134,32 @@ async function getCustomThemeImage(slot) {
     });
 }
 
+// ==========================================
+// DEV'S FAVORITE THEMES (curated preset backgrounds)
+// ==========================================
+// These ship as static files in assets/dev-themes/ — NOT stored per-user in
+// IndexedDB, since they're already part of the app bundle. To add your own:
+// 1. Drop a .png or .gif into assets/dev-themes/
+// 2. Add an entry below with a display name and the matching file path
+const DEV_FAVORITE_THEMES = [
+    { name: 'Sakura Dusk', file: 'assets/dev-themes/sakura-dusk.png' },
+    { name: 'Neon Tokyo', file: 'assets/dev-themes/neon-tokyo.gif' },
+    { name: 'Quiet Library', file: 'assets/dev-themes/quiet-library.png' },
+    { name: 'Rainy Window', file: 'assets/dev-themes/rainy-window.gif' },
+    { name: 'Mount Fuji', file: 'assets/dev-themes/mount-fuji.png' },
+];
+
+function renderDevFavorites(selectedPath) {
+    const grid = document.getElementById('devFavoritesGrid');
+    if (!grid) return;
+    grid.innerHTML = DEV_FAVORITE_THEMES.map(theme => `
+        <button type="button" class="dev-favorite-thumb${theme.file === selectedPath ? ' selected' : ''}"
+            style="background-image: url('${theme.file}')" data-file="${theme.file}" title="${theme.name}">
+            <span class="dev-favorite-thumb-label">${theme.name}</span>
+        </button>
+    `).join('');
+}
+
 class KanjiLearningApp {
     constructor() {
         this.currentKanji = null;
@@ -319,6 +345,8 @@ class KanjiLearningApp {
             document.getElementById('customThemeCSSToggle').checked = false;
             document.getElementById('customThemeCSSPanel').classList.remove('show');
 
+            let selectedPresetPath = null;
+
             if (settingsRaw) {
                 const settings = JSON.parse(settingsRaw);
                 document.getElementById('customThemeBlur').value = settings.blur;
@@ -333,13 +361,24 @@ class KanjiLearningApp {
                     document.getElementById('customThemeCSSPanel').classList.add('show');
                 }
 
-                const blob = await getCustomThemeImage(1);
-                if (blob) {
-                    const url = URL.createObjectURL(blob);
-                    document.getElementById('customThemePreview').style.backgroundImage = `url(${url})`;
-                    document.getElementById('customThemePreview').dataset.imageUrl = url;
+                const previewEl = document.getElementById('customThemePreview');
+                if (settings.imageSource === 'preset' && settings.presetImage) {
+                    previewEl.style.backgroundImage = `url(${settings.presetImage})`;
+                    previewEl.dataset.imageUrl = settings.presetImage;
+                    previewEl.dataset.isPreset = 'true';
+                    selectedPresetPath = settings.presetImage;
+                } else {
+                    const blob = await getCustomThemeImage(1);
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        previewEl.style.backgroundImage = `url(${url})`;
+                        previewEl.dataset.imageUrl = url;
+                        delete previewEl.dataset.isPreset;
+                    }
                 }
             }
+
+            renderDevFavorites(selectedPresetPath);
             document.getElementById('autoAccentToggle').checked = false; // always starts unchecked
             document.getElementById('customThemeModal').classList.add('show');
         });
@@ -368,6 +407,29 @@ class KanjiLearningApp {
             const previewEl = document.getElementById('customThemePreview');
             previewEl.style.backgroundImage = `url(${url})`;
             previewEl.dataset.imageUrl = url;
+            delete previewEl.dataset.isPreset; // this is a real upload, not a dev preset
+            document.querySelectorAll('.dev-favorite-thumb').forEach(t => t.classList.remove('selected'));
+
+            if (document.getElementById('autoAccentToggle').checked) {
+                const mode = document.getElementById('customThemeMode').value;
+                const color = await autoPickAccentFromImage(mode);
+                if (color) document.getElementById('customThemeAccent').value = color;
+            }
+        });
+
+        // Dev's Picks: click a curated preset to use it directly, no upload needed
+        document.getElementById('devFavoritesGrid').addEventListener('click', async (e) => {
+            const thumb = e.target.closest('.dev-favorite-thumb');
+            if (!thumb) return;
+
+            const file = thumb.dataset.file;
+            const previewEl = document.getElementById('customThemePreview');
+            previewEl.style.backgroundImage = `url(${file})`;
+            previewEl.dataset.imageUrl = file;
+            previewEl.dataset.isPreset = 'true';
+
+            document.querySelectorAll('.dev-favorite-thumb').forEach(t => t.classList.remove('selected'));
+            thumb.classList.add('selected');
 
             if (document.getElementById('autoAccentToggle').checked) {
                 const mode = document.getElementById('customThemeMode').value;
@@ -428,15 +490,26 @@ class KanjiLearningApp {
             const mode = document.getElementById('customThemeMode').value;
             const customCSSEnabled = document.getElementById('customThemeCSSToggle').checked;
             const customCSS = document.getElementById('customThemeUserCSSInput').value;
+            const previewEl = document.getElementById('customThemePreview');
+            const isPreset = previewEl.dataset.isPreset === 'true';
 
             const { hex: accentHex, adjusted } = sanitizeAccentColor(rawAccentHex, mode);
             document.getElementById('customThemeAccent').value = accentHex; // reflect the clamped color back in the picker
 
-            if (fileInput.files && fileInput.files[0]) {
+            let imageSource = null;
+            let presetImage = null;
+
+            if (isPreset) {
+                imageSource = 'preset';
+                presetImage = previewEl.dataset.imageUrl;
+            } else if (fileInput.files && fileInput.files[0]) {
                 await saveCustomThemeImage(1, fileInput.files[0]);
+                imageSource = 'upload';
             }
 
-            localStorage.setItem('customTheme:slot1:settings', JSON.stringify({ blur: blurPx, accent: accentHex, mode, customCSS, customCSSEnabled }));
+            localStorage.setItem('customTheme:slot1:settings', JSON.stringify({
+                blur: blurPx, accent: accentHex, mode, customCSS, customCSSEnabled, imageSource, presetImage
+            }));
 
             this.setTheme('custom-1');
             document.getElementById('customThemeModal').classList.remove('show');
@@ -1757,8 +1830,14 @@ class KanjiLearningApp {
         if (!settingsRaw) return; // nothing saved for this slot yet
 
         const settings = JSON.parse(settingsRaw);
-        const blob = await getCustomThemeImage(slot);
-        const imageUrl = blob ? URL.createObjectURL(blob) : null;
+        let imageUrl = null;
+
+        if (settings.imageSource === 'preset' && settings.presetImage) {
+            imageUrl = settings.presetImage; // static asset path, no IndexedDB needed
+        } else {
+            const blob = await getCustomThemeImage(slot);
+            imageUrl = blob ? URL.createObjectURL(blob) : null;
+        }
 
         this.applyCustomThemeStyles(imageUrl, settings.blur, settings.accent, settings.mode);
         this.applyCustomCSS(settings.customCSSEnabled ? settings.customCSS : '');
