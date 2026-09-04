@@ -137,19 +137,27 @@ async function getCustomThemeImage(slot) {
 // ==========================================
 // DEV'S FAVORITE THEMES (curated preset backgrounds)
 // ==========================================
-// Static files live in assets/dev-themes/. To add one: drop the image/gif in
-// that folder AND add its filename to assets/dev-themes/manifest.json.
-// The display name is derived automatically from the filename.
+// Static files live in assets/dev-themes/ (landscape, for desktop) and
+// assets/dev-themes/mobile/ (portrait, for phones) — auto-swapped based on
+// screen size so nobody sees a wallpaper cropped for the wrong orientation.
+// To add one: drop the image/gif in the right folder AND add its filename
+// to that folder's manifest.json. Display name is derived from the filename.
 const DEV_THEMES_FOLDER = 'assets/dev-themes/';
+const DEV_THEMES_MOBILE_FOLDER = 'assets/dev-themes/mobile/';
+
+function isMobileViewport() {
+    return window.matchMedia('(max-width: 768px)').matches;
+}
 
 async function loadDevFavoritesManifest() {
+    const folder = isMobileViewport() ? DEV_THEMES_MOBILE_FOLDER : DEV_THEMES_FOLDER;
     try {
-        const res = await fetch(`${DEV_THEMES_FOLDER}manifest.json`);
-        if (!res.ok) return [];
+        const res = await fetch(`${folder}manifest.json`);
+        if (!res.ok) return { folder, files: [] };
         const files = await res.json();
-        return Array.isArray(files) ? files : [];
+        return { folder, files: Array.isArray(files) ? files : [] };
     } catch (err) {
-        return []; // manifest missing or unreadable — just show no dev picks, not an error state
+        return { folder, files: [] }; // manifest missing or unreadable — just show no dev picks, not an error state
     }
 }
 
@@ -160,19 +168,20 @@ function filenameToThemeName(filename) {
         .replace(/\b[a-z]/g, c => c.toUpperCase()); // title-cases ASCII words; harmless no-op on non-Latin names
 }
 
-function renderDevFavorites(filenames, selectedPath) {
+function renderDevFavorites(manifest, selectedPath) {
+    const { folder, files } = manifest;
     const grid = document.getElementById('devFavoritesGrid');
     const labelEl = document.getElementById('devFavoritesLabel');
     if (!grid) return;
 
-    const targetTotal = filenames.length > 5 ? 10 : 5;
+    const targetTotal = files.length > 5 ? 10 : 5;
     if (labelEl) labelEl.textContent = `Dante's Top ${targetTotal} Themes`;
 
     let html = '';
     for (let i = 0; i < targetTotal; i++) {
-        if (i < filenames.length) {
-            const path = DEV_THEMES_FOLDER + filenames[i];
-            const name = filenameToThemeName(filenames[i]);
+        if (i < files.length) {
+            const path = folder + files[i];
+            const name = filenameToThemeName(files[i]);
             const isSelected = path === selectedPath;
             html += `
                 <button type="button" class="dev-favorite-thumb${isSelected ? ' selected' : ''}"
@@ -409,8 +418,8 @@ class KanjiLearningApp {
                 }
             }
 
-            const filenames = await loadDevFavoritesManifest();
-            renderDevFavorites(filenames, selectedPresetPath);
+            const devManifest = await loadDevFavoritesManifest();
+            renderDevFavorites(devManifest, selectedPresetPath);
             document.getElementById('autoAccentToggle').checked = false; // always starts unchecked
             document.getElementById('customThemeModal').classList.add('show');
         });
