@@ -137,27 +137,58 @@ async function getCustomThemeImage(slot) {
 // ==========================================
 // DEV'S FAVORITE THEMES (curated preset backgrounds)
 // ==========================================
-// These ship as static files in assets/dev-themes/ — NOT stored per-user in
-// IndexedDB, since they're already part of the app bundle. To add your own:
-// 1. Drop a .png or .gif into assets/dev-themes/
-// 2. Add an entry below with a display name and the matching file path
-const DEV_FAVORITE_THEMES = [
-    { name: 'Sakura Dusk', file: 'assets/dev-themes/sakura-dusk.png' },
-    { name: 'Neon Tokyo', file: 'assets/dev-themes/neon-tokyo.gif' },
-    { name: 'Quiet Library', file: 'assets/dev-themes/quiet-library.png' },
-    { name: 'Rainy Window', file: 'assets/dev-themes/rainy-window.gif' },
-    { name: 'Mount Fuji', file: 'assets/dev-themes/mount-fuji.png' },
-];
+// Static files live in assets/dev-themes/. To add one: drop the image/gif in
+// that folder AND add its filename to assets/dev-themes/manifest.json.
+// The display name is derived automatically from the filename.
+const DEV_THEMES_FOLDER = 'assets/dev-themes/';
 
-function renderDevFavorites(selectedPath) {
+async function loadDevFavoritesManifest() {
+    try {
+        const res = await fetch(`${DEV_THEMES_FOLDER}manifest.json`);
+        if (!res.ok) return [];
+        const files = await res.json();
+        return Array.isArray(files) ? files : [];
+    } catch (err) {
+        return []; // manifest missing or unreadable — just show no dev picks, not an error state
+    }
+}
+
+function filenameToThemeName(filename) {
+    const withoutExt = filename.replace(/\.[^/.]+$/, '');
+    return withoutExt
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b[a-z]/g, c => c.toUpperCase()); // title-cases ASCII words; harmless no-op on non-Latin names
+}
+
+function renderDevFavorites(filenames, selectedPath) {
     const grid = document.getElementById('devFavoritesGrid');
+    const labelEl = document.getElementById('devFavoritesLabel');
     if (!grid) return;
-    grid.innerHTML = DEV_FAVORITE_THEMES.map(theme => `
-        <button type="button" class="dev-favorite-thumb${theme.file === selectedPath ? ' selected' : ''}"
-            style="background-image: url('${theme.file}')" data-file="${theme.file}" title="${theme.name}">
-            <span class="dev-favorite-thumb-label">${theme.name}</span>
-        </button>
-    `).join('');
+
+    const targetTotal = filenames.length > 5 ? 10 : 5;
+    if (labelEl) labelEl.textContent = `Dante's Top ${targetTotal} Themes`;
+
+    let html = '';
+    for (let i = 0; i < targetTotal; i++) {
+        if (i < filenames.length) {
+            const path = DEV_THEMES_FOLDER + filenames[i];
+            const name = filenameToThemeName(filenames[i]);
+            const isSelected = path === selectedPath;
+            html += `
+                <button type="button" class="dev-favorite-thumb${isSelected ? ' selected' : ''}"
+                    style="background-image: url('${path}')" data-file="${path}" title="${name}">
+                    <span class="dev-favorite-thumb-label">${name}</span>
+                </button>
+            `;
+        } else {
+            html += `
+                <div class="dev-favorite-thumb placeholder" title="Coming soon">
+                    <span class="dev-favorite-thumb-label">Coming Soon</span>
+                </div>
+            `;
+        }
+    }
+    grid.innerHTML = html;
 }
 
 class KanjiLearningApp {
