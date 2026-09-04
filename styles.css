@@ -3003,6 +3003,37 @@ input:focus {
     text-overflow: ellipsis;
 }
 
+/* Empty slot: no file added yet for this position */
+.dev-favorite-thumb.placeholder {
+    background-image: none !important;
+    background-color: rgba(150, 150, 150, 0.1);
+    background-image: repeating-linear-gradient(45deg,
+            rgba(150, 150, 150, 0.12),
+            rgba(150, 150, 150, 0.12) 8px,
+            rgba(150, 150, 150, 0.2) 8px,
+            rgba(150, 150, 150, 0.2) 16px) !important;
+    border-style: dashed;
+    border-color: rgba(150, 150, 150, 0.35);
+    cursor: default;
+    opacity: 0.65;
+}
+
+.dev-favorite-thumb.placeholder:hover {
+    transform: none;
+}
+
+.dev-favorite-thumb.placeholder .dev-favorite-thumb-label {
+    background: none;
+    color: var(--on-surface);
+    opacity: 0.8;
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0.2rem;
+}
+
 /* Full-screen background image layer for the custom theme. Scaled up
    slightly so the blur filter doesn't reveal soft edges at the viewport border. */
 .custom-theme-background {

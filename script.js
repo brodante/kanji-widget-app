@@ -378,7 +378,8 @@ class KanjiLearningApp {
                 }
             }
 
-            renderDevFavorites(selectedPresetPath);
+            const filenames = await loadDevFavoritesManifest();
+            renderDevFavorites(filenames, selectedPresetPath);
             document.getElementById('autoAccentToggle').checked = false; // always starts unchecked
             document.getElementById('customThemeModal').classList.add('show');
         });
@@ -420,7 +421,7 @@ class KanjiLearningApp {
         // Dev's Picks: click a curated preset to use it directly, no upload needed
         document.getElementById('devFavoritesGrid').addEventListener('click', async (e) => {
             const thumb = e.target.closest('.dev-favorite-thumb');
-            if (!thumb) return;
+            if (!thumb || !thumb.dataset.file) return;
 
             const file = thumb.dataset.file;
             const previewEl = document.getElementById('customThemePreview');
