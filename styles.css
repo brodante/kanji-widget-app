@@ -2943,6 +2943,97 @@ input:focus {
     color: var(--on-surface);
 }
 
+.dev-favorites-section {
+    margin-bottom: 1.2rem;
+}
+
+.dev-favorites-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    color: var(--on-surface);
+}
+
+.dev-favorites-label i {
+    color: #FF4081;
+}
+
+.dev-favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 0.6rem;
+}
+
+.dev-favorite-thumb {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.dev-favorite-thumb:hover {
+    transform: scale(1.05);
+}
+
+.dev-favorite-thumb.selected {
+    border-color: var(--primary-color);
+}
+
+.dev-favorite-thumb-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.2rem 0.3rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+    color: white;
+    font-size: 0.62rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Empty slot: no file added yet for this position */
+.dev-favorite-thumb.placeholder {
+    background-image: none !important;
+    background-color: rgba(150, 150, 150, 0.1);
+    background-image: repeating-linear-gradient(45deg,
+            rgba(150, 150, 150, 0.12),
+            rgba(150, 150, 150, 0.12) 8px,
+            rgba(150, 150, 150, 0.2) 8px,
+            rgba(150, 150, 150, 0.2) 16px) !important;
+    border-style: dashed;
+    border-color: rgba(150, 150, 150, 0.35);
+    cursor: default;
+    opacity: 0.65;
+}
+
+.dev-favorite-thumb.placeholder:hover {
+    transform: none;
+}
+
+.dev-favorite-thumb.placeholder .dev-favorite-thumb-label {
+    background: none;
+    color: var(--on-surface);
+    opacity: 0.8;
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0.2rem;
+}
+
 /* Full-screen background image layer for the custom theme. Scaled up
    slightly so the blur filter doesn't reveal soft edges at the viewport border. */
 .custom-theme-background {
