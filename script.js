@@ -472,11 +472,17 @@ class KanjiLearningApp {
             document.querySelectorAll('.dev-favorite-thumb').forEach(t => t.classList.remove('selected'));
             thumb.classList.add('selected');
 
-            if (document.getElementById('autoAccentToggle').checked) {
-                const mode = document.getElementById('customThemeMode').value;
-                const color = await autoPickAccentFromImage(mode);
-                if (color) document.getElementById('customThemeAccent').value = color;
-            }
+            // Dev's picks are curated to already look good — apply instantly
+            // with a light blur and an auto-matched accent, no manual tweaking needed.
+            document.getElementById('customThemeBlur').value = 2;
+            document.getElementById('customThemeBlurValue').textContent = '2px';
+
+            const mode = document.getElementById('customThemeMode').value;
+            const color = await autoPickAccentFromImage(mode);
+            if (color) document.getElementById('customThemeAccent').value = color;
+
+            const themeName = filenameToThemeName(file.split('/').pop());
+            await this.saveAndApplyCustomTheme(themeName);
         });
 
         // Auto-pick an accent color from the current image when checked
@@ -525,39 +531,8 @@ class KanjiLearningApp {
         });
 
             document.getElementById('saveCustomTheme').addEventListener('click', async () => {
-            const fileInput = document.getElementById('customThemeImageInput');
-            const blurPx = document.getElementById('customThemeBlur').value;
-            const rawAccentHex = document.getElementById('customThemeAccent').value;
-            const mode = document.getElementById('customThemeMode').value;
-            const customCSSEnabled = document.getElementById('customThemeCSSToggle').checked;
-            const customCSS = document.getElementById('customThemeUserCSSInput').value;
-            const previewEl = document.getElementById('customThemePreview');
-            const isPreset = previewEl.dataset.isPreset === 'true';
-
-            const { hex: accentHex, adjusted } = sanitizeAccentColor(rawAccentHex, mode);
-            document.getElementById('customThemeAccent').value = accentHex; // reflect the clamped color back in the picker
-
-            let imageSource = null;
-            let presetImage = null;
-
-            if (isPreset) {
-                imageSource = 'preset';
-                presetImage = previewEl.dataset.imageUrl;
-            } else if (fileInput.files && fileInput.files[0]) {
-                await saveCustomThemeImage(1, fileInput.files[0]);
-                imageSource = 'upload';
-            }
-
-            localStorage.setItem('customTheme:slot1:settings', JSON.stringify({
-                blur: blurPx, accent: accentHex, mode, customCSS, customCSSEnabled, imageSource, presetImage
-            }));
-
-            this.setTheme('custom-1');
-            document.getElementById('customThemeModal').classList.remove('show');
-            this.showToast(adjusted
-                ? 'Theme saved! Accent color adjusted slightly for visibility.'
-                : 'Custom theme saved and applied!');
-        });
+                await this.saveAndApplyCustomTheme();
+            });
 
         // Settings changes
         document.getElementById('jlptLevel').addEventListener('change', (e) => {
@@ -1863,6 +1838,51 @@ class KanjiLearningApp {
                 isDark = saved ? JSON.parse(saved).mode === 'dark' : true;
             }
             icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+        }
+    }
+
+    // Persists whatever's currently in the builder and applies it immediately.
+    // Shared by the Save button and by clicking a Dev's Pick (instant-apply).
+    // appliedName, if given, personalizes the success toast.
+    async saveAndApplyCustomTheme(appliedName = null) {
+        const fileInput = document.getElementById('customThemeImageInput');
+        const blurPx = document.getElementById('customThemeBlur').value;
+        const rawAccentHex = document.getElementById('customThemeAccent').value;
+        const mode = document.getElementById('customThemeMode').value;
+        const customCSSEnabled = document.getElementById('customThemeCSSToggle').checked;
+        const customCSS = document.getElementById('customThemeUserCSSInput').value;
+        const previewEl = document.getElementById('customThemePreview');
+        const isPreset = previewEl.dataset.isPreset === 'true';
+
+        const { hex: accentHex, adjusted } = sanitizeAccentColor(rawAccentHex, mode);
+        document.getElementById('customThemeAccent').value = accentHex; // reflect the clamped color back in the picker
+
+        let imageSource = null;
+        let presetImage = null;
+
+        if (isPreset) {
+            imageSource = 'preset';
+            presetImage = previewEl.dataset.imageUrl;
+        } else if (fileInput.files && fileInput.files[0]) {
+            await saveCustomThemeImage(1, fileInput.files[0]);
+            imageSource = 'upload';
+        }
+
+        localStorage.setItem('customTheme:slot1:settings', JSON.stringify({
+            blur: blurPx, accent: accentHex, mode, customCSS, customCSSEnabled, imageSource, presetImage
+        }));
+
+        this.setTheme('custom-1');
+        document.getElementById('customThemeModal').classList.remove('show');
+
+        if (appliedName) {
+            this.showToast(adjusted
+                ? `"${appliedName}" applied! Accent adjusted slightly for visibility.`
+                : `"${appliedName}" applied!`);
+        } else {
+            this.showToast(adjusted
+                ? 'Theme saved! Accent color adjusted slightly for visibility.'
+                : 'Custom theme saved and applied!');
         }
     }
 
