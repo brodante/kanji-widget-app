@@ -168,6 +168,12 @@ function filenameToThemeName(filename) {
         .replace(/\b[a-z]/g, c => c.toUpperCase()); // title-cases ASCII words; harmless no-op on non-Latin names
 }
 
+// Detects video files by extension so the same manifest/preset system can
+// hold either images or videos, and the right DOM element gets used for each.
+function isVideoFile(filename) {
+    return /\.(mp4|webm)$/i.test(filename);
+}
+
 function renderDevFavorites(manifest, selectedPath) {
     const { folder, files } = manifest;
     const grid = document.getElementById('devFavoritesGrid');
@@ -1927,6 +1933,18 @@ class KanjiLearningApp {
         if (imageUrl) {
             root.style.setProperty('--custom-bg-image', `url(${imageUrl})`);
         }
+
+        // This path is image-only for now (video selection lands in a later
+        // batch) — make sure the image layer is the one actually showing,
+        // and the video layer stays paused/hidden rather than silently
+        // running in the background.
+        document.getElementById('customThemeBackground')?.classList.add('active');
+        const videoEl = document.getElementById('customThemeBackgroundVideo');
+        if (videoEl) {
+            videoEl.classList.remove('active');
+            videoEl.pause();
+        }
+
         this.updateCustomThemeBlurForViewport();
 
         const rgb = hexToRgb(accentHex);

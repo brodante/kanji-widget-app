@@ -3052,7 +3052,28 @@ input:focus {
     transform: scale(1.15);
 }
 
-[data-theme="custom-1"] .custom-theme-background {
+.custom-theme-background-video {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -10;
+    pointer-events: none;
+    object-fit: cover;
+    object-position: center;
+    filter: blur(var(--custom-blur, 10px));
+    transform: scale(1.15);
+}
+
+/* Only one of these shows at a time — toggled explicitly via JS, since a
+   custom theme's background is either a still image or a video, never both. */
+[data-theme="custom-1"] .custom-theme-background.active {
+    display: block;
+}
+
+[data-theme="custom-1"] .custom-theme-background-video.active {
     display: block;
 }
 
