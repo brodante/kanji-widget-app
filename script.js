@@ -207,7 +207,7 @@ class KanjiLearningApp {
         this.currentIndex = 0;
         this.widgetSize = 'large';
         this.settings = {
-            jlptLevel: 'N5',
+            jlptLevel: 'Hiragana',
             autoPlay: false,
             showFurigana: true,
             kanjiFont: 'Klee One',
@@ -362,6 +362,17 @@ class KanjiLearningApp {
                 }, 150);
             });
         }
+
+        // Re-check the mobile/desktop blur compensation whenever the window
+        // is resized (e.g. a PC window maximized after picking a mobile theme
+        // while narrow) — debounced so it doesn't run on every pixel of a drag.
+        let resizeDebounceTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeDebounceTimer);
+            resizeDebounceTimer = setTimeout(() => {
+                this.updateCustomThemeBlurForViewport();
+            }, 150);
+        });
 
         // Settings modal
         document.getElementById('settingsBtn').addEventListener('click', () => {
@@ -652,18 +663,18 @@ class KanjiLearningApp {
         if (!btn) return;
 
         const levelMap = {
-            'Hiragana': 'あ',
-            'Katakana': 'ア',
-            'N5': '漢5',
-            'N4': '漢4',
-            'N3': '漢3',
-            'N2': '漢2',
-            'N1': '漢1',
+            'Hiragana': 'あ Hiragana',
+            'Katakana': 'ア Katakana',
+            'N5': 'N5(Basic)',
+            'N4': 'N4(Elementary)',
+            'N3': 'N3(Intermediate)',
+            'N2': 'N2(Advanced)',
+            'N1': 'N1(Master)',
             'all': '全'
         };
 
         // Update the button icon text
-        btn.textContent = levelMap[this.settings.jlptLevel] || '漢';
+        btn.textContent = levelMap[this.settings.jlptLevel] || 'N';
 
         // Update the dropdown active states
         document.querySelectorAll('.level-option').forEach(opt => {
@@ -1908,14 +1919,34 @@ class KanjiLearningApp {
         const root = document.documentElement;
         root.setAttribute('data-custom-mode', mode);
 
+        // Remember these so updateCustomThemeBlurForViewport() can recompute
+        // on resize without needing the full settings object again.
+        this.customThemeBaseBlur = parseFloat(blurPx) || 0;
+        this.customThemeImageIsMobileSourced = !!(imageUrl && imageUrl.includes(DEV_THEMES_MOBILE_FOLDER));
+
         if (imageUrl) {
             root.style.setProperty('--custom-bg-image', `url(${imageUrl})`);
         }
-        root.style.setProperty('--custom-blur', `${blurPx}px`);
+        this.updateCustomThemeBlurForViewport();
 
         const rgb = hexToRgb(accentHex);
         root.style.setProperty('--custom-accent', accentHex);
         root.style.setProperty('--custom-accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+    }
+
+    // A mobile-sourced background is captured at phone resolution. If the
+    // viewport later grows past the desktop breakpoint (window resized, or
+    // page loaded directly at that size), a small resolution mismatch would
+    // otherwise be visible as softness/pixelation. Leaning into more blur
+    // masks that cleanly instead of looking like a mistake.
+    updateCustomThemeBlurForViewport() {
+        if (this.customThemeBaseBlur === undefined) return; // no custom theme active yet
+        const MOBILE_MISMATCH_COMPENSATION_PX = 10;
+        const needsCompensation = this.customThemeImageIsMobileSourced && !isMobileViewport();
+        const effectiveBlur = needsCompensation
+            ? this.customThemeBaseBlur + MOBILE_MISMATCH_COMPENSATION_PX
+            : this.customThemeBaseBlur;
+        document.documentElement.style.setProperty('--custom-blur', `${effectiveBlur}px`);
     }
 
     // Applies user-typed CSS *declarations only* (no selectors, no braces) to
