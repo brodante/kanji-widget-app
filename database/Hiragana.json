@@ -4,12 +4,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "あ",
-            "meanings": [
-                "a"
-            ],
-            "kunyomi": [
-                "あ"
-            ],
+            "meanings": ["a"],
+            "kunyomi": ["あ"],
             "examples": [
                 {
                     "word": "ありがとう",
@@ -37,12 +33,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "い",
-            "meanings": [
-                "i"
-            ],
-            "kunyomi": [
-                "い"
-            ],
+            "meanings": ["i"],
+            "kunyomi": ["い"],
             "examples": [
                 {
                     "word": "犬",
@@ -70,12 +62,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "う",
-            "meanings": [
-                "u"
-            ],
-            "kunyomi": [
-                "う"
-            ],
+            "meanings": ["u"],
+            "kunyomi": ["う"],
             "examples": [
                 {
                     "word": "海",
@@ -103,12 +91,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "え",
-            "meanings": [
-                "e"
-            ],
-            "kunyomi": [
-                "え"
-            ],
+            "meanings": ["e"],
+            "kunyomi": ["え"],
             "examples": [
                 {
                     "word": "駅",
@@ -136,12 +120,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "お",
-            "meanings": [
-                "o"
-            ],
-            "kunyomi": [
-                "お"
-            ],
+            "meanings": ["o"],
+            "kunyomi": ["お"],
             "examples": [
                 {
                     "word": "おはよう",
@@ -169,12 +149,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "か",
-            "meanings": [
-                "ka"
-            ],
-            "kunyomi": [
-                "か"
-            ],
+            "meanings": ["ka"],
+            "kunyomi": ["か"],
             "examples": [
                 {
                     "word": "傘",
@@ -202,12 +178,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "き",
-            "meanings": [
-                "ki"
-            ],
-            "kunyomi": [
-                "き"
-            ],
+            "meanings": ["ki"],
+            "kunyomi": ["き"],
             "examples": [
                 {
                     "word": "木",
@@ -235,12 +207,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "く",
-            "meanings": [
-                "ku"
-            ],
-            "kunyomi": [
-                "く"
-            ],
+            "meanings": ["ku"],
+            "kunyomi": ["く"],
             "examples": [
                 {
                     "word": "靴",
@@ -268,12 +236,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "け",
-            "meanings": [
-                "ke"
-            ],
-            "kunyomi": [
-                "け"
-            ],
+            "meanings": ["ke"],
+            "kunyomi": ["け"],
             "examples": [
                 {
                     "word": "今朝",
@@ -301,12 +265,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "こ",
-            "meanings": [
-                "ko"
-            ],
-            "kunyomi": [
-                "こ"
-            ],
+            "meanings": ["ko"],
+            "kunyomi": ["こ"],
             "examples": [
                 {
                     "word": "子供",
@@ -334,12 +294,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "さ",
-            "meanings": [
-                "sa"
-            ],
-            "kunyomi": [
-                "さ"
-            ],
+            "meanings": ["sa"],
+            "kunyomi": ["さ"],
             "examples": [
                 {
                     "word": "桜",
@@ -367,12 +323,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "し",
-            "meanings": [
-                "shi"
-            ],
-            "kunyomi": [
-                "し"
-            ],
+            "meanings": ["shi"],
+            "kunyomi": ["し"],
             "examples": [
                 {
                     "word": "写真",
@@ -400,12 +352,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "す",
-            "meanings": [
-                "su"
-            ],
-            "kunyomi": [
-                "す"
-            ],
+            "meanings": ["su"],
+            "kunyomi": ["す"],
             "examples": [
                 {
                     "word": "寿司",
@@ -433,12 +381,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "せ",
-            "meanings": [
-                "se"
-            ],
-            "kunyomi": [
-                "せ"
-            ],
+            "meanings": ["se"],
+            "kunyomi": ["せ"],
             "examples": [
                 {
                     "word": "先生",
@@ -466,12 +410,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "そ",
-            "meanings": [
-                "so"
-            ],
-            "kunyomi": [
-                "そ"
-            ],
+            "meanings": ["so"],
+            "kunyomi": ["そ"],
             "examples": [
                 {
                     "word": "空",
@@ -499,12 +439,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "た",
-            "meanings": [
-                "ta"
-            ],
-            "kunyomi": [
-                "た"
-            ],
+            "meanings": ["ta"],
+            "kunyomi": ["た"],
             "examples": [
                 {
                     "word": "食べ物",
@@ -532,12 +468,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ち",
-            "meanings": [
-                "chi"
-            ],
-            "kunyomi": [
-                "ち"
-            ],
+            "meanings": ["chi"],
+            "kunyomi": ["ち"],
             "examples": [
                 {
                     "word": "地下鉄",
@@ -565,12 +497,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "つ",
-            "meanings": [
-                "tsu"
-            ],
-            "kunyomi": [
-                "つ"
-            ],
+            "meanings": ["tsu"],
+            "kunyomi": ["つ"],
             "examples": [
                 {
                     "word": "月",
@@ -598,12 +526,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "て",
-            "meanings": [
-                "te"
-            ],
-            "kunyomi": [
-                "て"
-            ],
+            "meanings": ["te"],
+            "kunyomi": ["て"],
             "examples": [
                 {
                     "word": "手",
@@ -631,12 +555,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "と",
-            "meanings": [
-                "to"
-            ],
-            "kunyomi": [
-                "と"
-            ],
+            "meanings": ["to"],
+            "kunyomi": ["と"],
             "examples": [
                 {
                     "word": "友達",
@@ -664,12 +584,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "な",
-            "meanings": [
-                "na"
-            ],
-            "kunyomi": [
-                "な"
-            ],
+            "meanings": ["na"],
+            "kunyomi": ["な"],
             "examples": [
                 {
                     "word": "名前",
@@ -697,12 +613,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "に",
-            "meanings": [
-                "ni"
-            ],
-            "kunyomi": [
-                "に"
-            ],
+            "meanings": ["ni"],
+            "kunyomi": ["に"],
             "examples": [
                 {
                     "word": "肉",
@@ -730,12 +642,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ぬ",
-            "meanings": [
-                "nu"
-            ],
-            "kunyomi": [
-                "ぬ"
-            ],
+            "meanings": ["nu"],
+            "kunyomi": ["ぬ"],
             "examples": [
                 {
                     "word": "ぬいぐるみ",
@@ -763,12 +671,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ね",
-            "meanings": [
-                "ne"
-            ],
-            "kunyomi": [
-                "ね"
-            ],
+            "meanings": ["ne"],
+            "kunyomi": ["ね"],
             "examples": [
                 {
                     "word": "猫",
@@ -796,12 +700,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "の",
-            "meanings": [
-                "no"
-            ],
-            "kunyomi": [
-                "の"
-            ],
+            "meanings": ["no"],
+            "kunyomi": ["の"],
             "examples": [
                 {
                     "word": "飲み物",
@@ -829,12 +729,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "は",
-            "meanings": [
-                "ha"
-            ],
-            "kunyomi": [
-                "は"
-            ],
+            "meanings": ["ha"],
+            "kunyomi": ["は"],
             "examples": [
                 {
                     "word": "花",
@@ -862,12 +758,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ひ",
-            "meanings": [
-                "hi"
-            ],
-            "kunyomi": [
-                "ひ"
-            ],
+            "meanings": ["hi"],
+            "kunyomi": ["ひ"],
             "examples": [
                 {
                     "word": "人",
@@ -895,12 +787,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ふ",
-            "meanings": [
-                "fu"
-            ],
-            "kunyomi": [
-                "ふ"
-            ],
+            "meanings": ["fu"],
+            "kunyomi": ["ふ"],
             "examples": [
                 {
                     "word": "冬",
@@ -928,12 +816,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "へ",
-            "meanings": [
-                "he"
-            ],
-            "kunyomi": [
-                "へ"
-            ],
+            "meanings": ["he"],
+            "kunyomi": ["へ"],
             "examples": [
                 {
                     "word": "部屋",
@@ -961,12 +845,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ほ",
-            "meanings": [
-                "ho"
-            ],
-            "kunyomi": [
-                "ほ"
-            ],
+            "meanings": ["ho"],
+            "kunyomi": ["ほ"],
             "examples": [
                 {
                     "word": "星",
@@ -994,12 +874,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ま",
-            "meanings": [
-                "ma"
-            ],
-            "kunyomi": [
-                "ま"
-            ],
+            "meanings": ["ma"],
+            "kunyomi": ["ま"],
             "examples": [
                 {
                     "word": "窓",
@@ -1027,12 +903,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "み",
-            "meanings": [
-                "mi"
-            ],
-            "kunyomi": [
-                "み"
-            ],
+            "meanings": ["mi"],
+            "kunyomi": ["み"],
             "examples": [
                 {
                     "word": "水",
@@ -1060,12 +932,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "む",
-            "meanings": [
-                "mu"
-            ],
-            "kunyomi": [
-                "む"
-            ],
+            "meanings": ["mu"],
+            "kunyomi": ["む"],
             "examples": [
                 {
                     "word": "虫",
@@ -1093,12 +961,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "め",
-            "meanings": [
-                "me"
-            ],
-            "kunyomi": [
-                "め"
-            ],
+            "meanings": ["me"],
+            "kunyomi": ["め"],
             "examples": [
                 {
                     "word": "目",
@@ -1126,12 +990,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "も",
-            "meanings": [
-                "mo"
-            ],
-            "kunyomi": [
-                "も"
-            ],
+            "meanings": ["mo"],
+            "kunyomi": ["も"],
             "examples": [
                 {
                     "word": "森",
@@ -1159,12 +1019,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "や",
-            "meanings": [
-                "ya"
-            ],
-            "kunyomi": [
-                "や"
-            ],
+            "meanings": ["ya"],
+            "kunyomi": ["や"],
             "examples": [
                 {
                     "word": "山",
@@ -1192,12 +1048,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ゆ",
-            "meanings": [
-                "yu"
-            ],
-            "kunyomi": [
-                "ゆ"
-            ],
+            "meanings": ["yu"],
+            "kunyomi": ["ゆ"],
             "examples": [
                 {
                     "word": "雪",
@@ -1225,12 +1077,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "よ",
-            "meanings": [
-                "yo"
-            ],
-            "kunyomi": [
-                "よ"
-            ],
+            "meanings": ["yo"],
+            "kunyomi": ["よ"],
             "examples": [
                 {
                     "word": "夜",
@@ -1258,12 +1106,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ら",
-            "meanings": [
-                "ra"
-            ],
-            "kunyomi": [
-                "ら"
-            ],
+            "meanings": ["ra"],
+            "kunyomi": ["ら"],
             "examples": [
                 {
                     "word": "来週",
@@ -1291,12 +1135,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "り",
-            "meanings": [
-                "ri"
-            ],
-            "kunyomi": [
-                "り"
-            ],
+            "meanings": ["ri"],
+            "kunyomi": ["り"],
             "examples": [
                 {
                     "word": "林檎",
@@ -1324,12 +1164,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "る",
-            "meanings": [
-                "ru"
-            ],
-            "kunyomi": [
-                "る"
-            ],
+            "meanings": ["ru"],
+            "kunyomi": ["る"],
             "examples": [
                 {
                     "word": "留守",
@@ -1357,12 +1193,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "れ",
-            "meanings": [
-                "re"
-            ],
-            "kunyomi": [
-                "れ"
-            ],
+            "meanings": ["re"],
+            "kunyomi": ["れ"],
             "examples": [
                 {
                     "word": "冷蔵庫",
@@ -1390,12 +1222,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ろ",
-            "meanings": [
-                "ro"
-            ],
-            "kunyomi": [
-                "ろ"
-            ],
+            "meanings": ["ro"],
+            "kunyomi": ["ろ"],
             "examples": [
                 {
                     "word": "六",
@@ -1423,12 +1251,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "わ",
-            "meanings": [
-                "wa"
-            ],
-            "kunyomi": [
-                "わ"
-            ],
+            "meanings": ["wa"],
+            "kunyomi": ["わ"],
             "examples": [
                 {
                     "word": "私",
@@ -1456,12 +1280,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "を",
-            "meanings": [
-                "wo"
-            ],
-            "kunyomi": [
-                "を"
-            ],
+            "meanings": ["wo"],
+            "kunyomi": ["を"],
             "examples": [
                 {
                     "word": "本を読む",
@@ -1483,12 +1303,8 @@
             "onyomi": [],
             "jlpt": "Hiragana",
             "character": "ん",
-            "meanings": [
-                "n"
-            ],
-            "kunyomi": [
-                "ん"
-            ],
+            "meanings": ["n"],
+            "kunyomi": ["ん"],
             "examples": [
                 {
                     "word": "パン",

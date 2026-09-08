@@ -13,12 +13,14 @@ Preferred communication style: Simple, everyday language.
 The application follows a **client-side architecture** with vanilla JavaScript modules and browser-based storage. It's designed as a single-page application (SPA) with no backend dependencies, making it lightweight and easily deployable.
 
 ### Frontend Architecture
+
 - **Vanilla JavaScript** with ES6+ class-based modules
 - **HTML5** with semantic markup
 - **CSS3** with CSS custom properties for theming
 - **Modular design** with separate classes for different concerns
 
 ### Key Design Decisions
+
 1. **No Framework Dependency**: Uses vanilla JavaScript to keep the bundle size small and reduce complexity
 2. **Browser Storage**: Leverages localStorage for persistence without requiring a backend
 3. **Progressive Enhancement**: Core functionality works without JavaScript, enhanced features require it
@@ -41,6 +43,7 @@ The application follows a **client-side architecture** with vanilla JavaScript m
 4. **Theme System**: Light/dark theme toggle with CSS custom properties
 
 ### Widget Size Variants
+
 - **Small (2x2)**: Kanji character only
 - **Medium (2x3)**: Kanji + audio controls
 - **Large (3x3)**: Full details including readings and examples
@@ -54,6 +57,7 @@ The application follows a **client-side architecture** with vanilla JavaScript m
 5. **State Persistence**: All user preferences and progress saved locally
 
 ### Data Sources
+
 - **Primary**: Jisho.org API for real-time kanji data
 - **Fallback**: Local JSON data for offline functionality
 - **Storage**: Browser localStorage for persistence
@@ -61,15 +65,18 @@ The application follows a **client-side architecture** with vanilla JavaScript m
 ## External Dependencies
 
 ### APIs
+
 - **Jisho.org API**: Primary source for kanji data, meanings, and readings
 - **Web Speech API**: Browser-native text-to-speech for pronunciation
 
 ### CDN Resources
+
 - **Google Fonts**: Noto Sans JP for Japanese character display
 - **Font Awesome**: Icons for UI elements
 - **Material Icons**: Additional icon set
 
 ### Browser Requirements
+
 - **localStorage**: For data persistence
 - **speechSynthesis**: For audio pronunciation (optional)
 - **ES6+ Support**: For modern JavaScript features
@@ -84,6 +91,7 @@ The application is designed for **static hosting** with no server-side requireme
 4. **Progressive Enhancement**: Core features work even if external APIs fail
 
 ### Future Considerations
+
 - Could be enhanced with a backend for user accounts and synchronized progress
 - Potential for packaging as a Progressive Web App (PWA)
 - Mobile app version could use similar architecture with native widgets
@@ -99,6 +107,7 @@ The application is designed for **static hosting** with no server-side requireme
 ## Recent Changes
 
 ### July 31, 2025 (Latest)
+
 - **Expanded Kanji Database**: Significantly expanded kanji collection with comprehensive N5 (~50 kanji) and N4 (~50 kanji) data including complete Japanese readings in vocabulary examples
 - **Added All JLPT Levels**: Included representative kanji samples for N3, N2, and N1 levels with authentic readings and meanings
 - **GitHub Pages Setup**: Created comprehensive deployment documentation and GitHub Actions workflow for automatic Pages deployment

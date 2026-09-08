@@ -8,9 +8,9 @@ app.use(express.static(__dirname));
 
 // Serve main route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`KanjiWidgets server running on port ${PORT}`);
+    console.log(`KanjiWidgets server running on port ${PORT}`);
 });

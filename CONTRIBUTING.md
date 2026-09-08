@@ -77,36 +77,40 @@ kanji-widget-app/
 ### Creating a New Feature
 
 1. **Checkout a new branch:**
-   ```bash
-   git checkout cline-dev
-   git checkout -b feature/your-feature-name
-   ```
+
+    ```bash
+    git checkout cline-dev
+    git checkout -b feature/your-feature-name
+    ```
 
 2. **Implement your feature:**
-   - Follow the code style guidelines
-   - Add tests if applicable
-   - Update documentation
+    - Follow the code style guidelines
+    - Add tests if applicable
+    - Update documentation
 
 3. **Test locally:**
-   ```bash
-   npm start
-   # Open http://localhost:3000 in your browser
-   ```
+
+    ```bash
+    npm start
+    # Open http://localhost:3000 in your browser
+    ```
 
 4. **Commit your changes:**
-   ```bash
-   git commit -m "feat: add your feature description"
-   ```
+
+    ```bash
+    git commit -m "feat: add your feature description"
+    ```
 
 5. **Push to GitHub:**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+
+    ```bash
+    git push origin feature/your-feature-name
+    ```
 
 6. **Create a Pull Request:**
-   - Go to GitHub
-   - Create a PR from your branch to `cline-dev`
-   - Fill in the PR template
+    - Go to GitHub
+    - Create a PR from your branch to `cline-dev`
+    - Fill in the PR template
 
 ---
 
@@ -117,6 +121,7 @@ kanji-widget-app/
 We use **ESLint** and **Prettier** to enforce consistent code style.
 
 **Key Rules:**
+
 - Use 2 spaces for indentation
 - Use single quotes (`'`), not double quotes (`"`)
 - Always use `const` or `let`, never `var`
@@ -126,15 +131,18 @@ We use **ESLint** and **Prettier** to enforce consistent code style.
 - Avoid `console.log` in production code
 
 **Example:**
+
 ```javascript
 // ✅ Good
-const kanji = data.find(item => item.id === id);
+const kanji = data.find((item) => item.id === id);
 const message = `Loaded ${kanji.length} kanji`;
 return message;
 
 // ❌ Bad
-var kanji = data.find(function(item) { return item.id == id; });
-console.log("Loaded " + kanji.length + " kanji");
+var kanji = data.find(function (item) {
+    return item.id == id;
+});
+console.log('Loaded ' + kanji.length + ' kanji');
 ```
 
 ### CSS
@@ -164,6 +172,7 @@ footer (optional)
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -173,6 +182,7 @@ footer (optional)
 - `chore`: Maintenance tasks
 
 **Examples:**
+
 ```
 feat(srs): add spaced repetition algorithm
 fix(widget): correct kanji display issue
@@ -188,29 +198,35 @@ refactor(audio): modularize audio system
 
 ```markdown
 ## Description
+
 [Describe your changes]
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 - [ ] Tested locally
 - [ ] Added/updated tests
 - [ ] Verified on multiple browsers
 
 ## Screenshots (if applicable)
+
 [Add screenshots for UI changes]
 
 ## Issues Fixed
+
 Fixes #[issue number]
 ```
 
 ### PR Checklist
 
 Before submitting, ensure:
+
 - [ ] Code follows project style
 - [ ] Tests pass (if applicable)
 - [ ] Documentation updated
@@ -265,7 +281,7 @@ For new public functions, add JSDoc comments:
  * @returns {Promise<Array>} Array of kanji objects
  */
 async function loadKanjiData(level) {
-  // implementation
+    // implementation
 }
 ```
 
