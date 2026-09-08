@@ -1328,10 +1328,11 @@ class KanjiLearningApp {
                             : '';
             break;
         case 'first':
-        default:
+        default:{
             const allReadings = [...this.currentKanji.onyomi, ...this.currentKanji.kunyomi];
             readingToPlay = allReadings.length > 0 ? allReadings[0] : '';
             break;
+        }
         }
 
         if (readingToPlay) {
@@ -3162,18 +3163,16 @@ function sanitizeAccentColor(hex, mode) {
 
     if (mode === 'dark') {
         if (l < 35) {
-            safeL = 55;
-        } // too dark to read on a dark surface
-        else if (l > 92) {
-            safeL = 80;
-        } // near-white can blend with light icon fills
+            safeL = 55; // too dark to read on a dark surface
+        } else if (l > 92) {
+            safeL = 80; // near-white can blend with light icon fills
+        }
     } else {
         if (l > 65) {
-            safeL = 45;
-        } // too light to read on a light surface
-        else if (l < 10) {
-            safeL = 25;
-        } // near-black can blend with dark text/icons
+            safeL = 45; // too light to read on a light surface
+        } else if (l < 10) {
+            safeL = 25; // near-black can blend with dark text/icons
+        }
     }
 
     if (safeL === l) {
