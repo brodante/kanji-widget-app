@@ -62,3 +62,6 @@ deploy/
 attached_assets/
 *.tmp
 *.temp
+
+# Planning files
+docs/

@@ -3003,6 +3003,34 @@ input:focus {
     text-overflow: ellipsis;
 }
 
+.dev-favorite-thumb-video {
+    padding: 0;
+    background-color: #000; /* fallback while metadata loads */
+}
+
+.dev-favorite-thumb-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none; /* clicks should hit the parent button, not the video itself */
+}
+
+.dev-favorite-thumb-play-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+}
+
 /* Empty slot: no file added yet for this position */
 .dev-favorite-thumb.placeholder {
     background-image: none !important;
@@ -3052,7 +3080,28 @@ input:focus {
     transform: scale(1.15);
 }
 
-[data-theme="custom-1"] .custom-theme-background {
+.custom-theme-background-video {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -10;
+    pointer-events: none;
+    object-fit: cover;
+    object-position: center;
+    filter: blur(var(--custom-blur, 10px));
+    transform: scale(1.15);
+}
+
+/* Only one of these shows at a time — toggled explicitly via JS, since a
+   custom theme's background is either a still image or a video, never both. */
+[data-theme="custom-1"] .custom-theme-background.active {
+    display: block;
+}
+
+[data-theme="custom-1"] .custom-theme-background-video.active {
     display: block;
 }
 

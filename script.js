@@ -168,6 +168,12 @@ function filenameToThemeName(filename) {
         .replace(/\b[a-z]/g, c => c.toUpperCase()); // title-cases ASCII words; harmless no-op on non-Latin names
 }
 
+// Detects video files by extension so the same manifest/preset system can
+// hold either images or videos, and the right DOM element gets used for each.
+function isVideoFile(filename) {
+    return /\.(mp4|webm)$/i.test(filename);
+}
+
 function renderDevFavorites(manifest, selectedPath) {
     const { folder, files } = manifest;
     const grid = document.getElementById('devFavoritesGrid');
@@ -183,12 +189,24 @@ function renderDevFavorites(manifest, selectedPath) {
             const path = folder + files[i];
             const name = filenameToThemeName(files[i]);
             const isSelected = path === selectedPath;
-            html += `
-                <button type="button" class="dev-favorite-thumb${isSelected ? ' selected' : ''}"
-                    style="background-image: url('${path}')" data-file="${path}" title="${name}">
-                    <span class="dev-favorite-thumb-label">${name}</span>
-                </button>
-            `;
+
+            if (isVideoFile(files[i])) {
+                html += `
+                    <button type="button" class="dev-favorite-thumb dev-favorite-thumb-video${isSelected ? ' selected' : ''}"
+                        data-file="${path}" title="${name}">
+                        <video src="${path}" muted preload="metadata" playsinline></video>
+                        <span class="dev-favorite-thumb-play-badge"><i class="fas fa-play"></i></span>
+                        <span class="dev-favorite-thumb-label">${name}</span>
+                    </button>
+                `;
+            } else {
+                html += `
+                    <button type="button" class="dev-favorite-thumb${isSelected ? ' selected' : ''}"
+                        style="background-image: url('${path}')" data-file="${path}" title="${name}">
+                        <span class="dev-favorite-thumb-label">${name}</span>
+                    </button>
+                `;
+            }
         } else {
             html += `
                 <div class="dev-favorite-thumb placeholder" title="Coming soon">
@@ -413,17 +431,27 @@ class KanjiLearningApp {
                 }
 
                 const previewEl = document.getElementById('customThemePreview');
+                const wasVideo = !!settings.isVideo;
                 if (settings.imageSource === 'preset' && settings.presetImage) {
-                    previewEl.style.backgroundImage = `url(${settings.presetImage})`;
+                    previewEl.innerHTML = '';
+                    previewEl.style.backgroundImage = wasVideo ? 'none' : `url(${settings.presetImage})`;
                     previewEl.dataset.imageUrl = settings.presetImage;
+                    previewEl.dataset.isVideo = wasVideo ? 'true' : 'false';
                     previewEl.dataset.isPreset = 'true';
                     selectedPresetPath = settings.presetImage;
                 } else {
                     const blob = await getCustomThemeImage(1);
                     if (blob) {
                         const url = URL.createObjectURL(blob);
-                        previewEl.style.backgroundImage = `url(${url})`;
+                        if (wasVideo) {
+                            previewEl.style.backgroundImage = 'none';
+                            previewEl.innerHTML = `<video src="${url}" muted loop autoplay playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
+                        } else {
+                            previewEl.innerHTML = '';
+                            previewEl.style.backgroundImage = `url(${url})`;
+                        }
                         previewEl.dataset.imageUrl = url;
+                        previewEl.dataset.isVideo = wasVideo ? 'true' : 'false';
                         delete previewEl.dataset.isPreset;
                     }
                 }
@@ -455,16 +483,40 @@ class KanjiLearningApp {
         document.getElementById('customThemeImageInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Use the File's actual MIME type, not the URL — a blob: URL has
+            // no file extension, so extension-sniffing wouldn't work here.
+            const isVideo = file.type.startsWith('video/');
             const url = URL.createObjectURL(file);
             const previewEl = document.getElementById('customThemePreview');
-            previewEl.style.backgroundImage = `url(${url})`;
+
+            if (isVideo) {
+                const sizeMB = file.size / (1024 * 1024);
+                if (sizeMB > 20) {
+                    this.showToast(`That clip is ${sizeMB.toFixed(1)}MB — quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`);
+                } else if (sizeMB > 8) {
+                    this.showToast(`This clip is ${sizeMB.toFixed(1)}MB. For best performance, aim for 720p-1080p and 8-15 seconds.`);
+                }
+
+                previewEl.style.backgroundImage = 'none';
+                previewEl.innerHTML = `<video src="${url}" muted loop autoplay playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
+            } else {
+                previewEl.innerHTML = ''; // clear any leftover <video> from a previous video pick
+                previewEl.style.backgroundImage = `url(${url})`;
+            }
+
             previewEl.dataset.imageUrl = url;
+            previewEl.dataset.isVideo = isVideo ? 'true' : 'false';
             delete previewEl.dataset.isPreset; // this is a real upload, not a dev preset
             document.querySelectorAll('.dev-favorite-thumb').forEach(t => t.classList.remove('selected'));
 
+            // Default to checked on upload — most people uploading their own
+            // image/video want a matching accent without an extra click.
+            document.getElementById('autoAccentToggle').checked = true;
+
             if (document.getElementById('autoAccentToggle').checked) {
                 const mode = document.getElementById('customThemeMode').value;
-                const color = await autoPickAccentFromImage(mode);
+                const color = await autoPickAccentFromMedia(mode);
                 if (color) document.getElementById('customThemeAccent').value = color;
             }
         });
@@ -475,38 +527,45 @@ class KanjiLearningApp {
             if (!thumb || !thumb.dataset.file) return;
 
             const file = thumb.dataset.file;
+            const isVideo = isVideoFile(file);
             const previewEl = document.getElementById('customThemePreview');
-            previewEl.style.backgroundImage = `url(${file})`;
+
+            // Videos can't be a CSS background-image — clear it so a stale
+            // image doesn't show through behind the small preview box.
+            previewEl.style.backgroundImage = isVideo ? 'none' : `url(${file})`;
             previewEl.dataset.imageUrl = file;
+            previewEl.dataset.isVideo = isVideo ? 'true' : 'false';
             previewEl.dataset.isPreset = 'true';
 
             document.querySelectorAll('.dev-favorite-thumb').forEach(t => t.classList.remove('selected'));
             thumb.classList.add('selected');
 
             // Dev's picks are curated to already look good — apply instantly
-            // with a light blur and an auto-matched accent, no manual tweaking needed.
+            // with a light blur, no manual tweaking needed.
             document.getElementById('customThemeBlur').value = 2;
             document.getElementById('customThemeBlurValue').textContent = '2px';
 
+            // Auto-accent-pick now supports both images and videos (grabs a
+            // representative frame for video).
             const mode = document.getElementById('customThemeMode').value;
-            const color = await autoPickAccentFromImage(mode);
+            const color = await autoPickAccentFromMedia(mode);
             if (color) document.getElementById('customThemeAccent').value = color;
 
             const themeName = filenameToThemeName(file.split('/').pop());
             await this.saveAndApplyCustomTheme(themeName);
         });
 
-        // Auto-pick an accent color from the current image when checked
+        // Auto-pick an accent color from the current image or video when checked
         document.getElementById('autoAccentToggle').addEventListener('change', async (e) => {
             if (!e.target.checked) return;
 
             const mode = document.getElementById('customThemeMode').value;
-            const color = await autoPickAccentFromImage(mode);
+            const color = await autoPickAccentFromMedia(mode);
             if (color) {
                 document.getElementById('customThemeAccent').value = color;
-                this.showToast('Accent color picked from your image!');
+                this.showToast('Accent color picked!');
             } else {
-                this.showToast('Pick an image first!');
+                this.showToast('Pick an image or video first!');
                 e.target.checked = false;
             }
         });
@@ -1864,6 +1923,7 @@ class KanjiLearningApp {
         const customCSS = document.getElementById('customThemeUserCSSInput').value;
         const previewEl = document.getElementById('customThemePreview');
         const isPreset = previewEl.dataset.isPreset === 'true';
+        const isVideo = previewEl.dataset.isVideo === 'true';
 
         const { hex: accentHex, adjusted } = sanitizeAccentColor(rawAccentHex, mode);
         document.getElementById('customThemeAccent').value = accentHex; // reflect the clamped color back in the picker
@@ -1880,7 +1940,7 @@ class KanjiLearningApp {
         }
 
         localStorage.setItem('customTheme:slot1:settings', JSON.stringify({
-            blur: blurPx, accent: accentHex, mode, customCSS, customCSSEnabled, imageSource, presetImage
+            blur: blurPx, accent: accentHex, mode, customCSS, customCSSEnabled, imageSource, presetImage, isVideo
         }));
 
         this.setTheme('custom-1');
@@ -1911,11 +1971,11 @@ class KanjiLearningApp {
             imageUrl = blob ? URL.createObjectURL(blob) : null;
         }
 
-        this.applyCustomThemeStyles(imageUrl, settings.blur, settings.accent, settings.mode);
+        this.applyCustomThemeStyles(imageUrl, settings.blur, settings.accent, settings.mode, !!settings.isVideo);
         this.applyCustomCSS(settings.customCSSEnabled ? settings.customCSS : '');
     }
 
-    applyCustomThemeStyles(imageUrl, blurPx, accentHex, mode) {
+    applyCustomThemeStyles(imageUrl, blurPx, accentHex, mode, isVideo = false) {
         const root = document.documentElement;
         root.setAttribute('data-custom-mode', mode);
 
@@ -1924,9 +1984,29 @@ class KanjiLearningApp {
         this.customThemeBaseBlur = parseFloat(blurPx) || 0;
         this.customThemeImageIsMobileSourced = !!(imageUrl && imageUrl.includes(DEV_THEMES_MOBILE_FOLDER));
 
-        if (imageUrl) {
-            root.style.setProperty('--custom-bg-image', `url(${imageUrl})`);
+        const imageEl = document.getElementById('customThemeBackground');
+        const videoEl = document.getElementById('customThemeBackgroundVideo');
+
+        if (isVideo) {
+            if (videoEl) {
+                if (videoEl.getAttribute('src') !== imageUrl) {
+                    videoEl.src = imageUrl;
+                }
+                videoEl.classList.add('active');
+                videoEl.play().catch(() => { }); // autoplay can be blocked pre-interaction; harmless either way
+            }
+            imageEl?.classList.remove('active');
+        } else {
+            if (imageUrl) {
+                root.style.setProperty('--custom-bg-image', `url(${imageUrl})`);
+            }
+            imageEl?.classList.add('active');
+            if (videoEl) {
+                videoEl.classList.remove('active');
+                videoEl.pause();
+            }
         }
+
         this.updateCustomThemeBlurForViewport();
 
         const rgb = hexToRgb(accentHex);
@@ -2752,13 +2832,74 @@ function loadImageElement(url) {
 
 // Ties extraction + the existing contrast safety net together.
 // Returns a safe hex string, or null if there's no image to work with.
-async function autoPickAccentFromImage(mode) {
+// Loads a video and seeks to a representative frame (partway through,
+// never the very first frame which is often black/fading in) so canvas
+// can draw from it the same way it draws from a still image.
+function loadVideoFrame(url) {
+    return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'auto';
+        // Detached video elements can fail to reliably decode frames or fire
+        // seek events in some browsers — keep it in the DOM, just off-screen
+        // and invisible. The caller removes it after drawing from it.
+        video.style.position = 'fixed';
+        video.style.left = '-9999px';
+        video.style.width = '1px';
+        video.style.height = '1px';
+        document.body.appendChild(video);
+
+        let settled = false;
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            resolve(video);
+        };
+        const fail = (err) => {
+            if (settled) return;
+            settled = true;
+            video.remove(); // caller never gets a reference on failure, so clean up here
+            reject(err);
+        };
+
+        video.onloadeddata = () => {
+            const seekTime = (isFinite(video.duration) && video.duration > 0.2)
+                ? Math.min(0.5, video.duration / 2)
+                : 0;
+            if (seekTime > 0) {
+                video.currentTime = seekTime;
+            } else {
+                finish();
+            }
+        };
+        video.onseeked = finish;
+        video.onerror = fail;
+        setTimeout(finish, 2000); // safety net in case seeking never fires on some browsers
+
+        video.src = url;
+    });
+}
+
+// Ties extraction + the existing contrast safety net together. Works for
+// both still images and videos — reads dataset.isVideo itself, so every
+// call site can use this the same way regardless of media type.
+// Returns a safe hex string, or null if there's no usable media.
+async function autoPickAccentFromMedia(mode) {
     const previewEl = document.getElementById('customThemePreview');
     const url = previewEl?.dataset.imageUrl;
     if (!url) return null;
 
-    const img = await loadImageElement(url);
-    const extracted = extractVibrantColor(img);
+    const isVideo = previewEl.dataset.isVideo === 'true';
+    let mediaEl;
+    try {
+        mediaEl = isVideo ? await loadVideoFrame(url) : await loadImageElement(url);
+    } catch (err) {
+        return null; // failed to load/decode — fail safely instead of throwing into the caller
+    }
+
+    const extracted = extractVibrantColor(mediaEl);
+    if (isVideo) mediaEl.remove(); // clean up the temporary off-screen video element
     if (!extracted) return null;
 
     return sanitizeAccentColor(extracted, mode).hex;
