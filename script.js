@@ -510,6 +510,10 @@ class KanjiLearningApp {
             delete previewEl.dataset.isPreset; // this is a real upload, not a dev preset
             document.querySelectorAll('.dev-favorite-thumb').forEach(t => t.classList.remove('selected'));
 
+            // Default to checked on upload — most people uploading their own
+            // image/video want a matching accent without an extra click.
+            document.getElementById('autoAccentToggle').checked = true;
+
             if (document.getElementById('autoAccentToggle').checked) {
                 const mode = document.getElementById('customThemeMode').value;
                 const color = await autoPickAccentFromMedia(mode);
@@ -2837,12 +2841,26 @@ function loadVideoFrame(url) {
         video.muted = true;
         video.playsInline = true;
         video.preload = 'auto';
+        // Detached video elements can fail to reliably decode frames or fire
+        // seek events in some browsers — keep it in the DOM, just off-screen
+        // and invisible. The caller removes it after drawing from it.
+        video.style.position = 'fixed';
+        video.style.left = '-9999px';
+        video.style.width = '1px';
+        video.style.height = '1px';
+        document.body.appendChild(video);
 
         let settled = false;
         const finish = () => {
             if (settled) return;
             settled = true;
             resolve(video);
+        };
+        const fail = (err) => {
+            if (settled) return;
+            settled = true;
+            video.remove(); // caller never gets a reference on failure, so clean up here
+            reject(err);
         };
 
         video.onloadeddata = () => {
@@ -2856,7 +2874,7 @@ function loadVideoFrame(url) {
             }
         };
         video.onseeked = finish;
-        video.onerror = reject;
+        video.onerror = fail;
         setTimeout(finish, 2000); // safety net in case seeking never fires on some browsers
 
         video.src = url;
@@ -2881,6 +2899,7 @@ async function autoPickAccentFromMedia(mode) {
     }
 
     const extracted = extractVibrantColor(mediaEl);
+    if (isVideo) mediaEl.remove(); // clean up the temporary off-screen video element
     if (!extracted) return null;
 
     return sanitizeAccentColor(extracted, mode).hex;
