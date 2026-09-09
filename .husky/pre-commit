@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run ESLint on all JavaScript files
+echo "📝 Checking code style with ESLint..."
+npx eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/
+
+# Check if ESLint passed
+if [ $? -ne 0 ]; then
+  echo "❌ ESLint found issues. Please fix them before committing."
+  exit 1
+fi
+
+echo "✅ All checks passed! Proceeding with commit..."

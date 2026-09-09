@@ -63,5 +63,9 @@ attached_assets/
 *.tmp
 *.temp
 
-# Planning files
-docs/
+# Planning docs (not for production)
+docs/planning/
+
+# OS generated files
+.DS_Store
+Thumbs.db
