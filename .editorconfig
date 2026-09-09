@@ -1,0 +1,44 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+# 2 space indentation
+[*.js]
+indent_style = space
+indent_size = 4
+
+# 2 space indentation
+[*.json]
+indent_style = space
+indent_size = 4
+
+# 4 space indentation for HTML
+[*.html]
+indent_style = space
+indent_size = 4
+
+# 4 space indentation for CSS
+[*.css]
+indent_style = space
+indent_size = 4
+
+# Preserve existing indentation for MD
+[*.md]
+indent_style = preserve
+
+# 2 space indentation for shell scripts
+[*.sh]
+indent_style = space
+indent_size = 4
+
+# 4 space indentation for Python
+[*.py]
+indent_style = space
+indent_size = 4
