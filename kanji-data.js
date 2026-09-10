@@ -15,7 +15,9 @@ class KanjiData {
         try {
             // Fetch the specific level JSON file from your new database folder
             const response = await fetch(`database/${level}.json`);
-            if (!response.ok) throw new Error(`Missing ${level}.json file in database folder.`);
+            if (!response.ok) {
+                throw new Error(`Missing ${level}.json file in database folder.`);
+            }
 
             const data = await response.json();
             const kanjiPool = data[level] || [];
@@ -33,8 +35,8 @@ class KanjiData {
     /**
      * Legacy Hydration Fallback.
      * script.js previously used to fetch missing details from KanjiAPI.
-     * Because new offline database files (N4.json, etc.) are 100% complete, 
-     * this will no longer be triggered, but we keep the function here returning null 
+     * Because new offline database files (N4.json, etc.) are 100% complete,
+     * this will no longer be triggered, but we keep the function here returning null
      * so your existing script.js does not throw an undefined error.
      */
     /*static async fetchKanjiDetails(character) {

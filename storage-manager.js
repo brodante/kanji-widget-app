@@ -11,7 +11,7 @@ class StorageManager {
         if (!this.getProgress()) {
             this.resetProgress();
         }
-        
+
         if (!this.getRecent()) {
             this.setItem(this.keys.RECENT, []);
         }
@@ -68,50 +68,50 @@ class StorageManager {
 
     static markAsMastered(character) {
         const progress = this.getProgress();
-        
+
         // Add to mastered if not already there
         if (!progress.mastered.includes(character)) {
             progress.mastered.push(character);
         }
-        
+
         // Add to studied if not already there
         if (!progress.studied.includes(character)) {
             progress.studied.push(character);
         }
-        
+
         // Update last studied
         progress.lastStudied = Date.now();
-        
+
         // Update streak (simplified - just increment for now)
         const today = new Date().toDateString();
-        const lastStudiedDate = progress.lastStudied ? 
+        const lastStudiedDate = progress.lastStudied ?
             new Date(progress.lastStudied).toDateString() : null;
-        
+
         if (lastStudiedDate !== today) {
             progress.streak += 1;
         }
-        
+
         return this.saveProgress(progress);
     }
 
     static markAsStudied(character) {
         const progress = this.getProgress();
-        
+
         if (!progress.studied.includes(character)) {
             progress.studied.push(character);
         }
-        
+
         progress.lastStudied = Date.now();
         return this.saveProgress(progress);
     }
 
     static skipKanji(character) {
         const progress = this.getProgress();
-        
+
         if (!progress.skipped.includes(character)) {
             progress.skipped.push(character);
         }
-        
+
         return this.saveProgress(progress);
     }
 
@@ -136,7 +136,7 @@ class StorageManager {
             streak: 0,
             totalTime: 0
         };
-        
+
         return this.saveProgress(defaultProgress);
     }
 
@@ -148,19 +148,19 @@ class StorageManager {
 
     static addToRecent(kanjiData) {
         let recent = this.getItem(this.keys.RECENT, []);
-        
+
         // Remove if already exists
         recent = recent.filter(item => item.character !== kanjiData.character);
-        
+
         // Add to beginning
         recent.unshift({
             ...kanjiData,
             timestamp: Date.now()
         });
-        
+
         // Keep only last 20 items
         recent = recent.slice(0, 20);
-        
+
         return this.setItem(this.keys.RECENT, recent);
     }
 
@@ -211,9 +211,11 @@ class StorageManager {
     static getCachedKanjiData(level) {
         const cache = this.getItem(this.keys.CACHE, {});
         const levelCache = cache[level];
-        
-        if (!levelCache) return null;
-        
+
+        if (!levelCache) {
+            return null;
+        }
+
         // Check if cache is older than 7 days
         const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
         if (Date.now() - levelCache.timestamp > maxAge) {
@@ -222,7 +224,7 @@ class StorageManager {
             this.setItem(this.keys.CACHE, cache);
             return null;
         }
-        
+
         return levelCache.data;
     }
 
@@ -234,7 +236,7 @@ class StorageManager {
     static getStats() {
         const progress = this.getProgress();
         const recent = this.getRecent();
-        
+
         return {
             totalMastered: progress.mastered.length,
             totalStudied: progress.studied.length,
@@ -270,35 +272,35 @@ class StorageManager {
             exportDate: Date.now(),
             version: 1
         };
-        
+
         return JSON.stringify(data, null, 2);
     }
 
     static importData(jsonData) {
         try {
             const data = JSON.parse(jsonData);
-            
+
             if (!data.version || !data.progress) {
                 throw new Error('Invalid data format');
             }
-            
+
             // Import progress
             if (data.progress) {
                 this.saveProgress(data.progress);
             }
-            
+
             // Import recent
             if (data.recent) {
                 this.setItem(this.keys.RECENT, data.recent);
             }
-            
+
             // Import settings
             if (data.settings) {
                 this.saveSettings(data.settings);
             }
-            
+
             return true;
-            
+
         } catch (error) {
             console.error('Error importing data:', error);
             return false;
@@ -310,15 +312,15 @@ class StorageManager {
         // Clean old cache entries
         const cache = this.getItem(this.keys.CACHE, {});
         const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-        
+
         Object.keys(cache).forEach(key => {
             if (Date.now() - cache[key].timestamp > maxAge) {
                 delete cache[key];
             }
         });
-        
+
         this.setItem(this.keys.CACHE, cache);
-        
+
         // Limit recent items
         const recent = this.getRecent(20);
         this.setItem(this.keys.RECENT, recent);
@@ -329,7 +331,7 @@ class StorageManager {
     //     if ('storage' in navigator && 'estimate' in navigator.storage) {
     //         return navigator.storage.estimate();
     //     }
-        
+
     //     // Fallback: estimate localStorage usage
     //     let total = 0;
     //     for (let key in localStorage) {
@@ -337,7 +339,7 @@ class StorageManager {
     //             total += localStorage[key].length + key.length;
     //         }
     //     }
-        
+
     //     return Promise.resolve({
     //         usage: total,
     //         quota: 5 * 1024 * 1024 // 5MB typical localStorage limit
@@ -348,7 +350,7 @@ class StorageManager {
 // Initialize storage when script loads
 document.addEventListener('DOMContentLoaded', () => {
     StorageManager.init();
-    
+
     // Cleanup old data periodically
     StorageManager.cleanup();
 });
