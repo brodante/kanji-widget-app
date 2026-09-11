@@ -4066,6 +4066,7 @@ input:focus {
     font-weight: 700;
     letter-spacing: 0.4px;
     background: linear-gradient(135deg, #ffffff, #e0d0ff);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
