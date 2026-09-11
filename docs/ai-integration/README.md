@@ -6,10 +6,11 @@ To maintain KanjiWidgets' core philosophy — **lightning-fast, zero-build-step,
 
 1. **Zero Bloat & Modular Architecture**:
    - All AI logic lives in clean, decoupled vanilla JS modules (`ai-manager.js`, `srs-engine.js`, `ai-tutor-modal.js`).
+   - `ai-tutor-modal.js` owns all AI Sensei modal + Kanji Drawer UI logic; `script.js` delegates to it.
    - No node build pipelines, heavyweight frameworks, or server requirements.
 2. **Provider Agnostic (BYOK - Bring Your Own Key)**:
    - Supports **Google Gemini** (Gemini 1.5 Flash / Pro - generous free tier), **OpenAI** (GPT-4o / GPT-4o-mini), **Anthropic Claude** (Claude 3.5 Sonnet / Haiku), **OpenRouter**, and local **Ollama** endpoints (`http://localhost:11434`).
-   - Users can plug in their own free or paid API key in Settings (stored securely in `localStorage`).
+   - Users can plug in their own free or paid API key in Settings. Keys are stored locally in `localStorage` (plain text, browser-only — never transmitted to any KanjiWidgets server).
 3. **Graceful Offline & Fallback Handling**:
    - If offline or no API key is provided, the app falls back to rule-based algorithmic analysis (SM-2 statistical heuristics and local diagnostics).
    - Smart local caching (`localStorage` / memory) ensures generated mnemonics, analyses, and quiz feedback don't trigger repeated API requests for the same kanji.
@@ -34,8 +35,9 @@ To maintain KanjiWidgets' core philosophy — **lightning-fast, zero-build-step,
 ┌───────────────────────────────┐ ┌──────────────────────────────────────┐
 │     Storage Manager (V2)      │ │        AI Provider Endpoints         │
 │ - Progress & SRS Metrics DB   │ │ (Gemini 1.5 Flash / GPT-4o-mini /    │
-│ - Encrypted API Key Storage   │ │  Claude 3.5 Haiku / Ollama / Local)  │
-└───────────────────────────────┘ └──────────────────────────────────────┘
+│ - Local API Key Storage       │ │  Claude 3.5 Haiku / Ollama / Local)  │
+│   (plain-text localStorage)   │ └──────────────────────────────────────┘
+└───────────────────────────────┘
 ```
 
 ---

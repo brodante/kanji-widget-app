@@ -535,8 +535,12 @@
                                 </button>
                             </div>
                             <small class="setting-help-text" id="aiKeyHelpText"
-                                >Saved safely in local browser storage only.</small
+                                >Stored locally in your browser only &mdash; never sent to any KanjiWidgets server.</small
                             >
+                            <small class="setting-help-text api-key-security-notice">
+                                <i class="fas fa-triangle-exclamation"></i>
+                                <strong>Security notice:</strong> Your API key is saved as plain text in browser localStorage. Do not use this on a shared or public computer.
+                            </small>
                         </div>
                         <div class="setting-group" id="aiEndpointGroup" style="display: none">
                             <label for="aiCustomEndpoint">Local Ollama Endpoint:</label>
@@ -1171,6 +1175,7 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="storage-manager.js"></script>
         <script src="srs-engine.js"></script>
         <script src="ai-manager.js"></script>
+        <script src="ai-tutor-modal.js"></script>
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
         <script src="script.js"></script>

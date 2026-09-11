@@ -16,6 +16,7 @@
         "StorageManager": "readonly",
         "SRSEngine": "readonly",
         "AIManager": "readonly",
+        "AISenseiModule": "readonly",
         "gtag": "readonly"
     },
     "rules": {

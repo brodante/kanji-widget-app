@@ -4631,6 +4631,28 @@ input:focus {
     opacity: 1;
 }
 
+/* API key plain-text storage disclosure notice */
+.api-key-security-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-top: 0.35rem;
+    padding: 0.45rem 0.6rem;
+    background: rgba(255, 170, 0, 0.08);
+    border: 1px solid rgba(255, 170, 0, 0.3);
+    border-radius: 6px;
+    color: var(--on-surface);
+    font-size: 0.76rem;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.api-key-security-notice .fa-triangle-exclamation {
+    color: #e0a000;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
 .ai-test-connection-wrapper {
     display: flex;
     align-items: center;
