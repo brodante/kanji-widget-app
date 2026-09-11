@@ -187,7 +187,7 @@ class AudioManager {
         this.isPlaying = false;
     }
 
-    static setApiKey(key) { }
+    static setApiKey(_key) { }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

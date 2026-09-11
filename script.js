@@ -8,7 +8,6 @@ let lumenAnimationId = null;
 let obakeAnimationId = null;
 
 let itoAppInstance = null;
-const itoInitialized = false;
 let itoAnimationId = null;
 let itoIntervalId = null;
 
@@ -19,34 +18,117 @@ let itoIntervalId = null;
 // Katakana -> Hiragana, so onyomi (stored in katakana) and kunyomi
 // (stored in hiragana) can be compared on equal footing.
 function katakanaToHiragana(str) {
-    return str.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+    return str.replace(/[\u30A1-\u30F6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
 }
 
 // Small greedy romaji -> hiragana converter. Covers standard mora,
 // youon (kya/sha/etc.), and sokuon (doubled consonant -> っ). Not a
 // full IME — good enough for matching search queries against readings.
 const ROMAJI_TO_HIRAGANA = {
-    kya: 'きゃ', kyu: 'きゅ', kyo: 'きょ', sha: 'しゃ', shu: 'しゅ', sho: 'しょ',
-    cha: 'ちゃ', chu: 'ちゅ', cho: 'ちょ', nya: 'にゃ', nyu: 'にゅ', nyo: 'にょ',
-    hya: 'ひゃ', hyu: 'ひゅ', hyo: 'ひょ', mya: 'みゃ', myu: 'みゅ', myo: 'みょ',
-    rya: 'りゃ', ryu: 'りゅ', ryo: 'りょ', gya: 'ぎゃ', gyu: 'ぎゅ', gyo: 'ぎょ',
-    bya: 'びゃ', byu: 'びゅ', byo: 'びょ', pya: 'ぴゃ', pyu: 'ぴゅ', pyo: 'ぴょ',
-    ja: 'じゃ', ju: 'じゅ', jo: 'じょ',
-    a: 'あ', i: 'い', u: 'う', e: 'え', o: 'お',
-    ka: 'か', ki: 'き', ku: 'く', ke: 'け', ko: 'こ',
-    sa: 'さ', shi: 'し', su: 'す', se: 'せ', so: 'そ',
-    ta: 'た', chi: 'ち', tsu: 'つ', te: 'て', to: 'と',
-    na: 'な', ni: 'に', nu: 'ぬ', ne: 'ね', no: 'の',
-    ha: 'は', hi: 'ひ', fu: 'ふ', he: 'へ', ho: 'ほ',
-    ma: 'ま', mi: 'み', mu: 'む', me: 'め', mo: 'も',
-    ya: 'や', yu: 'ゆ', yo: 'よ',
-    ra: 'ら', ri: 'り', ru: 'る', re: 'れ', ro: 'ろ',
-    wa: 'わ', wo: 'を', n: 'ん',
-    ga: 'が', gi: 'ぎ', gu: 'ぐ', ge: 'げ', go: 'ご',
-    za: 'ざ', ji: 'じ', zu: 'ず', ze: 'ぜ', zo: 'ぞ',
-    da: 'だ', di: 'ぢ', du: 'づ', de: 'で', do: 'ど',
-    ba: 'ば', bi: 'び', bu: 'ぶ', be: 'べ', bo: 'ぼ',
-    pa: 'ぱ', pi: 'ぴ', pu: 'ぷ', pe: 'ぺ', po: 'ぽ'
+    kya: 'きゃ',
+    kyu: 'きゅ',
+    kyo: 'きょ',
+    sha: 'しゃ',
+    shu: 'しゅ',
+    sho: 'しょ',
+    cha: 'ちゃ',
+    chu: 'ちゅ',
+    cho: 'ちょ',
+    nya: 'にゃ',
+    nyu: 'にゅ',
+    nyo: 'にょ',
+    hya: 'ひゃ',
+    hyu: 'ひゅ',
+    hyo: 'ひょ',
+    mya: 'みゃ',
+    myu: 'みゅ',
+    myo: 'みょ',
+    rya: 'りゃ',
+    ryu: 'りゅ',
+    ryo: 'りょ',
+    gya: 'ぎゃ',
+    gyu: 'ぎゅ',
+    gyo: 'ぎょ',
+    bya: 'びゃ',
+    byu: 'びゅ',
+    byo: 'びょ',
+    pya: 'ぴゃ',
+    pyu: 'ぴゅ',
+    pyo: 'ぴょ',
+    ja: 'じゃ',
+    ju: 'じゅ',
+    jo: 'じょ',
+    a: 'あ',
+    i: 'い',
+    u: 'う',
+    e: 'え',
+    o: 'お',
+    ka: 'か',
+    ki: 'き',
+    ku: 'く',
+    ke: 'け',
+    ko: 'こ',
+    sa: 'さ',
+    shi: 'し',
+    su: 'す',
+    se: 'せ',
+    so: 'そ',
+    ta: 'た',
+    chi: 'ち',
+    tsu: 'つ',
+    te: 'て',
+    to: 'と',
+    na: 'な',
+    ni: 'に',
+    nu: 'ぬ',
+    ne: 'ね',
+    no: 'の',
+    ha: 'は',
+    hi: 'ひ',
+    fu: 'ふ',
+    he: 'へ',
+    ho: 'ほ',
+    ma: 'ま',
+    mi: 'み',
+    mu: 'む',
+    me: 'め',
+    mo: 'も',
+    ya: 'や',
+    yu: 'ゆ',
+    yo: 'よ',
+    ra: 'ら',
+    ri: 'り',
+    ru: 'る',
+    re: 'れ',
+    ro: 'ろ',
+    wa: 'わ',
+    wo: 'を',
+    n: 'ん',
+    ga: 'が',
+    gi: 'ぎ',
+    gu: 'ぐ',
+    ge: 'げ',
+    go: 'ご',
+    za: 'ざ',
+    ji: 'じ',
+    zu: 'ず',
+    ze: 'ぜ',
+    zo: 'ぞ',
+    da: 'だ',
+    di: 'ぢ',
+    du: 'づ',
+    de: 'で',
+    do: 'ど',
+    ba: 'ば',
+    bi: 'び',
+    bu: 'ぶ',
+    be: 'べ',
+    bo: 'ぼ',
+    pa: 'ぱ',
+    pi: 'ぴ',
+    pu: 'ぷ',
+    pe: 'ぺ',
+    po: 'ぽ'
 };
 
 function romajiToHiragana(input) {
@@ -168,9 +250,7 @@ async function loadDevFavoritesManifest() {
 
 function filenameToThemeName(filename) {
     const withoutExt = filename.replace(/\.[^/.]+$/, '');
-    return withoutExt
-        .replace(/[-_]+/g, ' ')
-        .replace(/\b[a-z]/g, c => c.toUpperCase()); // title-cases ASCII words; harmless no-op on non-Latin names
+    return withoutExt.replace(/[-_]+/g, ' ').replace(/\b[a-z]/g, (c) => c.toUpperCase()); // title-cases ASCII words; harmless no-op on non-Latin names
 }
 
 // Detects video files by extension so the same manifest/preset system can
@@ -271,7 +351,7 @@ class KanjiLearningApp {
 
     bindFontGridEvents() {
         const fontOptions = document.querySelectorAll('.font-option');
-        fontOptions.forEach(option => {
+        fontOptions.forEach((option) => {
             option.addEventListener('click', () => {
                 const selectedFont = option.getAttribute('data-font');
                 this.settings.kanjiFont = selectedFont;
@@ -299,7 +379,16 @@ class KanjiLearningApp {
             const current = localStorage.getItem('theme') || 'candy';
 
             // NEW: Added 'lumen' to the end of this list!
-            const darkThemes = ['dark', 'nami', 'obake', 'nord', 'midnight', 'forest', 'lumen', 'ito'];
+            const darkThemes = [
+                'dark',
+                'nami',
+                'obake',
+                'nord',
+                'midnight',
+                'forest',
+                'lumen',
+                'ito'
+            ];
             const isDark = darkThemes.includes(current);
 
             if (isDark) {
@@ -331,7 +420,7 @@ class KanjiLearningApp {
             });
 
             // Handle clicking a level inside the dropdown
-            document.querySelectorAll('.level-option').forEach(option => {
+            document.querySelectorAll('.level-option').forEach((option) => {
                 option.addEventListener('click', () => {
                     const newLevel = option.getAttribute('data-level');
 
@@ -414,6 +503,150 @@ class KanjiLearningApp {
                 this.closeSettings();
             }
         });
+
+        // AI Sensei Modal triggers
+        const aiSenseiFab = document.getElementById('aiSenseiFab');
+        if (aiSenseiFab) {
+            aiSenseiFab.addEventListener('click', () => {
+                this.openAISenseiModal();
+            });
+        }
+        const aiSenseiBtn = document.getElementById('aiSenseiBtn');
+        if (aiSenseiBtn) {
+            aiSenseiBtn.addEventListener('click', () => {
+                this.openAISenseiModal();
+            });
+        }
+
+        const closeAISenseiModal = document.getElementById('closeAISenseiModal');
+        if (closeAISenseiModal) {
+            closeAISenseiModal.addEventListener('click', () => {
+                this.closeAISenseiModal();
+            });
+        }
+
+        const aiSenseiModal = document.getElementById('aiSenseiModal');
+        if (aiSenseiModal) {
+            aiSenseiModal.addEventListener('click', (e) => {
+                if (e.target.id === 'aiSenseiModal') {
+                    this.closeAISenseiModal();
+                }
+            });
+        }
+
+        // AI Sensei Tabs
+        document.querySelectorAll('.ai-tab').forEach((tab) => {
+            tab.addEventListener('click', () => {
+                this.switchAISenseiTab(tab.dataset.tab);
+            });
+        });
+
+        // AI Diagnostic trigger
+        const refreshAIDiagnosticBtn = document.getElementById('refreshAIDiagnosticBtn');
+        if (refreshAIDiagnosticBtn) {
+            refreshAIDiagnosticBtn.addEventListener('click', () => {
+                this.runAIDiagnosticAnalysis();
+            });
+        }
+
+        // Start SRS session trigger
+        const startSRSReviewSessionBtn = document.getElementById('startSRSReviewSessionBtn');
+        if (startSRSReviewSessionBtn) {
+            startSRSReviewSessionBtn.addEventListener('click', () => {
+                this.startSRSReviewSession();
+            });
+        }
+
+        // AI Chat Send trigger
+        const aiSenseiSendBtn = document.getElementById('aiSenseiSendBtn');
+        const aiSenseiInput = document.getElementById('aiSenseiInput');
+        if (aiSenseiSendBtn && aiSenseiInput) {
+            aiSenseiSendBtn.addEventListener('click', () => {
+                const text = aiSenseiInput.value.trim();
+                if (text) {
+                    this.askAISensei(text);
+                    aiSenseiInput.value = '';
+                }
+            });
+
+            aiSenseiInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const text = aiSenseiInput.value.trim();
+                    if (text) {
+                        this.askAISensei(text);
+                        aiSenseiInput.value = '';
+                    }
+                }
+            });
+        }
+
+        // Quick prompts
+        document.querySelectorAll('.ai-quick-prompt').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const prompt = btn.dataset.prompt;
+                if (prompt) {
+                    this.askAISensei(prompt);
+                }
+            });
+        });
+
+        // AI Settings UI events
+        const aiProvider = document.getElementById('aiProvider');
+        if (aiProvider) {
+            aiProvider.addEventListener('change', (e) => {
+                const provider = e.target.value;
+                StorageManager.updateAISetting('provider', provider);
+                this.syncAISettingsUI();
+            });
+        }
+
+        const aiApiKey = document.getElementById('aiApiKey');
+        if (aiApiKey) {
+            aiApiKey.addEventListener('change', (e) => {
+                StorageManager.updateAISetting('apiKey', e.target.value.trim());
+            });
+        }
+
+        const toggleApiKeyVisibility = document.getElementById('toggleApiKeyVisibility');
+        if (toggleApiKeyVisibility && aiApiKey) {
+            toggleApiKeyVisibility.addEventListener('click', () => {
+                const isPass = aiApiKey.type === 'password';
+                aiApiKey.type = isPass ? 'text' : 'password';
+                toggleApiKeyVisibility.innerHTML = isPass
+                    ? '<i class="fas fa-eye-slash"></i>'
+                    : '<i class="fas fa-eye"></i>';
+            });
+        }
+
+        const aiCustomEndpoint = document.getElementById('aiCustomEndpoint');
+        if (aiCustomEndpoint) {
+            aiCustomEndpoint.addEventListener('change', (e) => {
+                StorageManager.updateAISetting('customEndpoint', e.target.value.trim());
+            });
+        }
+
+        const aiModel = document.getElementById('aiModel');
+        if (aiModel) {
+            aiModel.addEventListener('change', (e) => {
+                StorageManager.updateAISetting('model', e.target.value);
+            });
+        }
+
+        const aiPersona = document.getElementById('aiPersona');
+        if (aiPersona) {
+            aiPersona.addEventListener('change', (e) => {
+                StorageManager.updateAISetting('persona', e.target.value);
+                this.updatePersonaTag();
+            });
+        }
+
+        const testAIConnectionBtn = document.getElementById('testAIConnectionBtn');
+        if (testAIConnectionBtn) {
+            testAIConnectionBtn.addEventListener('click', () => {
+                this.testAIConnection();
+            });
+        }
         // Custom Theme Builder
         document.getElementById('customThemeBtn').addEventListener('click', async () => {
             // Prefill the builder with whatever's already saved for Slot 1
@@ -441,7 +674,9 @@ class KanjiLearningApp {
                 const wasVideo = !!settings.isVideo;
                 if (settings.imageSource === 'preset' && settings.presetImage) {
                     previewEl.innerHTML = '';
-                    previewEl.style.backgroundImage = wasVideo ? 'none' : `url(${settings.presetImage})`;
+                    previewEl.style.backgroundImage = wasVideo
+                        ? 'none'
+                        : `url(${settings.presetImage})`;
                     previewEl.dataset.imageUrl = settings.presetImage;
                     previewEl.dataset.isVideo = wasVideo ? 'true' : 'false';
                     previewEl.dataset.isPreset = 'true';
@@ -480,7 +715,7 @@ class KanjiLearningApp {
             }
         });
 
-        document.querySelectorAll('.theme-slot-tab.locked').forEach(tab => {
+        document.querySelectorAll('.theme-slot-tab.locked').forEach((tab) => {
             tab.addEventListener('click', () => {
                 this.showToast('This slot is coming in a future update!');
             });
@@ -502,9 +737,13 @@ class KanjiLearningApp {
             if (isVideo) {
                 const sizeMB = file.size / (1024 * 1024);
                 if (sizeMB > 20) {
-                    this.showToast(`That clip is ${sizeMB.toFixed(1)}MB — quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`);
+                    this.showToast(
+                        `That clip is ${sizeMB.toFixed(1)}MB — quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`
+                    );
                 } else if (sizeMB > 8) {
-                    this.showToast(`This clip is ${sizeMB.toFixed(1)}MB. For best performance, aim for 720p-1080p and 8-15 seconds.`);
+                    this.showToast(
+                        `This clip is ${sizeMB.toFixed(1)}MB. For best performance, aim for 720p-1080p and 8-15 seconds.`
+                    );
                 }
 
                 previewEl.style.backgroundImage = 'none';
@@ -517,7 +756,9 @@ class KanjiLearningApp {
             previewEl.dataset.imageUrl = url;
             previewEl.dataset.isVideo = isVideo ? 'true' : 'false';
             delete previewEl.dataset.isPreset; // this is a real upload, not a dev preset
-            document.querySelectorAll('.dev-favorite-thumb').forEach(t => t.classList.remove('selected'));
+            document
+                .querySelectorAll('.dev-favorite-thumb')
+                .forEach((t) => t.classList.remove('selected'));
 
             // Default to checked on upload — most people uploading their own
             // image/video want a matching accent without an extra click.
@@ -550,7 +791,9 @@ class KanjiLearningApp {
             previewEl.dataset.isVideo = isVideo ? 'true' : 'false';
             previewEl.dataset.isPreset = 'true';
 
-            document.querySelectorAll('.dev-favorite-thumb').forEach(t => t.classList.remove('selected'));
+            document
+                .querySelectorAll('.dev-favorite-thumb')
+                .forEach((t) => t.classList.remove('selected'));
             thumb.classList.add('selected');
 
             // Dev's picks are curated to already look good — apply instantly
@@ -588,7 +831,7 @@ class KanjiLearningApp {
         });
 
         // Accent color presets — quick picks, still fully overridable
-        document.querySelectorAll('.accent-swatch').forEach(swatch => {
+        document.querySelectorAll('.accent-swatch').forEach((swatch) => {
             swatch.addEventListener('click', () => {
                 document.getElementById('customThemeAccent').value = swatch.dataset.color;
                 document.getElementById('autoAccentToggle').checked = false; // manual pick overrides auto-pick
@@ -597,7 +840,9 @@ class KanjiLearningApp {
 
         // Custom CSS toggle: panel starts hidden so non-technical users never see raw CSS
         document.getElementById('customThemeCSSToggle').addEventListener('change', (e) => {
-            document.getElementById('customThemeCSSPanel').classList.toggle('show', e.target.checked);
+            document
+                .getElementById('customThemeCSSPanel')
+                .classList.toggle('show', e.target.checked);
         });
 
         // Browse and load a .css file straight into the textarea
@@ -719,8 +964,8 @@ class KanjiLearningApp {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Prevent shortcuts from firing if you are typing in the settings input box
-            if (e.target.tagName === 'INPUT') {
+            // Prevent shortcuts from firing if you are typing in an input or textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
 
@@ -747,21 +992,21 @@ class KanjiLearningApp {
         }
 
         const levelMap = {
-            'Hiragana': 'あ Hiragana',
-            'Katakana': 'ア Katakana',
-            'N5': 'N5(Basic)',
-            'N4': 'N4(Elementary)',
-            'N3': 'N3(Intermediate)',
-            'N2': 'N2(Advanced)',
-            'N1': 'N1(Master)',
-            'all': '全'
+            Hiragana: 'あ Hiragana',
+            Katakana: 'ア Katakana',
+            N5: 'N5(Basic)',
+            N4: 'N4(Elementary)',
+            N3: 'N3(Intermediate)',
+            N2: 'N2(Advanced)',
+            N1: 'N1(Master)',
+            all: '全'
         };
 
         // Update the button icon text
         btn.textContent = levelMap[this.settings.jlptLevel] || 'N';
 
         // Update the dropdown active states
-        document.querySelectorAll('.level-option').forEach(opt => {
+        document.querySelectorAll('.level-option').forEach((opt) => {
             if (opt.getAttribute('data-level') === this.settings.jlptLevel) {
                 opt.classList.add('active');
             } else {
@@ -772,7 +1017,8 @@ class KanjiLearningApp {
 
     async loadCurrentKanji() {
         const widget = document.getElementById('kanjiWidget');
-        widget.innerHTML = '<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading Kanji...</p></div>';
+        widget.innerHTML =
+            '<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading Kanji...</p></div>';
 
         // FIX 1: Clear the recent list UI immediately so it doesn't show old data during the loading delay
         const recentContainer = document.getElementById('recentKanji');
@@ -805,7 +1051,9 @@ class KanjiLearningApp {
             if (!nextKanji) {
                 nextKanji = availableKanji[0];
                 this.currentIndex = 0;
-                this.showToast('Congratulations! You\'ve mastered all kanji in this level. Starting over.');
+                this.showToast(
+                    "Congratulations! You've mastered all kanji in this level. Starting over."
+                );
             }
 
             this.currentKanji = nextKanji;
@@ -818,10 +1066,10 @@ class KanjiLearningApp {
             if (this.settings.autoPlay) {
                 setTimeout(() => this.playPronunciation(), 500);
             }
-
         } catch (error) {
             console.error('Error loading kanji:', error);
-            widget.innerHTML = '<div class="widget-loading"><p>Error loading data.</p><button onclick="app.loadCurrentKanji()">Retry</button></div>';
+            widget.innerHTML =
+                '<div class="widget-loading"><p>Error loading data.</p><button onclick="app.loadCurrentKanji()">Retry</button></div>';
         }
     }
 
@@ -851,6 +1099,8 @@ class KanjiLearningApp {
         if (this.widgetSize === 'small') {
             content += `
                 <div class="widget-actions">
+                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
+                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
                     <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
                     <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
                 </div>
@@ -860,40 +1110,63 @@ class KanjiLearningApp {
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
+                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
+                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
                     <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
                     <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
                 </div>
             `;
         } else {
-            const isMastered = StorageManager.getProgress().mastered.includes(this.currentKanji.character);
+            const isMastered = StorageManager.getProgress().mastered.includes(
+                this.currentKanji.character
+            );
             content += `
                 ${isMastered ? '<button class="unmark-badge" onclick="app.unmarkCurrentKanji()" title="Unmark as mastered"><i class="fas fa-times"></i></button>' : ''}
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>                <div class="kanji-readings">
-                    ${this.currentKanji.onyomi.length > 0 ? `
+                    ${
+    this.currentKanji.onyomi.length > 0
+        ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">On'yomi</div>
                             <div class="reading-value japanese-text">
-                                ${this.currentKanji.onyomi.map(reading =>
-        `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
-    ).join(', ')}
+                                ${this.currentKanji.onyomi
+        .map(
+            (reading) =>
+                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+        )
+        .join(', ')}
                             </div>
                         </div>
-                    ` : ''}
-                    ${this.currentKanji.kunyomi.length > 0 ? `
+                    `
+        : ''
+}
+                    ${
+    this.currentKanji.kunyomi.length > 0
+        ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">Kun'yomi</div>
                             <div class="reading-value japanese-text">
-                                ${this.currentKanji.kunyomi.map(reading =>
-        `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
-    ).join(', ')}
+                                ${this.currentKanji.kunyomi
+        .map(
+            (reading) =>
+                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+        )
+        .join(', ')}
                             </div>
                         </div>
-                    ` : ''}
+                    `
+        : ''
+}
                 </div>
-                ${this.currentKanji.examples && this.currentKanji.examples.length > 0 ? `
+                ${
+    this.currentKanji.examples && this.currentKanji.examples.length > 0
+        ? `
                     <div class="kanji-examples">
                         <h4>Examples</h4>
-                        ${this.currentKanji.examples.slice(0, 3).map(example => `
+                        ${this.currentKanji.examples
+        .slice(0, 3)
+        .map(
+            (example) => `
                             <div class="example-item">
                                 <span class="example-word japanese-text" onclick="app.playSpecificReading('${example.word}')" title="Click to pronounce">
                                     ${example.word}
@@ -901,9 +1174,13 @@ class KanjiLearningApp {
                                 </span>
                                 <span class="example-meaning">${example.meaning}</span>
                             </div>
-                        `).join('')}
+                        `
+        )
+        .join('')}
                     </div>
-                ` : ''}
+                `
+        : ''
+}
                 <div class="stroke-order-section">
                     <div class="stroke-order-header">Stroke order</div>
                     <div class="stroke-order-toolbar">
@@ -913,6 +1190,8 @@ class KanjiLearningApp {
                 </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
+                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
+                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
                     <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
                     <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
                 </div>
@@ -954,6 +1233,9 @@ class KanjiLearningApp {
 
         // Save progress
         StorageManager.markAsMastered(masteredChar);
+        if (window.SRSEngine) {
+            SRSEngine.recordReview(masteredChar, 3, { level: this.settings.jlptLevel });
+        }
 
         // Add to recent
         StorageManager.addToRecent({
@@ -963,7 +1245,8 @@ class KanjiLearningApp {
         });
 
         // Trigger the upgraded HTML Toast with an Undo button
-        const undoBtnHtml = '<button onclick="app.undoMaster()" style="margin-left: 15px; padding: 4px 10px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Undo <i class="fas fa-undo"></i></button>';
+        const undoBtnHtml =
+            '<button onclick="app.undoMaster()" style="margin-left: 15px; padding: 4px 10px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Undo <i class="fas fa-undo"></i></button>';
         this.showToast(`Great! "${masteredChar}" marked as mastered! ${undoBtnHtml}`, true);
 
         // Update progress display
@@ -1039,11 +1322,11 @@ class KanjiLearningApp {
                 const examples = kanji.examples || [];
 
                 const isMatch =
-                    trimmed.includes(kanji.character) ||                       // handles single AND compound queries, e.g. "今夜" matches both 今 and 夜
-                    examples.some(ex => ex.word === trimmed) || // exact compound-word match only — avoids flooding results for common single kanji
-                    meanings.some(m => m.toLowerCase().includes(lowerQuery)) ||
-                    onyomi.some(r => readingMatches(r, lowerQuery, romajiHiragana)) ||
-                    kunyomi.some(r => readingMatches(r, lowerQuery, romajiHiragana));
+                    trimmed.includes(kanji.character) || // handles single AND compound queries, e.g. "今夜" matches both 今 and 夜
+                    examples.some((ex) => ex.word === trimmed) || // exact compound-word match only — avoids flooding results for common single kanji
+                    meanings.some((m) => m.toLowerCase().includes(lowerQuery)) ||
+                    onyomi.some((r) => readingMatches(r, lowerQuery, romajiHiragana)) ||
+                    kunyomi.some((r) => readingMatches(r, lowerQuery, romajiHiragana));
 
                 if (isMatch) {
                     matches.push({ level, kanji });
@@ -1067,10 +1350,13 @@ class KanjiLearningApp {
             return;
         }
 
-        resultsContainer.innerHTML = matches.map(({ level, kanji }) => {
-            const readings = [...(kanji.onyomi || []), ...(kanji.kunyomi || [])].slice(0, 4).join('、');
-            const meaning = (kanji.meanings || []).slice(0, 2).join(', ');
-            return `
+        resultsContainer.innerHTML = matches
+            .map(({ level, kanji }) => {
+                const readings = [...(kanji.onyomi || []), ...(kanji.kunyomi || [])]
+                    .slice(0, 4)
+                    .join('、');
+                const meaning = (kanji.meanings || []).slice(0, 2).join(', ');
+                return `
                 <button class="search-result-item" onclick="app.jumpToSearchResult('${kanji.character}', '${level}')">
                     <span class="search-result-level">${level}</span>
                     <span class="search-result-char japanese-text">${kanji.character}</span>
@@ -1080,7 +1366,8 @@ class KanjiLearningApp {
                     </span>
                 </button>
             `;
-        }).join('');
+            })
+            .join('');
     }
 
     async jumpToSearchResult(character, level) {
@@ -1099,7 +1386,7 @@ class KanjiLearningApp {
             await AudioManager.loadLevelAudio(level, this.currentKanjiPool);
         }
 
-        const idx = this.currentKanjiPool.findIndex(k => k.character === character);
+        const idx = this.currentKanjiPool.findIndex((k) => k.character === character);
         if (idx === -1) {
             return;
         }
@@ -1128,12 +1415,12 @@ class KanjiLearningApp {
 
         // 1. Remove from Mastered array
         const progress = StorageManager.getProgress();
-        progress.mastered = progress.mastered.filter(char => char !== this.lastMasteredChar);
+        progress.mastered = progress.mastered.filter((char) => char !== this.lastMasteredChar);
         StorageManager.saveProgress(progress);
 
         // 2. Remove from Recent array
         let recent = StorageManager.getRecent();
-        recent = recent.filter(item => item.character !== this.lastMasteredChar);
+        recent = recent.filter((item) => item.character !== this.lastMasteredChar);
         localStorage.setItem(StorageManager.keys.RECENT, JSON.stringify(recent));
 
         // 3. UI Updates
@@ -1162,12 +1449,12 @@ class KanjiLearningApp {
             return;
         } // nothing to unmark
 
-        progress.mastered = progress.mastered.filter(char => char !== character);
+        progress.mastered = progress.mastered.filter((char) => char !== character);
         StorageManager.saveProgress(progress);
 
         this.showToast(`"${character}" unmarked — moved back to pending.`);
 
-        this.renderKanji();       // refresh so the ✕ button hides again
+        this.renderKanji(); // refresh so the ✕ button hides again
         this.updateProgress();
         this.renderKanjiJourney();
     }
@@ -1181,14 +1468,20 @@ class KanjiLearningApp {
 
         switch (this.settings.defaultAudio) {
         case 'kunyomi':
-            readingToPlay = this.currentKanji.kunyomi.length > 0 ?
-                this.currentKanji.kunyomi[0] :
-                (this.currentKanji.onyomi.length > 0 ? this.currentKanji.onyomi[0] : '');
+            readingToPlay =
+                    this.currentKanji.kunyomi.length > 0
+                        ? this.currentKanji.kunyomi[0]
+                        : this.currentKanji.onyomi.length > 0
+                            ? this.currentKanji.onyomi[0]
+                            : '';
             break;
         case 'onyomi':
-            readingToPlay = this.currentKanji.onyomi.length > 0 ?
-                this.currentKanji.onyomi[0] :
-                (this.currentKanji.kunyomi.length > 0 ? this.currentKanji.kunyomi[0] : '');
+            readingToPlay =
+                    this.currentKanji.onyomi.length > 0
+                        ? this.currentKanji.onyomi[0]
+                        : this.currentKanji.kunyomi.length > 0
+                            ? this.currentKanji.kunyomi[0]
+                            : '';
             break;
         case 'first':
         default: {
@@ -1233,7 +1526,9 @@ class KanjiLearningApp {
         for (let i = 1; i < this.currentKanjiPool.length; i++) {
             // Calculate the next index, wrapping around to the start/end of the array if necessary
             const step = direction === 'next' ? i : -i;
-            newIndex = (this.currentIndex + step + this.currentKanjiPool.length) % this.currentKanjiPool.length;
+            newIndex =
+                (this.currentIndex + step + this.currentKanjiPool.length) %
+                this.currentKanjiPool.length;
 
             const candidate = this.currentKanjiPool[newIndex];
 
@@ -1249,7 +1544,7 @@ class KanjiLearningApp {
             // Add a rapid visual flash so the user feels the transition
             const widget = document.getElementById('kanjiWidget');
             widget.style.opacity = '0.5';
-            setTimeout(() => widget.style.opacity = '1', 150);
+            setTimeout(() => (widget.style.opacity = '1'), 150);
 
             // Re-render the UI with the newly selected Kanji
             this.renderKanji();
@@ -1267,7 +1562,7 @@ class KanjiLearningApp {
     async getKanjiPool(level = this.settings.jlptLevel) {
         if (level === 'all') {
             const levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
-            const pools = await Promise.all(levels.map(item => KanjiData.getKanjiByLevel(item)));
+            const pools = await Promise.all(levels.map((item) => KanjiData.getKanjiByLevel(item)));
             return pools.flat();
         }
 
@@ -1288,14 +1583,18 @@ class KanjiLearningApp {
         //const masteredCount = progress.mastered.length;
         const pool = this.currentKanjiPool.length > 0 ? this.currentKanjiPool : [];
 
-        const currentLevelChars = new Set(pool.map(k => k.character));
-        const masteredCount = progress.mastered.filter(char => currentLevelChars.has(char)).length;
+        const currentLevelChars = new Set(pool.map((k) => k.character));
+        const masteredCount = progress.mastered.filter((char) =>
+            currentLevelChars.has(char)
+        ).length;
 
         const totalCount = pool.length;
-        const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
+        const levelLabel =
+            this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
 
         // Toggle the special 5-row Gojuon grid layout for basic alphabets
-        const isKana = this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
+        const isKana =
+            this.settings.jlptLevel === 'Hiragana' || this.settings.jlptLevel === 'Katakana';
         if (isKana) {
             container.classList.add('kana-layout');
         } else {
@@ -1332,16 +1631,19 @@ class KanjiLearningApp {
             this.isJourneyExpanded = false;
         }
 
-        const visiblePool = (needsTruncation && !this.isJourneyExpanded)
-            ? pool.slice(0, defaultLimit)
-            : pool;
+        const visiblePool =
+            needsTruncation && !this.isJourneyExpanded ? pool.slice(0, defaultLimit) : pool;
 
         // 1. Generate core collection of pill items
-        let pillsHtml = visiblePool.map(kanji => `
+        let pillsHtml = visiblePool
+            .map(
+                (kanji) => `
             <button class="journey-pill ${masteredSet.has(kanji.character) ? 'mastered' : 'pending'}" data-character="${kanji.character}" type="button">
                 ${kanji.character}
             </button>
-        `).join('');
+        `
+            )
+            .join('');
 
         // NEW ADDITION: If truncated, append a dedicated trailing indicator placeholder inside the grid container row loop
         if (needsTruncation && !this.isJourneyExpanded) {
@@ -1408,11 +1710,13 @@ class KanjiLearningApp {
             // Insert it cleanly immediately after your journey-grid element block bounds
             container.parentNode.insertBefore(bottomDiv, container.nextSibling);
 
-            document.getElementById('toggleJourneyBottomBtn').addEventListener('click', toggleStateAction);
+            document
+                .getElementById('toggleJourneyBottomBtn')
+                .addEventListener('click', toggleStateAction);
         }
 
         // Rebind card loading events to current layout collection
-        container.querySelectorAll('.journey-pill').forEach(button => {
+        container.querySelectorAll('.journey-pill').forEach((button) => {
             button.addEventListener('click', () => {
                 this.showSpecificKanji(button.getAttribute('data-character'));
             });
@@ -1424,9 +1728,12 @@ class KanjiLearningApp {
             return;
         }
 
-        const pool = this.currentKanjiPool.length > 0 ? this.currentKanjiPool : await this.getKanjiPool(this.settings.jlptLevel);
+        const pool =
+            this.currentKanjiPool.length > 0
+                ? this.currentKanjiPool
+                : await this.getKanjiPool(this.settings.jlptLevel);
         this.currentKanjiPool = pool;
-        const foundIndex = pool.findIndex(item => item.character === character);
+        const foundIndex = pool.findIndex((item) => item.character === character);
         const foundKanji = foundIndex !== -1 ? pool[foundIndex] : null;
 
         if (foundKanji) {
@@ -1461,11 +1768,14 @@ class KanjiLearningApp {
             //     }
             // }
 
-            this.currentIndex = foundIndex;   // keep position tracking in sync with the tap
+            this.currentIndex = foundIndex; // keep position tracking in sync with the tap
             this.currentKanji = foundKanji;
             this.renderKanji();
+            this.closeKanjiDrawer();
             this.showToast(`Showing ${character}`);
-            document.getElementById('kanjiWidget').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document
+                .getElementById('kanjiWidget')
+                .scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             //Auto-play the audio if the setting is enabled
             if (this.settings.autoPlay) {
@@ -1489,18 +1799,15 @@ class KanjiLearningApp {
             container.innerHTML = svgMarkup;
             this.prepareStrokeOrderAnimation();
         } else {
-            container.innerHTML = '<div class="stroke-order-empty">Stroke order preview unavailable for this kanji.</div>';
+            container.innerHTML =
+                '<div class="stroke-order-empty">Stroke order preview unavailable for this kanji.</div>';
         }
     }
 
     async fetchStrokeOrderSvg(character) {
         const codePoint = character.codePointAt(0).toString(16).toLowerCase();
         const hex = codePoint.padStart(5, '0');
-        const fileNames = [
-            `${hex}.svg`,
-            `${hex}-Kaisho.svg`,
-            `${hex}-Jinmeiyo.svg`
-        ];
+        const fileNames = [`${hex}.svg`, `${hex}-Kaisho.svg`, `${hex}-Jinmeiyo.svg`];
         const baseUrls = [
             'https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/',
             'https://cdn.jsdelivr.net/gh/KanjiVG/kanjivg/kanji/'
@@ -1689,13 +1996,16 @@ class KanjiLearningApp {
         const progress = StorageManager.getProgress();
 
         // FIX: Create a quick lookup set of the characters currently on screen
-        const currentLevelChars = new Set(this.currentKanjiPool.map(k => k.character));
+        const currentLevelChars = new Set(this.currentKanjiPool.map((k) => k.character));
 
         // FIX: Only count mastered items if they exist in the CURRENT level pool
-        const masteredInThisLevel = progress.mastered.filter(char => currentLevelChars.has(char)).length;
+        const masteredInThisLevel = progress.mastered.filter((char) =>
+            currentLevelChars.has(char)
+        ).length;
 
         const totalCount = this.currentKanjiPool.length || 0;
-        const levelLabel = this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
+        const levelLabel =
+            this.settings.jlptLevel === 'all' ? 'all levels' : `${this.settings.jlptLevel} level`;
 
         const progressStats = document.getElementById('progressStats');
         if (progressStats) {
@@ -1704,7 +2014,8 @@ class KanjiLearningApp {
         }
 
         // The Math.min fail-safe you already had will now work perfectly
-        const progressPercentage = totalCount > 0 ? Math.min((masteredInThisLevel / totalCount) * 100, 100) : 0;
+        const progressPercentage =
+            totalCount > 0 ? Math.min((masteredInThisLevel / totalCount) * 100, 100) : 0;
 
         // Grab the fill element and set its width
         const progressFill = document.getElementById('progressFill');
@@ -1763,7 +2074,7 @@ class KanjiLearningApp {
             } else {
                 // Streak broken
                 streak = 1;
-                this.showToast('Streak reset. Let\'s build a new one!');
+                this.showToast("Streak reset. Let's build a new one!");
             }
         } else {
             // Very first time studying
@@ -1820,8 +2131,8 @@ class KanjiLearningApp {
         }
 
         // 1. Filter by current level pool to prevent cross-level bugs
-        const currentLevelChars = new Set(this.currentKanjiPool.map(k => k.character));
-        const filteredRecent = allRecent.filter(item => currentLevelChars.has(item.character));
+        const currentLevelChars = new Set(this.currentKanjiPool.map((k) => k.character));
+        const filteredRecent = allRecent.filter((item) => currentLevelChars.has(item.character));
 
         // 2. Dynamically update the section header text
         const sectionHeader = container.previousElementSibling;
@@ -1843,26 +2154,30 @@ class KanjiLearningApp {
             return;
         }
 
-        container.innerHTML = filteredRecent.map(item => `
+        container.innerHTML = filteredRecent
+            .map(
+                (item) => `
             <div class="recent-item" onclick="app.showKanjiFromRecent('${item.character}')">
                 <div class="recent-kanji japanese-text">${item.character}</div>
                 <div class="recent-meaning">${item.meanings.slice(0, 2).join(', ')}</div>
             </div>
-        `).join('');
+        `
+            )
+            .join('');
     }
 
     async showKanjiFromRecent(character) {
         try {
             // Find the kanji in our data
             const availableKanji = await KanjiData.getKanjiByLevel(this.settings.jlptLevel);
-            let foundKanji = availableKanji.find(k => k.character === character);
+            let foundKanji = availableKanji.find((k) => k.character === character);
 
             // If not found in current level, search in all levels
             if (!foundKanji) {
                 const allLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
                 for (const level of allLevels) {
                     const levelKanji = await KanjiData.getKanjiByLevel(level);
-                    foundKanji = levelKanji.find(k => k.character === character);
+                    foundKanji = levelKanji.find((k) => k.character === character);
                     if (foundKanji) {
                         break;
                     }
@@ -1888,6 +2203,7 @@ class KanjiLearningApp {
 
                 this.currentKanji = foundKanji;
                 this.renderKanji();
+                this.closeKanjiDrawer();
                 this.renderKanjiJourney();
                 this.showToast(`Showing details for "${character}"`);
 
@@ -1901,7 +2217,6 @@ class KanjiLearningApp {
                 if (this.settings.autoPlay) {
                     setTimeout(() => this.playPronunciation(), 800);
                 }
-
             } else {
                 this.showToast(`Could not find details for "${character}"`);
             }
@@ -1927,11 +2242,673 @@ class KanjiLearningApp {
 
         // Update font preview active state
         this.updateFontPreviewActive();
+
+        // Sync AI Settings UI
+        this.syncAISettingsUI();
     }
 
     closeSettings() {
         const modal = document.getElementById('settingsModal');
         modal.classList.remove('show');
+    }
+
+    syncAISettingsUI() {
+        if (!window.StorageManager) {
+            return;
+        }
+        const aiSettings = StorageManager.getAISettings();
+        const providerEl = document.getElementById('aiProvider');
+        const apiKeyEl = document.getElementById('aiApiKey');
+        const endpointEl = document.getElementById('aiCustomEndpoint');
+        const modelEl = document.getElementById('aiModel');
+        const personaEl = document.getElementById('aiPersona');
+        const apiKeyGroup = document.getElementById('aiApiKeyGroup');
+        const endpointGroup = document.getElementById('aiEndpointGroup');
+
+        if (providerEl) {
+            providerEl.value = aiSettings.provider || 'gemini';
+        }
+        if (apiKeyEl) {
+            apiKeyEl.value = aiSettings.apiKey || '';
+        }
+        if (endpointEl) {
+            endpointEl.value = aiSettings.customEndpoint || 'http://localhost:11434/api/generate';
+        }
+        if (personaEl) {
+            personaEl.value = aiSettings.persona || 'encouraging';
+        }
+
+        const isOllama = aiSettings.provider === 'ollama';
+        if (apiKeyGroup) {
+            apiKeyGroup.style.display = isOllama ? 'none' : 'block';
+        }
+        if (endpointGroup) {
+            endpointGroup.style.display = isOllama ? 'block' : 'none';
+        }
+
+        // Populate models dropdown
+        if (modelEl && window.AIManager && AIManager.PROVIDER_DEFAULTS) {
+            const providerInfo =
+                AIManager.PROVIDER_DEFAULTS[aiSettings.provider] ||
+                AIManager.PROVIDER_DEFAULTS.gemini;
+            modelEl.innerHTML = providerInfo.models
+                .map(
+                    (m) =>
+                        `<option value="${m}" ${m === aiSettings.model ? 'selected' : ''}>${m}</option>`
+                )
+                .join('');
+        }
+    }
+
+    updatePersonaTag() {
+        const tagEl = document.getElementById('aiSenseiPersonaTag');
+        if (!tagEl || !window.StorageManager) {
+            return;
+        }
+        const persona = StorageManager.getAISettings().persona || 'encouraging';
+        const labels = {
+            encouraging: 'Warm & Encouraging Sensei',
+            strict: 'Master Kenji (Strict & Precise)',
+            mnemonic: 'Mnemonic Magician',
+            anime: 'Anime Senpai'
+        };
+        tagEl.textContent = labels[persona] || 'Warm & Encouraging Sensei';
+    }
+
+    async testAIConnection() {
+        const statusEl = document.getElementById('aiConnectionStatus');
+        if (!statusEl || !window.AIManager) {
+            return;
+        }
+
+        statusEl.className = 'ai-conn-status';
+        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+
+        const result = await AIManager.testConnection();
+        if (result.success) {
+            statusEl.className = 'ai-conn-status success';
+            statusEl.innerHTML = `<i class="fas fa-check-circle"></i> ${result.message}`;
+        } else {
+            statusEl.className = 'ai-conn-status error';
+            statusEl.innerHTML = `<i class="fas fa-times-circle"></i> ${result.message}`;
+        }
+    }
+
+    openAISenseiModal(initialTab = 'diagnostics') {
+        const modal = document.getElementById('aiSenseiModal');
+        if (!modal) {
+            return;
+        }
+        modal.classList.add('show');
+        this.switchAISenseiTab(initialTab);
+        this.updateAISenseiTelemetry();
+        this.updatePersonaTag();
+    }
+
+    closeAISenseiModal() {
+        const modal = document.getElementById('aiSenseiModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+
+    switchAISenseiTab(tabName) {
+        document.querySelectorAll('.ai-tab').forEach((tab) => {
+            tab.classList.toggle('active', tab.dataset.tab === tabName);
+        });
+
+        const tabMap = {
+            diagnostics: 'aiTabDiagnostics',
+            'study-path': 'aiTabStudyPath',
+            'ask-sensei': 'aiTabAskSensei'
+        };
+
+        document.querySelectorAll('.ai-tab-pane').forEach((pane) => {
+            pane.classList.remove('active');
+        });
+
+        const activePaneId = tabMap[tabName] || 'aiTabDiagnostics';
+        const targetPane = document.getElementById(activePaneId);
+        if (targetPane) {
+            targetPane.classList.add('active');
+        }
+
+        if (tabName === 'study-path') {
+            this.renderAIPriorityStudyPlan();
+        }
+    }
+
+    updateAISenseiTelemetry() {
+        if (!window.SRSEngine || !window.StorageManager) {
+            return;
+        }
+
+        const level = this.settings.jlptLevel;
+        const stats = SRSEngine.getRetentionStats(level);
+        const weakCards = SRSEngine.getWeakCards(level, 10);
+        const progress = StorageManager.getProgress();
+
+        const retEl = document.getElementById('aiRetentionRate');
+        const dueEl = document.getElementById('aiDueCount');
+        const matEl = document.getElementById('aiMatureCount');
+        const weakEl = document.getElementById('aiWeakCount');
+
+        if (retEl) {
+            retEl.textContent = `${stats.retentionRate}%`;
+        }
+        if (dueEl) {
+            dueEl.textContent = stats.dueCount;
+        }
+        if (matEl) {
+            matEl.textContent = stats.matureCount;
+        }
+        if (weakEl) {
+            weakEl.textContent = weakCards.length;
+        }
+
+        const diagnostics = SRSEngine.generateRuleBasedDiagnostics(
+            progress,
+            this.currentKanjiPool || []
+        );
+        this.renderAILookalikeTraps(diagnostics.lookalikeTraps || []);
+    }
+    renderAILookalikeTraps(traps) {
+        const listEl = document.getElementById('aiLookalikeTrapsList');
+        if (!listEl) {
+            return;
+        }
+
+        if (!traps || traps.length === 0) {
+            listEl.innerHTML =
+                '<p class="ai-placeholder-text">No high-risk lookalikes detected in your current deck.</p>';
+            return;
+        }
+
+        listEl.innerHTML = traps
+            .map(
+                (trap) => `
+            <div class="ai-trap-item">
+                <div class="ai-trap-chars">
+                    <span>${trap.kanji1}</span>
+                    <span class="ai-trap-vs">vs</span>
+                    <span>${trap.kanji2}</span>
+                </div>
+                <div class="ai-trap-reason">${trap.reason}</div>
+            </div>
+        `
+            )
+            .join('');
+    }
+
+    async runAIDiagnosticAnalysis() {
+        if (!window.AIManager || !window.SRSEngine || !window.StorageManager) {
+            return;
+        }
+
+        const loadingEl = document.getElementById('aiDiagnosticLoading');
+        const contentEl = document.getElementById('aiDiagnosticContent');
+        const level = this.settings.jlptLevel;
+
+        if (loadingEl) {
+            loadingEl.style.display = 'flex';
+        }
+        if (contentEl) {
+            contentEl.style.display = 'none';
+        }
+
+        try {
+            const progress = StorageManager.getProgress();
+            const stats = SRSEngine.getRetentionStats(level);
+            const weakCards = SRSEngine.getWeakCards(level, 8);
+            const result = await AIManager.analyzeStudyProfile(
+                progress,
+                stats,
+                weakCards,
+                this.currentKanjiPool || []
+            );
+
+            if (contentEl) {
+                if (result.aiGenerated && result.commentary) {
+                    contentEl.innerHTML = this.formatMarkdownToHtml(result.commentary);
+                } else {
+                    let fallbackHtml = `
+                        <h3><i class="fas fa-chart-line"></i> Local Algorithmic Analysis</h3>
+                        <p>${result.advice || 'Keep reviewing consistently!'}</p>
+                    `;
+                    if (result.note) {
+                        fallbackHtml += `<p style="opacity: 0.7; font-size: 0.8rem;"><i class="fas fa-info-circle"></i> ${result.note}</p>`;
+                    }
+                    contentEl.innerHTML = fallbackHtml;
+                }
+            }
+        } catch (error) {
+            if (contentEl) {
+                contentEl.innerHTML = `<p class="ai-conn-status error"><i class="fas fa-exclamation-triangle"></i> Failed to run analysis: ${error.message}</p>`;
+            }
+        } finally {
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+            if (contentEl) {
+                contentEl.style.display = 'block';
+            }
+        }
+    }
+
+    renderAIPriorityStudyPlan() {
+        if (!window.SRSEngine || !window.StorageManager) {
+            return;
+        }
+
+        const listEl = document.getElementById('aiPriorityKanjiList');
+        if (!listEl) {
+            return;
+        }
+
+        const progress = StorageManager.getProgress();
+        const diagnostics = SRSEngine.generateRuleBasedDiagnostics(
+            progress,
+            this.currentKanjiPool || []
+        );
+        const priorityList = diagnostics.priorityStudy || [];
+
+        if (priorityList.length === 0) {
+            listEl.innerHTML = '<p class="ai-placeholder-text">All caught up! Great work.</p>';
+            return;
+        }
+
+        listEl.innerHTML = priorityList
+            .map(
+                (item) => `
+            <div class="ai-priority-card" onclick="app.jumpToKanjiCharacter('${item.character}')">
+                <div class="ai-priority-char japanese-text">${item.character}</div>
+                <div class="ai-priority-reason">${item.reason}</div>
+            </div>
+        `
+            )
+            .join('');
+    }
+
+    startSRSReviewSession() {
+        if (!window.SRSEngine || !window.StorageManager) {
+            return;
+        }
+
+        const dueCards = SRSEngine.getDueCards(this.settings.jlptLevel);
+        const weakCards = SRSEngine.getWeakCards(this.settings.jlptLevel, 5);
+        const target = dueCards[0] || weakCards[0];
+
+        this.closeAISenseiModal();
+
+        if (target) {
+            this.jumpToKanjiCharacter(target.character);
+            this.showToast(`Starting review for "${target.character}"!`);
+        } else if (this.currentKanji) {
+            this.showToast('No overdue cards! Reviewing current deck.');
+        }
+    }
+
+    jumpToKanjiCharacter(character) {
+        if (!this.currentKanjiPool) {
+            return;
+        }
+        const index = this.currentKanjiPool.findIndex((k) => k.character === character);
+        if (index !== -1) {
+            this.currentIndex = index;
+            this.currentKanji = this.currentKanjiPool[index];
+            this.renderKanji();
+            this.closeAISenseiModal();
+            this.closeKanjiDrawer();
+        } else {
+            this.showKanjiFromRecent(character);
+            this.closeAISenseiModal();
+            this.closeKanjiDrawer();
+        }
+    }
+
+    async askAISensei(question) {
+        const chatLog = document.getElementById('aiChatLog');
+        if (!chatLog || !window.AIManager) {
+            return;
+        }
+
+        // Add user message bubble
+        const userMsg = document.createElement('div');
+        userMsg.className = 'ai-chat-msg ai-msg-user';
+        userMsg.innerHTML = `<div class="ai-msg-text">${this.escapeHtml(question)}</div>`;
+        chatLog.appendChild(userMsg);
+
+        // Add bot typing bubble
+        const botMsg = document.createElement('div');
+        botMsg.className = 'ai-chat-msg ai-msg-bot';
+        botMsg.innerHTML = `
+            <div class="ai-msg-avatar"><i class="fas fa-brain"></i></div>
+            <div class="ai-msg-text"><i class="fas fa-spinner fa-spin"></i> Sensei is thinking...</div>
+        `;
+        chatLog.appendChild(botMsg);
+        chatLog.scrollTop = chatLog.scrollHeight;
+
+        try {
+            const answer = await AIManager.askSenseiQuestion(question, this.currentKanji);
+            botMsg.querySelector('.ai-msg-text').innerHTML = this.formatMarkdownToHtml(answer);
+        } catch (error) {
+            botMsg.querySelector('.ai-msg-text').innerHTML =
+                `<span style="color: #FF5252;"><i class="fas fa-circle-exclamation"></i> ${error.message}</span>`;
+        }
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    openAISenseiForCurrentKanji() {
+        this.openAISenseiModal('ask-sensei');
+        if (this.currentKanji) {
+            this.askAISensei(
+                `Explain the radicals and visual mnemonic for "${this.currentKanji.character}"`
+            );
+        }
+    }
+
+    // ==========================================
+    // PHASE 2: KANJI MNEMONIC & ETYMOLOGY DRAWER
+    // ==========================================
+
+    openKanjiDrawer(tab = 'mnemonic') {
+        if (!this.currentKanji) {
+            return;
+        }
+        const drawer = document.getElementById('kanjiDrawer');
+        if (!drawer) {
+            return;
+        }
+
+        const charEl = document.getElementById('drawerKanjiChar');
+        const meaningEl = document.getElementById('drawerKanjiMeaning');
+        const badgeEl = document.getElementById('drawerCacheBadge');
+
+        if (charEl) {
+            charEl.textContent = this.currentKanji.character;
+        }
+        if (meaningEl) {
+            meaningEl.textContent = (this.currentKanji.meanings || []).join(', ');
+        }
+
+        // Show cache badge if either tab is cached
+        const mnemonicCached = StorageManager.getAICacheItem(`mnemonic_${this.currentKanji.character}`);
+        const etymologyCached = StorageManager.getAICacheItem(`etymology_${this.currentKanji.character}`);
+        if (badgeEl) {
+            badgeEl.style.display = (mnemonicCached || etymologyCached) ? 'inline-flex' : 'none';
+        }
+
+        this.switchKanjiDrawerTab(tab);
+        drawer.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeKanjiDrawer() {
+        const drawer = document.getElementById('kanjiDrawer');
+        if (drawer) {
+            drawer.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    }
+
+    switchKanjiDrawerTab(tabName) {
+        document.querySelectorAll('.kanji-drawer-tab').forEach((tab) => {
+            tab.classList.toggle('active', tab.dataset.drawerTab === tabName);
+        });
+        const paneMap = { mnemonic: 'drawerTabMnemonic', etymology: 'drawerTabEtymology' };
+        document.querySelectorAll('.kanji-drawer-pane').forEach((p) => p.classList.remove('active'));
+        const target = document.getElementById(paneMap[tabName]);
+        if (target) {
+            target.classList.add('active');
+        }
+
+        if (tabName === 'mnemonic') {
+            this.loadDrawerMnemonic();
+        } else if (tabName === 'etymology') {
+            this.loadDrawerEtymology();
+        }
+    }
+
+    async loadDrawerMnemonic() {
+        if (!this.currentKanji) {
+            return;
+        }
+        const contentEl = document.getElementById('drawerMnemonicContent');
+        if (!contentEl) {
+            return;
+        }
+
+        // Guard against duplicate concurrent loads for the same kanji
+        if (this._drawerMnemonicInFlight === this.currentKanji.character) {
+            return;
+        }
+        this._drawerMnemonicInFlight = this.currentKanji.character;
+
+        // Check AI availability
+        if (!window.AIManager || !window.StorageManager) {
+            contentEl.innerHTML = this._drawerNoAIMessage(); return;
+        }
+        const settings = StorageManager.getAISettings();
+        if (!settings.apiKey && settings.provider !== 'ollama') {
+            contentEl.innerHTML = this._drawerNoAIMessage(); return;
+        }
+
+        // Instant cache hit
+        const cacheKey = `mnemonic_${this.currentKanji.character}`;
+        const cached = StorageManager.getAICacheItem(cacheKey);
+        const badgeEl = document.getElementById('drawerCacheBadge');
+
+        if (cached && cached.data) {
+            contentEl.innerHTML = `<div class="kanji-drawer-content">${this.formatMarkdownToHtml(cached.data)}</div>`;
+            if (badgeEl) {
+                badgeEl.style.display = 'inline-flex';
+            }
+            // Enrich async and append stroke warning banner if not yet shown
+            this._enrichKanjiWithStrokeCount().then(() => {
+                if (this.currentKanji && (this.currentKanji.strokes || 0) > 12) {
+                    this._appendStrokeWarning(contentEl, this.currentKanji);
+                }
+            });
+            return;
+        }
+
+        // Loading state
+        contentEl.innerHTML = `<div class="ai-loading-container"><div class="ai-spinner"></div><p>Sensei is crafting a mnemonic for <strong class="japanese-text">${this.currentKanji.character}</strong>…</p></div>`;
+
+        try {
+            // Enrich stroke data so prompt includes stroke-count warnings
+            await this._enrichKanjiWithStrokeCount();
+            const result = await AIManager.generateMnemonic(this.currentKanji);
+            contentEl.innerHTML = `<div class="kanji-drawer-content">${this.formatMarkdownToHtml(result)}</div>`;
+            this._appendStrokeWarning(contentEl, this.currentKanji);
+            if (badgeEl) {
+                badgeEl.style.display = 'inline-flex';
+            }
+            this._drawerMnemonicInFlight = null;
+        } catch (error) {
+            contentEl.innerHTML = `<div class="kanji-drawer-content"><div class="kanji-drawer-stroke-warning"><i class="fas fa-circle-exclamation"></i><span>${this.escapeHtml(error.message)}</span></div></div>`;
+            this._drawerMnemonicInFlight = null;
+        }
+    }
+
+    async loadDrawerEtymology() {
+        if (!this.currentKanji) {
+            return;
+        }
+        const contentEl = document.getElementById('drawerEtymologyContent');
+        if (!contentEl) {
+            return;
+        }
+
+        // Guard against duplicate concurrent loads for the same kanji
+        if (this._drawerEtymologyInFlight === this.currentKanji.character) {
+            return;
+        }
+        this._drawerEtymologyInFlight = this.currentKanji.character;
+
+        // Check AI availability
+        if (!window.AIManager || !window.StorageManager) {
+            contentEl.innerHTML = this._drawerNoAIMessage(); return;
+        }
+        const settings = StorageManager.getAISettings();
+        if (!settings.apiKey && settings.provider !== 'ollama') {
+            contentEl.innerHTML = this._drawerNoAIMessage(); return;
+        }
+
+        // Instant cache hit
+        const cacheKey = `etymology_${this.currentKanji.character}`;
+        const cached = StorageManager.getAICacheItem(cacheKey);
+        const badgeEl = document.getElementById('drawerCacheBadge');
+
+        if (cached && cached.data) {
+            contentEl.innerHTML = `<div class="kanji-drawer-content">${this.formatMarkdownToHtml(cached.data)}</div>`;
+            if (badgeEl) {
+                badgeEl.style.display = 'inline-flex';
+            }
+            // Enrich async and append stroke warning banner if not yet shown
+            this._enrichKanjiWithStrokeCount().then(() => {
+                if (this.currentKanji && (this.currentKanji.strokes || 0) > 12) {
+                    this._appendStrokeWarning(contentEl, this.currentKanji);
+                }
+            });
+            return;
+        }
+
+        // Loading state
+        contentEl.innerHTML = `<div class="ai-loading-container"><div class="ai-spinner"></div><p>Exploring etymology of <strong class="japanese-text">${this.currentKanji.character}</strong>…</p></div>`;
+
+        try {
+            // Enrich stroke data so prompt includes stroke-count warnings
+            await this._enrichKanjiWithStrokeCount();
+            const result = await AIManager.explainEtymology(this.currentKanji);
+            contentEl.innerHTML = `<div class="kanji-drawer-content">${this.formatMarkdownToHtml(result)}</div>`;
+            if (badgeEl) {
+                badgeEl.style.display = 'inline-flex';
+            }
+            this._drawerEtymologyInFlight = null;
+        } catch (error) {
+            contentEl.innerHTML = `<div class="kanji-drawer-content"><div class="kanji-drawer-stroke-warning"><i class="fas fa-circle-exclamation"></i><span>${this.escapeHtml(error.message)}</span></div></div>`;
+            this._drawerEtymologyInFlight = null;
+        }
+    }
+
+    refreshKanjiDrawer() {
+        if (!this.currentKanji) {
+            return;
+        }
+
+        // Clear cached data for current kanji
+        const cache = StorageManager.getItem(StorageManager.keys.AI_CACHE, {});
+        delete cache[`mnemonic_${this.currentKanji.character}`];
+        delete cache[`etymology_${this.currentKanji.character}`];
+        StorageManager.setItem(StorageManager.keys.AI_CACHE, cache);
+
+        const badgeEl = document.getElementById('drawerCacheBadge');
+        if (badgeEl) {
+            badgeEl.style.display = 'none';
+        }
+
+        // Reset in-flight guards so refresh always triggers a fresh load
+        this._drawerMnemonicInFlight = null;
+        this._drawerEtymologyInFlight = null;
+
+        // Reload the active tab
+        const activeTab = document.querySelector('.kanji-drawer-tab.active');
+        if (activeTab) {
+            const tabName = activeTab.dataset.drawerTab;
+            if (tabName === 'mnemonic') {
+                this.loadDrawerMnemonic();
+            } else if (tabName === 'etymology') {
+                this.loadDrawerEtymology();
+            }
+        }
+        this.showToast('Regenerating AI content…');
+    }
+
+    _appendStrokeWarning(containerEl, kanjiData) {
+        if (!kanjiData.strokes || kanjiData.strokes <= 12) {
+            return;
+        }
+        const warningHtml = `<div class="kanji-drawer-stroke-warning"><i class="fas fa-pen-nib"></i><span>This kanji has <strong>${kanjiData.strokes} strokes</strong>. Pay close attention to the stroke order tips above to avoid common mistakes.</span></div>`;
+        containerEl.insertAdjacentHTML('beforeend', warningHtml);
+    }
+
+    _drawerNoAIMessage() {
+        return '<div class="kanji-drawer-no-ai"><i class="fas fa-key"></i><p><strong>AI not configured</strong></p><p>Set up your API key in Settings to unlock AI-powered mnemonics and etymology.</p><button onclick="app.closeKanjiDrawer(); app.openSettings();">Open Settings</button></div>';
+    }
+
+    /**
+     * Derives the kanji's stroke count from the KanjiVG SVG (counts <path> elements).
+     * Enriches this.currentKanji.strokes so prompts and warnings can use it.
+     * Falls back gracefully to no stroke data when unavailable.
+     */
+    async _enrichKanjiWithStrokeCount() {
+        if (!this.currentKanji) {
+            return;
+        }
+        if (this.currentKanji.strokes) {
+            return this.currentKanji.strokes;
+        }
+
+        // 1) Count strokes from the already-rendered stroke-order SVG if present
+        const container = document.getElementById('strokeOrderContainer');
+        const renderedSvg = container ? container.querySelector('svg') : null;
+        if (renderedSvg) {
+            const count = renderedSvg.querySelectorAll('path').length;
+            if (count > 0) {
+                this.currentKanji.strokes = count;
+                return count;
+            }
+        }
+
+        // 2) Fetch the KanjiVG SVG and count stroke paths
+        try {
+            const svgMarkup = await this.fetchStrokeOrderSvg(this.currentKanji.character);
+            if (svgMarkup) {
+                const count = (svgMarkup.match(/<path\b/gi) || []).length;
+                if (count > 0) {
+                    this.currentKanji.strokes = count;
+                    return count;
+                }
+            }
+        } catch (error) {
+            console.warn('Could not derive stroke count:', error);
+        }
+
+        return null;
+    }
+
+    formatMarkdownToHtml(text) {
+        if (!text) {
+            return '';
+        }
+
+        // Basic escape to prevent arbitrary XSS
+        let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Headings
+        html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+        html = html.replace(/^## (.*$)/gim, '<h3>$1</h3>');
+        html = html.replace(/^# (.*$)/gim, '<h3>$1</h3>');
+
+        // Bold & Italic
+        html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+
+        // Unordered lists
+        html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li>$1</li>');
+        html = html.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
+
+        // Line breaks
+        html = html.replace(/\n\n+/gim, '<p></p>').replace(/\n/gim, '<br>');
+
+        return html;
+    }
+
+    escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 
     resetProgress() {
@@ -1963,19 +2940,24 @@ class KanjiLearningApp {
 
         // NEW FIX: Bulletproof WebGL & Timer Kill Switches!
         if (typeof namiAnimationId !== 'undefined' && namiAnimationId) {
-            cancelAnimationFrame(namiAnimationId); namiAnimationId = null;
+            cancelAnimationFrame(namiAnimationId);
+            namiAnimationId = null;
         }
         if (typeof lumenAnimationId !== 'undefined' && lumenAnimationId) {
-            cancelAnimationFrame(lumenAnimationId); lumenAnimationId = null;
+            cancelAnimationFrame(lumenAnimationId);
+            lumenAnimationId = null;
         }
         if (typeof obakeAnimationId !== 'undefined' && obakeAnimationId) {
-            cancelAnimationFrame(obakeAnimationId); obakeAnimationId = null;
+            cancelAnimationFrame(obakeAnimationId);
+            obakeAnimationId = null;
         }
         if (typeof itoAnimationId !== 'undefined' && itoAnimationId) {
-            cancelAnimationFrame(itoAnimationId); itoAnimationId = null;
+            cancelAnimationFrame(itoAnimationId);
+            itoAnimationId = null;
         }
         if (typeof itoIntervalId !== 'undefined' && itoIntervalId) {
-            clearInterval(itoIntervalId); itoIntervalId = null;
+            clearInterval(itoIntervalId);
+            itoIntervalId = null;
         }
 
         // NEW: Automatically boot the WebGL wave.
@@ -2038,21 +3020,35 @@ class KanjiLearningApp {
             imageSource = 'upload';
         }
 
-        localStorage.setItem('customTheme:slot1:settings', JSON.stringify({
-            blur: blurPx, accent: accentHex, mode, customCSS, customCSSEnabled, imageSource, presetImage, isVideo
-        }));
+        localStorage.setItem(
+            'customTheme:slot1:settings',
+            JSON.stringify({
+                blur: blurPx,
+                accent: accentHex,
+                mode,
+                customCSS,
+                customCSSEnabled,
+                imageSource,
+                presetImage,
+                isVideo
+            })
+        );
 
         this.setTheme('custom-1');
         document.getElementById('customThemeModal').classList.remove('show');
 
         if (appliedName) {
-            this.showToast(adjusted
-                ? `"${appliedName}" applied! Accent adjusted slightly for visibility.`
-                : `"${appliedName}" applied!`);
+            this.showToast(
+                adjusted
+                    ? `"${appliedName}" applied! Accent adjusted slightly for visibility.`
+                    : `"${appliedName}" applied!`
+            );
         } else {
-            this.showToast(adjusted
-                ? 'Theme saved! Accent color adjusted slightly for visibility.'
-                : 'Custom theme saved and applied!');
+            this.showToast(
+                adjusted
+                    ? 'Theme saved! Accent color adjusted slightly for visibility.'
+                    : 'Custom theme saved and applied!'
+            );
         }
     }
 
@@ -2072,7 +3068,13 @@ class KanjiLearningApp {
             imageUrl = blob ? URL.createObjectURL(blob) : null;
         }
 
-        this.applyCustomThemeStyles(imageUrl, settings.blur, settings.accent, settings.mode, !!settings.isVideo);
+        this.applyCustomThemeStyles(
+            imageUrl,
+            settings.blur,
+            settings.accent,
+            settings.mode,
+            !!settings.isVideo
+        );
         this.applyCustomCSS(settings.customCSSEnabled ? settings.customCSS : '');
     }
 
@@ -2083,7 +3085,9 @@ class KanjiLearningApp {
         // Remember these so updateCustomThemeBlurForViewport() can recompute
         // on resize without needing the full settings object again.
         this.customThemeBaseBlur = parseFloat(blurPx) || 0;
-        this.customThemeImageIsMobileSourced = !!(imageUrl && imageUrl.includes(DEV_THEMES_MOBILE_FOLDER));
+        this.customThemeImageIsMobileSourced = !!(
+            imageUrl && imageUrl.includes(DEV_THEMES_MOBILE_FOLDER)
+        );
 
         const imageEl = document.getElementById('customThemeBackground');
         const videoEl = document.getElementById('customThemeBackgroundVideo');
@@ -2094,7 +3098,7 @@ class KanjiLearningApp {
                     videoEl.src = imageUrl;
                 }
                 videoEl.classList.add('active');
-                videoEl.play().catch(() => { }); // autoplay can be blocked pre-interaction; harmless either way
+                videoEl.play().catch(() => {}); // autoplay can be blocked pre-interaction; harmless either way
             }
             imageEl?.classList.remove('active');
         } else {
@@ -2190,9 +3194,24 @@ class KanjiLearningApp {
         const appContainer = document.querySelector('.app-container');
 
         // Remove existing font and size classes
-        appContainer.classList.remove('font-size-small', 'font-size-medium', 'font-size-large', 'font-size-extra-large');
-        widget.classList.remove('font-klee-one', 'font-noto-sans-jp', 'font-zen-antique', 'font-zen-maru-gothic', 'font-hannari', 'font-kokoro',
-            'font-hiragino-sans', 'font-yu-gothic', 'font-meiryo', 'font-ms-gothic');
+        appContainer.classList.remove(
+            'font-size-small',
+            'font-size-medium',
+            'font-size-large',
+            'font-size-extra-large'
+        );
+        widget.classList.remove(
+            'font-klee-one',
+            'font-noto-sans-jp',
+            'font-zen-antique',
+            'font-zen-maru-gothic',
+            'font-hannari',
+            'font-kokoro',
+            'font-hiragino-sans',
+            'font-yu-gothic',
+            'font-meiryo',
+            'font-ms-gothic'
+        );
 
         // Apply font size class
         appContainer.classList.add(`font-size-${this.settings.fontSize}`);
@@ -2203,11 +3222,11 @@ class KanjiLearningApp {
             'Noto Sans JP': 'font-noto-sans-jp',
             'Zen Antique': 'font-zen-antique',
             'Zen Maru Gothic': 'font-zen-maru-gothic',
-            'Hannari': 'font-hannari',
-            'Kokoro': 'font-kokoro',
+            Hannari: 'font-hannari',
+            Kokoro: 'font-kokoro',
             'Hiragino Sans': 'font-hiragino-sans',
             'Yu Gothic': 'font-yu-gothic',
-            'Meiryo': 'font-meiryo',
+            Meiryo: 'font-meiryo',
             'MS Gothic': 'font-ms-gothic'
         };
 
@@ -2215,7 +3234,10 @@ class KanjiLearningApp {
             widget.classList.add(fontClassMap[this.settings.kanjiFont]);
             widget.style.removeProperty('--japanese-font');
         } else if (this.settings.kanjiFont !== 'Noto Sans JP') {
-            widget.style.setProperty('--japanese-font', `'${this.settings.kanjiFont}', 'Noto Sans JP', sans-serif`);
+            widget.style.setProperty(
+                '--japanese-font',
+                `'${this.settings.kanjiFont}', 'Noto Sans JP', sans-serif`
+            );
         } else {
             widget.style.removeProperty('--japanese-font');
         }
@@ -2224,7 +3246,7 @@ class KanjiLearningApp {
     updateFontPreviewActive() {
         // Set the active state on the font preview grid
         const fontOptions = document.querySelectorAll('.font-option');
-        fontOptions.forEach(option => {
+        fontOptions.forEach((option) => {
             option.classList.remove('active');
             if (option.getAttribute('data-font') === this.settings.kanjiFont) {
                 option.classList.add('active');
@@ -2254,7 +3276,6 @@ class KanjiLearningApp {
             // Update last backup time
             localStorage.setItem('lastLocalBackup', Date.now().toString());
             this.showToast('Local backup created successfully!');
-
         } catch (error) {
             console.error('Error creating backup:', error);
             this.showToast('Error creating backup. Please try again.');
@@ -2298,9 +3319,9 @@ class KanjiLearningApp {
         // Schedule local backups
         if (this.settings.localBackupFreq !== 'never') {
             const intervals = {
-                'daily': 24 * 60 * 60 * 1000,
-                'weekly': 7 * 24 * 60 * 60 * 1000,
-                'monthly': 30 * 24 * 60 * 60 * 1000
+                daily: 24 * 60 * 60 * 1000,
+                weekly: 7 * 24 * 60 * 60 * 1000,
+                monthly: 30 * 24 * 60 * 60 * 1000
             };
 
             const interval = intervals[this.settings.localBackupFreq];
@@ -2331,13 +3352,13 @@ class KanjiLearningApp {
         const lastBackupTime = parseInt(lastBackup);
         const now = Date.now();
         const intervals = {
-            'daily': 24 * 60 * 60 * 1000,
-            'weekly': 7 * 24 * 60 * 60 * 1000,
-            'monthly': 30 * 24 * 60 * 60 * 1000
+            daily: 24 * 60 * 60 * 1000,
+            weekly: 7 * 24 * 60 * 60 * 1000,
+            monthly: 30 * 24 * 60 * 60 * 1000
         };
 
         const interval = intervals[this.settings.localBackupFreq];
-        if (interval && (now - lastBackupTime) >= interval) {
+        if (interval && now - lastBackupTime >= interval) {
             this.autoCreateBackup();
         }
     }
@@ -2349,11 +3370,13 @@ class KanjiLearningApp {
             localStorage.setItem('lastLocalBackup', Date.now().toString());
 
             // Keep only last 5 auto backups
-            const keys = Object.keys(localStorage).filter(key => key.startsWith('autoBackup_'));
+            const keys = Object.keys(localStorage).filter((key) => key.startsWith('autoBackup_'));
             if (keys.length > 5) {
-                keys.sort().slice(0, -5).forEach(key => {
-                    localStorage.removeItem(key);
-                });
+                keys.sort()
+                    .slice(0, -5)
+                    .forEach((key) => {
+                        localStorage.removeItem(key);
+                    });
             }
 
             console.log('Auto backup created');
@@ -2394,11 +3417,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Service Worker registration for offline support
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {
                 console.log('SW registered: ', registration);
             })
-            .catch(registrationError => {
+            .catch((registrationError) => {
                 console.log('SW registration failed: ', registrationError);
             });
     });
@@ -2416,7 +3440,12 @@ function initNamiWave() {
         return;
     }
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
     camera.position.set(0, 2, 6);
     camera.lookAt(0, 0, 0);
 
@@ -2529,12 +3558,8 @@ function initLumenWave() {
 
     // 2. Create the flat geometry covering the screen
     const position = [
-        -1.0, -1.0, 0.0,
-        1.0, -1.0, 0.0,
-        -1.0, 1.0, 0.0,
-        1.0, -1.0, 0.0,
-        -1.0, 1.0, 0.0,
-        1.0, 1.0, 0.0
+        -1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0,
+        0.0
     ];
     const positions = new THREE.BufferAttribute(new Float32Array(position), 3);
     const geometry = new THREE.BufferGeometry();
@@ -2546,7 +3571,7 @@ function initLumenWave() {
         time: { type: 'f', value: 0.0 },
         xScale: { type: 'f', value: 1.0 },
         yScale: { type: 'f', value: 0.5 },
-        distortion: { type: 'f', value: 0.050 }
+        distortion: { type: 'f', value: 0.05 }
     };
 
     // 4. Create the Shader Material (Yuki's CodePen Math)
@@ -2626,7 +3651,12 @@ function initObakeGhost() {
 
     // 1. Setup Scene & Camera
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
     camera.position.z = 20;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -2644,16 +3674,28 @@ function initObakeGhost() {
     const renderPass = new THREE.RenderPass(scene, camera);
     composer.addPass(renderPass);
 
-    const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.3, 1.25, 0.0);
+    const bloomPass = new THREE.UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        0.3,
+        1.25,
+        0.0
+    );
     composer.addPass(bloomPass);
 
     const analogDecayShader = {
         uniforms: {
-            tDiffuse: { value: null }, uTime: { value: 0.0 }, uAnalogGrain: { value: 0.4 },
-            uAnalogBleeding: { value: 1.0 }, uAnalogVSync: { value: 1.0 }, uAnalogScanlines: { value: 1.0 },
-            uAnalogVignette: { value: 1.0 }, uAnalogJitter: { value: 0.4 }, uAnalogIntensity: { value: 0.6 }
+            tDiffuse: { value: null },
+            uTime: { value: 0.0 },
+            uAnalogGrain: { value: 0.4 },
+            uAnalogBleeding: { value: 1.0 },
+            uAnalogVSync: { value: 1.0 },
+            uAnalogScanlines: { value: 1.0 },
+            uAnalogVignette: { value: 1.0 },
+            uAnalogJitter: { value: 0.4 },
+            uAnalogIntensity: { value: 0.6 }
         },
-        vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        vertexShader:
+            'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
         fragmentShader: `
             uniform sampler2D tDiffuse; uniform float uTime; uniform float uAnalogGrain;
             uniform float uAnalogBleeding; uniform float uAnalogVSync; uniform float uAnalogScanlines;
@@ -2707,16 +3749,25 @@ function initObakeGhost() {
     const positions = ghostGeometry.getAttribute('position').array;
     for (let i = 0; i < positions.length; i += 3) {
         if (positions[i + 1] < -0.2) {
-            const x = positions[i]; const z = positions[i + 2];
-            positions[i + 1] = -2.0 + Math.sin(x * 5) * 0.35 + Math.cos(z * 4) * 0.25 + Math.sin((x + z) * 3) * 0.15;
+            const x = positions[i];
+            const z = positions[i + 2];
+            positions[i + 1] =
+                -2.0 +
+                Math.sin(x * 5) * 0.35 +
+                Math.cos(z * 4) * 0.25 +
+                Math.sin((x + z) * 3) * 0.15;
         }
     }
     ghostGeometry.computeVertexNormals();
 
     const ghostMaterial = new THREE.MeshStandardMaterial({
-        color: 0x0f2027, transparent: true, opacity: 0.88,
-        emissive: 0xbb86fc, emissiveIntensity: 5.8, // NEW: Soft glowing purple
-        roughness: 0.02, side: THREE.DoubleSide
+        color: 0x0f2027,
+        transparent: true,
+        opacity: 0.88,
+        emissive: 0xbb86fc,
+        emissiveIntensity: 5.8, // NEW: Soft glowing purple
+        roughness: 0.02,
+        side: THREE.DoubleSide
     });
     const ghostBody = new THREE.Mesh(ghostGeometry, ghostMaterial);
     ghostGroup.add(ghostBody);
@@ -2724,9 +3775,12 @@ function initObakeGhost() {
     // Ghost Eyes
     const eyeGeom = new THREE.SphereGeometry(0.3, 12, 12);
     const eyeMat = new THREE.MeshBasicMaterial({ color: 0x03dac6 }); // Soft Teal eyes
-    const leftEye = new THREE.Mesh(eyeGeom, eyeMat); leftEye.position.set(-0.7, 0.6, 2.0);
-    const rightEye = new THREE.Mesh(eyeGeom, eyeMat); rightEye.position.set(0.7, 0.6, 2.0);
-    ghostGroup.add(leftEye); ghostGroup.add(rightEye);
+    const leftEye = new THREE.Mesh(eyeGeom, eyeMat);
+    leftEye.position.set(-0.7, 0.6, 2.0);
+    const rightEye = new THREE.Mesh(eyeGeom, eyeMat);
+    rightEye.position.set(0.7, 0.6, 2.0);
+    ghostGroup.add(leftEye);
+    ghostGroup.add(rightEye);
 
     // 4. Fireflies
     const fireflies = [];
@@ -2735,18 +3789,35 @@ function initObakeGhost() {
 
     for (let i = 0; i < 20; i++) {
         const fireflyGeometry = new THREE.SphereGeometry(0.03, 4, 4);
-        const fireflyMaterial = new THREE.MeshBasicMaterial({ color: 0xffff44, transparent: true, opacity: 0.9 });
+        const fireflyMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffff44,
+            transparent: true,
+            opacity: 0.9
+        });
         const firefly = new THREE.Mesh(fireflyGeometry, fireflyMaterial);
 
-        firefly.position.set((Math.random() - 0.5) * 40, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 20);
+        firefly.position.set(
+            (Math.random() - 0.5) * 40,
+            (Math.random() - 0.5) * 30,
+            (Math.random() - 0.5) * 20
+        );
 
         const glowGeometry = new THREE.SphereGeometry(0.12, 8, 8);
-        const glowMaterial = new THREE.MeshBasicMaterial({ color: 0xffff88, transparent: true, opacity: 0.4, side: THREE.BackSide });
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffff88,
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.BackSide
+        });
         const glow = new THREE.Mesh(glowGeometry, glowMaterial);
         firefly.add(glow);
 
         firefly.userData = {
-            velocity: new THREE.Vector3((Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.04),
+            velocity: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.04,
+                (Math.random() - 0.5) * 0.04,
+                (Math.random() - 0.5) * 0.04
+            ),
             phase: Math.random() * Math.PI * 2,
             pulseSpeed: 2 + Math.random() * 3,
             glowMaterial: glowMaterial,
@@ -2758,8 +3829,12 @@ function initObakeGhost() {
 
     // Lighting
     scene.add(new THREE.AmbientLight(0x0a0a2e, 0.08));
-    const rimLight1 = new THREE.DirectionalLight(0x4a90e2, 1.8); rimLight1.position.set(-8, 6, -4); scene.add(rimLight1);
-    const rimLight2 = new THREE.DirectionalLight(0x50e3c2, 1.26); rimLight2.position.set(8, -4, -6); scene.add(rimLight2);
+    const rimLight1 = new THREE.DirectionalLight(0x4a90e2, 1.8);
+    rimLight1.position.set(-8, 6, -4);
+    scene.add(rimLight1);
+    const rimLight2 = new THREE.DirectionalLight(0x50e3c2, 1.26);
+    rimLight2.position.set(8, -4, -6);
+    scene.add(rimLight2);
 
     // 5. Mouse Tracking Logic (Reverted to original perfect tracking)
     const mouse = new THREE.Vector2();
@@ -2791,7 +3866,7 @@ function initObakeGhost() {
             ghostMaterial.emissiveIntensity = 5.8 + pulse + Math.sin(time * 0.6) * 0.12;
 
             // Firefly animation
-            fireflies.forEach(firefly => {
+            fireflies.forEach((firefly) => {
                 const data = firefly.userData;
                 const pulsePhase = time + data.phase;
                 const fireflyPulse = Math.sin(pulsePhase * data.pulseSpeed) * 0.4 + 0.6;
@@ -2845,28 +3920,41 @@ const itoState = {
 };
 
 // Math Helpers
-const getRandomHex = () => `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+const getRandomHex = () =>
+    `#${Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, '0')}`;
 const hexToRgb = (hex) => {
     const bigint = parseInt(hex.replace('#', ''), 16);
     return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
 };
 
-const rgbToHex = (r, g, b) => `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
+const rgbToHex = (r, g, b) => `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 
 // Convert hex -> {h, s, l} so we can safely reason about a color's lightness
 const hexToHsl = (hex) => {
     const { r, g, b } = hexToRgb(hex);
-    const rn = r / 255, gn = g / 255, bn = b / 255;
-    const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
-    let h = 0, s = 0;
+    const rn = r / 255,
+        gn = g / 255,
+        bn = b / 255;
+    const max = Math.max(rn, gn, bn),
+        min = Math.min(rn, gn, bn);
+    let h = 0,
+        s = 0;
     const l = (max + min) / 2;
     if (max !== min) {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
-        case rn: h = (gn - bn) / d + (gn < bn ? 6 : 0); break;
-        case gn: h = (bn - rn) / d + 2; break;
-        case bn: h = (rn - gn) / d + 4; break;
+        case rn:
+            h = (gn - bn) / d + (gn < bn ? 6 : 0);
+            break;
+        case gn:
+            h = (bn - rn) / d + 2;
+            break;
+        case bn:
+            h = (rn - gn) / d + 4;
+            break;
         }
         h /= 6;
     }
@@ -2874,11 +3962,15 @@ const hexToHsl = (hex) => {
 };
 
 const hslToHex = (h, s, l) => {
-    s /= 100; l /= 100;
-    const k = n => (n + h / 30) % 12;
+    s /= 100;
+    l /= 100;
+    const k = (n) => (n + h / 30) % 12;
     const a = s * Math.min(l, 1 - l);
-    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-    const toHex = x => Math.round(x * 255).toString(16).padStart(2, '0');
+    const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    const toHex = (x) =>
+        Math.round(x * 255)
+            .toString(16)
+            .padStart(2, '0');
     return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
 };
 
@@ -2998,9 +4090,10 @@ function loadVideoFrame(url) {
         };
 
         video.onloadeddata = () => {
-            const seekTime = (isFinite(video.duration) && video.duration > 0.2)
-                ? Math.min(0.5, video.duration / 2)
-                : 0;
+            const seekTime =
+                isFinite(video.duration) && video.duration > 0.2
+                    ? Math.min(0.5, video.duration / 2)
+                    : 0;
             if (seekTime > 0) {
                 video.currentTime = seekTime;
             } else {
@@ -3046,7 +4139,8 @@ async function autoPickAccentFromMedia(mode) {
 }
 
 const lerpColor = (c1, c2, t) => {
-    const r1 = hexToRgb(c1), r2 = hexToRgb(c2);
+    const r1 = hexToRgb(c1),
+        r2 = hexToRgb(c2);
     const r = Math.round(r1.r + (r2.r - r1.r) * t);
     const g = Math.round(r1.g + (r2.g - r1.g) * t);
     const b = Math.round(r1.b + (r2.b - r1.b) * t);
@@ -3068,12 +4162,17 @@ window.smoothColorLoop = () => {
     }
 
     if (itoAppInstance && itoState.progress < 1) {
-        const easeT = itoState.progress < 0.5
-            ? 2 * itoState.progress * itoState.progress
-            : 1 - Math.pow(-2 * itoState.progress + 2, 2) / 2;
+        const easeT =
+            itoState.progress < 0.5
+                ? 2 * itoState.progress * itoState.progress
+                : 1 - Math.pow(-2 * itoState.progress + 2, 2) / 2;
 
-        const nextTubes = itoState.currentTubes.map((c, i) => lerpColor(c, itoState.targetTubes[i], easeT));
-        const nextLights = itoState.currentLights.map((c, i) => lerpColor(c, itoState.targetLights[i], easeT));
+        const nextTubes = itoState.currentTubes.map((c, i) =>
+            lerpColor(c, itoState.targetTubes[i], easeT)
+        );
+        const nextLights = itoState.currentLights.map((c, i) =>
+            lerpColor(c, itoState.targetLights[i], easeT)
+        );
 
         // Fail-safe to ensure the library's internal tubes object still exists
         if (itoAppInstance.tubes) {
@@ -3102,10 +4201,12 @@ async function initItoTubes() {
     container.innerHTML = '';
 
     if (itoAnimationId) {
-        cancelAnimationFrame(itoAnimationId); itoAnimationId = null;
+        cancelAnimationFrame(itoAnimationId);
+        itoAnimationId = null;
     }
     if (itoIntervalId) {
-        clearInterval(itoIntervalId); itoIntervalId = null;
+        clearInterval(itoIntervalId);
+        itoIntervalId = null;
     }
 
     // If the library supports an internal memory cleanup method, call it.
@@ -3120,7 +4221,8 @@ async function initItoTubes() {
     container.appendChild(canvas);
 
     try {
-        const module = await import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js');
+        const module =
+            await import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js');
         const TubesCursor = module.default;
 
         itoAppInstance = TubesCursor(canvas, {
@@ -3135,8 +4237,16 @@ async function initItoTubes() {
         // Bind click event only once per page load to prevent 100x overlaps
         if (!itoState.clickBound) {
             window.addEventListener('click', (e) => {
-                if (document.documentElement.getAttribute('data-theme') === 'ito' && itoAppInstance) {
-                    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.level-option') || e.target.closest('.modal-content')) {
+                if (
+                    document.documentElement.getAttribute('data-theme') === 'ito' &&
+                    itoAppInstance
+                ) {
+                    if (
+                        e.target.closest('button') ||
+                        e.target.closest('a') ||
+                        e.target.closest('.level-option') ||
+                        e.target.closest('.modal-content')
+                    ) {
                         return;
                     }
                     window.triggerColorTransition();

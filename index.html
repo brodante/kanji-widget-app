@@ -1,148 +1,215 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KanjiWidgets - Daily Japanese Learning</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <title>KanjiWidgets - Daily Japanese Learning</title>
 
-    <!-- SEO & Primary Meta Tags -->
-    <meta name="title" content="KanjiWidgets - Daily Japanese Learning">
-    <meta name="description"
-        content="Master Hiragana, Katakana, and JLPT N5-N1 Kanji. An offline-capable, interactive Japanese learning widget featuring native audio, stroke order animations, and progress tracking.">
-    <meta name="keywords"
-        content="Kanji, JLPT, Japanese Learning, Hiragana, Katakana, N5, N1, N2, N3, N4, Stroke Order, Flashcards">
-    <meta name="author" content="d4nte">
+        <!-- SEO & Primary Meta Tags -->
+        <meta name="title" content="KanjiWidgets - Daily Japanese Learning" />
+        <meta
+            name="description"
+            content="Master Hiragana, Katakana, and JLPT N5-N1 Kanji. An offline-capable, interactive Japanese learning widget featuring native audio, stroke order animations, and progress tracking."
+        />
+        <meta
+            name="keywords"
+            content="Kanji, JLPT, Japanese Learning, Hiragana, Katakana, N5, N1, N2, N3, N4, Stroke Order, Flashcards"
+        />
+        <meta name="author" content="d4nte" />
 
-    <!-- Open Graph / Facebook / Discord / Social Media -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://brodante.github.io/kanji-widget-app/">
-    <meta property="og:title" content="KanjiWidgets - Daily Japanese Learning">
-    <meta property="og:description"
-        content="Master Hiragana, Katakana, and JLPT N5-N1 Kanji with offline native audio and stroke order animations.">
-    <meta property="og:image" content="https://brodante.github.io/kanji-widget-app/preview.png">
+        <!-- Open Graph / Facebook / Discord / Social Media -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://brodante.github.io/kanji-widget-app/" />
+        <meta property="og:title" content="KanjiWidgets - Daily Japanese Learning" />
+        <meta
+            property="og:description"
+            content="Master Hiragana, Katakana, and JLPT N5-N1 Kanji with offline native audio and stroke order animations."
+        />
+        <meta
+            property="og:image"
+            content="https://brodante.github.io/kanji-widget-app/preview.png"
+        />
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6XNG2ETFL"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-Q6XNG2ETFL');
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- NEW: Post-Processing Addons for Dracula's Glow and VHS Glitch -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <!-- Fonts & Icons -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Material+Icons&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Antique&family=Zen+Maru+Gothic:wght@400;700&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/earlyaccess/hannari.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/earlyaccess/kokoro.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <!-- Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6XNG2ETFL"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+            gtag('config', 'G-Q6XNG2ETFL');
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <!-- App Resources -->
-    <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
+        <!-- NEW: Post-Processing Addons for Dracula's Glow and VHS Glitch -->
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+        <!-- Fonts & Icons -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Material+Icons&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Zen+Antique&family=Zen+Maru+Gothic:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
+        <link href="https://fonts.googleapis.com/earlyaccess/hannari.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/earlyaccess/kokoro.css" rel="stylesheet" />
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet"
+        />
 
-    <!-- PWA & Mobile Settings -->
-    <meta name="theme-color" content="#6200EE">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="KanjiWidgets">
-    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180x180.png">
-</head>
-<body>
-    <!-- 波 (Waves) Theme WebGL Container -->
-    <div id="nami-canvas-container" class="nami-background"></div>
-    <!-- Lumen Theme WebGL Container -->
-    <div id="lumen-canvas-container" class="lumen-background"></div>
-    <!-- お化け Theme WebGL Container -->
-    <div id="obake-canvas-container" class="obake-background"></div>
-    <!-- Midnight Theme Cosmic Background Elements -->
-    <div class="midnight-stars"></div>
-    <!-- Ito Theme WebGL Container -->
-    <div id="ito-canvas-container" class="ito-background"></div>
-    
-    <!-- Custom Theme Background Layer -->
-    <div id="customThemeBackground" class="custom-theme-background"></div>
-    <video id="customThemeBackgroundVideo" class="custom-theme-background-video" autoplay loop muted playsinline></video>
-    
-    <!-- Big Named Stars -->
-    <div class="midnight-named-stars">
-        <div class="named-star pos-1"><span>Alpha Centauri</span></div>
-        <div class="named-star pos-2"><span>Sirius</span></div>
-        <div class="named-star pos-3"><span>Vega</span></div>
-    </div>
-    
-    <!-- Multiple Meteors & Comets -->
-    <div class="midnight-meteor meteor-1"></div>
-    <div class="midnight-meteor meteor-2"></div>
-    <div class="midnight-comet"></div>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <h1><i class="fas fa-language"></i> KanjiWidgets</h1>
-            <div class="header-controls">
-                <!-- KANJI/KANA SEARCH -->
-                <button id="searchToggleBtn" class="icon-btn" title="Search Kanji">
-                <i class="fas fa-search"></i>
-                </button>
-                <!-- NEW LEVEL SWITCHER -->
-                <div class="level-switcher-container" style="position: relative;">
-                    <button id="levelToggleBtn" class="icon-btn japanese-text" title="Switch Level"
-                        style="font-weight: 700; font-size: 1.1rem; height: 40px; min-width: 40px; padding: 0 14px; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); white-space: nowrap;">
-                        あ
+        <!-- App Resources -->
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="manifest" href="manifest.json" />
+
+        <!-- PWA & Mobile Settings -->
+        <meta name="theme-color" content="#6200EE" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="KanjiWidgets" />
+        <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180x180.png" />
+    </head>
+    <body>
+        <!-- 波 (Waves) Theme WebGL Container -->
+        <div id="nami-canvas-container" class="nami-background"></div>
+        <!-- Lumen Theme WebGL Container -->
+        <div id="lumen-canvas-container" class="lumen-background"></div>
+        <!-- お化け Theme WebGL Container -->
+        <div id="obake-canvas-container" class="obake-background"></div>
+        <!-- Midnight Theme Cosmic Background Elements -->
+        <div class="midnight-stars"></div>
+        <!-- Ito Theme WebGL Container -->
+        <div id="ito-canvas-container" class="ito-background"></div>
+
+        <!-- Custom Theme Background Layer -->
+        <div id="customThemeBackground" class="custom-theme-background"></div>
+        <video
+            id="customThemeBackgroundVideo"
+            class="custom-theme-background-video"
+            autoplay
+            loop
+            muted
+            playsinline
+        ></video>
+
+        <!-- Big Named Stars -->
+        <div class="midnight-named-stars">
+            <div class="named-star pos-1"><span>Alpha Centauri</span></div>
+            <div class="named-star pos-2"><span>Sirius</span></div>
+            <div class="named-star pos-3"><span>Vega</span></div>
+        </div>
+
+        <!-- Multiple Meteors & Comets -->
+        <div class="midnight-meteor meteor-1"></div>
+        <div class="midnight-meteor meteor-2"></div>
+        <div class="midnight-comet"></div>
+        <div class="app-container">
+            <!-- Header -->
+            <header class="app-header">
+                <h1><i class="fas fa-language"></i> KanjiWidgets</h1>
+                <div class="header-controls">
+                    <!-- KANJI/KANA SEARCH -->
+                    <button id="searchToggleBtn" class="icon-btn" title="Search Kanji">
+                        <i class="fas fa-search"></i>
                     </button>
-            
-                    <!-- DROPDOWN MENU -->
-                    <div id="levelDropdown" class="level-dropdown">
-                        <button class="level-option" data-level="Hiragana"><span class="kana-icon">あ</span> Hiragana</button>
-                        <button class="level-option" data-level="Katakana"><span class="kana-icon">ア</span> Katakana</button>
-                        <div class="dropdown-divider"></div>
-                        <button class="level-option" data-level="N5"><span class="kana-icon">N5</span> N5 (Beginner)</button>
-                        <button class="level-option" data-level="N4"><span class="kana-icon">N4</span> N4 (Elementary)</button>
-                        <button class="level-option" data-level="N3"><span class="kana-icon">N3</span> N3 (Intermediate)</button>
-                        <button class="level-option" data-level="N2"><span class="kana-icon">N2</span> N2 (Advanced)</button>
-                        <button class="level-option" data-level="N1"><span class="kana-icon">N1</span> N1 (Master)</button>
-                        <div class="dropdown-divider"></div>
-                        <button class="level-option" data-level="all"><span class="kana-icon">全</span> All Levels</button>
+                    <!-- NEW LEVEL SWITCHER -->
+                    <div class="level-switcher-container" style="position: relative">
+                        <button
+                            id="levelToggleBtn"
+                            class="icon-btn japanese-text"
+                            title="Switch Level"
+                            style="
+                                font-weight: 700;
+                                font-size: 1.1rem;
+                                height: 40px;
+                                min-width: 40px;
+                                padding: 0 14px;
+                                border-radius: 20px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                background: rgba(255, 255, 255, 0.15);
+                                white-space: nowrap;
+                            "
+                        >
+                            あ
+                        </button>
+
+                        <!-- DROPDOWN MENU -->
+                        <div id="levelDropdown" class="level-dropdown">
+                            <button class="level-option" data-level="Hiragana">
+                                <span class="kana-icon">あ</span> Hiragana
+                            </button>
+                            <button class="level-option" data-level="Katakana">
+                                <span class="kana-icon">ア</span> Katakana
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="level-option" data-level="N5">
+                                <span class="kana-icon">N5</span> N5 (Beginner)
+                            </button>
+                            <button class="level-option" data-level="N4">
+                                <span class="kana-icon">N4</span> N4 (Elementary)
+                            </button>
+                            <button class="level-option" data-level="N3">
+                                <span class="kana-icon">N3</span> N3 (Intermediate)
+                            </button>
+                            <button class="level-option" data-level="N2">
+                                <span class="kana-icon">N2</span> N2 (Advanced)
+                            </button>
+                            <button class="level-option" data-level="N1">
+                                <span class="kana-icon">N1</span> N1 (Master)
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="level-option" data-level="all">
+                                <span class="kana-icon">全</span> All Levels
+                            </button>
+                        </div>
                     </div>
-                </div>
-            
-                <button id="settingsBtn" class="icon-btn" title="Settings">
-                    <i class="fas fa-cog"></i>
-                </button>
-                <button id="themeToggle" class="icon-btn" title="Toggle Theme">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
-            <!-- SEARCH PANEL -->
-            <div id="searchPanel" class="search-panel">
-                <div class="search-input-wrapper">
-                    <i class="fas fa-search search-input-icon"></i>
-                    <input type="text" id="kanjiSearchInput" class="search-input"
-                        placeholder="Search by kanji, kana, meaning, or reading..." autocomplete="off">
-                    <button id="searchCloseBtn" class="search-close-btn" title="Close search">
-                        <i class="fas fa-times"></i>
+
+                    <button id="settingsBtn" class="icon-btn" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button id="themeToggle" class="icon-btn" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
                     </button>
                 </div>
-                <div id="searchResults" class="search-results"></div>
-            </div>
-        </header>
+                <!-- SEARCH PANEL -->
+                <div id="searchPanel" class="search-panel">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-input-icon"></i>
+                        <input
+                            type="text"
+                            id="kanjiSearchInput"
+                            class="search-input"
+                            placeholder="Search by kanji, kana, meaning, or reading..."
+                            autocomplete="off"
+                        />
+                        <button id="searchCloseBtn" class="search-close-btn" title="Close search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Widget Size Selector -->
-            <!-- <div class="widget-controls">
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Widget Size Selector -->
+                <!-- <div class="widget-controls">
                 <label for="widgetSize">Widget Size:</label>
                 <select id="widgetSize">
                     <option value="small">2x2 - Kanji Only</option>
@@ -151,408 +218,961 @@
                 </select>
             </div> -->
 
-            <!-- Kanji Widget -->
-            <div id="kanjiWidget" class="kanji-widget large-widget">
-                <div class="widget-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading Kanji...</p>
+                <!-- Kanji Widget -->
+                <div id="kanjiWidget" class="kanji-widget large-widget">
+                    <div class="widget-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading Kanji...</p>
+                    </div>
                 </div>
-            </div>
 
-<!-- Progress Section -->
-            <div class="progress-section">
-                <!-- FIX 1: Removed Flexbox. Made it relative so the badge can be pinned inside it. -->
-                <div class="progress-header" style="position: relative; text-align: left;">
-            
-                    <!-- FIX 2: Added padding-right as a bumper so zoomed text won't hit the badge -->
-                    <div style="padding-right: 80px;">
-                        <h3 style="margin-top: 0; text-align: left;">Learning Progress</h3>
-                        <!-- Reverted back to the normal stats line -->
-                        <div id="progressStats" class="progress-stats" style="text-align: left;">0 mastered | 0 total (N5 level)
+                <!-- Progress Section -->
+                <div class="progress-section">
+                    <!-- FIX 1: Removed Flexbox. Made it relative so the badge can be pinned inside it. -->
+                    <div class="progress-header" style="position: relative; text-align: left">
+                        <!-- FIX 2: Added padding-right as a bumper so zoomed text won't hit the badge -->
+                        <div style="padding-right: 80px">
+                            <h3 style="margin-top: 0; text-align: left">Learning Progress</h3>
+                            <!-- Reverted back to the normal stats line -->
+                            <div id="progressStats" class="progress-stats" style="text-align: left">
+                                0 mastered | 0 total (N5 level)
+                            </div>
+                        </div>
+
+                        <!-- FIX 3: Pinned absolutely to the top right corner -->
+                        <div
+                            class="streak-badge"
+                            id="streakBadge"
+                            title="Daily Learning Streak"
+                            style="position: absolute; top: 0; right: 0"
+                        >
+                            <i class="fas fa-fire"></i>
+                            <span id="streakCount">0</span>
                         </div>
                     </div>
-            
-                    <!-- FIX 3: Pinned absolutely to the top right corner -->
-                    <div class="streak-badge" id="streakBadge" title="Daily Learning Streak"
-                        style="position: absolute; top: 0; right: 0;">
-                        <i class="fas fa-fire"></i>
-                        <span id="streakCount">0</span>
+
+                    <!-- FIX: Moved down here to its own line, removed the pipe, and added quotes! -->
+                    <!-- FIX: Changed from a div to a clickable anchor link pointing to the WWF -->
+                    <a
+                        href="https://www.worldwildlife.org/habitats/polar-regions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="nord-warning-text"
+                    >
+                        "Our home is melting. Save our ice."
+                    </a>
+                    <!-- NEW: Forest Theme Deforestation Link -->
+                    <a
+                        href="https://www.worldwildlife.org/habitats/forest-habitat"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="forest-warning-text"
+                    >
+                        "Our woods are fading. Protect our forests."
+                    </a>
+                    <a
+                        href="https://darksky.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="space-warning-text"
+                    >
+                        "The universe belongs to us all. Protect our dark skies."
+                    </a>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
                     </div>
                 </div>
-            
-                <!-- FIX: Moved down here to its own line, removed the pipe, and added quotes! -->
-                <!-- FIX: Changed from a div to a clickable anchor link pointing to the WWF -->
-                <a href="https://www.worldwildlife.org/habitats/polar-regions" target="_blank" rel="noopener noreferrer"
-                    class="nord-warning-text">
-                    "Our home is melting. Save our ice."
-                </a>
-                <!-- NEW: Forest Theme Deforestation Link -->
-                <a href="https://www.worldwildlife.org/habitats/forest-habitat" target="_blank" rel="noopener noreferrer"
-                    class="forest-warning-text">
-                    "Our woods are fading. Protect our forests."
-                </a>
-                <a href="https://darksky.org/" target="_blank" rel="noopener noreferrer" class="space-warning-text">
-                    "The universe belongs to us all. Protect our dark skies."
-                </a>
-                <div class="progress-bar">
-                    <div id="progressFill" class="progress-fill"></div>
+
+                <!-- Kanji/Kana Dictionary: full level grid, mastered vs pending -->
+                <div class="journey-section">
+                    <div class="journey-header">
+                        <h3>Kanji Dictionary</h3>
+                        <span id="journeySummary" class="journey-summary">0 mastered</span>
+                    </div>
+                    <div id="kanjiJourney" class="journey-grid"></div>
                 </div>
-            </div>
 
-            <!-- Kanji/Kana Dictionary: full level grid, mastered vs pending -->
-            <div class="journey-section">
-                <div class="journey-header">
-                    <h3>Kanji Dictionary</h3>
-                    <span id="journeySummary" class="journey-summary">0 mastered</span>
+                <!-- Recently Studied: last items seen, filtered to current level -->
+                <div class="recent-section">
+                    <h3>Recently Studied</h3>
+                    <div id="recentKanji" class="recent-grid"></div>
                 </div>
-                <div id="kanjiJourney" class="journey-grid"></div>
-            </div>
+            </main>
 
-            <!-- Recently Studied: last items seen, filtered to current level -->
-            <div class="recent-section">
-                <h3>Recently Studied</h3>
-                <div id="recentKanji" class="recent-grid"></div>
-            </div>
-        </main>
-
-        <!-- Settings Modal -->
-<div id="settingsModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Settings</h2>
-            <button class="close-btn" id="closeSettings">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="settings-section-header">
-                <i class="fas fa-graduation-cap"></i>
-                <span>Learning</span>
-            </div>
-            <div class="setting-group">
-                <label style="color: var(--primary-color); font-weight: bold; margin-bottom: 0.8rem;">Basic Alphabets
-                    (Start Here):</label>
-                <div style="display: flex; gap: 1rem; width: 100%;">
-                    <button type="button" id="btnHiragana" class="premium-kana-btn">
-                        <span class="kana-icon">あ</span> Hiragana
-                    </button>
-                    <button type="button" id="btnKatakana" class="premium-kana-btn">
-                        <span class="kana-icon">ア</span> Katakana
-                    </button>
-                </div>
-            </div>
-            <div class="setting-group">
-                <label for="jlptLevel">JLPT Level:</label>
-                <select id="jlptLevel">
-                    <option value="Hiragana" hidden selected>Hiragana (Basic)</option>
-                    <option value="Katakana" hidden>Katakana (Basic)</option>
-            
-                    <option value="all">All Levels</option>
-                    <option value="N5">N5 (Beginner)</option>
-                    <option value="N4">N4</option>
-                    <option value="N3">N3</option>
-                    <option value="N2">N2</option>
-                    <option value="N1">N1 (Advanced)</option>
-                </select>
-            </div>
-
-            <div class="settings-section-header">
-                <i class="fas fa-palette"></i>
-                <span>Appearance</span>
-            </div>
-            <div class="setting-group">
-                <label for="themeSelect">Color Theme:</label>
-                <div class="theme-select-row">
-                    <select id="themeSelect">
-                        <optgroup label="Light Themes">
-                            <option value="light">Default Light</option>
-                            <option value="yotsuba">Yotsuba (Green)</option>
-                            <option value="paper">Paper (Minimal)</option>
-                            <option value="candy">Candy (Pastel)</option>
-                            <option value="sunrise">Sunrise (Warm)</option>
-                        </optgroup>
-                        <optgroup label="Dark Themes">
-                            <option value="dark">Default Dark</option>
-                            <option value="nami">月の湖 (Moon Lake)</option>
-                            <option value="lumen">Lumen (WebGL Wave)</option>
-                            <option value="obake">お化け (Spectral Ghost)</option>
-                            <option value="ito">糸 (Neon Threads)</option>
-                            <option value="nord">Nord (Arctic)</option>
-                            <option value="midnight">Midnight</option>
-                            <option value="forest">Forest (Earthy)</option>
-                        </optgroup>
-                        <optgroup label="Custom">
-                            <option value="custom-1">My Theme</option>
-                        </optgroup>
-                    </select>
-                    <button type="button" id="customThemeBtn" class="customize-theme-btn" title="Customize Theme">
-                        <i class="fas fa-wand-magic-sparkles"></i> Customize
-                    </button>
-                </div>
-            </div>
-            <div class="setting-group setting-row">
-                <label for="showFurigana">Show Furigana <span style="font-size: 0.75rem; opacity: 0.6;">(Coming
-                        Soon)</span>:</label>
-                <input type="checkbox" id="showFurigana" checked>
-            </div>
-            <div class="setting-group">
-                <label>Kanji Font:</label>
-                <div class="font-preview-grid" id="fontPreviewGrid">
-                    <div class="font-option" data-font="Klee One">
-                        <div class="font-sample" style="font-family: 'Klee One';">日本</div>
-                        <div class="font-name">Klee One</div>
-                    </div>
-                    <div class="font-option" data-font="Noto Sans JP">
-                        <div class="font-sample" style="font-family: 'Noto Sans JP';">日本</div>
-                        <div class="font-name">Noto Sans JP</div>
-                    </div>
-                    <div class="font-option" data-font="Zen Antique">
-                        <div class="font-sample" style="font-family: 'Zen Antique';">日本</div>
-                        <div class="font-name">Zen Antique</div>
-                    </div>
-                    <div class="font-option" data-font="Zen Maru Gothic">
-                        <div class="font-sample" style="font-family: 'Zen Maru Gothic';">日本</div>
-                        <div class="font-name">Zen Maru</div>
-                    </div>
-                    <div class="font-option" data-font="Hannari">
-                        <div class="font-sample" style="font-family: 'Hannari';">日本</div>
-                        <div class="font-name">Hannari</div>
-                    </div>
-                    <div class="font-option" data-font="Kokoro">
-                        <div class="font-sample" style="font-family: 'Kokoro';">日本</div>
-                        <div class="font-name">Kokoro</div>
-                    </div>
-                    <div class="font-option" data-font="Hiragino Sans">
-                        <div class="font-sample" style="font-family: 'Hiragino Sans';">日本</div>
-                        <div class="font-name">Hiragino</div>
-                    </div>
-                    <div class="font-option" data-font="Yu Gothic">
-                        <div class="font-sample" style="font-family: 'Yu Gothic';">日本</div>
-                        <div class="font-name">Yu Gothic</div>
-                    </div>
-                    <div class="font-option" data-font="Meiryo">
-                        <div class="font-sample" style="font-family: 'Meiryo';">日本</div>
-                        <div class="font-name">Meiryo</div>
-                    </div>
-                    <div class="font-option" data-font="MS Gothic">
-                        <div class="font-sample" style="font-family: 'MS Gothic';">日本</div>
-                        <div class="font-name">MS Gothic</div>
-                    </div>
-                </div>
-                <select id="kanjiFont" style="display: none;">
-                    <option value="Klee One" selected>Klee One (Default)</option>
-                    <option value="Noto Sans JP">Noto Sans JP</option>
-                    <option value="Zen Antique">Zen Antique (Mincho Style)</option>
-                    <option value="Zen Maru Gothic">Zen Maru Gothic</option>
-                    <option value="Hannari">Hannari (Traditional)</option>
-                    <option value="Kokoro">Kokoro (Brush Style)</option>
-                    <option value="Hiragino Sans">Hiragino Sans</option>
-                    <option value="Yu Gothic">Yu Gothic</option>
-                    <option value="Meiryo">Meiryo</option>
-                    <option value="MS Gothic">MS Gothic</option>
-                </select>
-                <input type="hidden" id="kanjiFont-hidden" value="Klee One">
-            </div>
-            <div class="setting-group">
-                <label for="fontSize">Font Size:</label>
-                <select id="fontSize">
-                    <option value="small">Small</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="large">Large</option>
-                    <option value="extra-large">Extra Large</option>
-                </select>
-            </div>
-
-            <div class="settings-section-header">
-                <i class="fas fa-volume-high"></i>
-                <span>Audio</span>
-            </div>
-            <div class="setting-group setting-row">
-                <label for="autoPlay">Auto-play pronunciation:</label>
-                <input type="checkbox" id="autoPlay">
-            </div>
-            <div class="setting-group">
-                <label for="defaultAudio">Default Audio Type:</label>
-                <select id="defaultAudio">
-                    <option value="kunyomi" selected>Kun'yomi (Japanese reading)</option>
-                    <option value="onyomi">On'yomi (Chinese reading)</option>
-                    <option value="first">First available reading</option>
-                </select>
-            </div>
-
-            <div class="settings-section-header">
-                <i class="fas fa-cloud-arrow-up"></i>
-                <span>Backup &amp; Data</span>
-            </div>
-            <div class="setting-group">
-                <label for="localBackupFreq">Local Backup Frequency:</label>
-                <select id="localBackupFreq">
-                    <option value="never">Never</option>
-                    <option value="daily" selected>Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                </select>
-            </div>
-            <div class="setting-group">
-                <label for="onlineBackupFreq">Online Backup Frequency:</label>
-                <select id="onlineBackupFreq">
-                    <option value="never" selected>Never</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                </select>
-            </div>
-            <div class="setting-group">
-                <div class="backup-buttons">
-                    <button id="createBackup" class="backup-btn">Create Local Backup</button>
-                    <button id="restoreBackup" class="backup-btn">Import Backup</button>
-                </div>
-            </div>
-
-            <div class="settings-section-header danger-zone-header">
-                <i class="fas fa-triangle-exclamation"></i>
-                <span>Danger Zone</span>
-            </div>
-            <div class="setting-group">
-                <button id="resetProgress" class="reset-btn">Reset All Progress</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-        <!-- Custom Theme Builder Modal -->
-        <div id="customThemeModal" class="modal">
-            <div class="modal-content custom-theme-modal-content">
-                <div class="modal-header">
-                    <h2><i class="fas fa-wand-magic-sparkles"></i> Customize Theme</h2>
-                    <button class="close-btn" id="closeCustomTheme">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Slot Tabs: 1 usable + 2 locked/coming-soon -->
-                    <div class="theme-slot-tabs">
-                        <button type="button" class="theme-slot-tab active" data-slot="1">Slot 1</button>
-                        <button type="button" class="theme-slot-tab locked" data-slot="2" disabled>
-                            <i class="fas fa-lock"></i> Slot 2
-                        </button>
-                        <button type="button" class="theme-slot-tab locked" data-slot="3" disabled>
-                            <i class="fas fa-lock"></i> Slot 3
+            <!-- Settings Modal -->
+            <div id="settingsModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Settings</h2>
+                        <button class="close-btn" id="closeSettings">
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <div class="theme-slot-locked-note">
-                        <i class="fas fa-star"></i> Slots 2 &amp; 3 are coming in a future update!
-                    </div>
-
-                    <!-- Dev's Favorite Themes: curated preset backgrounds, click to use directly -->
-                    <div class="dev-favorites-section">
-                        <label class="dev-favorites-label"><i class="fas fa-heart"></i> <span id="devFavoritesLabel">Dante's Top 5 Themes</span></label>
-                        <div id="devFavoritesGrid" class="dev-favorites-grid"></div>
-                    </div>
-
-                    <!-- Slot 1 builder (functional) -->
-                    <div id="themeSlot1Builder" class="theme-slot-builder">
-                        <div class="setting-group">
-                            <label>Background Image or Video:</label>
-                            <input type="file" id="customThemeImageInput" accept="image/*,video/mp4,video/webm">
-                            <div class="custom-css-hint">For video: 720p-1080p, 8-15 seconds works best — it's always blurred, so higher resolution just adds file size with no visible benefit.</div>
-                            <div id="customThemePreview" class="custom-theme-preview"></div>
+                    <div class="modal-body">
+                        <div class="settings-section-header">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Learning</span>
                         </div>
                         <div class="setting-group">
-                            <label for="customThemeBlur">Background Blur: <span id="customThemeBlurValue">10px</span></label>
-                            <input type="range" id="customThemeBlur" min="0" max="30" value="10">
+                            <label
+                                style="
+                                    color: var(--primary-color);
+                                    font-weight: bold;
+                                    margin-bottom: 0.8rem;
+                                "
+                                >Basic Alphabets (Start Here):</label
+                            >
+                            <div style="display: flex; gap: 1rem; width: 100%">
+                                <button type="button" id="btnHiragana" class="premium-kana-btn">
+                                    <span class="kana-icon">あ</span> Hiragana
+                                </button>
+                                <button type="button" id="btnKatakana" class="premium-kana-btn">
+                                    <span class="kana-icon">ア</span> Katakana
+                                </button>
+                            </div>
                         </div>
-                                                <div class="setting-group">
-                            <label for="customThemeAccent">Accent Color:</label>
-                            <div class="accent-color-row">
-                                <input type="color" id="customThemeAccent" value="#6200EE">
-                                <label class="auto-accent-toggle" for="autoAccentToggle">
-                                    <input type="checkbox" id="autoAccentToggle">
-                                    <span>Auto-pick from image</span>
-                                </label>
+                        <div class="setting-group">
+                            <label for="jlptLevel">JLPT Level:</label>
+                            <select id="jlptLevel">
+                                <option value="Hiragana" hidden selected>Hiragana (Basic)</option>
+                                <option value="Katakana" hidden>Katakana (Basic)</option>
+
+                                <option value="all">All Levels</option>
+                                <option value="N5">N5 (Beginner)</option>
+                                <option value="N4">N4</option>
+                                <option value="N3">N3</option>
+                                <option value="N2">N2</option>
+                                <option value="N1">N1 (Advanced)</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-section-header">
+                            <i class="fas fa-palette"></i>
+                            <span>Appearance</span>
+                        </div>
+                        <div class="setting-group">
+                            <label for="themeSelect">Color Theme:</label>
+                            <div class="theme-select-row">
+                                <select id="themeSelect">
+                                    <optgroup label="Light Themes">
+                                        <option value="light">Default Light</option>
+                                        <option value="yotsuba">Yotsuba (Green)</option>
+                                        <option value="paper">Paper (Minimal)</option>
+                                        <option value="candy">Candy (Pastel)</option>
+                                        <option value="sunrise">Sunrise (Warm)</option>
+                                    </optgroup>
+                                    <optgroup label="Dark Themes">
+                                        <option value="dark">Default Dark</option>
+                                        <option value="nami">月の湖 (Moon Lake)</option>
+                                        <option value="lumen">Lumen (WebGL Wave)</option>
+                                        <option value="obake">お化け (Spectral Ghost)</option>
+                                        <option value="ito">糸 (Neon Threads)</option>
+                                        <option value="nord">Nord (Arctic)</option>
+                                        <option value="midnight">Midnight</option>
+                                        <option value="forest">Forest (Earthy)</option>
+                                    </optgroup>
+                                    <optgroup label="Custom">
+                                        <option value="custom-1">My Theme</option>
+                                    </optgroup>
+                                </select>
+                                <button
+                                    type="button"
+                                    id="customThemeBtn"
+                                    class="customize-theme-btn"
+                                    title="Customize Theme"
+                                >
+                                    <i class="fas fa-wand-magic-sparkles"></i> Customize
+                                </button>
                             </div>
-                            <div class="accent-swatches">
-                                <button type="button" class="accent-swatch" data-color="#6200EE" style="background-color:#6200EE" title="Indigo"></button>
-                                <button type="button" class="accent-swatch" data-color="#00BCD4" style="background-color:#00BCD4" title="Teal"></button>
-                                <button type="button" class="accent-swatch" data-color="#FF4081" style="background-color:#FF4081" title="Rose"></button>
-                                <button type="button" class="accent-swatch" data-color="#10B981" style="background-color:#10B981" title="Emerald"></button>
-                                <button type="button" class="accent-swatch" data-color="#F59E0B" style="background-color:#F59E0B" title="Amber"></button>
-                                <button type="button" class="accent-swatch" data-color="#8B5CF6" style="background-color:#8B5CF6" title="Violet"></button>
-                            </div>
-                                                </div>
+                        </div>
                         <div class="setting-group setting-row">
-                            <label for="customThemeMode">Base Mode:</label>
-                            <select id="customThemeMode">
-                                <option value="dark">Dark</option>
-                                <option value="light">Light</option>
+                            <label for="showFurigana"
+                                >Show Furigana
+                                <span style="font-size: 0.75rem; opacity: 0.6">(Coming Soon)</span
+                                >:</label
+                            >
+                            <input type="checkbox" id="showFurigana" checked />
+                        </div>
+                        <div class="setting-group">
+                            <label>Kanji Font:</label>
+                            <div class="font-preview-grid" id="fontPreviewGrid">
+                                <div class="font-option" data-font="Klee One">
+                                    <div class="font-sample" style="font-family: 'Klee One'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Klee One</div>
+                                </div>
+                                <div class="font-option" data-font="Noto Sans JP">
+                                    <div class="font-sample" style="font-family: 'Noto Sans JP'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Noto Sans JP</div>
+                                </div>
+                                <div class="font-option" data-font="Zen Antique">
+                                    <div class="font-sample" style="font-family: 'Zen Antique'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Zen Antique</div>
+                                </div>
+                                <div class="font-option" data-font="Zen Maru Gothic">
+                                    <div class="font-sample" style="font-family: 'Zen Maru Gothic'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Zen Maru</div>
+                                </div>
+                                <div class="font-option" data-font="Hannari">
+                                    <div class="font-sample" style="font-family: 'Hannari'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Hannari</div>
+                                </div>
+                                <div class="font-option" data-font="Kokoro">
+                                    <div class="font-sample" style="font-family: 'Kokoro'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Kokoro</div>
+                                </div>
+                                <div class="font-option" data-font="Hiragino Sans">
+                                    <div class="font-sample" style="font-family: 'Hiragino Sans'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Hiragino</div>
+                                </div>
+                                <div class="font-option" data-font="Yu Gothic">
+                                    <div class="font-sample" style="font-family: 'Yu Gothic'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Yu Gothic</div>
+                                </div>
+                                <div class="font-option" data-font="Meiryo">
+                                    <div class="font-sample" style="font-family: 'Meiryo'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Meiryo</div>
+                                </div>
+                                <div class="font-option" data-font="MS Gothic">
+                                    <div class="font-sample" style="font-family: 'MS Gothic'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">MS Gothic</div>
+                                </div>
+                            </div>
+                            <select id="kanjiFont" style="display: none">
+                                <option value="Klee One" selected>Klee One (Default)</option>
+                                <option value="Noto Sans JP">Noto Sans JP</option>
+                                <option value="Zen Antique">Zen Antique (Mincho Style)</option>
+                                <option value="Zen Maru Gothic">Zen Maru Gothic</option>
+                                <option value="Hannari">Hannari (Traditional)</option>
+                                <option value="Kokoro">Kokoro (Brush Style)</option>
+                                <option value="Hiragino Sans">Hiragino Sans</option>
+                                <option value="Yu Gothic">Yu Gothic</option>
+                                <option value="Meiryo">Meiryo</option>
+                                <option value="MS Gothic">MS Gothic</option>
+                            </select>
+                            <input type="hidden" id="kanjiFont-hidden" value="Klee One" />
+                        </div>
+                        <div class="setting-group">
+                            <label for="fontSize">Font Size:</label>
+                            <select id="fontSize">
+                                <option value="small">Small</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="large">Large</option>
+                                <option value="extra-large">Extra Large</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-section-header">
+                            <i class="fas fa-volume-high"></i>
+                            <span>Audio</span>
+                        </div>
+                        <div class="setting-group setting-row">
+                            <label for="autoPlay">Auto-play pronunciation:</label>
+                            <input type="checkbox" id="autoPlay" />
+                        </div>
+                        <div class="setting-group">
+                            <label for="defaultAudio">Default Audio Type:</label>
+                            <select id="defaultAudio">
+                                <option value="kunyomi" selected>
+                                    Kun'yomi (Japanese reading)
+                                </option>
+                                <option value="onyomi">On'yomi (Chinese reading)</option>
+                                <option value="first">First available reading</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-section-header">
+                            <i class="fas fa-brain"></i>
+                            <span>AI Sensei &amp; LLM Configuration</span>
+                        </div>
+                        <div class="setting-group">
+                            <label for="aiProvider">AI Provider:</label>
+                            <select id="aiProvider">
+                                <option value="gemini" selected>
+                                    Google Gemini (Recommended - Free)
+                                </option>
+                                <option value="openai">OpenAI (ChatGPT)</option>
+                                <option value="claude">Anthropic Claude</option>
+                                <option value="openrouter">OpenRouter</option>
+                                <option value="ollama">Ollama (Local Offline LLM)</option>
+                            </select>
+                        </div>
+                        <div class="setting-group" id="aiApiKeyGroup">
+                            <label for="aiApiKey">API Key:</label>
+                            <div class="api-key-input-wrapper">
+                                <input
+                                    type="password"
+                                    id="aiApiKey"
+                                    placeholder="Enter API Key..."
+                                    autocomplete="off"
+                                />
+                                <button
+                                    type="button"
+                                    id="toggleApiKeyVisibility"
+                                    class="api-key-toggle-btn"
+                                    title="Show/Hide Key"
+                                >
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="setting-help-text" id="aiKeyHelpText"
+                                >Saved safely in local browser storage only.</small
+                            >
+                        </div>
+                        <div class="setting-group" id="aiEndpointGroup" style="display: none">
+                            <label for="aiCustomEndpoint">Local Ollama Endpoint:</label>
+                            <input
+                                type="text"
+                                id="aiCustomEndpoint"
+                                placeholder="http://localhost:11434/api/generate"
+                                value="http://localhost:11434/api/generate"
+                            />
+                        </div>
+                        <div class="setting-group">
+                            <label for="aiModel">Model:</label>
+                            <select id="aiModel">
+                                <option value="gemini-1.5-flash" selected>
+                                    gemini-1.5-flash (Fast &amp; Free)
+                                </option>
+                                <option value="gemini-1.5-pro">
+                                    gemini-1.5-pro (Deep reasoning)
+                                </option>
+                                <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp</option>
                             </select>
                         </div>
                         <div class="setting-group">
-                            <div class="custom-css-toggle-row">
-                                <span class="custom-css-toggle-label">Custom CSS (optional)</span>
-                                <label class="auto-accent-toggle" for="customThemeCSSToggle">
-                                    <input type="checkbox" id="customThemeCSSToggle">
-                                    <span>Enable</span>
-                                </label>
+                            <label for="aiPersona">Sensei Persona:</label>
+                            <select id="aiPersona">
+                                <option value="encouraging" selected>
+                                    Warm &amp; Encouraging Sensei
+                                </option>
+                                <option value="strict">Master Kenji (Strict &amp; Precise)</option>
+                                <option value="mnemonic">Mnemonic Magician (Visual Stories)</option>
+                                <option value="anime">Anime Senpai (High Energy)</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <div class="ai-test-connection-wrapper">
+                                <button type="button" id="testAIConnectionBtn" class="ai-test-btn">
+                                    <i class="fas fa-plug"></i> Test Connection
+                                </button>
+                                <span id="aiConnectionStatus" class="ai-conn-status"></span>
                             </div>
-                            <div id="customThemeCSSPanel" class="custom-css-panel">
-                                <div class="custom-css-hint">Only affects the background image layer — one property per line, no selectors or braces.</div>
-                                <label for="customThemeCSSFileInput" class="custom-css-file-label">Browse a .css file (optional):</label>
-                                <input type="file" id="customThemeCSSFileInput" accept=".css,text/css" class="custom-css-file-input">
-                                <textarea id="customThemeUserCSSInput" class="custom-css-textarea" spellcheck="false">filter: blur(10px) brightness(1) saturate(1);
+                        </div>
+
+                        <div class="settings-section-header">
+                            <i class="fas fa-cloud-arrow-up"></i>
+                            <span>Backup &amp; Data</span>
+                        </div>
+                        <div class="setting-group">
+                            <label for="localBackupFreq">Local Backup Frequency:</label>
+                            <select id="localBackupFreq">
+                                <option value="never">Never</option>
+                                <option value="daily" selected>Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="onlineBackupFreq">Online Backup Frequency:</label>
+                            <select id="onlineBackupFreq">
+                                <option value="never" selected>Never</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <div class="backup-buttons">
+                                <button id="createBackup" class="backup-btn">
+                                    Create Local Backup
+                                </button>
+                                <button id="restoreBackup" class="backup-btn">Import Backup</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section-header danger-zone-header">
+                            <i class="fas fa-triangle-exclamation"></i>
+                            <span>Danger Zone</span>
+                        </div>
+                        <div class="setting-group">
+                            <button id="resetProgress" class="reset-btn">Reset All Progress</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Theme Builder Modal -->
+            <div id="customThemeModal" class="modal">
+                <div class="modal-content custom-theme-modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-wand-magic-sparkles"></i> Customize Theme</h2>
+                        <button class="close-btn" id="closeCustomTheme">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Slot Tabs: 1 usable + 2 locked/coming-soon -->
+                        <div class="theme-slot-tabs">
+                            <button type="button" class="theme-slot-tab active" data-slot="1">
+                                Slot 1
+                            </button>
+                            <button
+                                type="button"
+                                class="theme-slot-tab locked"
+                                data-slot="2"
+                                disabled
+                            >
+                                <i class="fas fa-lock"></i> Slot 2
+                            </button>
+                            <button
+                                type="button"
+                                class="theme-slot-tab locked"
+                                data-slot="3"
+                                disabled
+                            >
+                                <i class="fas fa-lock"></i> Slot 3
+                            </button>
+                        </div>
+                        <div class="theme-slot-locked-note">
+                            <i class="fas fa-star"></i> Slots 2 &amp; 3 are coming in a future
+                            update!
+                        </div>
+
+                        <!-- Dev's Favorite Themes: curated preset backgrounds, click to use directly -->
+                        <div class="dev-favorites-section">
+                            <label class="dev-favorites-label"
+                                ><i class="fas fa-heart"></i>
+                                <span id="devFavoritesLabel">Dante's Top 5 Themes</span></label
+                            >
+                            <div id="devFavoritesGrid" class="dev-favorites-grid"></div>
+                        </div>
+
+                        <!-- Slot 1 builder (functional) -->
+                        <div id="themeSlot1Builder" class="theme-slot-builder">
+                            <div class="setting-group">
+                                <label>Background Image or Video:</label>
+                                <input
+                                    type="file"
+                                    id="customThemeImageInput"
+                                    accept="image/*,video/mp4,video/webm"
+                                />
+                                <div class="custom-css-hint">
+                                    For video: 720p-1080p, 8-15 seconds works best — it's always
+                                    blurred, so higher resolution just adds file size with no
+                                    visible benefit.
+                                </div>
+                                <div id="customThemePreview" class="custom-theme-preview"></div>
+                            </div>
+                            <div class="setting-group">
+                                <label for="customThemeBlur"
+                                    >Background Blur:
+                                    <span id="customThemeBlurValue">10px</span></label
+                                >
+                                <input
+                                    type="range"
+                                    id="customThemeBlur"
+                                    min="0"
+                                    max="30"
+                                    value="10"
+                                />
+                            </div>
+                            <div class="setting-group">
+                                <label for="customThemeAccent">Accent Color:</label>
+                                <div class="accent-color-row">
+                                    <input type="color" id="customThemeAccent" value="#6200EE" />
+                                    <label class="auto-accent-toggle" for="autoAccentToggle">
+                                        <input type="checkbox" id="autoAccentToggle" />
+                                        <span>Auto-pick from image</span>
+                                    </label>
+                                </div>
+                                <div class="accent-swatches">
+                                    <button
+                                        type="button"
+                                        class="accent-swatch"
+                                        data-color="#6200EE"
+                                        style="background-color: #6200ee"
+                                        title="Indigo"
+                                    ></button>
+                                    <button
+                                        type="button"
+                                        class="accent-swatch"
+                                        data-color="#00BCD4"
+                                        style="background-color: #00bcd4"
+                                        title="Teal"
+                                    ></button>
+                                    <button
+                                        type="button"
+                                        class="accent-swatch"
+                                        data-color="#FF4081"
+                                        style="background-color: #ff4081"
+                                        title="Rose"
+                                    ></button>
+                                    <button
+                                        type="button"
+                                        class="accent-swatch"
+                                        data-color="#10B981"
+                                        style="background-color: #10b981"
+                                        title="Emerald"
+                                    ></button>
+                                    <button
+                                        type="button"
+                                        class="accent-swatch"
+                                        data-color="#F59E0B"
+                                        style="background-color: #f59e0b"
+                                        title="Amber"
+                                    ></button>
+                                    <button
+                                        type="button"
+                                        class="accent-swatch"
+                                        data-color="#8B5CF6"
+                                        style="background-color: #8b5cf6"
+                                        title="Violet"
+                                    ></button>
+                                </div>
+                            </div>
+                            <div class="setting-group setting-row">
+                                <label for="customThemeMode">Base Mode:</label>
+                                <select id="customThemeMode">
+                                    <option value="dark">Dark</option>
+                                    <option value="light">Light</option>
+                                </select>
+                            </div>
+                            <div class="setting-group">
+                                <div class="custom-css-toggle-row">
+                                    <span class="custom-css-toggle-label"
+                                        >Custom CSS (optional)</span
+                                    >
+                                    <label class="auto-accent-toggle" for="customThemeCSSToggle">
+                                        <input type="checkbox" id="customThemeCSSToggle" />
+                                        <span>Enable</span>
+                                    </label>
+                                </div>
+                                <div id="customThemeCSSPanel" class="custom-css-panel">
+                                    <div class="custom-css-hint">
+                                        Only affects the background image layer — one property per
+                                        line, no selectors or braces.
+                                    </div>
+                                    <label
+                                        for="customThemeCSSFileInput"
+                                        class="custom-css-file-label"
+                                        >Browse a .css file (optional):</label
+                                    >
+                                    <input
+                                        type="file"
+                                        id="customThemeCSSFileInput"
+                                        accept=".css,text/css"
+                                        class="custom-css-file-input"
+                                    />
+                                    <textarea
+                                        id="customThemeUserCSSInput"
+                                        class="custom-css-textarea"
+                                        spellcheck="false"
+                                    >
+filter: blur(10px) brightness(1) saturate(1);
                                 background-position: center;
                                 background-size: cover;
                                 opacity: 1;
                                 </textarea>
+                                </div>
                             </div>
-                        </div>
-                        <div class="setting-group">
-                            <button type="button" id="saveCustomTheme" class="backup-btn">Save &amp; Apply</button>
+                            <div class="setting-group">
+                                <button type="button" id="saveCustomTheme" class="backup-btn">
+                                    Save &amp; Apply
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Notification Toast -->
-        <!-- Notification Toast -->
-        <div id="toast" class="toast">
-            <span id="toastMessage"></span>
-        </div>
+            <!-- AI Sensei Diagnostic & Study Path Modal -->
+            <div id="aiSenseiModal" class="modal">
+                <div class="modal-content ai-sensei-modal-content">
+                    <div class="modal-header ai-modal-header">
+                        <div class="ai-modal-title-group">
+                            <div class="ai-avatar-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div>
+                                <h2 id="aiSenseiModalTitle">
+                                    AI Sensei Diagnostic &amp; Study Hub
+                                </h2>
+                                <span class="ai-persona-subtitle" id="aiSenseiPersonaTag"
+                                    >Warm &amp; Encouraging Sensei</span
+                                >
+                            </div>
+                        </div>
+                        <button class="close-btn" id="closeAISenseiModal" title="Close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body ai-modal-body">
+                        <!-- Navigation Tabs -->
+                        <div class="ai-tabs">
+                            <button type="button" class="ai-tab active" data-tab="diagnostics">
+                                <i class="fas fa-chart-pie"></i> Diagnostics &amp; Telemetry
+                            </button>
+                            <button type="button" class="ai-tab" data-tab="study-path">
+                                <i class="fas fa-route"></i> Daily AI Study Path
+                            </button>
+                            <button type="button" class="ai-tab" data-tab="ask-sensei">
+                                <i class="fas fa-comments"></i> Ask Sensei
+                            </button>
+                        </div>
 
-        <!-- Hidden file input for backup import -->
-        <input type="file" id="backupFileInput" accept=".json" style="display: none;">
-    </div>
+                        <!-- TAB 1: Diagnostics & Telemetry -->
+                        <div id="aiTabDiagnostics" class="ai-tab-pane active">
+                            <!-- Stats Grid -->
+                            <div class="ai-stats-grid">
+                                <div class="ai-stat-card">
+                                    <span class="ai-stat-label">Retention Health</span>
+                                    <span class="ai-stat-value" id="aiRetentionRate">--%</span>
+                                    <span class="ai-stat-desc">SM-2 Accuracy</span>
+                                </div>
+                                <div class="ai-stat-card">
+                                    <span class="ai-stat-label">Reviews Due</span>
+                                    <span class="ai-stat-value" id="aiDueCount">0</span>
+                                    <span class="ai-stat-desc">Needs active recall</span>
+                                </div>
+                                <div class="ai-stat-card">
+                                    <span class="ai-stat-label">Mature Kanji</span>
+                                    <span class="ai-stat-value" id="aiMatureCount">0</span>
+                                    <span class="ai-stat-desc">&gt;21d retention interval</span>
+                                </div>
+                                <div class="ai-stat-card">
+                                    <span class="ai-stat-label">High-Risk Traps</span>
+                                    <span class="ai-stat-value" id="aiWeakCount">0</span>
+                                    <span class="ai-stat-desc">Frequent lapse cards</span>
+                                </div>
+                            </div>
 
-    <footer class="app-footer">
-        <div class="footer-content">
-            <div class="footer-text">
-                <p>Made with love by <a href="https://github.com/brodante/" target="_blank" rel="noopener noreferrer">d4nte</a></p>
-                <p class="footer-jp japanese-text">愛をこめて <a href="https://github.com/brodante/" target="_blank" rel="noopener noreferrer">ダンテ</a> が作りました</p>
-                <p class="yuki-credit">Gorgeous WebGL wave by <a href="https://codepen.io/Web_yuki1027/pens/" target="_blank" rel="noopener noreferrer">Yuki</a><br>
-                <span class="footer-jp">美しいWebGLウェーブ by <a href="https://codepen.io/Web_yuki1027/pens/" target="_blank" rel="noopener noreferrer">Yuki</a></span>
-                </p>
-                <p class="filip-credit">Powered by Filip Zrnzevic's <a href="https://codepen.io/filipz/pen/GgpMOEq" target="_blank" rel="noopener noreferrer">❍ Spooky Spectral Ghost</a><br>
-                <span class="footer-jp">❍ Spooky Spectral Ghost by <a href="https://codepen.io/filipz/pen/GgpMOEq" target="_blank" rel="noopener noreferrer">Filip Zrnzevic</a></span>
-                </p>
-                <p class="soju-credit">Tubes Cursor by <a href="https://codepen.io/soju22/pen/qEbdVjK" target="_blank" rel="noopener noreferrer">Soju</a><br>
-                <span class="footer-jp">Tubes Cursor by <a href="https://codepen.io/soju22/pen/qEbdVjK" target="_blank" rel="noopener noreferrer">Soju</a></span>
-                </p>
+                            <!-- AI Sensei Commentary Box -->
+                            <div class="ai-commentary-card">
+                                <div class="ai-commentary-header">
+                                    <h3>
+                                        <i class="fas fa-sparkles"></i> Sensei's Diagnostic Analysis
+                                    </h3>
+                                    <button
+                                        type="button"
+                                        id="refreshAIDiagnosticBtn"
+                                        class="ai-action-sm-btn"
+                                    >
+                                        <i class="fas fa-rotate-right"></i> Run Analysis
+                                    </button>
+                                </div>
+                                <div
+                                    id="aiDiagnosticLoading"
+                                    class="ai-loading-container"
+                                    style="display: none"
+                                >
+                                    <div class="ai-spinner"></div>
+                                    <p>
+                                        Sensei is analyzing your review history and stroke recall...
+                                    </p>
+                                </div>
+                                <div id="aiDiagnosticContent" class="ai-diagnostic-content">
+                                    <p class="ai-placeholder-text">
+                                        Click "Run Analysis" to generate your personalized AI study
+                                        breakdown.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Lookalike Traps -->
+                            <div class="ai-lookalikes-section">
+                                <h4>
+                                    <i class="fas fa-triangle-exclamation"></i> Lookalike &amp;
+                                    Radical Traps in Your Level
+                                </h4>
+                                <div id="aiLookalikeTrapsList" class="ai-traps-list">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- TAB 2: Daily AI Study Path -->
+                        <div id="aiTabStudyPath" class="ai-tab-pane">
+                            <div class="ai-study-plan-card">
+                                <h3>
+                                    <i class="fas fa-calendar-check"></i> Today's Tailored Learning
+                                    Deck
+                                </h3>
+                                <p class="ai-plan-subtitle">
+                                    Prioritized using Spaced Repetition (SM-2) memory decay curves.
+                                </p>
+                                <div id="aiPriorityKanjiList" class="ai-priority-grid">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                                <div class="ai-plan-actions">
+                                    <button
+                                        type="button"
+                                        id="startSRSReviewSessionBtn"
+                                        class="ai-primary-btn"
+                                    >
+                                        <i class="fas fa-play"></i> Study Priority Deck Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: Ask Sensei -->
+                        <div id="aiTabAskSensei" class="ai-tab-pane">
+                            <div class="ai-chat-quick-actions">
+                                <button
+                                    type="button"
+                                    class="ai-quick-prompt"
+                                    data-prompt="Explain current kanji radicals and stroke anatomy"
+                                >
+                                    <i class="fas fa-puzzle-piece"></i> Radical Breakdown
+                                </button>
+                                <button
+                                    type="button"
+                                    class="ai-quick-prompt"
+                                    data-prompt="Create a vivid visual mnemonic story for the current kanji"
+                                >
+                                    <i class="fas fa-lightbulb"></i> Vivid Mnemonic
+                                </button>
+                                <button
+                                    type="button"
+                                    class="ai-quick-prompt"
+                                    data-prompt="Give me 2 natural example sentences using this kanji at my JLPT level"
+                                >
+                                    <i class="fas fa-quote-left"></i> Example Sentences
+                                </button>
+                                <button
+                                    type="button"
+                                    class="ai-quick-prompt"
+                                    data-prompt="What are common mistakes learners make with this kanji?"
+                                >
+                                    <i class="fas fa-circle-exclamation"></i> Common Pitfalls
+                                </button>
+                            </div>
+                            <div id="aiChatLog" class="ai-chat-log">
+                                <div class="ai-chat-msg ai-msg-bot">
+                                    <div class="ai-msg-avatar"><i class="fas fa-brain"></i></div>
+                                    <div class="ai-msg-text">
+                                        Konnichiwa! I am your AI Sensei. Ask me any question about
+                                        Kanji, readings, radicals, or Japanese grammar!
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ai-chat-input-bar">
+                                <input
+                                    type="text"
+                                    id="aiSenseiInput"
+                                    placeholder="Ask Sensei a question (e.g., How do I remember 待 vs 持?)..."
+                                    autocomplete="off"
+                                />
+                                <button type="button" id="aiSenseiSendBtn" class="ai-send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="footer-actions">
-                <a class="footer-btn" href="https://github.com/brodante/kanji-widget-app" target="_blank" rel="noopener noreferrer">
-                    <i class="fab fa-github"></i> View on GitHub
-                </a>
-                <a class="footer-link" href="https://github.com/brodante/kanji-widget-app/issues/new" target="_blank" rel="noopener noreferrer">
-                    Create issue
-                </a>
-            </div>
-        </div>
-    </footer>
 
-    <script src="storage-manager.js"></script>
-    <script src="audio-manager.js"></script>
-    <script src="kanji-data.js"></script>
-    <script src="script.js"></script>
-</body>
+            <!-- KANJI MNEMONIC & ETYMOLOGY DRAWER (Bottom Sheet) -->
+            <div id="kanjiDrawer" class="kanji-drawer">
+                <div class="kanji-drawer-backdrop" onclick="app.closeKanjiDrawer()"></div>
+                <div class="kanji-drawer-sheet">
+                    <div class="kanji-drawer-handle" onclick="app.closeKanjiDrawer()" title="Drag or click to close">
+                        <span class="kanji-drawer-handle-bar"></span>
+                    </div>
+                    <div class="kanji-drawer-header">
+                        <div class="kanji-drawer-title-group">
+                            <span class="kanji-drawer-kanji japanese-text" id="drawerKanjiChar"></span>
+                            <div class="kanji-drawer-meta">
+                                <span class="kanji-drawer-meaning" id="drawerKanjiMeaning"></span>
+                                <span class="kanji-drawer-cache-badge" id="drawerCacheBadge" style="display:none;">
+                                    <i class="fas fa-bolt"></i> Cached
+                                </span>
+                            </div>
+                        </div>
+                        <button class="kanji-drawer-close" onclick="app.closeKanjiDrawer()" title="Close drawer">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="kanji-drawer-tabs">
+                        <button type="button" class="kanji-drawer-tab active" data-drawer-tab="mnemonic" onclick="app.switchKanjiDrawerTab('mnemonic')">
+                            <i class="fas fa-wand-magic-sparkles"></i> Mnemonic
+                        </button>
+                        <button type="button" class="kanji-drawer-tab" data-drawer-tab="etymology" onclick="app.switchKanjiDrawerTab('etymology')">
+                            <i class="fas fa-scroll"></i> Etymology
+                        </button>
+                    </div>
+                    <div class="kanji-drawer-body">
+                        <div id="drawerTabMnemonic" class="kanji-drawer-pane active">
+                            <div id="drawerMnemonicContent" class="kanji-drawer-content">
+                                <div class="ai-loading-container">
+                                    <div class="ai-spinner"></div>
+                                    <p>Generating mnemonic…</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="drawerTabEtymology" class="kanji-drawer-pane">
+                            <div id="drawerEtymologyContent" class="kanji-drawer-content">
+                                <div class="ai-loading-container">
+                                    <div class="ai-spinner"></div>
+                                    <p>Exploring etymology…</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kanji-drawer-footer">
+                        <button type="button" class="kanji-drawer-refresh-btn" onclick="app.refreshKanjiDrawer()" title="Regenerate with AI">
+                            <i class="fas fa-arrows-rotate"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FLOATING AI SENSEI FAB (Bottom-Left) -->
+            <button
+                id="aiSenseiFab"
+                class="ai-sensei-fab"
+                title="AI Sensei & Spaced Repetition Hub"
+                aria-label="Open AI Sensei Hub"
+            >
+                <div class="ai-fab-glow"></div>
+                <div class="ai-fab-icon-box">
+                    <i class="fas fa-brain"></i>
+                    <span class="ai-fab-pulse-dot"></span>
+                </div>
+                <span class="ai-fab-text">AI Sensei</span>
+            </button>
+
+            <!-- Notification Toast -->
+            <div id="toast" class="toast">
+                <span id="toastMessage"></span>
+            </div>
+
+            <!-- Hidden file input for backup import -->
+            <input type="file" id="backupFileInput" accept=".json" style="display: none" />
+        </div>
+
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-text">
+                    <p>
+                        Made with love by
+                        <a
+                            href="https://github.com/brodante/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            >d4nte</a
+                        >
+                    </p>
+                    <p class="footer-jp japanese-text">
+                        愛をこめて
+                        <a
+                            href="https://github.com/brodante/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            >ダンテ</a
+                        >
+                        が作りました
+                    </p>
+                    <p class="yuki-credit">
+                        Gorgeous WebGL wave by
+                        <a
+                            href="https://codepen.io/Web_yuki1027/pens/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            >Yuki</a
+                        ><br />
+                        <span class="footer-jp"
+                            >美しいWebGLウェーブ by
+                            <a
+                                href="https://codepen.io/Web_yuki1027/pens/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >Yuki</a
+                            ></span
+                        >
+                    </p>
+                    <p class="filip-credit">
+                        Powered by Filip Zrnzevic's
+                        <a
+                            href="https://codepen.io/filipz/pen/GgpMOEq"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            >❍ Spooky Spectral Ghost</a
+                        ><br />
+                        <span class="footer-jp"
+                            >❍ Spooky Spectral Ghost by
+                            <a
+                                href="https://codepen.io/filipz/pen/GgpMOEq"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >Filip Zrnzevic</a
+                            ></span
+                        >
+                    </p>
+                    <p class="soju-credit">
+                        Tubes Cursor by
+                        <a
+                            href="https://codepen.io/soju22/pen/qEbdVjK"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            >Soju</a
+                        ><br />
+                        <span class="footer-jp"
+                            >Tubes Cursor by
+                            <a
+                                href="https://codepen.io/soju22/pen/qEbdVjK"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >Soju</a
+                            ></span
+                        >
+                    </p>
+                </div>
+                <div class="footer-actions">
+                    <a
+                        class="footer-btn"
+                        href="https://github.com/brodante/kanji-widget-app"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <i class="fab fa-github"></i> View on GitHub
+                    </a>
+                    <a
+                        class="footer-link"
+                        href="https://github.com/brodante/kanji-widget-app/issues/new"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Create issue
+                    </a>
+                </div>
+            </div>
+        </footer>
+
+        <script src="storage-manager.js"></script>
+        <script src="srs-engine.js"></script>
+        <script src="ai-manager.js"></script>
+        <script src="audio-manager.js"></script>
+        <script src="kanji-data.js"></script>
+        <script src="script.js"></script>
+    </body>
 </html>

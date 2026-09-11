@@ -14,6 +14,8 @@
         "AudioManager": "readonly",
         "KanjiData": "readonly",
         "StorageManager": "readonly",
+        "SRSEngine": "readonly",
+        "AIManager": "readonly",
         "gtag": "readonly"
     },
     "rules": {
@@ -50,3 +52,4 @@
         "template-curly-spacing": ["error", "never"]
     }
 }
+

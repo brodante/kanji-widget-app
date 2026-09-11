@@ -1,17 +1,17 @@
 :root {
-    --primary-color: #6200EE;
+    --primary-color: #6200ee;
     --japanese-font: 'Klee One', 'Noto Sans JP', sans-serif;
     --primary-color-rgb: 98, 0, 238;
-    --primary-variant: #3700B3;
-    --secondary-color: #03DAC6;
-    --background: #FFFFFF;
-    --surface: #FFFFFF;
-    --error: #B00020;
-    --on-primary: #FFFFFF;
+    --primary-variant: #3700b3;
+    --secondary-color: #03dac6;
+    --background: #ffffff;
+    --surface: #ffffff;
+    --error: #b00020;
+    --on-primary: #ffffff;
     --on-secondary: #000000;
     --on-background: #000000;
     --on-surface: #000000;
-    --on-error: #FFFFFF;
+    --on-error: #ffffff;
     --shadow: rgba(0, 0, 0, 0.1);
     --border-radius: 12px;
     --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -19,17 +19,17 @@
     --elevation-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
 
-[data-theme="dark"] {
-    --primary-color: #BB86FC;
-    --primary-variant: #3700B3;
-    --secondary-color: #03DAC6;
+[data-theme='dark'] {
+    --primary-color: #bb86fc;
+    --primary-variant: #3700b3;
+    --secondary-color: #03dac6;
     --background: #121212;
-    --surface: #1E1E1E;
-    --error: #CF6679;
+    --surface: #1e1e1e;
+    --error: #cf6679;
     --on-primary: #000000;
     --on-secondary: #000000;
-    --on-background: #FFFFFF;
-    --on-surface: #FFFFFF;
+    --on-background: #ffffff;
+    --on-surface: #ffffff;
     --on-error: #000000;
     --shadow: rgba(0, 0, 0, 0.3);
 }
@@ -51,11 +51,18 @@ a:focus-visible {
 }
 
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
     background-color: var(--background);
     color: var(--on-background);
     line-height: 1.6;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
     overflow-x: hidden;
 }
 
@@ -63,16 +70,36 @@ body {
 .japanese-text {
     font-family: var(--japanese-font);
 }
-.font-klee-one { --japanese-font: 'Klee One', 'Noto Sans JP', sans-serif; }
-.font-noto-sans-jp { --japanese-font: 'Noto Sans JP', sans-serif; }
-.font-zen-antique { --japanese-font: 'Zen Antique', 'Noto Sans JP', serif; }
-.font-zen-maru-gothic { --japanese-font: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; }
-.font-hannari { --japanese-font: 'Hannari', 'Noto Sans JP', serif; }
-.font-kokoro { --japanese-font: 'Kokoro', 'Noto Sans JP', serif; }
-.font-hiragino-sans { --japanese-font: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; }
-.font-yu-gothic { --japanese-font: 'Yu Gothic', 'Meiryo', sans-serif; }
-.font-meiryo { --japanese-font: 'Meiryo', sans-serif; }
-.font-ms-gothic { --japanese-font: 'MS Gothic', monospace; }
+.font-klee-one {
+    --japanese-font: 'Klee One', 'Noto Sans JP', sans-serif;
+}
+.font-noto-sans-jp {
+    --japanese-font: 'Noto Sans JP', sans-serif;
+}
+.font-zen-antique {
+    --japanese-font: 'Zen Antique', 'Noto Sans JP', serif;
+}
+.font-zen-maru-gothic {
+    --japanese-font: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
+}
+.font-hannari {
+    --japanese-font: 'Hannari', 'Noto Sans JP', serif;
+}
+.font-kokoro {
+    --japanese-font: 'Kokoro', 'Noto Sans JP', serif;
+}
+.font-hiragino-sans {
+    --japanese-font: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
+}
+.font-yu-gothic {
+    --japanese-font: 'Yu Gothic', 'Meiryo', sans-serif;
+}
+.font-meiryo {
+    --japanese-font: 'Meiryo', sans-serif;
+}
+.font-ms-gothic {
+    --japanese-font: 'MS Gothic', monospace;
+}
 
 .app-container {
     max-width: 800px;
@@ -185,7 +212,9 @@ body {
     font-size: 0.95rem !important;
     background-color: var(--primary-color) !important;
     color: var(--on-primary) !important;
-    transition: transform 0.2s ease, opacity 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease !important;
 }
 
 .footer-link,
@@ -200,7 +229,9 @@ body {
     font-size: 0.95rem !important;
     color: var(--primary-color) !important;
     background-color: rgba(var(--primary-color-rgb), 0.12) !important;
-    transition: transform 0.2s ease, opacity 0.2s ease !important;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease !important;
 }
 
 .footer-btn:hover,
@@ -209,7 +240,7 @@ body {
     opacity: 0.9 !important;
 }
 
-[data-theme="dark"] .footer-content {
+[data-theme='dark'] .footer-content {
     /* iOS Translucent Dark Background Blur */
     background: rgba(30, 30, 30, 0.55) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
@@ -334,7 +365,9 @@ body {
 
 .clickable-reading {
     cursor: pointer;
-    transition: color 0.2s ease, background-color 0.2s ease;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     display: inline-block;
@@ -371,7 +404,7 @@ body {
 }
 
 /* 2. Target the invisible wrapper holding the Japanese text */
-.example-item> :first-child {
+.example-item > :first-child {
     display: flex;
     flex-wrap: wrap;
     /* THE MAGIC: Drops furigana to the next line if squeezed! */
@@ -442,7 +475,7 @@ body {
 }
 
 .master-action-btn:hover {
-    background-color: #00BFA5 !important;
+    background-color: #00bfa5 !important;
 }
 
 .action-btn {
@@ -494,7 +527,7 @@ body {
 }
 
 .master-btn:hover {
-    background-color: #00BFA5;
+    background-color: #00bfa5;
     transform: translateX(-50%) translateY(-2px);
     box-shadow: var(--elevation-2);
 }
@@ -540,7 +573,7 @@ body {
 
 /* 50% Milestone (Midpoint) */
 .progress-bar::before {
-    content: "";
+    content: '';
     position: absolute;
     left: 50%;
     top: 50%;
@@ -558,7 +591,7 @@ body {
 /* 100% Milestone (Endpoint) */
 /* 100% Milestone (Endpoint) */
 .progress-bar::after {
-    content: "";
+    content: '';
     position: absolute;
     right: -29px;
     /* Adjusted to keep the larger icon perfectly centered */
@@ -588,7 +621,7 @@ body {
 
 /* 1. Create the carried mid-mark (trailing just behind the big point) */
 .progress-fill::before {
-    content: "";
+    content: '';
     position: absolute;
     right: -15px;
     /* Tucked tightly behind the main 56px point */
@@ -608,7 +641,7 @@ body {
 
 /* The Moving Point (Thumb Icon) */
 .progress-fill::after {
-    content: "";
+    content: '';
     position: absolute;
     right: -28px;
     top: 50%;
@@ -670,7 +703,7 @@ body {
 
 /* Tiny triangle arrow pointing down from the tooltip */
 .progress-tooltip::after {
-    content: "";
+    content: '';
     position: absolute;
     top: 100%;
     /* Bottom of the tooltip */
@@ -697,19 +730,19 @@ body {
 /* ========================================== */
 
 /* Yotsuba Theme Setup */
-[data-theme="yotsuba"] .progress-fill::before {
+[data-theme='yotsuba'] .progress-fill::before {
     background-image: url('assets/icons/clover-mid.png');
 }
 
-[data-theme="yotsuba"] .progress-fill::after {
+[data-theme='yotsuba'] .progress-fill::after {
     background-image: url('assets/icons/clover-point.png');
 }
 
-[data-theme="yotsuba"] .progress-bar::before {
+[data-theme='yotsuba'] .progress-bar::before {
     background-image: url('assets/icons/clover-mid.png');
 }
 
-[data-theme="yotsuba"] .progress-bar::after {
+[data-theme='yotsuba'] .progress-bar::after {
     background-image: url('assets/icons/clover-end.png');
     border-radius: 50%;
     /* Smooths out the corners of the JPG */
@@ -720,7 +753,6 @@ body {
 
 /* The joyful double-bounce keyframes */
 @keyframes happy-bounce {
-
     0%,
     100% {
         transform: translateY(-50%) scale(1) rotate(0deg);
@@ -749,13 +781,12 @@ body {
 }
 
 /* Apply the happy bounce to the Yotsuba POINT (progress-fill::after) */
-[data-theme="yotsuba"] .progress-bar.is-complete .progress-fill::after {
+[data-theme='yotsuba'] .progress-bar.is-complete .progress-fill::after {
     /* 1.2s loop, delayed by 0.6s so it waits to arrive first */
     animation: happy-bounce 1.2s ease-in-out 0.6s infinite !important;
     z-index: 10;
     /* Ensures it bounces cleanly in front of the others */
 }
-
 
 /* Candy Theme Setup */
 /* ========================================== */
@@ -763,7 +794,7 @@ body {
 /* ========================================== */
 
 /* 1. The main moving point (50% smaller) */
-[data-theme="candy"] .progress-fill::after {
+[data-theme='candy'] .progress-fill::after {
     background-image: url('assets/icons/candy-point.svg');
     width: 28px;
     height: 28px;
@@ -772,7 +803,7 @@ body {
 }
 
 /* 2. The stationary 50% mark (10% larger) */
-[data-theme="candy"] .progress-bar::before {
+[data-theme='candy'] .progress-bar::before {
     background-image: url('assets/icons/candy-mid.svg');
     width: 35px;
     /* Increased by ~10% (from 32px) */
@@ -780,7 +811,7 @@ body {
 }
 
 /* 3. The carried 50% mark (10% larger) */
-[data-theme="candy"] .progress-fill::before {
+[data-theme='candy'] .progress-fill::before {
     background-image: url('assets/icons/candy-mid.svg');
     width: 44px;
     /* Increased by 10% (from 40px) */
@@ -790,7 +821,7 @@ body {
 }
 
 /* 4. The 100% finish line (Inherits the master 58px size) */
-[data-theme="candy"] .progress-bar::after {
+[data-theme='candy'] .progress-bar::after {
     background-image: url('assets/icons/candy-end.svg');
 }
 /* ========================================== */
@@ -799,7 +830,6 @@ body {
 
 /* The continuous jumping keyframes */
 @keyframes candy-dance {
-
     0%,
     100% {
         transform: translateY(-50%) scale(1) rotate(0deg);
@@ -822,26 +852,25 @@ body {
 }
 
 /* 1. The Main Candy (Point) */
-[data-theme="candy"] .progress-bar.is-complete .progress-fill::after {
+[data-theme='candy'] .progress-bar.is-complete .progress-fill::after {
     /* Lowered to 0.8s for a faster loop */
     animation: candy-dance 0.8s ease-in-out 0.6s infinite !important;
     z-index: 10;
 }
 
 /* 2. The Carried Candy (Mid) */
-[data-theme="candy"] .progress-bar.is-complete .progress-fill::before {
+[data-theme='candy'] .progress-bar.is-complete .progress-fill::before {
     /* Delayed by 0.4s (exactly half the loop time) for the perfect alternating seesaw! */
-    animation: candy-dance 0.8s ease-in-out 1.0s infinite !important;
+    animation: candy-dance 0.8s ease-in-out 1s infinite !important;
     z-index: 10;
 }
-
 
 /* ========================================== */
 /* DARK THEME SETUP (Car & Trailer)           */
 /* ========================================== */
 
 /* 1. The Car (Main Point) */
-[data-theme="dark"] .progress-fill::after {
+[data-theme='dark'] .progress-fill::after {
     background-image: url('assets/icons/dark-point.svg');
     /* The Car */
     width: 55px;
@@ -851,7 +880,7 @@ body {
 }
 
 /* 2. The Waiting Trailer (Stationary 50% Mark) */
-[data-theme="dark"] .progress-bar::before {
+[data-theme='dark'] .progress-bar::before {
     background-image: url('assets/icons/dark-mid.svg');
     /* The Trailer */
     width: 30px;
@@ -860,7 +889,7 @@ body {
 }
 
 /* 3. The Hitched Trailer (Carried 50% Mark) */
-[data-theme="dark"] .progress-fill::before {
+[data-theme='dark'] .progress-fill::before {
     background-image: url('assets/icons/dark-mid.svg');
     /* The Trailer (Attached) */
     width: 40px;
@@ -873,12 +902,12 @@ body {
     /*opacity: 1;*/
     /* Keeps it fully solid instead of faded for this theme */
 }
-[data-theme="dark"] .progress-bar.past-midpoint .progress-fill::before {
+[data-theme='dark'] .progress-bar.past-midpoint .progress-fill::before {
     opacity: 1;
 }
 
 /* 4. The Gas Station (100% Finish Line) */
-[data-theme="dark"] .progress-bar::after {
+[data-theme='dark'] .progress-bar::after {
     background-image: url('assets/icons/dark-end.svg');
     /* The Gas Station */
     width: 45px;
@@ -894,7 +923,6 @@ body {
 
 /* 1. Gas Station Machine Rumble Keyframes */
 @keyframes gas-pump-rumble {
-
     0%,
     100% {
         transform: translateY(-50%) translate(0, 0);
@@ -915,7 +943,6 @@ body {
 
 /* 2. Car Taillight / Handbrake Soft Red Glow Keyframes */
 @keyframes taillight-pulse {
-
     0%,
     100% {
         /* Dim initial red glow on the tail of the car */
@@ -924,45 +951,48 @@ body {
 
     50% {
         /* Bright firefly pulse like brake lights glowing in the dark */
-        filter: drop-shadow(-6px 0px 8px rgba(255, 0, 0, 0.95)) drop-shadow(-2px 0px 12px rgba(255, 50, 50, 0.6));
+        filter: drop-shadow(-6px 0px 8px rgba(255, 0, 0, 0.95))
+            drop-shadow(-2px 0px 12px rgba(255, 50, 50, 0.6));
     }
 }
 
 /* Apply Rumble to the Gas Station */
-[data-theme="dark"] .progress-bar.is-complete::after {
+[data-theme='dark'] .progress-bar.is-complete::after {
     /* Fast 0.2s vibration, starts after 0.6s slide delay */
     animation: gas-pump-rumble 0.2s linear 0.6s infinite !important;
 }
 
 /* Apply Red Handbrake Glow to the Car */
-[data-theme="dark"] .progress-bar.is-complete .progress-fill::after {
+[data-theme='dark'] .progress-bar.is-complete .progress-fill::after {
     /* Smooth 1.5s firefly pulse */
     animation: taillight-pulse 1.5s ease-in-out 0.6s infinite !important;
 }
-
 
 /* ========================================== */
 /* FOREST THEME                               */
 /* ========================================== */
 
 /* 1. Base Thumb (1 Tree) */
-[data-theme="forest"] .progress-fill::after {
+[data-theme='forest'] .progress-fill::after {
     background-image: url('assets/icons/forest-point.svg');
     width: 32px;
     height: 32px;
     right: -16px;
-    transition: background-image 0.2s ease, opacity 0.2s ease, width 0.2s ease;
+    transition:
+        background-image 0.2s ease,
+        opacity 0.2s ease,
+        width 0.2s ease;
 }
 
 /* 2. Stationary 50% Mark (2 Trees) */
-[data-theme="forest"] .progress-bar::before {
+[data-theme='forest'] .progress-bar::before {
     background-image: url('assets/icons/forest-mid.svg');
     width: 40px;
     height: 40px;
 }
 
 /* 3. When passing 50%, thumb BECOMES the 2 Trees */
-[data-theme="forest"] .progress-bar.past-midpoint .progress-fill::after {
+[data-theme='forest'] .progress-bar.past-midpoint .progress-fill::after {
     background-image: url('assets/icons/forest-mid.svg');
     width: 40px;
     /* Scales up slightly to match */
@@ -971,7 +1001,7 @@ body {
 }
 
 /* 4. Stationary 100% Mark (3 Trees) */
-[data-theme="forest"] .progress-bar::after {
+[data-theme='forest'] .progress-bar::after {
     background-image: url('assets/icons/forest-end.svg');
     width: 48px;
     height: 48px;
@@ -980,7 +1010,7 @@ body {
 }
 
 /* 5. At 100%, moving thumb vanishes, leaving only the stationary 3 Trees */
-[data-theme="forest"] .progress-bar.is-complete .progress-fill::after {
+[data-theme='forest'] .progress-bar.is-complete .progress-fill::after {
     opacity: 0;
 }
 
@@ -990,7 +1020,6 @@ body {
 
 /* The slow, gentle breeze keyframes */
 @keyframes forest-sway {
-
     0%,
     100% {
         transform: translateY(-50%) rotate(0deg);
@@ -1006,7 +1035,7 @@ body {
 }
 
 /* Trigger the sway on the 3-tree icon when progress hits 100% */
-[data-theme="forest"] .progress-bar.is-complete::after {
+[data-theme='forest'] .progress-bar.is-complete::after {
     /* 4 seconds long so it feels calm and peaceful */
     animation: forest-sway 4s ease-in-out infinite;
 
@@ -1018,7 +1047,7 @@ body {
 .forest-warning-text {
     display: none;
     text-align: center;
-    color: #81C784;
+    color: #81c784;
     /* Soft, natural forest green */
     font-size: 18px;
     font-style: italic;
@@ -1032,7 +1061,7 @@ body {
 }
 
 /* Reveal ONLY when Forest theme is active */
-[data-theme="forest"] .forest-warning-text {
+[data-theme='forest'] .forest-warning-text {
     display: block;
 }
 
@@ -1049,7 +1078,7 @@ body {
 /* ========================================== */
 
 /* 1. Base Thumb (The Fountain Pen) */
-[data-theme="paper"] .progress-fill::after {
+[data-theme='paper'] .progress-fill::after {
     background-image: url('assets/icons/paper-point.svg');
     width: 35px;
     height: 35px;
@@ -1058,18 +1087,21 @@ body {
 }
 
 /* 2. Stationary 50% Mark (The Full Inkwell) */
-[data-theme="paper"] .progress-bar::before {
+[data-theme='paper'] .progress-bar::before {
     background-image: url('assets/icons/paper-mid.svg');
     width: 44px;
     /* Starts about 10% larger than base */
     height: 44px;
     opacity: 1;
     /* Adds a smooth animation for when the size and opacity change */
-    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+    transition:
+        width 0.3s ease,
+        height 0.3s ease,
+        opacity 0.3s ease;
 }
 
 /* 3. At 50%, the pen "uses" the ink! Inkwell shrinks and fades. */
-[data-theme="paper"] .progress-bar.past-midpoint::before {
+[data-theme='paper'] .progress-bar.past-midpoint::before {
     width: 35px;
     /* Shrinks down by ~20% total */
     height: 35px;
@@ -1078,12 +1110,12 @@ body {
 }
 
 /* 4. We aren't carrying anything in this theme, so we hide the trailer layer */
-[data-theme="paper"] .progress-fill::before {
+[data-theme='paper'] .progress-fill::before {
     display: none;
 }
 
 /* 5. Stationary 100% Mark (The Letter) */
-[data-theme="paper"] .progress-bar::after {
+[data-theme='paper'] .progress-bar::after {
     background-image: url('assets/icons/paper-end.svg');
     width: 55px;
     height: 55px;
@@ -1098,7 +1130,6 @@ body {
 
 /* The lifting and slamming keyframes, adjusted for looping */
 @keyframes wax-stamp {
-
     0%,
     100% {
         transform: translateY(-50%) scale(1);
@@ -1126,23 +1157,22 @@ body {
 }
 
 /* Apply the animation to the PEN (progress-fill::after) */
-[data-theme="paper"] .progress-bar.is-complete .progress-fill::after {
+[data-theme='paper'] .progress-bar.is-complete .progress-fill::after {
     /* Set to 1.5s and infinite to keep it stamping smoothly! */
     animation: wax-stamp 1.5s ease-out 0.6s infinite !important;
     z-index: 10;
 }
 
-
 /* ========================================== */
 /* MIDNIGHT THEME SETUP (Deep Space Tow)      */
 /* ========================================== */
 /*0. WHole progress line */
-[data-theme="midnight"] .progress-fill {
+[data-theme='midnight'] .progress-fill {
     z-index: auto !important;
 }
 
 /* 1. The Rocket (Main Point) */
-[data-theme="midnight"] .progress-fill::after {
+[data-theme='midnight'] .progress-fill::after {
     background-image: url('assets/icons/midnight-point.svg');
     width: 40px;
     height: 40px;
@@ -1152,14 +1182,14 @@ body {
 }
 
 /* 2. The Waiting Satellite (Stationary 50% Mark) */
-[data-theme="midnight"] .progress-bar::before {
+[data-theme='midnight'] .progress-bar::before {
     background-image: url('assets/icons/midnight-mid.svg');
     width: 32px;
     height: 32px;
 }
 
 /* 3. The Towed Satellite (Carried 50% Mark) */
-[data-theme="midnight"] .progress-fill::before {
+[data-theme='midnight'] .progress-fill::before {
     background-image: url('assets/icons/midnight-mid.svg');
     width: 32px;
     height: 32px;
@@ -1172,13 +1202,13 @@ body {
 }
 
 /* 3.5 Reveal the towed satellite ONLY when the rocket hits 50% */
-[data-theme="midnight"] .progress-bar.past-midpoint .progress-fill::before {
+[data-theme='midnight'] .progress-bar.past-midpoint .progress-fill::before {
     opacity: 1;
     /* Docking complete! Solidifies the satellite so it can be towed */
 }
 
 /* 4. The Space Station (100% Finish Line) */
-[data-theme="midnight"] .progress-bar::after {
+[data-theme='midnight'] .progress-bar::after {
     background-image: url('assets/icons/midnight-end.svg');
     width: 60px;
     /* Nice and large for the final destination */
@@ -1195,7 +1225,7 @@ body {
 .space-warning-text {
     display: none;
     text-align: center;
-    color: #FDE047;
+    color: #fde047;
     /* Bright starlight yellow */
     font-size: 18px;
     font-style: italic;
@@ -1210,7 +1240,7 @@ body {
 }
 
 /* Reveal ONLY when Space theme is active */
-[data-theme="midnight"] .space-warning-text {
+[data-theme='midnight'] .space-warning-text {
     display: block;
 }
 
@@ -1222,14 +1252,12 @@ body {
     transform: scale(1.02);
 }
 
-
 /* ========================================== */
 /* MIDNIGHT 100% ANIMATIONS (Zero-G Docking)  */
 /* ========================================== */
 
 /* The slow, smooth upward drift */
 @keyframes zero-g-hover-up {
-
     0%,
     100% {
         transform: translateY(-50%);
@@ -1243,7 +1271,6 @@ body {
 
 /* The slow, smooth downward drift */
 @keyframes zero-g-hover-down {
-
     0%,
     100% {
         transform: translateY(-50%);
@@ -1256,19 +1283,19 @@ body {
 }
 
 /* 1. The Space Station (End) */
-[data-theme="midnight"] .progress-bar.is-complete::after {
+[data-theme='midnight'] .progress-bar.is-complete::after {
     /* 4-second slow loop, drifting upwards */
     animation: zero-g-hover-up 4s ease-in-out 0.6s infinite !important;
 }
 
 /* 2. The Rocket (Point) */
-[data-theme="midnight"] .progress-bar.is-complete .progress-fill::after {
+[data-theme='midnight'] .progress-bar.is-complete .progress-fill::after {
     /* 3-second loop, drifting downwards (opposite of the station) */
     animation: zero-g-hover-down 3s ease-in-out 0.6s infinite !important;
 }
 
 /* 3. The Towed Satellite (Mid) */
-[data-theme="midnight"] .progress-bar.is-complete .progress-fill::before {
+[data-theme='midnight'] .progress-bar.is-complete .progress-fill::before {
     /* Same as the rocket, but with a 0.9s delay so it bobs a split-second 
        after the rocket moves, making the invisible tether feel flexible! */
     animation: zero-g-hover-down 3s ease-in-out 0.9s infinite !important;
@@ -1278,7 +1305,7 @@ body {
 /* ========================================== */
 
 /* 1. Ensure the progress section doesn't trap our stars */
-[data-theme="midnight"] .progress-section {
+[data-theme='midnight'] .progress-section {
     position: relative;
     overflow: visible !important; /* FIX: Changed to visible so meteors can fly out */
 }
@@ -1311,26 +1338,20 @@ body {
         radial-gradient(1px 1px at 70% 85%, rgba(255, 255, 255, 0.5), rgba(0, 0, 0, 0)),
         radial-gradient(1px 1px at 80% 40%, rgba(253, 224, 71, 0.3), rgba(0, 0, 0, 0)),
         radial-gradient(1px 1px at 90% 60%, #fff, rgba(0, 0, 0, 0)),
-
         /* --- Middle Ground Medium Stars --- */
         radial-gradient(1.5px 1.5px at 15% 75%, #fff, rgba(0, 0, 0, 0)),
-        radial-gradient(1.5px 1.5px at 25% 15%, #A0E0F0, rgba(0, 0, 0, 0)),
+        radial-gradient(1.5px 1.5px at 25% 15%, #a0e0f0, rgba(0, 0, 0, 0)),
         radial-gradient(1.5px 1.5px at 60% 50%, #fff, rgba(0, 0, 0, 0)),
-        radial-gradient(1.5px 1.5px at 85% 20%, #FDE047, rgba(0, 0, 0, 0)),
-
+        radial-gradient(1.5px 1.5px at 85% 20%, #fde047, rgba(0, 0, 0, 0)),
         /* --- SUPER SHINY FOREGROUND STARS (Multi-layered for bloom) --- */
-        /* Shiny Star 1 (Top Left) */
-        radial-gradient(2px 2px at 5% 5%, #fff 100%, rgba(0, 0, 0, 0)),
+        /* Shiny Star 1 (Top Left) */ radial-gradient(2px 2px at 5% 5%, #fff 100%, rgba(0, 0, 0, 0)),
         radial-gradient(6px 6px at 5% 5%, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0) 100%),
-
         /* Shiny Star 2 (Center Right) */
         radial-gradient(2px 2px at 75% 45%, #fff 100%, rgba(0, 0, 0, 0)),
         radial-gradient(8px 8px at 75% 45%, rgba(160, 224, 240, 0.2) 0%, rgba(0, 0, 0, 0) 100%),
-
         /* Shiny Star 3 (Bottom Center) */
         radial-gradient(2.5px 2.5px at 45% 90%, #fff 100%, rgba(0, 0, 0, 0)),
         radial-gradient(10px 10px at 45% 90%, rgba(253, 224, 71, 0.15) 0%, rgba(0, 0, 0, 0) 100%),
-
         /* Shiny Star 4 (Far Right) */
         radial-gradient(2px 2px at 95% 70%, #fff 100%, rgba(0, 0, 0, 0)),
         radial-gradient(5px 5px at 95% 70%, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
@@ -1364,29 +1385,34 @@ body {
     display: none;
     position: fixed; /* FIX: Pinned to the viewport */
     top: 15vh; /* Starts near the top 15% of the screen */
-    left: 0; 
-    width: 120px; 
+    left: 0;
+    width: 120px;
     height: 2px;
-    
-    background: linear-gradient(to right, rgba(255,255,255,0) 0%, #A0E0F0 100%);
+
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, #a0e0f0 100%);
     transform: rotate(45deg);
     pointer-events: none;
     z-index: -10;
-    
+
     animation: shooting-star-fullscreen 8s linear infinite; /* Increased to 8s for a longer flight */
     animation-fill-mode: backwards;
 }
 
 /* Reveal stars and meteors only on midnight theme */
-[data-theme="midnight"] .midnight-stars,
-[data-theme="midnight"] .midnight-meteor {
+[data-theme='midnight'] .midnight-stars,
+[data-theme='midnight'] .midnight-meteor {
     display: block;
 }
 
 /* 4. The Animations */
 @keyframes twinkle-stars {
-    0% { opacity: 0.2; }
-    100% { opacity: 0.8; transform: scale(1.01); }
+    0% {
+        opacity: 0.2;
+    }
+    100% {
+        opacity: 0.8;
+        transform: scale(1.01);
+    }
 }
 
 @keyframes shooting-star-fullscreen {
@@ -1424,7 +1450,7 @@ body {
     /* Just above the background stars */
 }
 
-[data-theme="midnight"] .midnight-named-stars {
+[data-theme='midnight'] .midnight-named-stars {
     display: block;
 }
 
@@ -1439,7 +1465,7 @@ body {
 
 /* The glowing star dot */
 .named-star::before {
-    content: "";
+    content: '';
     width: 5px;
     height: 5px;
     background-color: #fff;
@@ -1495,7 +1521,7 @@ body {
 .midnight-meteor.meteor-2 {
     top: 60vh;
     /* Lower on the screen */
-    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, #FDE047 100%);
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, #fde047 100%);
     /* Yellow tail */
     animation: shooting-star-fullscreen 14s linear infinite 5s backwards;
     /* Slower, with a 5s delay */
@@ -1510,18 +1536,23 @@ body {
     width: 350px;
     /* Massive long tail */
     height: 3px;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(160, 224, 240, 0.5) 80%, #ffffff 100%);
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(160, 224, 240, 0.5) 80%,
+        #ffffff 100%
+    );
     transform: rotate(20deg);
     border-radius: 50% 0 0 50%;
     pointer-events: none;
-    filter: drop-shadow(0 0 12px #A0E0F0) blur(1px);
+    filter: drop-shadow(0 0 12px #a0e0f0) blur(1px);
     /* Soft, glowing blur */
     z-index: -11;
     /* Way back in deep space */
     animation: majestic-comet 25s linear infinite;
 }
 
-[data-theme="midnight"] .midnight-comet {
+[data-theme='midnight'] .midnight-comet {
     display: block;
 }
 
@@ -1563,13 +1594,13 @@ body {
 /* ========================================== */
 
 /* 1. Hide the stationary 50% midpoint icon once the rocket passes it */
-[data-theme="midnight"] .progress-bar.past-midpoint::before {
+[data-theme='midnight'] .progress-bar.past-midpoint::before {
     opacity: 0 !important;
 }
 
 /* 2. Hide the original 0% Start Icon (if your base theme uses a specific class for it) */
 /* Adjust '.start-icon' to whatever class your HTML uses for the 0% mark, if it has one! */
-[data-theme="midnight"] .start-icon {
+[data-theme='midnight'] .start-icon {
     display: none !important;
 }
 
@@ -1579,9 +1610,9 @@ body {
 
 /* 1. THE PREMIUM FROSTED GLASS EFFECT */
 /* Targeted specifically to your Kanji, Progress, and Journey widgets */
-[data-theme="midnight"] .kanji-widget,
-[data-theme="midnight"] .progress-section,
-[data-theme="midnight"] .journey-section {
+[data-theme='midnight'] .kanji-widget,
+[data-theme='midnight'] .progress-section,
+[data-theme='midnight'] .journey-section {
     /* Changes solid color to a semi-transparent deep space blue */
     background-color: rgba(15, 20, 35, 0.65) !important;
 
@@ -1597,7 +1628,6 @@ body {
 
 /* 2. SMARTPHONE SCREEN ADJUSTMENTS */
 @media (max-width: 768px) {
-
     /* Pack the stars twice as tight so they fit in the narrow mobile margins */
     .midnight-stars {
         background-size: 200px 200px !important;
@@ -1644,21 +1674,19 @@ body {
 }
 
 /* 2. Optimize the frosted glass panels so they don't repaint on scroll */
-[data-theme="midnight"] .kanji-widget,
-[data-theme="midnight"] .progress-section,
-[data-theme="midnight"] .journey-section {
+[data-theme='midnight'] .kanji-widget,
+[data-theme='midnight'] .progress-section,
+[data-theme='midnight'] .journey-section {
     will-change: transform;
     transform: translate3d(0, 0, 0);
 }
-
-
 
 /* ========================================== */
 /* SUNRISE THEME (Transparent Crossfade Fix)  */
 /* ========================================== */
 
 /* 1. The Moving Moon (Point) */
-[data-theme="sunrise"] .progress-fill::after {
+[data-theme='sunrise'] .progress-fill::after {
     background-image: url('assets/icons/sunrise-point.svg');
     width: 35px;
     height: 35px;
@@ -1668,7 +1696,7 @@ body {
 }
 
 /* 2. The Moving Cloud (Hidden initially, travels invisibly with the Moon) */
-[data-theme="sunrise"] .progress-fill::before {
+[data-theme='sunrise'] .progress-fill::before {
     background-image: url('assets/icons/sunrise-mid.svg');
     width: 45px;
     height: 45px;
@@ -1680,7 +1708,7 @@ body {
 }
 
 /* 3. The Stationary Cloud (Waiting at 50%) */
-[data-theme="sunrise"] .progress-bar::before {
+[data-theme='sunrise'] .progress-bar::before {
     background-image: url('assets/icons/sunrise-mid.svg');
     width: 45px;
     height: 45px;
@@ -1694,22 +1722,22 @@ body {
 
 /* 4. AT 50%: The Crossfade! */
 /* Moon fades out */
-[data-theme="sunrise"] .progress-bar.past-midpoint .progress-fill::after {
+[data-theme='sunrise'] .progress-bar.past-midpoint .progress-fill::after {
     opacity: 0;
 }
 
 /* Moving Cloud fades in */
-[data-theme="sunrise"] .progress-bar.past-midpoint .progress-fill::before {
+[data-theme='sunrise'] .progress-bar.past-midpoint .progress-fill::before {
     opacity: 1;
 }
 
 /* Stationary Cloud fades out so their transparent outlines don't overlap! */
-[data-theme="sunrise"] .progress-bar.past-midpoint::before {
+[data-theme='sunrise'] .progress-bar.past-midpoint::before {
     opacity: 0;
 }
 
 /* 5. The Stationary Sun (Waiting at 100%) */
-[data-theme="sunrise"] .progress-bar::after {
+[data-theme='sunrise'] .progress-bar::after {
     background-image: url('assets/icons/sunrise-end.svg');
     width: 55px;
     height: 55px;
@@ -1719,7 +1747,7 @@ body {
 }
 
 /* 6. AT 100%: The Moving Cloud vanishes into the Sun! */
-[data-theme="sunrise"] .progress-bar.is-complete .progress-fill::before {
+[data-theme='sunrise'] .progress-bar.is-complete .progress-fill::before {
     opacity: 0;
 }
 
@@ -1729,17 +1757,28 @@ body {
 
 /* The Wiggle Keyframes */
 @keyframes sun-wiggle {
-    0%, 100% { transform: translateY(-50%) rotate(0deg) scale(1); }
-    20% { transform: translateY(-50%) rotate(-15deg) scale(1.1); }
-    40% { transform: translateY(-50%) rotate(10deg) scale(1.1); }
-    60% { transform: translateY(-50%) rotate(-10deg) scale(1.1); }
-    80% { transform: translateY(-50%) rotate(5deg) scale(1.1); }
+    0%,
+    100% {
+        transform: translateY(-50%) rotate(0deg) scale(1);
+    }
+    20% {
+        transform: translateY(-50%) rotate(-15deg) scale(1.1);
+    }
+    40% {
+        transform: translateY(-50%) rotate(10deg) scale(1.1);
+    }
+    60% {
+        transform: translateY(-50%) rotate(-10deg) scale(1.1);
+    }
+    80% {
+        transform: translateY(-50%) rotate(5deg) scale(1.1);
+    }
 }
 
 /* Trigger the wiggle on the Sun when progress hits 100% */
-[data-theme="sunrise"] .progress-bar.is-complete::after {
+[data-theme='sunrise'] .progress-bar.is-complete::after {
     /* Runs the 1-second wiggle animation, loops infinitely */
-    animation: sun-wiggle 1s ease-in-out infinite; 
+    animation: sun-wiggle 1s ease-in-out infinite;
 }
 
 /* ========================================== */
@@ -1747,18 +1786,18 @@ body {
 /* ========================================== */
 
 /* Cold arctic blue progress line and fill */
-[data-theme="nord"] .progress-bar {
+[data-theme='nord'] .progress-bar {
     background-color: rgba(60, 90, 110, 0.4);
 }
 
-[data-theme="nord"] .progress-fill {
-    background-color: #A0E0F0;
+[data-theme='nord'] .progress-fill {
+    background-color: #a0e0f0;
     z-index: auto !important;
 }
 
 /* 1. Melting Start Shelf (The Transform Loop) */
-[data-theme="nord"] .progress-bar::before {
-    content: "";
+[data-theme='nord'] .progress-bar::before {
+    content: '';
     position: absolute;
     width: 100px;
     height: 100px;
@@ -1774,7 +1813,7 @@ body {
     animation: start-shelf-melts 8s linear infinite !important;
 }
 /* 2. Polar Bear (Moving Point) */
-[data-theme="nord"] .progress-fill::after {
+[data-theme='nord'] .progress-fill::after {
     background-image: url('assets/icons/polar-bear-4-feet.svg');
     width: 44px;
     height: 44px;
@@ -1786,7 +1825,7 @@ body {
 }
 
 /* 3. Towed Penguin (Revealed Past 50%) */
-[data-theme="nord"] .progress-bar .progress-fill::before {
+[data-theme='nord'] .progress-bar .progress-fill::before {
     background-image: url('assets/icons/arctic-penguin.svg');
     width: 33px;
     height: 33px;
@@ -1799,12 +1838,12 @@ body {
     transform: translateY(calc(-100% + 0px));
 }
 /* 3.5 Reveal towed penguin only PAST 50% */
-[data-theme="nord"] .progress-bar.past-midpoint .progress-fill::before {
+[data-theme='nord'] .progress-bar.past-midpoint .progress-fill::before {
     opacity: 1;
 }
 
 /* 4. The Sad Melting Glacier (Stationary 100% End) */
-[data-theme="nord"] .progress-bar::after {
+[data-theme='nord'] .progress-bar::after {
     /* Start with the normal glacier */
     background-image: url('assets/icons/glacier.svg');
     width: 50px;
@@ -1820,7 +1859,7 @@ body {
 .nord-warning-text {
     display: none;
     text-align: center;
-    color: #A0E0F0;
+    color: #a0e0f0;
     /* FIX: Matching icy blue theme color */
     font-size: 18px;
     /* FIX: Bigger text */
@@ -1838,7 +1877,7 @@ body {
 }
 
 /* Reveal ONLY when Nord is active */
-[data-theme="nord"] .nord-warning-text {
+[data-theme='nord'] .nord-warning-text {
     display: block;
 }
 
@@ -1857,7 +1896,6 @@ body {
 /* ========================================== */
 
 @keyframes start-shelf-melts {
-
     /* 1. Hold the normal ice */
     0%,
     40% {
@@ -1900,7 +1938,6 @@ body {
 
 /* 2. 100% Sad Pit Stop - Bear */
 @keyframes bear-sad-end {
-
     0%,
     100% {
         transform: translateY(calc(-100% + 7px)) rotate(0deg) scale(1);
@@ -1915,7 +1952,6 @@ body {
 
 /* 2.5 100% Sad Pit Stop - Penguin */
 @keyframes penguin-sad-end {
-
     0%,
     100% {
         /* FIX: Matches the new setup height exactly so it doesn't glitch! */
@@ -1932,7 +1968,6 @@ body {
 
 /* 3. 100% Sad Pit Stop - Glacier Cracks (No Movement) */
 @keyframes glacier-crack {
-
     0%,
     100% {
         /* Locked perfectly in place */
@@ -1951,7 +1986,6 @@ body {
 }
 
 @keyframes warning-fade {
-
     0%,
     100% {
         opacity: 0;
@@ -1963,24 +1997,23 @@ body {
     }
 }
 
-
 /* APPLYING THE ANIMATIONS AT 100% COMPLETE */
 
 /* 1. Bear Point */
 /* 1. Bear Point (is-complete) */
-[data-theme="nord"] .progress-bar.is-complete .progress-fill::after {
+[data-theme='nord'] .progress-bar.is-complete .progress-fill::after {
     /* Triggers the Bear's specific animation */
     animation: bear-sad-end 1.5s ease-in-out 0.6s infinite !important;
 }
 
 /* 2. Carried Penguin (is-complete) */
-[data-theme="nord"] .progress-bar.is-complete .progress-fill::before {
+[data-theme='nord'] .progress-bar.is-complete .progress-fill::before {
     /* Triggers the Penguin's specific animation */
     animation: penguin-sad-end 1.4s ease-in-out 0.6s infinite !important;
 }
 
 /* 3. Melting Glacier (is-complete) */
-[data-theme="nord"] .progress-bar.is-complete::after {
+[data-theme='nord'] .progress-bar.is-complete::after {
     /* Changed to the new cracking animation, 2s smooth loop */
     animation: glacier-crack 2s ease-in-out 0.6s infinite !important;
 }
@@ -2024,7 +2057,10 @@ body {
     padding: 0.45rem 0.75rem;
     font-size: 1.05rem;
     cursor: pointer;
-    transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        background-color 0.2s ease;
 }
 
 .journey-pill:hover {
@@ -2199,7 +2235,7 @@ body {
 }
 
 .settings-section-header.danger-zone-header {
-    color: #E53935;
+    color: #e53935;
     border-bottom-color: rgba(229, 57, 53, 0.35);
 }
 
@@ -2211,7 +2247,7 @@ body {
 }
 
 .setting-group select,
-.setting-group input[type="checkbox"] {
+.setting-group input[type='checkbox'] {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid rgba(var(--on-surface), 0.3);
@@ -2221,7 +2257,7 @@ body {
     font-family: inherit;
 }
 
-.setting-group input[type="checkbox"] {
+.setting-group input[type='checkbox'] {
     width: auto;
     transform: scale(1.2);
 }
@@ -2288,7 +2324,7 @@ body {
 }
 
 .reset-btn:hover {
-    background-color: #8B0000;
+    background-color: #8b0000;
     transform: translateY(-1px);
 }
 
@@ -2481,19 +2517,35 @@ body {
 
 /* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
 .pulse-animation {
@@ -2505,33 +2557,33 @@ body {
     .main-content {
         padding: 1rem;
     }
-    
+
     .kanji-character {
         font-size: 3rem;
     }
-    
+
     .widget-controls {
         flex-direction: column;
         align-items: stretch;
         gap: 0.5rem;
     }
-    
+
     .progress-header {
         flex-direction: column;
         align-items: stretch;
         gap: 0.5rem;
     }
-    
+
     .recent-grid {
         grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     }
-    
+
     .modal-content {
         width: 80%;
         max-width: 100%;
         right: -80%;
     }
-    
+
     .font-preview-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 0.5rem;
@@ -2553,15 +2605,15 @@ body {
     .app-header {
         padding: 1rem;
     }
-    
+
     .app-header h1 {
         font-size: 1.25rem;
     }
-    
+
     .kanji-character {
         font-size: 2.5rem;
     }
-    
+
     .kanji-readings {
         flex-direction: column;
         gap: 0.5rem;
@@ -2590,7 +2642,7 @@ input:focus {
     :root {
         --shadow: rgba(0, 0, 0, 0.5);
     }
-    
+
     .kanji-widget {
         border: 2px solid var(--on-surface);
     }
@@ -2630,12 +2682,22 @@ input:focus {
     /* Adds soft padding cushion space at the bottom boundary */
 
     /* THE FIX: Gracefully fades the actual kanji grid visibility out to 0% transparency at the bottom */
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
-    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 1) 60%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 1) 60%,
+        rgba(0, 0, 0, 0) 100%
+    );
 }
 
 /* Ensure the background match remains perfect when dark mode theme attributes are active */
-[data-theme="dark"] .compact-fade-wrapper::after {
+[data-theme='dark'] .compact-fade-wrapper::after {
     background: rgba(18, 18, 18, 0.9);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -2674,7 +2736,7 @@ input:focus {
 }
 
 /* Ensure the tiny checkboxes align smoothly center-wise with the label baseline text */
-.setting-row input[type="checkbox"] {
+.setting-row input[type='checkbox'] {
     margin: 0;
     cursor: pointer;
     width: 16px;
@@ -2769,7 +2831,6 @@ input:focus {
 }
 
 @keyframes customize-btn-glow {
-
     0%,
     100% {
         box-shadow: 0 0 6px rgba(var(--primary-color-rgb), 0.5);
@@ -2855,7 +2916,7 @@ input:focus {
     user-select: none;
 }
 
-.auto-accent-toggle input[type="checkbox"] {
+.auto-accent-toggle input[type='checkbox'] {
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -2875,7 +2936,9 @@ input:focus {
     border: 2px solid rgba(150, 150, 150, 0.25);
     cursor: pointer;
     padding: 0;
-    transition: transform 0.15s ease, border-color 0.15s ease;
+    transition:
+        transform 0.15s ease,
+        border-color 0.15s ease;
 }
 
 .accent-swatch:hover {
@@ -2958,7 +3021,7 @@ input:focus {
 }
 
 .dev-favorites-label i {
-    color: #FF4081;
+    color: #ff4081;
 }
 
 .dev-favorites-grid {
@@ -2977,7 +3040,9 @@ input:focus {
     cursor: pointer;
     padding: 0;
     overflow: hidden;
-    transition: transform 0.15s ease, border-color 0.15s ease;
+    transition:
+        transform 0.15s ease,
+        border-color 0.15s ease;
 }
 
 .dev-favorite-thumb:hover {
@@ -3035,11 +3100,13 @@ input:focus {
 .dev-favorite-thumb.placeholder {
     background-image: none !important;
     background-color: rgba(150, 150, 150, 0.1);
-    background-image: repeating-linear-gradient(45deg,
-            rgba(150, 150, 150, 0.12),
-            rgba(150, 150, 150, 0.12) 8px,
-            rgba(150, 150, 150, 0.2) 8px,
-            rgba(150, 150, 150, 0.2) 16px) !important;
+    background-image: repeating-linear-gradient(
+        45deg,
+        rgba(150, 150, 150, 0.12),
+        rgba(150, 150, 150, 0.12) 8px,
+        rgba(150, 150, 150, 0.2) 8px,
+        rgba(150, 150, 150, 0.2) 16px
+    ) !important;
     border-style: dashed;
     border-color: rgba(150, 150, 150, 0.35);
     cursor: default;
@@ -3097,42 +3164,42 @@ input:focus {
 
 /* Only one of these shows at a time — toggled explicitly via JS, since a
    custom theme's background is either a still image or a video, never both. */
-[data-theme="custom-1"] .custom-theme-background.active {
+[data-theme='custom-1'] .custom-theme-background.active {
     display: block;
 }
 
-[data-theme="custom-1"] .custom-theme-background-video.active {
+[data-theme='custom-1'] .custom-theme-background-video.active {
     display: block;
 }
 
-[data-theme="custom-1"] {
-    --primary-color: var(--custom-accent, #6200EE);
+[data-theme='custom-1'] {
+    --primary-color: var(--custom-accent, #6200ee);
     --primary-color-rgb: var(--custom-accent-rgb, 98, 0, 238);
     --background: transparent;
 }
 
-[data-theme="custom-1"][data-custom-mode="dark"] {
-    --surface: #1E1E1E;
+[data-theme='custom-1'][data-custom-mode='dark'] {
+    --surface: #1e1e1e;
     --custom-panel-rgb: 20, 20, 30;
     --on-primary: #000000;
     --on-secondary: #000000;
-    --on-background: #FFFFFF;
-    --on-surface: #FFFFFF;
+    --on-background: #ffffff;
+    --on-surface: #ffffff;
 }
 
-[data-theme="custom-1"][data-custom-mode="light"] {
-    --surface: #FFFFFF;
+[data-theme='custom-1'][data-custom-mode='light'] {
+    --surface: #ffffff;
     --custom-panel-rgb: 255, 255, 255;
-    --on-primary: #FFFFFF;
+    --on-primary: #ffffff;
     --on-secondary: #000000;
     --on-background: #000000;
     --on-surface: #000000;
 }
 
-[data-theme="custom-1"] .kanji-widget,
-[data-theme="custom-1"] .progress-section,
-[data-theme="custom-1"] .journey-section,
-[data-theme="custom-1"] .recent-section {
+[data-theme='custom-1'] .kanji-widget,
+[data-theme='custom-1'] .progress-section,
+[data-theme='custom-1'] .journey-section,
+[data-theme='custom-1'] .recent-section {
     background-color: rgba(var(--custom-panel-rgb, 30, 30, 30), 0.65);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -3170,61 +3237,61 @@ input:focus {
 }
 
 /* --- Light Themes --- */
-[data-theme="yotsuba"] {
+[data-theme='yotsuba'] {
     --primary-color: #789922;
-    --background: #F0EAD6;
-    --surface: #FFFFFF;
+    --background: #f0ead6;
+    --surface: #ffffff;
     --on-surface: #333;
 }
 
-[data-theme="paper"] {
+[data-theme='paper'] {
     --primary-color: #222222;
-    --background: #FFFFFF;
-    --surface: #F5F5F5;
+    --background: #ffffff;
+    --surface: #f5f5f5;
     --on-surface: #000;
 }
 
-[data-theme="candy"] {
-    --primary-color: #FF80AB;
-    --background: #FFF5F7;
-    --surface: #FFFFFF;
-    --on-surface: #4A148C;
+[data-theme='candy'] {
+    --primary-color: #ff80ab;
+    --background: #fff5f7;
+    --surface: #ffffff;
+    --on-surface: #4a148c;
 }
 
-[data-theme="sunrise"] {
-    --primary-color: #FF9800;
-    --background: #FFFDE7;
-    --surface: #FFFFFF;
-    --on-surface: #5D4037;
+[data-theme='sunrise'] {
+    --primary-color: #ff9800;
+    --background: #fffde7;
+    --surface: #ffffff;
+    --on-surface: #5d4037;
 }
 
 /* --- Dark Themes --- */
-[data-theme="dracula"] {
-    --primary-color: #BD93F9;
-    --background: #282A36;
-    --surface: #44475A;
-    --on-surface: #F8F8F2;
+[data-theme='dracula'] {
+    --primary-color: #bd93f9;
+    --background: #282a36;
+    --surface: #44475a;
+    --on-surface: #f8f8f2;
 }
 
-[data-theme="nord"] {
-    --primary-color: #88C0D0;
-    --background: #2E3440;
-    --surface: #3B4252;
-    --on-surface: #ECEFF4;
+[data-theme='nord'] {
+    --primary-color: #88c0d0;
+    --background: #2e3440;
+    --surface: #3b4252;
+    --on-surface: #eceff4;
 }
 
-[data-theme="midnight"] {
-    --primary-color: #2979FF;
-    --background: #0D1117;
-    --surface: #161B22;
-    --on-surface: #C9D1D9;
+[data-theme='midnight'] {
+    --primary-color: #2979ff;
+    --background: #0d1117;
+    --surface: #161b22;
+    --on-surface: #c9d1d9;
 }
 
-[data-theme="forest"] {
-    --primary-color: #81C784;
-    --background: #1B262C;
-    --surface: #2F4858;
-    --on-surface: #E0F2F1;
+[data-theme='forest'] {
+    --primary-color: #81c784;
+    --background: #1b262c;
+    --surface: #2f4858;
+    --on-surface: #e0f2f1;
 }
 
 /* ========================================== */
@@ -3294,7 +3361,6 @@ input:focus {
     background-color: rgba(150, 150, 150, 0.2);
     margin: 0.3rem 0;
 }
-
 
 /* ========================================== */
 /* KANJI/KANA SEARCH PANEL                    */
@@ -3447,7 +3513,7 @@ input:focus {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, #FF9A9E, #FF5252);
+    background: linear-gradient(135deg, #ff9a9e, #ff5252);
     color: white;
     padding: 0.4rem 1rem;
     border-radius: 20px;
@@ -3464,7 +3530,7 @@ input:focus {
 }
 
 .streak-badge i {
-    color: #FFE082;
+    color: #ffe082;
     /* Golden flame core */
     font-size: 1.2rem;
     animation: flicker 2s infinite alternate;
@@ -3559,21 +3625,21 @@ input:focus {
 /* ========================================== */
 
 /* 1. The Color Palette */
-[data-theme="nami"] {
-    --primary-color: #00E5FF;
+[data-theme='nami'] {
+    --primary-color: #00e5ff;
     /* Electric Cyan */
-    --primary-variant: #00B8D4;
-    --secondary-color: #FF00FF;
+    --primary-variant: #00b8d4;
+    --secondary-color: #ff00ff;
     /* Neon Magenta */
     --background: #050505;
     /* Pitch Black */
     --surface: #111111;
     /* Very dark grey for contrast */
-    --error: #FF1744;
+    --error: #ff1744;
     --on-primary: #000000;
-    --on-secondary: #FFFFFF;
-    --on-background: #FFFFFF;
-    --on-surface: #FFFFFF;
+    --on-secondary: #ffffff;
+    --on-background: #ffffff;
+    --on-surface: #ffffff;
     --shadow: rgba(0, 229, 255, 0.2);
     /* Cyan glowing shadows */
 }
@@ -3592,14 +3658,14 @@ input:focus {
     /* Allows clicking through the wave */
 }
 
-[data-theme="nami"] .nami-background {
+[data-theme='nami'] .nami-background {
     display: block;
 }
 
 /* 3. Apply Frosted Glass to Nami */
-[data-theme="nami"] .kanji-widget,
-[data-theme="nami"] .progress-section,
-[data-theme="nami"] .journey-section {
+[data-theme='nami'] .kanji-widget,
+[data-theme='nami'] .progress-section,
+[data-theme='nami'] .journey-section {
     background-color: rgba(10, 10, 10, 0.65) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -3611,40 +3677,38 @@ input:focus {
 }
 
 /* 4. Nami Progress Bar Colors */
-[data-theme="nami"] .progress-bar {
+[data-theme='nami'] .progress-bar {
     background-color: rgba(255, 0, 255, 0.2);
     /* Magenta track */
 }
 
-[data-theme="nami"] .progress-fill {
+[data-theme='nami'] .progress-fill {
     background-color: var(--primary-color);
     /* Cyan fill */
     box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
     /* Glow effect */
 }
 
-
-
 /* ========================================== */
 /* LUMEN THEME SETUP (Chromatic WebGL Wave)   */
 /* ========================================== */
 
 /* 1. The Color Palette (High contrast to make the RGB wave pop) */
-[data-theme="lumen"] {
-    --primary-color: #FFFFFF;
+[data-theme='lumen'] {
+    --primary-color: #ffffff;
     /* Pure white light */
-    --primary-variant: #CCCCCC;
-    --secondary-color: #FF0055;
+    --primary-variant: #cccccc;
+    --secondary-color: #ff0055;
     /* A subtle punchy accent */
     --background: #000000;
     /* Pitch Black */
-    --surface: #0A0A0A;
+    --surface: #0a0a0a;
     /* Deepest grey */
-    --error: #FF1744;
+    --error: #ff1744;
     --on-primary: #000000;
-    --on-secondary: #FFFFFF;
-    --on-background: #FFFFFF;
-    --on-surface: #FFFFFF;
+    --on-secondary: #ffffff;
+    --on-background: #ffffff;
+    --on-surface: #ffffff;
     --shadow: rgba(255, 255, 255, 0.1);
 }
 
@@ -3661,14 +3725,14 @@ input:focus {
     pointer-events: none;
 }
 
-[data-theme="lumen"] .lumen-background {
+[data-theme='lumen'] .lumen-background {
     display: block;
 }
 
 /* 3. Apply Premium Frosted Glass */
-[data-theme="lumen"] .kanji-widget,
-[data-theme="lumen"] .progress-section,
-[data-theme="lumen"] .journey-section {
+[data-theme='lumen'] .kanji-widget,
+[data-theme='lumen'] .progress-section,
+[data-theme='lumen'] .journey-section {
     background-color: rgba(10, 10, 10, 0.5) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -3680,11 +3744,11 @@ input:focus {
 }
 
 /* 4. Lumen Progress Bar */
-[data-theme="lumen"] .progress-bar {
+[data-theme='lumen'] .progress-bar {
     background-color: rgba(255, 255, 255, 0.15);
 }
 
-[data-theme="lumen"] .progress-fill {
+[data-theme='lumen'] .progress-fill {
     background-color: var(--primary-color);
     box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
     /* White glowing core */
@@ -3716,7 +3780,7 @@ input:focus {
 }
 
 /* Reveal ONLY when Lumen theme is active */
-[data-theme="lumen"] .yuki-credit {
+[data-theme='lumen'] .yuki-credit {
     display: block;
     animation: fadeInCredit 0.5s ease forwards 0.2s;
     /* Slight delay so it fades in smoothly */
@@ -3737,7 +3801,7 @@ input:focus {
 /* お化け (OBAKE) THEME SETUP (Spectral Ghost) */
 /* ========================================== */
 
-[data-theme="obake"] {
+[data-theme='obake'] {
     --primary-color: #bb86fc;
     /* Soft, glowing amethyst */
     --primary-variant: #9965f4;
@@ -3765,13 +3829,13 @@ input:focus {
     pointer-events: none;
 }
 
-[data-theme="obake"] .obake-background {
+[data-theme='obake'] .obake-background {
     display: block;
 }
 
-[data-theme="obake"] .kanji-widget,
-[data-theme="obake"] .progress-section,
-[data-theme="obake"] .journey-section {
+[data-theme='obake'] .kanji-widget,
+[data-theme='obake'] .progress-section,
+[data-theme='obake'] .journey-section {
     background-color: rgba(10, 10, 15, 0.6) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -3782,11 +3846,11 @@ input:focus {
     transform: translate3d(0, 0, 0);
 }
 
-[data-theme="obake"] .progress-bar {
+[data-theme='obake'] .progress-bar {
     background-color: rgba(187, 134, 252, 0.15);
 }
 
-[data-theme="obake"] .progress-fill {
+[data-theme='obake'] .progress-fill {
     background-color: var(--primary-color);
     box-shadow: 0 0 12px rgba(187, 134, 252, 0.4);
     /* Soft glow */
@@ -3796,7 +3860,7 @@ input:focus {
 /* ========================================== */
 
 /* 1. Frosted Glass Header */
-[data-theme="obake"] .app-header {
+[data-theme='obake'] .app-header {
     background-color: rgba(10, 10, 15, 0.4) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -3806,14 +3870,14 @@ input:focus {
 }
 
 /* 2. Glowing Text and Icons */
-[data-theme="obake"] .app-header h1,
-[data-theme="obake"] .app-header .icon-btn i {
+[data-theme='obake'] .app-header h1,
+[data-theme='obake'] .app-header .icon-btn i {
     color: var(--primary-color) !important;
     text-shadow: 0 0 12px rgba(187, 134, 252, 0.4);
 }
 
 /* 3. Level Switcher Button Restyling */
-[data-theme="obake"] #levelToggleBtn {
+[data-theme='obake'] #levelToggleBtn {
     background: rgba(187, 134, 252, 0.12) !important;
     border: 1px solid rgba(187, 134, 252, 0.3) !important;
     color: var(--primary-color) !important;
@@ -3846,7 +3910,7 @@ input:focus {
 }
 
 /* Reveal ONLY when Obake theme is active */
-[data-theme="obake"] .filip-credit {
+[data-theme='obake'] .filip-credit {
     display: block;
     animation: fadeInCredit 0.5s ease forwards 0.2s;
     /* Uses the same animation keyframes as Yuki's */
@@ -3856,7 +3920,7 @@ input:focus {
 /* 糸 (ITO) THEME SETUP (Neon Tubes)          */
 /* ========================================== */
 
-[data-theme="ito"] {
+[data-theme='ito'] {
     --primary-color: #f967fb;
     /* Neon Pink */
     --primary-variant: #6958d5;
@@ -3865,7 +3929,7 @@ input:focus {
     /* Acid Green */
     --background: #000000;
     --surface: #0a0a0f;
-    --error: #FF1744;
+    --error: #ff1744;
     --on-primary: #000000;
     --on-secondary: #000000;
     --on-background: #ffffff;
@@ -3885,15 +3949,15 @@ input:focus {
     /* Lets clicks pass through to the document */
 }
 
-[data-theme="ito"] .ito-background {
+[data-theme='ito'] .ito-background {
     display: block;
 }
 
 /* Frosted Glass UI panels */
-[data-theme="ito"] .kanji-widget,
-[data-theme="ito"] .progress-section,
-[data-theme="ito"] .journey-section,
-[data-theme="ito"] .app-header {
+[data-theme='ito'] .kanji-widget,
+[data-theme='ito'] .progress-section,
+[data-theme='ito'] .journey-section,
+[data-theme='ito'] .app-header {
     background-color: rgba(10, 10, 15, 0.5) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -3902,8 +3966,8 @@ input:focus {
 }
 
 /* Header Text Glow */
-[data-theme="ito"] .app-header h1,
-[data-theme="ito"] .app-header .icon-btn i {
+[data-theme='ito'] .app-header h1,
+[data-theme='ito'] .app-header .icon-btn i {
     color: var(--primary-color) !important;
     text-shadow: 0 0 12px rgba(249, 103, 251, 0.5);
 }
@@ -3928,7 +3992,1088 @@ input:focus {
     text-shadow: 0 0 8px rgba(249, 103, 251, 0.4);
 }
 
-[data-theme="ito"] .soju-credit {
+[data-theme='ito'] .soju-credit {
     display: block;
     animation: fadeInCredit 0.5s ease forwards 0.2s;
+}
+
+/* ========================================== */
+/* AI SENSEI & SRS INTEGRATION STYLES         */
+/* ========================================== */
+
+/* Floating Action Button (FAB) for AI Sensei */
+.ai-sensei-fab {
+    position: fixed;
+    bottom: 26px;
+    left: 26px;
+    z-index: 950;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px 8px 10px;
+    background: rgba(22, 20, 36, 0.88);
+    border: 1px solid rgba(187, 134, 252, 0.5);
+    border-radius: 50px;
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(187, 134, 252, 0.3);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.ai-sensei-fab:hover {
+    transform: translateY(-3px) scale(1.04);
+    background: rgba(32, 27, 52, 0.95);
+    border-color: rgba(187, 134, 252, 0.85);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 24px rgba(187, 134, 252, 0.5);
+}
+
+.ai-sensei-fab:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.ai-fab-icon-box {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #bb86fc, #00e5ff);
+    color: #121212;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(187, 134, 252, 0.4);
+}
+
+.ai-fab-pulse-dot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 9px;
+    height: 9px;
+    background: #00ff88;
+    border: 2px solid #1a1a2e;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #00ff88;
+    animation: fab-pulse 2s infinite ease-in-out;
+}
+
+.ai-fab-text {
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    background: linear-gradient(135deg, #ffffff, #e0d0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@keyframes fab-pulse {
+    0% {
+        transform: scale(0.9);
+        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+    }
+    70% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 8px rgba(0, 255, 136, 0);
+    }
+    100% {
+        transform: scale(0.9);
+        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+    }
+}
+
+/* Modal Content override for AI Sensei Hub */
+.ai-sensei-modal-content {
+    max-width: 820px;
+    width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+    border-radius: 20px;
+    border: 1px solid rgba(187, 134, 252, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.ai-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid rgba(150, 150, 150, 0.15);
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.08);
+}
+
+.ai-modal-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.ai-avatar-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-color), #00e5ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb, 98, 0, 238), 0.4);
+}
+
+.ai-modal-title-group h2 {
+    font-size: 1.25rem;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.ai-persona-subtitle {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.55rem;
+    border-radius: 10px;
+    background: rgba(187, 134, 252, 0.18);
+    color: var(--primary-color);
+    margin-top: 0.25rem;
+}
+
+.ai-modal-body {
+    padding: 1.2rem 1.5rem 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+/* Tabs */
+.ai-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(150, 150, 150, 0.15);
+    padding-bottom: 0.8rem;
+    overflow-x: auto;
+}
+
+.ai-tab {
+    background: rgba(150, 150, 150, 0.08);
+    border: 1px solid transparent;
+    color: var(--on-surface);
+    padding: 0.55rem 1rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.ai-tab:hover {
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.12);
+    color: var(--primary-color);
+}
+
+.ai-tab.active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb, 98, 0, 238), 0.3);
+}
+
+/* Telemetry Stats Grid */
+.ai-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+}
+
+.ai-stat-card {
+    background: rgba(150, 150, 150, 0.08);
+    border: 1px solid rgba(150, 150, 150, 0.15);
+    border-radius: 12px;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.ai-stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--primary-color-rgb, 98, 0, 238), 0.35);
+}
+
+.ai-stat-label {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+.ai-stat-value {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.ai-stat-desc {
+    font-size: 0.65rem;
+    opacity: 0.55;
+}
+
+/* AI Sensei Commentary Box */
+.ai-commentary-card {
+    background: rgba(150, 150, 150, 0.06);
+    border: 1px solid rgba(187, 134, 252, 0.2);
+    border-radius: 14px;
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.ai-commentary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ai-commentary-header h3 {
+    font-size: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+}
+
+.ai-action-sm-btn {
+    background: linear-gradient(135deg, var(--primary-color), #8a2be2);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.ai-action-sm-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 2px 8px rgba(var(--primary-color-rgb, 98, 0, 238), 0.4);
+}
+
+.ai-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1.5rem 0;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.ai-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(187, 134, 252, 0.2);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.ai-diagnostic-content {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--on-surface);
+}
+
+.ai-diagnostic-content h3 {
+    font-size: 0.95rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.3rem;
+    color: var(--primary-color);
+}
+
+.ai-diagnostic-content p {
+    margin: 0.4rem 0;
+}
+
+.ai-diagnostic-content ul,
+.ai-diagnostic-content ol {
+    margin: 0.4rem 0 0.8rem 1.2rem;
+    padding: 0;
+}
+
+.ai-diagnostic-content li {
+    margin-bottom: 0.3rem;
+}
+
+.ai-placeholder-text {
+    opacity: 0.6;
+    text-align: center;
+    font-style: italic;
+    padding: 1rem 0;
+}
+
+/* Lookalikes section */
+.ai-lookalikes-section h4 {
+    font-size: 0.9rem;
+    margin: 0 0 0.6rem 0;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.ai-traps-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.6rem;
+}
+
+.ai-trap-item {
+    background: rgba(150, 150, 150, 0.08);
+    border: 1px solid rgba(150, 150, 150, 0.15);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* Study Plan Card */
+.ai-study-plan-card {
+    background: rgba(150, 150, 150, 0.06);
+    border: 1px solid rgba(187, 134, 252, 0.2);
+    border-radius: 14px;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.ai-study-plan-card h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+}
+
+.ai-plan-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin: 0;
+}
+
+.ai-priority-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.7rem;
+    margin: 0.5rem 0;
+}
+
+.ai-priority-card {
+    background: rgba(150, 150, 150, 0.1);
+    border: 1px solid rgba(150, 150, 150, 0.2);
+    border-radius: 12px;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ai-priority-card:hover {
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.15);
+    border-color: var(--primary-color);
+    transform: translateY(-3px);
+}
+
+.ai-priority-char {
+    font-family: var(--japanese-font);
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.ai-priority-reason {
+    font-size: 0.68rem;
+    text-align: center;
+    opacity: 0.75;
+}
+
+.ai-primary-btn {
+    background: linear-gradient(135deg, var(--primary-color), #8a2be2);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(var(--primary-color-rgb, 98, 0, 238), 0.35);
+}
+
+.ai-primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--primary-color-rgb, 98, 0, 238), 0.5);
+}
+
+/* Ask Sensei Tab & Chat */
+.ai-chat-quick-actions {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+}
+
+.ai-quick-prompt {
+    background: rgba(150, 150, 150, 0.1);
+    border: 1px solid rgba(150, 150, 150, 0.2);
+    color: var(--on-surface);
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.ai-quick-prompt:hover {
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.15);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.ai-trap-chars {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--japanese-font);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.ai-trap-vs {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    font-family: inherit;
+}
+
+.ai-trap-reason {
+    font-size: 0.72rem;
+    opacity: 0.75;
+    line-height: 1.3;
+}
+
+.ai-tab-pane {
+    display: none;
+    flex-direction: column;
+    gap: 1.2rem;
+    animation: fadeIn 0.25s ease;
+}
+
+.ai-tab-pane.active {
+    display: flex;
+}
+
+.ai-chat-log {
+    min-height: 200px;
+    max-height: 340px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    background: rgba(150, 150, 150, 0.05);
+    border: 1px solid rgba(150, 150, 150, 0.12);
+    border-radius: 12px;
+}
+
+.ai-chat-msg {
+    display: flex;
+    gap: 0.6rem;
+    max-width: 88%;
+}
+
+.ai-chat-msg.ai-msg-user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.ai-chat-msg.ai-msg-bot {
+    align-self: flex-start;
+}
+
+.ai-msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: var(--on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.ai-msg-text {
+    background: rgba(150, 150, 150, 0.12);
+    padding: 0.6rem 0.85rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--on-surface);
+}
+
+.ai-msg-user .ai-msg-text {
+    background: var(--primary-color);
+    color: var(--on-primary);
+    border-bottom-right-radius: 2px;
+}
+
+.ai-msg-bot .ai-msg-text {
+    border-bottom-left-radius: 2px;
+}
+
+.ai-chat-input-bar {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.ai-chat-input-bar input {
+    flex: 1;
+    background: rgba(150, 150, 150, 0.1);
+    border: 1px solid rgba(150, 150, 150, 0.25);
+    border-radius: 10px;
+    padding: 0.6rem 0.9rem;
+    color: var(--on-surface);
+    font-size: 0.88rem;
+    outline: none;
+}
+
+.ai-chat-input-bar input:focus {
+    border-color: var(--primary-color);
+}
+
+.ai-send-btn {
+    background: var(--primary-color);
+    color: var(--on-primary);
+    border: none;
+    border-radius: 10px;
+    padding: 0 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: transform 0.15s ease;
+}
+
+.ai-send-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Settings AI Key Box */
+.api-key-input-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.api-key-input-wrapper input {
+    width: 100%;
+    padding-right: 2.4rem;
+}
+
+.api-key-toggle-btn {
+    position: absolute;
+    right: 6px;
+    background: none;
+    border: none;
+    color: var(--on-surface);
+    opacity: 0.6;
+    cursor: pointer;
+    padding: 0.4rem;
+}
+
+.api-key-toggle-btn:hover {
+    opacity: 1;
+}
+
+.ai-test-connection-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.ai-test-btn {
+    background: rgba(150, 150, 150, 0.12);
+    border: 1px solid rgba(150, 150, 150, 0.25);
+    color: var(--on-surface);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ai-test-btn:hover {
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.15);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.ai-conn-status {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.ai-conn-status.success {
+    color: #00e676;
+}
+
+.ai-conn-status.error {
+    color: #ff5252;
+}
+
+/* Quick Action AI button on card */
+.action-btn.ai-action-btn {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(0, 229, 255, 0.2));
+    border: 1px solid rgba(187, 134, 252, 0.4);
+    color: var(--primary-color);
+}
+
+.action-btn.ai-action-btn:hover {
+    background: var(--primary-color);
+    color: var(--on-primary);
+    transform: translateY(-2px) scale(1.1);
+}
+
+/* Mobile Responsiveness for AI Sensei FAB and Modal */
+@media (max-width: 768px) {
+    .ai-sensei-fab {
+        bottom: 18px;
+        left: 18px;
+        padding: 6px 14px 6px 8px;
+    }
+
+    .ai-fab-icon-box {
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+    }
+
+    .ai-fab-text {
+        font-size: 0.85rem;
+    }
+
+    .ai-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ai-sensei-modal-content {
+        width: 95%;
+        max-height: 94vh;
+    }
+
+    .kanji-drawer-sheet {
+        max-height: 85vh;
+    }
+}
+
+/* ============================================ */
+/* KANJI MNEMONIC & ETYMOLOGY DRAWER (Phase 2)  */
+/* ============================================ */
+
+.kanji-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 960;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 0.35s, opacity 0.35s ease;
+}
+
+.kanji-drawer.open {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0s 0s, opacity 0.3s ease;
+}
+
+.kanji-drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.kanji-drawer.open .kanji-drawer-backdrop {
+    opacity: 1;
+}
+
+.kanji-drawer-sheet {
+    position: relative;
+    width: 100%;
+    max-width: 680px;
+    max-height: 70vh;
+    background: var(--surface, #1e1e2e);
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    border: 1px solid rgba(187, 134, 252, 0.15);
+    border-bottom: none;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kanji-drawer.open .kanji-drawer-sheet {
+    transform: translateY(0);
+}
+
+/* Drag Handle */
+.kanji-drawer-handle {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.kanji-drawer-handle-bar {
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(150, 150, 150, 0.3);
+    transition: background 0.2s ease;
+}
+
+.kanji-drawer-handle:hover .kanji-drawer-handle-bar {
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.5);
+}
+
+/* Header */
+.kanji-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 1.4rem 0.8rem;
+    border-bottom: 1px solid rgba(150, 150, 150, 0.1);
+    flex-shrink: 0;
+}
+
+.kanji-drawer-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+}
+
+.kanji-drawer-kanji {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--primary-color), #00e5ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    flex-shrink: 0;
+}
+
+.kanji-drawer-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.kanji-drawer-meaning {
+    font-size: 0.82rem;
+    font-weight: 500;
+    opacity: 0.75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+}
+
+.kanji-drawer-cache-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 8px;
+    background: rgba(0, 230, 118, 0.15);
+    color: #00e676;
+    width: fit-content;
+}
+
+.kanji-drawer-close {
+    background: rgba(150, 150, 150, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--on-surface, #ccc);
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.kanji-drawer-close:hover {
+    background: rgba(255, 82, 82, 0.2);
+    color: #ff5252;
+    transform: scale(1.08);
+}
+
+/* Tabs */
+.kanji-drawer-tabs {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.6rem 1.4rem;
+    border-bottom: 1px solid rgba(150, 150, 150, 0.1);
+    flex-shrink: 0;
+}
+
+.kanji-drawer-tab {
+    background: rgba(150, 150, 150, 0.06);
+    border: 1px solid transparent;
+    color: var(--on-surface, #ccc);
+    padding: 0.45rem 1rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.kanji-drawer-tab:hover {
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.1);
+    color: var(--primary-color);
+}
+
+.kanji-drawer-tab.active {
+    background: var(--primary-color);
+    color: var(--on-primary, #fff);
+    box-shadow: 0 2px 10px rgba(var(--primary-color-rgb, 98, 0, 238), 0.3);
+}
+
+/* Body */
+.kanji-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 1.4rem;
+    min-height: 0;
+}
+
+.kanji-drawer-pane {
+    display: none;
+    padding: 1rem 0;
+}
+
+.kanji-drawer-pane.active {
+    display: block;
+}
+
+/* Content area styling */
+.kanji-drawer-content {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--on-surface, #ddd);
+    animation: drawerContentFadeIn 0.3s ease;
+}
+
+@keyframes drawerContentFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.kanji-drawer-content h3 {
+    font-size: 0.95rem;
+    margin: 1rem 0 0.3rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.kanji-drawer-content p {
+    margin: 0.35rem 0;
+}
+
+.kanji-drawer-content ul,
+.kanji-drawer-content ol {
+    margin: 0.3rem 0 0.6rem 1.2rem;
+    padding: 0;
+}
+
+.kanji-drawer-content li {
+    margin-bottom: 0.2rem;
+}
+
+.kanji-drawer-content strong {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.kanji-drawer-content em {
+    opacity: 0.8;
+}
+
+/* Stroke warning banner */
+.kanji-drawer-stroke-warning {
+    background: rgba(255, 152, 0, 0.12);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    border-radius: 10px;
+    padding: 0.6rem 0.85rem;
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    color: #ffb74d;
+}
+
+.kanji-drawer-stroke-warning i {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* Footer */
+.kanji-drawer-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.6rem 1.4rem 1rem;
+    border-top: 1px solid rgba(150, 150, 150, 0.1);
+    flex-shrink: 0;
+}
+
+.kanji-drawer-refresh-btn {
+    background: rgba(150, 150, 150, 0.1);
+    border: 1px solid rgba(150, 150, 150, 0.15);
+    color: var(--on-surface, #ccc);
+    padding: 0.4rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.kanji-drawer-refresh-btn:hover {
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.15);
+    border-color: rgba(var(--primary-color-rgb, 98, 0, 238), 0.3);
+    color: var(--primary-color);
+}
+
+.kanji-drawer-refresh-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* No-AI placeholder */
+.kanji-drawer-no-ai {
+    text-align: center;
+    padding: 2rem 1rem;
+    opacity: 0.7;
+}
+
+.kanji-drawer-no-ai i {
+    font-size: 2rem;
+    margin-bottom: 0.6rem;
+    display: block;
+    color: rgba(150, 150, 150, 0.4);
+}
+
+.kanji-drawer-no-ai p {
+    font-size: 0.85rem;
+    margin: 0.3rem 0;
+}
+
+.kanji-drawer-no-ai button {
+    margin-top: 0.8rem;
+    background: var(--primary-color);
+    color: var(--on-primary, #fff);
+    border: none;
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kanji-drawer-no-ai button:hover {
+    transform: scale(1.04);
+    box-shadow: 0 2px 8px rgba(var(--primary-color-rgb, 98, 0, 238), 0.4);
+}
+
+/* New explore button on kanji card */
+.action-btn.drawer-action-btn {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(187, 134, 252, 0.2));
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    color: var(--primary-color);
+}
+
+.action-btn.drawer-action-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.4), rgba(187, 134, 252, 0.35));
+    color: var(--on-primary, #fff);
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 4px 14px rgba(0, 229, 255, 0.25);
 }

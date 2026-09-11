@@ -8,7 +8,7 @@
         "lint:fix": "eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/ --fix",
         "format": "prettier --write . --ignore-path .gitignore",
         "format:check": "prettier --check . --ignore-path .gitignore",
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "node test/test-srs-ai.js",
         "prepare": "husky install"
     },
     "lint-staged": {
