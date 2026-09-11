@@ -9,10 +9,11 @@ const urlsToCache = [
     '/storage-manager.js'
 ];
 
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
+        caches
+            .open(CACHE_NAME)
+            .then((cache) => {
                 console.log('Opened cache');
                 return cache.addAll(urlsToCache);
             })
@@ -20,27 +21,43 @@ self.addEventListener('install', event => {
     );
 });
 
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then(keys => Promise.all(
-            keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-        )).then(() => self.clients.claim())
+        caches
+            .keys()
+            .then((keys) =>
+                Promise.all(
+                    keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+                )
+            )
+            .then(() => self.clients.claim())
     );
 });
 
-self.addEventListener('fetch', event => {
-    if (event.request.method !== 'GET') return;
+self.addEventListener('fetch', (event) => {
+    if (event.request.method !== 'GET') {
+        return;
+    }
 
     const { request } = event;
     const url = new URL(request.url);
-    const shouldCache = request.destination === 'script' || request.destination === 'style' || request.destination === 'document' || request.mode === 'navigate';
+    const shouldCache =
+        request.destination === 'script' ||
+        request.destination === 'style' ||
+        request.destination === 'document' ||
+        request.mode === 'navigate';
 
-    if (shouldCache && (url.origin === self.location.origin || url.hostname === 'raw.githubusercontent.com' || url.hostname === 'cdn.jsdelivr.net')) {
+    if (
+        shouldCache &&
+        (url.origin === self.location.origin ||
+            url.hostname === 'raw.githubusercontent.com' ||
+            url.hostname === 'cdn.jsdelivr.net')
+    ) {
         event.respondWith(
             fetch(request, { cache: 'no-store' })
-                .then(response => {
+                .then((response) => {
                     const copy = response.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+                    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
                     return response;
                 })
                 .catch(() => caches.match(request))
