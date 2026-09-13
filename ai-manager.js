@@ -93,47 +93,47 @@ class AIManager {
         }
 
         switch (provider) {
-            case 'gemini':
-                return this.callGemini(
-                    prompt,
-                    systemInstruction,
-                    apiKey,
-                    model,
-                    settings.temperature
-                );
-            case 'openai':
-                return this.callOpenAI(
-                    prompt,
-                    systemInstruction,
-                    apiKey,
-                    model,
-                    settings.temperature
-                );
-            case 'claude':
-                return this.callClaude(
-                    prompt,
-                    systemInstruction,
-                    apiKey,
-                    model,
-                    settings.temperature
-                );
-            case 'openrouter':
-                return this.callOpenRouter(
-                    prompt,
-                    systemInstruction,
-                    apiKey,
-                    model,
-                    settings.temperature
-                );
-            case 'ollama':
-                return this.callOllama(
-                    prompt,
-                    systemInstruction,
-                    settings.customEndpoint || 'http://localhost:11434/api/generate',
-                    model
-                );
-            default:
-                throw new Error(`Unsupported provider: ${provider}`);
+        case 'gemini':
+            return this.callGemini(
+                prompt,
+                systemInstruction,
+                apiKey,
+                model,
+                settings.temperature
+            );
+        case 'openai':
+            return this.callOpenAI(
+                prompt,
+                systemInstruction,
+                apiKey,
+                model,
+                settings.temperature
+            );
+        case 'claude':
+            return this.callClaude(
+                prompt,
+                systemInstruction,
+                apiKey,
+                model,
+                settings.temperature
+            );
+        case 'openrouter':
+            return this.callOpenRouter(
+                prompt,
+                systemInstruction,
+                apiKey,
+                model,
+                settings.temperature
+            );
+        case 'ollama':
+            return this.callOllama(
+                prompt,
+                systemInstruction,
+                settings.customEndpoint || 'http://localhost:11434/api/generate',
+                model
+            );
+        default:
+            throw new Error(`Unsupported provider: ${provider}`);
         }
     }
 
