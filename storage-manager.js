@@ -211,17 +211,13 @@ class StorageManager {
             customEndpoint: 'http://localhost:11434/api/generate',
             temperature: 0.7,
             enableCache: true
-    };
+        };
 
         const settings = this.getItem(this.keys.AI_SETTINGS, defaultSettings);
         // Migrate obsolete Gemini models saved by older versions.
         if (
-        settings.provider === 'gemini' &&
-            [
-                'gemini-1.5-flash',
-                'gemini-1.5-pro',
-                'gemini-2.0-flash-exp'
-            ].includes(settings.model)
+            settings.provider === 'gemini' &&
+            ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'].includes(settings.model)
         ) {
             settings.model = 'gemini-2.5-flash';
             this.saveAISettings(settings);
@@ -233,15 +229,15 @@ class StorageManager {
         };
     }
 
-static saveAISettings(settings) {
-    return this.setItem(this.keys.AI_SETTINGS, settings);
-}
+    static saveAISettings(settings) {
+        return this.setItem(this.keys.AI_SETTINGS, settings);
+    }
 
-static updateAISetting(key, value) {
-    const settings = this.getAISettings();
-    settings[key] = value;
-    return this.saveAISettings(settings);
-}
+    static updateAISetting(key, value) {
+        const settings = this.getAISettings();
+        settings[key] = value;
+        return this.saveAISettings(settings);
+    }
 
     // AI Cache management
     static getAICacheItem(key) {
