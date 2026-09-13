@@ -6,8 +6,8 @@ class AIManager {
     static PROVIDER_DEFAULTS = {
         gemini: {
             name: 'Google Gemini',
-            defaultModel: 'gemini-1.5-flash',
-            models: ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'],
+            defaultModel: 'gemini-2.5-flash',
+            models: ['gemini-2.5-flash', 'gemini-2.5-pro'],
             requiresKey: true
         },
         openai: {
@@ -24,9 +24,9 @@ class AIManager {
         },
         openrouter: {
             name: 'OpenRouter',
-            defaultModel: 'google/gemini-flash-1.5',
+            defaultModel: 'google/gemini-flash-2.5',
             models: [
-                'google/gemini-flash-1.5',
+                'google/gemini-flash-2.5',
                 'openai/gpt-4o-mini',
                 'anthropic/claude-3.5-haiku',
                 'meta-llama/llama-3.2-3b-instruct:free'
@@ -84,7 +84,7 @@ class AIManager {
         const provider = settings.provider || 'gemini';
         const apiKey = settings.apiKey ? settings.apiKey.trim() : '';
         const model =
-            settings.model || this.PROVIDER_DEFAULTS[provider]?.defaultModel || 'gemini-1.5-flash';
+            settings.model || this.PROVIDER_DEFAULTS[provider]?.defaultModel || 'gemini-2.5-flash';
 
         if (this.PROVIDER_DEFAULTS[provider]?.requiresKey && !apiKey) {
             throw new Error(
