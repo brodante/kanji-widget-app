@@ -34,6 +34,8 @@ jobs:
                   cp script.js deploy/
                   cp kanji-data.js deploy/
                   cp audio-manager.js deploy/
+                  cp ai-manager.js deploy/
+                  cp ai-tutor-modal.js deploy/
                   cp storage-manager.js deploy/
                   cp manifest.json deploy/
                   cp sw.js deploy/
