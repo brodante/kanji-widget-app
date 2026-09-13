@@ -85,7 +85,10 @@ const AISenseiModule = {
             if (weakEl) {
                 weakEl.textContent = weakCards.length;
             }
-            const diagnostics = SRSEngine.generateRuleBasedDiagnostics(progress, this.currentKanjiPool || []);
+            const diagnostics = SRSEngine.generateRuleBasedDiagnostics(
+                progress,
+                this.currentKanjiPool || []
+            );
             this.renderAILookalikeTraps(diagnostics.lookalikeTraps || []);
         },
 
@@ -95,12 +98,15 @@ const AISenseiModule = {
                 return;
             }
             if (!traps || traps.length === 0) {
-                listEl.innerHTML = '<p class="ai-placeholder-text">No high-risk lookalikes detected in your current deck.</p>';
+                listEl.innerHTML =
+                    '<p class="ai-placeholder-text">No high-risk lookalikes detected in your current deck.</p>';
                 return;
             }
-            listEl.innerHTML = traps.map((trap) => {
-                return `<div class="ai-trap-item"><div class="ai-trap-chars"><span>${trap.kanji1}</span><span class="ai-trap-vs">vs</span><span>${trap.kanji2}</span></div><div class="ai-trap-reason">${trap.reason}</div></div>`;
-            }).join('');
+            listEl.innerHTML = traps
+                .map((trap) => {
+                    return `<div class="ai-trap-item"><div class="ai-trap-chars"><span>${trap.kanji1}</span><span class="ai-trap-vs">vs</span><span>${trap.kanji2}</span></div><div class="ai-trap-reason">${trap.reason}</div></div>`;
+                })
+                .join('');
         },
 
         async runAIDiagnosticAnalysis() {
@@ -120,7 +126,12 @@ const AISenseiModule = {
                 const progress = StorageManager.getProgress();
                 const stats = SRSEngine.getRetentionStats(level);
                 const weakCards = SRSEngine.getWeakCards(level, 8);
-                const result = await AIManager.analyzeStudyProfile(progress, stats, weakCards, this.currentKanjiPool || []);
+                const result = await AIManager.analyzeStudyProfile(
+                    progress,
+                    stats,
+                    weakCards,
+                    this.currentKanjiPool || []
+                );
                 if (contentEl) {
                     if (result.aiGenerated && result.commentary) {
                         contentEl.innerHTML = this.formatMarkdownToHtml(result.commentary);
@@ -155,15 +166,20 @@ const AISenseiModule = {
                 return;
             }
             const progress = StorageManager.getProgress();
-            const diagnostics = SRSEngine.generateRuleBasedDiagnostics(progress, this.currentKanjiPool || []);
+            const diagnostics = SRSEngine.generateRuleBasedDiagnostics(
+                progress,
+                this.currentKanjiPool || []
+            );
             const priorityList = diagnostics.priorityStudy || [];
             if (priorityList.length === 0) {
                 listEl.innerHTML = '<p class="ai-placeholder-text">All caught up! Great work.</p>';
                 return;
             }
-            listEl.innerHTML = priorityList.map((item) => {
-                return `<div class="ai-priority-card" onclick="app.jumpToKanjiCharacter('${item.character}')"><div class="ai-priority-char japanese-text">${item.character}</div><div class="ai-priority-reason">${item.reason}</div></div>`;
-            }).join('');
+            listEl.innerHTML = priorityList
+                .map((item) => {
+                    return `<div class="ai-priority-card" onclick="app.jumpToKanjiCharacter('${item.character}')"><div class="ai-priority-char japanese-text">${item.character}</div><div class="ai-priority-reason">${item.reason}</div></div>`;
+                })
+                .join('');
         },
 
         startSRSReviewSession() {
@@ -211,14 +227,16 @@ const AISenseiModule = {
             chatLog.appendChild(userMsg);
             const botMsg = document.createElement('div');
             botMsg.className = 'ai-chat-msg ai-msg-bot';
-            botMsg.innerHTML = '<div class="ai-msg-avatar"><i class="fas fa-brain"></i></div><div class="ai-msg-text"><i class="fas fa-spinner fa-spin"></i> Sensei is thinking...</div>';
+            botMsg.innerHTML =
+                '<div class="ai-msg-avatar"><i class="fas fa-brain"></i></div><div class="ai-msg-text"><i class="fas fa-spinner fa-spin"></i> Sensei is thinking...</div>';
             chatLog.appendChild(botMsg);
             chatLog.scrollTop = chatLog.scrollHeight;
             try {
                 const answer = await AIManager.askSenseiQuestion(question, this.currentKanji);
                 botMsg.querySelector('.ai-msg-text').innerHTML = this.formatMarkdownToHtml(answer);
             } catch (error) {
-                botMsg.querySelector('.ai-msg-text').innerHTML = `<span style="color:#FF5252;"><i class="fas fa-circle-exclamation"></i> ${error.message}</span>`;
+                botMsg.querySelector('.ai-msg-text').innerHTML =
+                    `<span style="color:#FF5252;"><i class="fas fa-circle-exclamation"></i> ${error.message}</span>`;
             }
             chatLog.scrollTop = chatLog.scrollHeight;
         },
@@ -226,7 +244,9 @@ const AISenseiModule = {
         openAISenseiForCurrentKanji() {
             this.openAISenseiModal('ask-sensei');
             if (this.currentKanji) {
-                this.askAISensei(`Explain the radicals and visual mnemonic for "${this.currentKanji.character}"`);
+                this.askAISensei(
+                    `Explain the radicals and visual mnemonic for "${this.currentKanji.character}"`
+                );
             }
         },
         // ==========================================
@@ -253,10 +273,14 @@ const AISenseiModule = {
             if (meaningEl) {
                 meaningEl.textContent = (this.currentKanji.meanings || []).join(', ');
             }
-            const mnemonicCached = StorageManager.getAICacheItem(`mnemonic_${this.currentKanji.character}`);
-            const etymologyCached = StorageManager.getAICacheItem(`etymology_${this.currentKanji.character}`);
+            const mnemonicCached = StorageManager.getAICacheItem(
+                `mnemonic_${this.currentKanji.character}`
+            );
+            const etymologyCached = StorageManager.getAICacheItem(
+                `etymology_${this.currentKanji.character}`
+            );
             if (badgeEl) {
-                badgeEl.style.display = (mnemonicCached || etymologyCached) ? 'inline-flex' : 'none';
+                badgeEl.style.display = mnemonicCached || etymologyCached ? 'inline-flex' : 'none';
             }
             this.switchKanjiDrawerTab(tab);
             drawer.classList.add('open');
@@ -266,7 +290,8 @@ const AISenseiModule = {
         closeKanjiDrawer() {
             const drawer = document.getElementById('kanjiDrawer');
             if (drawer) {
-                drawer.classList.remove('open'); document.body.style.overflow = '';
+                drawer.classList.remove('open');
+                document.body.style.overflow = '';
             }
         },
 
@@ -275,7 +300,9 @@ const AISenseiModule = {
                 tab.classList.toggle('active', tab.dataset.drawerTab === tabName);
             });
             const paneMap = { mnemonic: 'drawerTabMnemonic', etymology: 'drawerTabEtymology' };
-            document.querySelectorAll('.kanji-drawer-pane').forEach((p) => p.classList.remove('active'));
+            document
+                .querySelectorAll('.kanji-drawer-pane')
+                .forEach((p) => p.classList.remove('active'));
             const target = document.getElementById(paneMap[tabName]);
             if (target) {
                 target.classList.add('active');
@@ -300,11 +327,14 @@ const AISenseiModule = {
             }
             this._drawerMnemonicInFlight = this.currentKanji.character;
             if (!window.AIManager || !window.StorageManager) {
-                contentEl.innerHTML = this._drawerNoAIMessage(); return;
+                contentEl.innerHTML = this._drawerNoAIMessage();
+                return;
             }
             const settings = StorageManager.getAISettings();
             if (!settings.apiKey && settings.provider !== 'ollama') {
-                contentEl.innerHTML = this._drawerNoAIMessage(); this._drawerMnemonicInFlight = null; return;
+                contentEl.innerHTML = this._drawerNoAIMessage();
+                this._drawerMnemonicInFlight = null;
+                return;
             }
             const cacheKey = `mnemonic_${this.currentKanji.character}`;
             const cached = StorageManager.getAICacheItem(cacheKey);
@@ -350,11 +380,13 @@ const AISenseiModule = {
             }
             this._drawerEtymologyInFlight = this.currentKanji.character;
             if (!window.AIManager || !window.StorageManager) {
-                contentEl.innerHTML = this._drawerNoAIMessage(); return;
+                contentEl.innerHTML = this._drawerNoAIMessage();
+                return;
             }
             const settings = StorageManager.getAISettings();
             if (!settings.apiKey && settings.provider !== 'ollama') {
-                contentEl.innerHTML = this._drawerNoAIMessage(); return;
+                contentEl.innerHTML = this._drawerNoAIMessage();
+                return;
             }
             const cacheKey = `etymology_${this.currentKanji.character}`;
             const cached = StorageManager.getAICacheItem(cacheKey);
@@ -416,7 +448,10 @@ const AISenseiModule = {
             if (!kanjiData.strokes || kanjiData.strokes <= 12) {
                 return;
             }
-            containerEl.insertAdjacentHTML('beforeend', `<div class="kanji-drawer-stroke-warning"><i class="fas fa-pen-nib"></i><span>This kanji has <strong>${kanjiData.strokes} strokes</strong>. Pay close attention to the stroke order tips above to avoid common mistakes.</span></div>`);
+            containerEl.insertAdjacentHTML(
+                'beforeend',
+                `<div class="kanji-drawer-stroke-warning"><i class="fas fa-pen-nib"></i><span>This kanji has <strong>${kanjiData.strokes} strokes</strong>. Pay close attention to the stroke order tips above to avoid common mistakes.</span></div>`
+            );
         },
 
         _drawerNoAIMessage() {
@@ -438,7 +473,8 @@ const AISenseiModule = {
             if (renderedSvg) {
                 const count = renderedSvg.querySelectorAll('path').length;
                 if (count > 0) {
-                    this.currentKanji.strokes = count; return count;
+                    this.currentKanji.strokes = count;
+                    return count;
                 }
             }
             try {
@@ -446,7 +482,8 @@ const AISenseiModule = {
                 if (svgMarkup) {
                     const count = (svgMarkup.match(/<path\b/gi) || []).length;
                     if (count > 0) {
-                        this.currentKanji.strokes = count; return count;
+                        this.currentKanji.strokes = count;
+                        return count;
                     }
                 }
             } catch (error) {
@@ -476,7 +513,6 @@ const AISenseiModule = {
             div.textContent = str;
             return div.innerHTML;
         }
-
     } // end _methods
 }; // end AISenseiModule
 

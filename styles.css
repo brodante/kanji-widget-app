@@ -4016,7 +4016,9 @@ input:focus {
     border-radius: 50px;
     color: #ffffff;
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(187, 134, 252, 0.3);
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        0 0 16px rgba(187, 134, 252, 0.3);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -4027,7 +4029,9 @@ input:focus {
     transform: translateY(-3px) scale(1.04);
     background: rgba(32, 27, 52, 0.95);
     border-color: rgba(187, 134, 252, 0.85);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 24px rgba(187, 134, 252, 0.5);
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.5),
+        0 0 24px rgba(187, 134, 252, 0.5);
 }
 
 .ai-sensei-fab:active {
@@ -4750,14 +4754,18 @@ input:focus {
     pointer-events: none;
     visibility: hidden;
     opacity: 0;
-    transition: visibility 0s 0.35s, opacity 0.35s ease;
+    transition:
+        visibility 0s 0.35s,
+        opacity 0.35s ease;
 }
 
 .kanji-drawer.open {
     pointer-events: auto;
     visibility: visible;
     opacity: 1;
-    transition: visibility 0s 0s, opacity 0.3s ease;
+    transition:
+        visibility 0s 0s,
+        opacity 0.3s ease;
 }
 
 .kanji-drawer-backdrop {
@@ -4960,8 +4968,14 @@ input:focus {
 }
 
 @keyframes drawerContentFadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .kanji-drawer-content h3 {

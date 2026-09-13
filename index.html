@@ -535,11 +535,14 @@
                                 </button>
                             </div>
                             <small class="setting-help-text" id="aiKeyHelpText"
-                                >Stored locally in your browser only &mdash; never sent to any KanjiWidgets server.</small
+                                >Stored locally in your browser only &mdash; never sent to any
+                                KanjiWidgets server.</small
                             >
                             <small class="setting-help-text api-key-security-notice">
                                 <i class="fas fa-triangle-exclamation"></i>
-                                <strong>Security notice:</strong> Your API key is saved as plain text in browser localStorage. Do not use this on a shared or public computer.
+                                <strong>Security notice:</strong> Your API key is saved as plain
+                                text in browser localStorage. Do not use this on a shared or public
+                                computer.
                             </small>
                         </div>
                         <div class="setting-group" id="aiEndpointGroup" style="display: none">
@@ -999,28 +1002,53 @@ filter: blur(10px) brightness(1) saturate(1);
             <div id="kanjiDrawer" class="kanji-drawer">
                 <div class="kanji-drawer-backdrop" onclick="app.closeKanjiDrawer()"></div>
                 <div class="kanji-drawer-sheet">
-                    <div class="kanji-drawer-handle" onclick="app.closeKanjiDrawer()" title="Drag or click to close">
+                    <div
+                        class="kanji-drawer-handle"
+                        onclick="app.closeKanjiDrawer()"
+                        title="Drag or click to close"
+                    >
                         <span class="kanji-drawer-handle-bar"></span>
                     </div>
                     <div class="kanji-drawer-header">
                         <div class="kanji-drawer-title-group">
-                            <span class="kanji-drawer-kanji japanese-text" id="drawerKanjiChar"></span>
+                            <span
+                                class="kanji-drawer-kanji japanese-text"
+                                id="drawerKanjiChar"
+                            ></span>
                             <div class="kanji-drawer-meta">
                                 <span class="kanji-drawer-meaning" id="drawerKanjiMeaning"></span>
-                                <span class="kanji-drawer-cache-badge" id="drawerCacheBadge" style="display:none;">
+                                <span
+                                    class="kanji-drawer-cache-badge"
+                                    id="drawerCacheBadge"
+                                    style="display: none"
+                                >
                                     <i class="fas fa-bolt"></i> Cached
                                 </span>
                             </div>
                         </div>
-                        <button class="kanji-drawer-close" onclick="app.closeKanjiDrawer()" title="Close drawer">
+                        <button
+                            class="kanji-drawer-close"
+                            onclick="app.closeKanjiDrawer()"
+                            title="Close drawer"
+                        >
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                     <div class="kanji-drawer-tabs">
-                        <button type="button" class="kanji-drawer-tab active" data-drawer-tab="mnemonic" onclick="app.switchKanjiDrawerTab('mnemonic')">
+                        <button
+                            type="button"
+                            class="kanji-drawer-tab active"
+                            data-drawer-tab="mnemonic"
+                            onclick="app.switchKanjiDrawerTab('mnemonic')"
+                        >
                             <i class="fas fa-wand-magic-sparkles"></i> Mnemonic
                         </button>
-                        <button type="button" class="kanji-drawer-tab" data-drawer-tab="etymology" onclick="app.switchKanjiDrawerTab('etymology')">
+                        <button
+                            type="button"
+                            class="kanji-drawer-tab"
+                            data-drawer-tab="etymology"
+                            onclick="app.switchKanjiDrawerTab('etymology')"
+                        >
                             <i class="fas fa-scroll"></i> Etymology
                         </button>
                     </div>
@@ -1043,7 +1071,12 @@ filter: blur(10px) brightness(1) saturate(1);
                         </div>
                     </div>
                     <div class="kanji-drawer-footer">
-                        <button type="button" class="kanji-drawer-refresh-btn" onclick="app.refreshKanjiDrawer()" title="Regenerate with AI">
+                        <button
+                            type="button"
+                            class="kanji-drawer-refresh-btn"
+                            onclick="app.refreshKanjiDrawer()"
+                            title="Regenerate with AI"
+                        >
                             <i class="fas fa-arrows-rotate"></i> Refresh
                         </button>
                     </div>

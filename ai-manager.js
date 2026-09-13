@@ -414,12 +414,11 @@ A short inspirational or coaching signoff tailored to your persona.`;
         const personaPrompt =
             this.PERSONA_PROMPTS[settings.persona] || this.PERSONA_PROMPTS.mnemonic;
 
-        const jlptContext = (kanjiData.level || kanjiData.jlpt)
-            ? `\nJLPT Level: ${kanjiData.level || kanjiData.jlpt}`
-            : '';
-        const strokeContext = kanjiData.strokes
-            ? `\nStroke count: ${kanjiData.strokes}`
-            : '';
+        const jlptContext =
+            kanjiData.level || kanjiData.jlpt
+                ? `\nJLPT Level: ${kanjiData.level || kanjiData.jlpt}`
+                : '';
+        const strokeContext = kanjiData.strokes ? `\nStroke count: ${kanjiData.strokes}` : '';
 
         const prompt = `Create an unforgettable, vivid visual mnemonic for the kanji "${kanjiData.character}".
 Meanings: ${(kanjiData.meanings || []).join(', ')}
@@ -451,9 +450,10 @@ ${kanjiData.strokes && kanjiData.strokes > 12 ? '- **Stroke Order Tip**: This is
         const personaPrompt =
             'You are a Japanese linguistics scholar and etymologist. Explain historical origins, oracle bone script evolution, and semantic radicals concisely.';
 
-        const jlptContext = (kanjiData.level || kanjiData.jlpt)
-            ? `\nJLPT Level: ${kanjiData.level || kanjiData.jlpt}`
-            : '';
+        const jlptContext =
+            kanjiData.level || kanjiData.jlpt
+                ? `\nJLPT Level: ${kanjiData.level || kanjiData.jlpt}`
+                : '';
 
         const prompt = `Explain the historical etymology and radical composition of the kanji "${kanjiData.character}" (${(kanjiData.meanings || []).join(', ')}).
 Include:

@@ -88,7 +88,10 @@ async function runTests() {
 
     await test('Etymology cache key uses correct format', () => {
         const kanji = { character: '火' };
-        StorageManager.setAICacheItem(`etymology_${kanji.character}`, 'Ancient pictograph of flames.');
+        StorageManager.setAICacheItem(
+            `etymology_${kanji.character}`,
+            'Ancient pictograph of flames.'
+        );
         const cached = StorageManager.getAICacheItem(`etymology_${kanji.character}`);
         assert(cached !== null);
         assert.strictEqual(cached.data, 'Ancient pictograph of flames.');
@@ -96,8 +99,14 @@ async function runTests() {
 
     await test('Mnemonic and etymology caches are independent', () => {
         const kanji = { character: '山' };
-        StorageManager.setAICacheItem(`mnemonic_${kanji.character}`, 'Three peaks touching the sky.');
-        StorageManager.setAICacheItem(`etymology_${kanji.character}`, 'Pictograph of mountain peaks.');
+        StorageManager.setAICacheItem(
+            `mnemonic_${kanji.character}`,
+            'Three peaks touching the sky.'
+        );
+        StorageManager.setAICacheItem(
+            `etymology_${kanji.character}`,
+            'Pictograph of mountain peaks.'
+        );
         const mCache = StorageManager.getAICacheItem(`mnemonic_${kanji.character}`);
         const eCache = StorageManager.getAICacheItem(`etymology_${kanji.character}`);
         assert.notStrictEqual(mCache.data, eCache.data);
@@ -125,7 +134,12 @@ async function runTests() {
         StorageManager.updateAISetting('provider', 'gemini');
         // Seed the cache to simulate a prior successful call
         StorageManager.setAICacheItem('mnemonic_月', 'A crescent moon glowing at night.');
-        const result = await AIManager.generateMnemonic({ character: '月', meanings: ['moon'], onyomi: ['ゲツ'], kunyomi: ['つき'] });
+        const result = await AIManager.generateMnemonic({
+            character: '月',
+            meanings: ['moon'],
+            onyomi: ['ゲツ'],
+            kunyomi: ['つき']
+        });
         assert.strictEqual(result, 'A crescent moon glowing at night.');
     });
 
@@ -250,4 +264,3 @@ async function runTests() {
 }
 
 runTests();
-
