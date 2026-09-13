@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanji-widgets-v3';
+const CACHE_NAME = 'kanji-widgets-v4';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -6,7 +6,10 @@ const urlsToCache = [
     '/script.js',
     '/kanji-data.js',
     '/audio-manager.js',
-    '/storage-manager.js'
+    '/storage-manager.js',
+    '/srs-engine.js',
+    '/ai-manager.js',
+    '/ai-tutor-modal.js'
 ];
 
 self.addEventListener('install', (event) => {
