@@ -3,11 +3,13 @@
 ## Option 1: WebView Wrapper (Recommended for quick deployment)
 
 ### Requirements
+
 - Android Studio
 - Java/Kotlin knowledge
 - Android SDK
 
 ### Steps:
+
 1. **Create new Android project** in Android Studio
 2. **Add WebView to main activity**
 3. **Include web files in assets folder**
@@ -28,14 +30,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        
+
         val webView: WebView = findViewById(R.id.webview)
         webView.webViewClient = WebViewClient()
-        
+
         // Enable JavaScript
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
-        
+
         // Load your web app
         webView.loadUrl("file:///android_asset/index.html")
     }
@@ -48,12 +50,12 @@ class MainActivity : AppCompatActivity() {
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    
+
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-        
+
 </LinearLayout>
 ```
 
@@ -66,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 ## Option 2: Cordova/PhoneGap (Web-to-App Framework)
 
 ### Installation
+
 ```bash
 npm install -g cordova
 cordova create KanjiWidgets com.yourname.kanjiwidgets KanjiWidgets
@@ -74,6 +77,7 @@ cordova platform add android
 ```
 
 ### Configuration
+
 ```javascript
 // config.xml
 <?xml version='1.0' encoding='utf-8'?>
@@ -87,6 +91,7 @@ cordova platform add android
 ```
 
 ### Build Process
+
 ```bash
 # Copy your web files to www/ folder
 cp *.html *.css *.js www/
@@ -101,6 +106,7 @@ cordova build android
 ## Option 3: Progressive Web App (PWA) - No APK needed
 
 ### Add Service Worker
+
 ```javascript
 // sw.js
 const CACHE_NAME = 'kanji-widgets-v1';
@@ -113,15 +119,13 @@ const urlsToCache = [
     '/storage-manager.js'
 ];
 
-self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
-    );
+self.addEventListener('install', (event) => {
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)));
 });
 ```
 
 ### Add Web App Manifest
+
 ```json
 // manifest.json
 {

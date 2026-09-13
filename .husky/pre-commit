@@ -3,11 +3,10 @@
 
 echo "🔍 Running pre-commit checks..."
 
-# Run ESLint on all JavaScript files
-echo "📝 Checking code style with ESLint..."
-npx eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/
+# Only lint the files actually being committed, not the whole codebase
+echo "📝 Checking staged files with ESLint..."
+npx lint-staged
 
-# Check if ESLint passed
 if [ $? -ne 0 ]; then
   echo "❌ ESLint found issues. Please fix them before committing."
   exit 1

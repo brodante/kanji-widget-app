@@ -25,7 +25,6 @@ class KanjiData {
             // Save to memory so we never fetch the same file twice
             this.cache.set(cacheKey, kanjiPool);
             return kanjiPool;
-
         } catch (error) {
             console.error(`Failed to load data for ${level}:`, error);
             return [];
