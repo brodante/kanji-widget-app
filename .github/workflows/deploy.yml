@@ -36,6 +36,7 @@ jobs:
                   cp audio-manager.js deploy/
                   cp ai-manager.js deploy/
                   cp ai-tutor-modal.js deploy/
+                  cp srs-engine.js deploy/
                   cp storage-manager.js deploy/
                   cp manifest.json deploy/
                   cp sw.js deploy/
