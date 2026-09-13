@@ -324,8 +324,8 @@ class SRSEngine {
                         firstMastered && secondMastered
                             ? 'Both Studied'
                             : firstMastered || secondMastered
-                                ? 'One Studied'
-                                : 'Pending'
+                              ? 'One Studied'
+                              : 'Pending'
                 });
             }
         });
@@ -371,8 +371,8 @@ class SRSEngine {
                 srsStats.dueCount > 10
                     ? 'You have a backlog of reviews due! Clear your review queue first before learning new kanji to prevent memory decay.'
                     : srsStats.retentionRate < 80
-                        ? 'Retention is below 80%. Consider spending extra time visualizing radicals and stroke sequences for tricky kanji.'
-                        : 'Pacing looks healthy! Keep up daily consistency to maintain your retention momentum.'
+                      ? 'Retention is below 80%. Consider spending extra time visualizing radicals and stroke sequences for tricky kanji.'
+                      : 'Pacing looks healthy! Keep up daily consistency to maintain your retention momentum.'
         };
     }
 }

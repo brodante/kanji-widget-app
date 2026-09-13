@@ -1127,49 +1127,49 @@ class KanjiLearningApp {
                 ${isMastered ? '<button class="unmark-badge" onclick="app.unmarkCurrentKanji()" title="Unmark as mastered"><i class="fas fa-times"></i></button>' : ''}
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>                <div class="kanji-readings">
                     ${
-    this.currentKanji.onyomi.length > 0
-        ? `
+                        this.currentKanji.onyomi.length > 0
+                            ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">On'yomi</div>
                             <div class="reading-value japanese-text">
                                 ${this.currentKanji.onyomi
-        .map(
-            (reading) =>
-                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
-        )
-        .join(', ')}
+                                    .map(
+                                        (reading) =>
+                                            `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+                                    )
+                                    .join(', ')}
                             </div>
                         </div>
                     `
-        : ''
-}
+                            : ''
+                    }
                     ${
-    this.currentKanji.kunyomi.length > 0
-        ? `
+                        this.currentKanji.kunyomi.length > 0
+                            ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">Kun'yomi</div>
                             <div class="reading-value japanese-text">
                                 ${this.currentKanji.kunyomi
-        .map(
-            (reading) =>
-                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
-        )
-        .join(', ')}
+                                    .map(
+                                        (reading) =>
+                                            `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+                                    )
+                                    .join(', ')}
                             </div>
                         </div>
                     `
-        : ''
-}
+                            : ''
+                    }
                 </div>
                 ${
-    this.currentKanji.examples && this.currentKanji.examples.length > 0
-        ? `
+                    this.currentKanji.examples && this.currentKanji.examples.length > 0
+                        ? `
                     <div class="kanji-examples">
                         <h4>Examples</h4>
                         ${this.currentKanji.examples
-        .slice(0, 3)
-        .map(
-            (example) => `
+                            .slice(0, 3)
+                            .map(
+                                (example) => `
                             <div class="example-item">
                                 <span class="example-word japanese-text" onclick="app.playSpecificReading('${example.word}')" title="Click to pronounce">
                                     ${example.word}
@@ -1178,12 +1178,12 @@ class KanjiLearningApp {
                                 <span class="example-meaning">${example.meaning}</span>
                             </div>
                         `
-        )
-        .join('')}
+                            )
+                            .join('')}
                     </div>
                 `
-        : ''
-}
+                        : ''
+                }
                 <div class="stroke-order-section">
                     <div class="stroke-order-header">Stroke order</div>
                     <div class="stroke-order-toolbar">
@@ -1470,28 +1470,28 @@ class KanjiLearningApp {
         let readingToPlay = '';
 
         switch (this.settings.defaultAudio) {
-        case 'kunyomi':
-            readingToPlay =
+            case 'kunyomi':
+                readingToPlay =
                     this.currentKanji.kunyomi.length > 0
                         ? this.currentKanji.kunyomi[0]
                         : this.currentKanji.onyomi.length > 0
-                            ? this.currentKanji.onyomi[0]
-                            : '';
-            break;
-        case 'onyomi':
-            readingToPlay =
+                          ? this.currentKanji.onyomi[0]
+                          : '';
+                break;
+            case 'onyomi':
+                readingToPlay =
                     this.currentKanji.onyomi.length > 0
                         ? this.currentKanji.onyomi[0]
                         : this.currentKanji.kunyomi.length > 0
-                            ? this.currentKanji.kunyomi[0]
-                            : '';
-            break;
-        case 'first':
-        default: {
-            const allReadings = [...this.currentKanji.onyomi, ...this.currentKanji.kunyomi];
-            readingToPlay = allReadings.length > 0 ? allReadings[0] : '';
-            break;
-        }
+                          ? this.currentKanji.kunyomi[0]
+                          : '';
+                break;
+            case 'first':
+            default: {
+                const allReadings = [...this.currentKanji.onyomi, ...this.currentKanji.kunyomi];
+                readingToPlay = allReadings.length > 0 ? allReadings[0] : '';
+                break;
+            }
         }
 
         if (readingToPlay) {
@@ -3372,15 +3372,15 @@ const hexToHsl = (hex) => {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
-        case rn:
-            h = (gn - bn) / d + (gn < bn ? 6 : 0);
-            break;
-        case gn:
-            h = (bn - rn) / d + 2;
-            break;
-        case bn:
-            h = (rn - gn) / d + 4;
-            break;
+            case rn:
+                h = (gn - bn) / d + (gn < bn ? 6 : 0);
+                break;
+            case gn:
+                h = (bn - rn) / d + 2;
+                break;
+            case bn:
+                h = (rn - gn) / d + 4;
+                break;
         }
         h /= 6;
     }
