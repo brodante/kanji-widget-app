@@ -1278,47 +1278,50 @@ class KanjiLearningApp {
             content += `
                 ${isMastered ? '<button class="unmark-badge" onclick="app.unmarkCurrentKanji()" title="Unmark as mastered"><i class="fas fa-times"></i></button>' : ''}
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>                <div class="kanji-readings">
-                    ${this.currentKanji.onyomi.length > 0
-                    ? `
+                    ${
+                        this.currentKanji.onyomi.length > 0
+                            ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">On'yomi</div>
                             <div class="reading-value japanese-text">
                                 ${this.currentKanji.onyomi
-                        .map(
-                            (reading) =>
-                                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
-                        )
-                        .join(', ')}
+                                    .map(
+                                        (reading) =>
+                                            `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+                                    )
+                                    .join(', ')}
                             </div>
                         </div>
                     `
-                    : ''
-                }
-                    ${this.currentKanji.kunyomi.length > 0
-                    ? `
+                            : ''
+                    }
+                    ${
+                        this.currentKanji.kunyomi.length > 0
+                            ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">Kun'yomi</div>
                             <div class="reading-value japanese-text">
                                 ${this.currentKanji.kunyomi
-                        .map(
-                            (reading) =>
-                                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
-                        )
-                        .join(', ')}
+                                    .map(
+                                        (reading) =>
+                                            `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+                                    )
+                                    .join(', ')}
                             </div>
                         </div>
                     `
-                    : ''
-                }
+                            : ''
+                    }
                 </div>
-                ${this.currentKanji.examples && this.currentKanji.examples.length > 0
-                    ? `
+                ${
+                    this.currentKanji.examples && this.currentKanji.examples.length > 0
+                        ? `
                     <div class="kanji-examples">
                         <h4>Examples</h4>
                         ${this.currentKanji.examples
-                        .slice(0, 3)
-                        .map(
-                            (example) => `
+                            .slice(0, 3)
+                            .map(
+                                (example) => `
                             <div class="example-item">
                                 <span class="example-word japanese-text" onclick="app.playSpecificReading('${example.word}')" title="Click to pronounce">
                                     ${example.word}
@@ -1327,11 +1330,11 @@ class KanjiLearningApp {
                                 <span class="example-meaning">${example.meaning}</span>
                             </div>
                         `
-                        )
-                        .join('')}
+                            )
+                            .join('')}
                     </div>
                 `
-                    : ''
+                        : ''
                 }
                 <div class="stroke-order-section">
                     <div class="stroke-order-header">Stroke order</div>
@@ -1624,16 +1627,16 @@ class KanjiLearningApp {
                     this.currentKanji.kunyomi.length > 0
                         ? this.currentKanji.kunyomi[0]
                         : this.currentKanji.onyomi.length > 0
-                            ? this.currentKanji.onyomi[0]
-                            : '';
+                          ? this.currentKanji.onyomi[0]
+                          : '';
                 break;
             case 'onyomi':
                 readingToPlay =
                     this.currentKanji.onyomi.length > 0
                         ? this.currentKanji.onyomi[0]
                         : this.currentKanji.kunyomi.length > 0
-                            ? this.currentKanji.kunyomi[0]
-                            : '';
+                          ? this.currentKanji.kunyomi[0]
+                          : '';
                 break;
             case 'first':
             default: {
@@ -2683,7 +2686,7 @@ class KanjiLearningApp {
                     videoEl.src = imageUrl;
                 }
                 videoEl.classList.add('active');
-                videoEl.play().catch(() => { }); // autoplay can be blocked pre-interaction; harmless either way
+                videoEl.play().catch(() => {}); // autoplay can be blocked pre-interaction; harmless either way
             }
             imageEl?.classList.remove('active');
         } else {
