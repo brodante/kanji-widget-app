@@ -7,7 +7,7 @@ class AIManager {
         gemini: {
             name: 'Google Gemini',
             defaultModel: 'gemini-3.6-flash',
-            models: ['gemini-3.6-flash', 'gemini-2.5-pro'],
+            models: ['gemini-3.6-flash', 'gemini-3.1-pro-preview'],
             requiresKey: true
         },
         openai: {
@@ -23,16 +23,16 @@ class AIManager {
             requiresKey: true
         },
         openrouter: {
-            name: 'OpenRouter',
-            defaultModel: 'google/gemini-flash-2.5',
-            models: [
-                'google/gemini-flash-2.5',
-                'openai/gpt-4o-mini',
-                'anthropic/claude-3.5-haiku',
-                'meta-llama/llama-3.2-3b-instruct:free'
-            ],
-            requiresKey: true
-        },
+    name: 'OpenRouter',
+    defaultModel: 'google/gemini-3.5-flash',
+    models: [
+        'google/gemini-3.5-flash',
+        'openai/gpt-4o-mini',
+        'anthropic/claude-3.5-haiku',
+        'meta-llama/llama-3.2-3b-instruct:free'
+    ],
+    requiresKey: true
+},
         ollama: {
             name: 'Ollama (Local)',
             defaultModel: 'llama3.2',
