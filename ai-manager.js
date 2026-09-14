@@ -60,6 +60,14 @@ class AIManager {
      * Tests connectivity to the configured AI provider.
      */
     static async testConnection(customSettings = null) {
+        const now = Date.now();
+        if (this._lastTestAt && now - this._lastTestAt < 10000) {
+            return {
+                success: false,
+                message: 'Please wait a few seconds before testing again.'
+            };
+        }
+        this._lastTestAt = now;
         const settings = customSettings || StorageManager.getAISettings();
         const testPrompt = 'Respond with exactly one word: "Connected"';
 
