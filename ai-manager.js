@@ -163,7 +163,7 @@ class AIManager {
             contents: contents,
             generationConfig: {
                 temperature: temperature,
-                maxOutputTokens: 1200
+                maxOutputTokens: 8192
             }
         };
 
@@ -200,7 +200,7 @@ class AIManager {
             model: model,
             messages: messages,
             temperature: temperature,
-            max_tokens: 1200
+            max_tokens: 4096
         };
 
         const response = await fetch(url, {
@@ -230,7 +230,7 @@ class AIManager {
         const url = 'https://api.anthropic.com/v1/messages';
         const body = {
             model: model,
-            max_tokens: 1200,
+            max_tokens: 4096,
             temperature: temperature,
             system: systemInstruction || undefined,
             messages: [{ role: 'user', content: prompt }]
@@ -241,7 +241,7 @@ class AIManager {
             headers: {
                 'x-api-key': apiKey,
                 'anthropic-version': '2023-06-01',
-                'dangerously-allow-browser': 'true',
+                'anthropic-dangerous-direct-browser-access': 'true',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)
@@ -273,7 +273,8 @@ class AIManager {
         const body = {
             model: model,
             messages: messages,
-            temperature: temperature
+            temperature: temperature,
+            max_tokens: 4096
         };
 
         const response = await fetch(url, {
