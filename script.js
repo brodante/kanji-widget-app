@@ -510,7 +510,15 @@ class KanjiLearningApp {
         // AI Sensei Modal triggers
         const aiSenseiFab = document.getElementById('aiSenseiFab');
         if (aiSenseiFab) {
-            aiSenseiFab.addEventListener('click', () => {
+            this.initDraggableFab(aiSenseiFab);
+            aiSenseiFab.addEventListener('click', (e) => {
+                // Don't open the modal if the user just finished dragging
+                const lastDragEnd = parseInt(aiSenseiFab.dataset.lastDragEnd || '0', 10);
+                if (Date.now() - lastDragEnd < 250) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return;
+                }
                 this.openAISenseiModal();
             });
         }
@@ -984,6 +992,150 @@ class KanjiLearningApp {
             } else if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 this.navigateDeck('prev');
+            }
+        });
+    }
+    initDraggableFab(fab) {
+        const STORAGE_KEY = 'aiSenseiFabPos';
+        const MARGIN = 8;
+        const DRAG_THRESHOLD = 4;
+
+        const computed = getComputedStyle(fab);
+        const baseLeft = parseFloat(computed.left) || 26;
+        const baseTop = parseFloat(computed.top) || 26;
+
+        let pos = { x: 0, y: 0 };
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+                    pos = parsed;
+                }
+            }
+        } catch (e) {
+            /* ignore corrupt storage */
+        }
+
+        const clampY = (y) => {
+            const h = fab.offsetHeight;
+            const minY = MARGIN - baseTop;
+            const maxY = window.innerHeight - MARGIN - baseTop - h;
+            return Math.min(Math.max(y, minY), maxY);
+        };
+
+        const clampXY = (x, y) => {
+            const w = fab.offsetWidth;
+            const minX = MARGIN - baseLeft;
+            const maxX = window.innerWidth - MARGIN - baseLeft - w;
+            return {
+                x: Math.min(Math.max(x, minX), maxX),
+                y: clampY(y)
+            };
+        };
+
+        // Decide which edge to snap to based on where the FAB's center is
+        const computeSnapX = (currentX) => {
+            const w = fab.offsetWidth;
+            const centerX = baseLeft + currentX + w / 2;
+            if (centerX < window.innerWidth / 2) {
+                return MARGIN - baseLeft; // left edge
+            }
+            return window.innerWidth - MARGIN - baseLeft - w; // right edge
+        };
+
+        // Apply restored position (clamp first in case viewport shrank)
+        pos = clampXY(pos.x, pos.y);
+        // Then snap to nearest edge on load so it always looks "docked"
+        pos = { x: computeSnapX(pos.x), y: pos.y };
+        fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+
+        let activePointerId = null;
+        let startPointer = { x: 0, y: 0 };
+        let startPos = { x: 0, y: 0 };
+        let moved = false;
+
+        fab.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'mouse' && e.button !== 0) {
+                return;
+            }
+            activePointerId = e.pointerId;
+            startPointer = { x: e.clientX, y: e.clientY };
+            startPos = { x: pos.x, y: pos.y };
+            moved = false;
+            try {
+                fab.setPointerCapture(activePointerId);
+            } catch (err) {
+                /* ignore */
+            }
+            fab.classList.add('dragging');
+        });
+
+        fab.addEventListener('pointermove', (e) => {
+            if (e.pointerId !== activePointerId) {
+                return;
+            }
+            const dx = e.clientX - startPointer.x;
+            const dy = e.clientY - startPointer.y;
+            if (!moved && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+                moved = true;
+            }
+            if (!moved) {
+                return;
+            }
+            pos = clampXY(startPos.x + dx, startPos.y + dy);
+            fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+        });
+
+        const endDrag = (e) => {
+            if (e.pointerId !== activePointerId) {
+                return;
+            }
+            try {
+                fab.releasePointerCapture(activePointerId);
+            } catch (err) {
+                /* ignore */
+            }
+            activePointerId = null;
+
+            if (!moved) {
+                fab.classList.remove('dragging');
+                return;
+            }
+
+            // Compute final snap target
+            const targetX = computeSnapX(pos.x);
+            const targetY = clampY(pos.y);
+            pos = { x: targetX, y: targetY };
+
+            // Mark the drag so the click handler swallows the trailing click
+            fab.dataset.lastDragEnd = Date.now().toString();
+
+            // Remove .dragging FIRST so the transition is active, then set the
+            // new transform on the next frame so the browser actually animates.
+            fab.classList.remove('dragging');
+            requestAnimationFrame(() => {
+                fab.style.transform = `translate(${targetX}px, ${targetY}px)`;
+            });
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+            } catch (err) {
+                /* ignore */
+            }
+        };
+
+        fab.addEventListener('pointerup', endDrag);
+        fab.addEventListener('pointercancel', endDrag);
+
+        // On resize / rotate, re-snap to the nearest edge
+        window.addEventListener('resize', () => {
+            pos = { x: computeSnapX(pos.x), y: clampY(pos.y) };
+            fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+            } catch (err) {
+                /* ignore */
             }
         });
     }

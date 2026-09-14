@@ -6,8 +6,8 @@ class AIManager {
     static PROVIDER_DEFAULTS = {
         gemini: {
             name: 'Google Gemini',
-            defaultModel: 'gemini-2.5-flash',
-            models: ['gemini-2.5-flash', 'gemini-2.5-pro'],
+            defaultModel: 'gemini-3.6-flash',
+            models: ['gemini-3.6-flash', 'gemini-3.1-pro-preview'],
             requiresKey: true
         },
         openai: {
@@ -24,9 +24,9 @@ class AIManager {
         },
         openrouter: {
             name: 'OpenRouter',
-            defaultModel: 'google/gemini-flash-2.5',
+            defaultModel: 'google/gemini-3.5-flash',
             models: [
-                'google/gemini-flash-2.5',
+                'google/gemini-3.5-flash',
                 'openai/gpt-4o-mini',
                 'anthropic/claude-3.5-haiku',
                 'meta-llama/llama-3.2-3b-instruct:free'
@@ -84,7 +84,7 @@ class AIManager {
         const provider = settings.provider || 'gemini';
         const apiKey = settings.apiKey ? settings.apiKey.trim() : '';
         const model =
-            settings.model || this.PROVIDER_DEFAULTS[provider]?.defaultModel || 'gemini-2.5-flash';
+            settings.model || this.PROVIDER_DEFAULTS[provider]?.defaultModel || 'gemini-3.6-flash';
 
         if (this.PROVIDER_DEFAULTS[provider]?.requiresKey && !apiKey) {
             throw new Error(
@@ -164,7 +164,7 @@ class AIManager {
             contents: contents,
             generationConfig: {
                 temperature: temperature,
-                maxOutputTokens: 1200
+                maxOutputTokens: 8192
             }
         };
 
@@ -201,7 +201,7 @@ class AIManager {
             model: model,
             messages: messages,
             temperature: temperature,
-            max_tokens: 1200
+            max_tokens: 4096
         };
 
         const response = await fetch(url, {
@@ -231,7 +231,7 @@ class AIManager {
         const url = 'https://api.anthropic.com/v1/messages';
         const body = {
             model: model,
-            max_tokens: 1200,
+            max_tokens: 4096,
             temperature: temperature,
             system: systemInstruction || undefined,
             messages: [{ role: 'user', content: prompt }]
@@ -242,7 +242,7 @@ class AIManager {
             headers: {
                 'x-api-key': apiKey,
                 'anthropic-version': '2023-06-01',
-                'dangerously-allow-browser': 'true',
+                'anthropic-dangerous-direct-browser-access': 'true',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)
@@ -274,7 +274,8 @@ class AIManager {
         const body = {
             model: model,
             messages: messages,
-            temperature: temperature
+            temperature: temperature,
+            max_tokens: 4096
         };
 
         const response = await fetch(url, {
@@ -488,4 +489,8 @@ ${kanjiData.strokes && kanjiData.strokes > 12 ? `5. **Stroke Warning**: This com
 // Export for module/browser environments
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AIManager;
+}
+
+if (typeof window !== 'undefined') {
+    window.AIManager = AIManager;
 }

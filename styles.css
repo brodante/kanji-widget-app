@@ -4004,7 +4004,7 @@ input:focus {
 /* Floating Action Button (FAB) for AI Sensei */
 .ai-sensei-fab {
     position: fixed;
-    bottom: 26px;
+    top: 26px;
     left: 26px;
     z-index: 950;
     display: inline-flex;
@@ -4015,18 +4015,24 @@ input:focus {
     border: 1px solid rgba(187, 134, 252, 0.5);
     border-radius: 50px;
     color: #ffffff;
-    cursor: pointer;
+    cursor: grab;
+    touch-action: none;
     box-shadow:
         0 8px 24px rgba(0, 0, 0, 0.4),
         0 0 16px rgba(187, 134, 252, 0.3);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        opacity 0.25s ease;
     user-select: none;
+    will-change: transform;
 }
 
 .ai-sensei-fab:hover {
-    transform: translateY(-3px) scale(1.04);
     background: rgba(32, 27, 52, 0.95);
     border-color: rgba(187, 134, 252, 0.85);
     box-shadow:
@@ -4034,8 +4040,17 @@ input:focus {
         0 0 24px rgba(187, 134, 252, 0.5);
 }
 
-.ai-sensei-fab:active {
-    transform: translateY(0) scale(0.97);
+.ai-sensei-fab.dragging {
+    cursor: grabbing;
+    transition: none;
+    box-shadow:
+        0 16px 36px rgba(0, 0, 0, 0.55),
+        0 0 28px rgba(187, 134, 252, 0.6);
+}
+
+body:has(#aiSenseiModal.show) .ai-sensei-fab {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .ai-fab-icon-box {
@@ -4159,14 +4174,19 @@ input:focus {
 
 /* Tabs */
 .ai-tabs {
+    flex-shrink: 0;
     display: flex;
     gap: 0.5rem;
     border-bottom: 1px solid rgba(150, 150, 150, 0.15);
-    padding-bottom: 0.8rem;
+    padding: 0.3rem 0.2rem 0.8rem;
     overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
 }
 
 .ai-tab {
+    flex-shrink: 0;
     background: rgba(150, 150, 150, 0.08);
     border: 1px solid transparent;
     color: var(--on-surface);
@@ -4711,7 +4731,7 @@ input:focus {
 /* Mobile Responsiveness for AI Sensei FAB and Modal */
 @media (max-width: 768px) {
     .ai-sensei-fab {
-        bottom: 18px;
+        top: 18px;
         left: 18px;
         padding: 6px 14px 6px 8px;
     }

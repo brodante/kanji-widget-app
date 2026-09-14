@@ -206,7 +206,7 @@ class StorageManager {
         const defaultSettings = {
             provider: 'gemini', // 'gemini', 'openai', 'claude', 'openrouter', 'ollama'
             apiKey: '',
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.6-flash',
             persona: 'encouraging', // 'encouraging', 'strict', 'mnemonic', 'anime'
             customEndpoint: 'http://localhost:11434/api/generate',
             temperature: 0.7,
@@ -219,7 +219,7 @@ class StorageManager {
             settings.provider === 'gemini' &&
             ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'].includes(settings.model)
         ) {
-            settings.model = 'gemini-2.5-flash';
+            settings.model = 'gemini-3.6-flash';
             this.saveAISettings(settings);
         }
 
