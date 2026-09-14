@@ -998,6 +998,7 @@ class KanjiLearningApp {
     initDraggableFab(fab) {
         const STORAGE_KEY = 'aiSenseiFabPos';
         const MARGIN = 8;
+        const DRAG_THRESHOLD = 4;
 
         const computed = getComputedStyle(fab);
         const baseLeft = parseFloat(computed.left) || 26;
@@ -1016,20 +1017,37 @@ class KanjiLearningApp {
             /* ignore corrupt storage */
         }
 
-        const clamp = (x, y) => {
-            const w = fab.offsetWidth;
+        const clampY = (y) => {
             const h = fab.offsetHeight;
-            const minX = MARGIN - baseLeft;
-            const maxX = window.innerWidth - MARGIN - baseLeft - w;
             const minY = MARGIN - baseTop;
             const maxY = window.innerHeight - MARGIN - baseTop - h;
+            return Math.min(Math.max(y, minY), maxY);
+        };
+
+        const clampXY = (x, y) => {
+            const w = fab.offsetWidth;
+            const minX = MARGIN - baseLeft;
+            const maxX = window.innerWidth - MARGIN - baseLeft - w;
             return {
                 x: Math.min(Math.max(x, minX), maxX),
-                y: Math.min(Math.max(y, minY), maxY)
+                y: clampY(y)
             };
         };
 
-        pos = clamp(pos.x, pos.y);
+        // Decide which edge to snap to based on where the FAB's center is
+        const computeSnapX = (currentX) => {
+            const w = fab.offsetWidth;
+            const centerX = baseLeft + currentX + w / 2;
+            if (centerX < window.innerWidth / 2) {
+                return MARGIN - baseLeft; // left edge
+            }
+            return window.innerWidth - MARGIN - baseLeft - w; // right edge
+        };
+
+        // Apply restored position (clamp first in case viewport shrank)
+        pos = clampXY(pos.x, pos.y);
+        // Then snap to nearest edge on load so it always looks "docked"
+        pos = { x: computeSnapX(pos.x), y: pos.y };
         fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
 
         let activePointerId = null;
@@ -1059,13 +1077,13 @@ class KanjiLearningApp {
             }
             const dx = e.clientX - startPointer.x;
             const dy = e.clientY - startPointer.y;
-            if (!moved && Math.hypot(dx, dy) > 4) {
+            if (!moved && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
                 moved = true;
             }
             if (!moved) {
                 return;
             }
-            pos = clamp(startPos.x + dx, startPos.y + dy);
+            pos = clampXY(startPos.x + dx, startPos.y + dy);
             fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
         });
 
@@ -1079,22 +1097,40 @@ class KanjiLearningApp {
                 /* ignore */
             }
             activePointerId = null;
+
+            if (!moved) {
+                fab.classList.remove('dragging');
+                return;
+            }
+
+            // Compute final snap target
+            const targetX = computeSnapX(pos.x);
+            const targetY = clampY(pos.y);
+            pos = { x: targetX, y: targetY };
+
+            // Mark the drag so the click handler swallows the trailing click
+            fab.dataset.lastDragEnd = Date.now().toString();
+
+            // Remove .dragging FIRST so the transition is active, then set the
+            // new transform on the next frame so the browser actually animates.
             fab.classList.remove('dragging');
-            if (moved) {
-                fab.dataset.lastDragEnd = Date.now().toString();
-                try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
-                } catch (err) {
-                    /* ignore */
-                }
+            requestAnimationFrame(() => {
+                fab.style.transform = `translate(${targetX}px, ${targetY}px)`;
+            });
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+            } catch (err) {
+                /* ignore */
             }
         };
 
         fab.addEventListener('pointerup', endDrag);
         fab.addEventListener('pointercancel', endDrag);
 
+        // On resize / rotate, re-snap to the nearest edge
         window.addEventListener('resize', () => {
-            pos = clamp(pos.x, pos.y);
+            pos = { x: computeSnapX(pos.x), y: clampY(pos.y) };
             fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
