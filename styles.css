@@ -5134,3 +5134,23 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     transform: translateY(-2px) scale(1.1);
     box-shadow: 0 4px 14px rgba(0, 229, 255, 0.25);
 }
+.ai-provider-key-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.82rem;
+    margin-top: 0.3rem;
+    transition: opacity 0.2s ease;
+}
+
+.ai-provider-key-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.ai-provider-key-link i {
+    font-size: 0.7rem;
+}

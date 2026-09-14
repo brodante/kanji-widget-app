@@ -8,19 +8,22 @@ class AIManager {
             name: 'Google Gemini',
             defaultModel: 'gemini-3.6-flash',
             models: ['gemini-3.6-flash', 'gemini-3.1-pro-preview'],
-            requiresKey: true
+            requiresKey: true,
+            keyUrl: 'https://aistudio.google.com/api-keys'
         },
         openai: {
             name: 'OpenAI',
             defaultModel: 'gpt-4o-mini',
             models: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
-            requiresKey: true
+            requiresKey: true,
+            keyUrl: 'https://platform.openai.com/api-keys'
         },
         claude: {
             name: 'Anthropic Claude',
             defaultModel: 'claude-3-5-haiku-20241022',
             models: ['claude-3-5-haiku-20241022', 'claude-3-5-sonnet-20241022'],
-            requiresKey: true
+            requiresKey: true,
+            keyUrl: 'https://console.anthropic.com/settings/keys'
         },
         openrouter: {
             name: 'OpenRouter',
@@ -31,14 +34,16 @@ class AIManager {
                 'anthropic/claude-3.5-haiku',
                 'meta-llama/llama-3.2-3b-instruct:free'
             ],
-            requiresKey: true
+            requiresKey: true,
+            keyUrl: 'https://openrouter.ai/keys'
         },
         ollama: {
             name: 'Ollama (Local)',
             defaultModel: 'llama3.2',
             models: ['llama3.2', 'mistral', 'qwen2.5'],
             requiresKey: false,
-            defaultEndpoint: 'http://localhost:11434/api/generate'
+            defaultEndpoint: 'http://localhost:11434/api/generate',
+            keyUrl: 'https://ollama.com/download'
         }
     };
 
