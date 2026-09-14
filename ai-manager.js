@@ -6,8 +6,8 @@ class AIManager {
     static PROVIDER_DEFAULTS = {
         gemini: {
             name: 'Google Gemini',
-            defaultModel: 'gemini-2.5-flash',
-            models: ['gemini-2.5-flash', 'gemini-2.5-pro'],
+            defaultModel: 'gemini-3.6-flash',
+            models: ['gemini-3.6-flash', 'gemini-2.5-pro'],
             requiresKey: true
         },
         openai: {
@@ -84,7 +84,7 @@ class AIManager {
         const provider = settings.provider || 'gemini';
         const apiKey = settings.apiKey ? settings.apiKey.trim() : '';
         const model =
-            settings.model || this.PROVIDER_DEFAULTS[provider]?.defaultModel || 'gemini-2.5-flash';
+            settings.model || this.PROVIDER_DEFAULTS[provider]?.defaultModel || 'gemini-3.6-flash';
 
         if (this.PROVIDER_DEFAULTS[provider]?.requiresKey && !apiKey) {
             throw new Error(
@@ -488,4 +488,8 @@ ${kanjiData.strokes && kanjiData.strokes > 12 ? `5. **Stroke Warning**: This com
 // Export for module/browser environments
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AIManager;
+}
+
+if (typeof window !== 'undefined') {
+    window.AIManager = AIManager;
 }
