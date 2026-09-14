@@ -23,16 +23,15 @@ class AIManager {
             requiresKey: true
         },
         openrouter: {
-    name: 'OpenRouter',
-    defaultModel: 'google/gemini-3.5-flash',
-    models: [
-        'google/gemini-3.5-flash',
-        'openai/gpt-4o-mini',
-        'anthropic/claude-3.5-haiku',
-        'meta-llama/llama-3.2-3b-instruct:free'
-    ],
-    requiresKey: true
-},
+            name: 'OpenRouter',
+            defaultModel: 'google/gemini-3.5-flash',
+            models: [
+                'google/gemini-3.5-flash',
+                'openai/gpt-4o-mini',
+                'anthropic/claude-3.5-haiku',
+                'meta-llama/llama-3.2-3b-instruct:free'],
+            requiresKey: true
+        },
         ollama: {
             name: 'Ollama (Local)',
             defaultModel: 'llama3.2',
