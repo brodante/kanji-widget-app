@@ -510,7 +510,15 @@ class KanjiLearningApp {
         // AI Sensei Modal triggers
         const aiSenseiFab = document.getElementById('aiSenseiFab');
         if (aiSenseiFab) {
-            aiSenseiFab.addEventListener('click', () => {
+            this.initDraggableFab(aiSenseiFab);
+            aiSenseiFab.addEventListener('click', (e) => {
+                // Don't open the modal if the user just finished dragging
+                const lastDragEnd = parseInt(aiSenseiFab.dataset.lastDragEnd || '0', 10);
+                if (Date.now() - lastDragEnd < 250) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return;
+                }
                 this.openAISenseiModal();
             });
         }
@@ -984,6 +992,114 @@ class KanjiLearningApp {
             } else if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 this.navigateDeck('prev');
+            }
+        });
+    }
+    initDraggableFab(fab) {
+        const STORAGE_KEY = 'aiSenseiFabPos';
+        const MARGIN = 8;
+
+        const computed = getComputedStyle(fab);
+        const baseLeft = parseFloat(computed.left) || 26;
+        const baseTop = parseFloat(computed.top) || 26;
+
+        let pos = { x: 0, y: 0 };
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+                    pos = parsed;
+                }
+            }
+        } catch (e) {
+            /* ignore corrupt storage */
+        }
+
+        const clamp = (x, y) => {
+            const w = fab.offsetWidth;
+            const h = fab.offsetHeight;
+            const minX = MARGIN - baseLeft;
+            const maxX = window.innerWidth - MARGIN - baseLeft - w;
+            const minY = MARGIN - baseTop;
+            const maxY = window.innerHeight - MARGIN - baseTop - h;
+            return {
+                x: Math.min(Math.max(x, minX), maxX),
+                y: Math.min(Math.max(y, minY), maxY)
+            };
+        };
+
+        pos = clamp(pos.x, pos.y);
+        fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+
+        let activePointerId = null;
+        let startPointer = { x: 0, y: 0 };
+        let startPos = { x: 0, y: 0 };
+        let moved = false;
+
+        fab.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'mouse' && e.button !== 0) {
+                return;
+            }
+            activePointerId = e.pointerId;
+            startPointer = { x: e.clientX, y: e.clientY };
+            startPos = { x: pos.x, y: pos.y };
+            moved = false;
+            try {
+                fab.setPointerCapture(activePointerId);
+            } catch (err) {
+                /* ignore */
+            }
+            fab.classList.add('dragging');
+        });
+
+        fab.addEventListener('pointermove', (e) => {
+            if (e.pointerId !== activePointerId) {
+                return;
+            }
+            const dx = e.clientX - startPointer.x;
+            const dy = e.clientY - startPointer.y;
+            if (!moved && Math.hypot(dx, dy) > 4) {
+                moved = true;
+            }
+            if (!moved) {
+                return;
+            }
+            pos = clamp(startPos.x + dx, startPos.y + dy);
+            fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+        });
+
+        const endDrag = (e) => {
+            if (e.pointerId !== activePointerId) {
+                return;
+            }
+            try {
+                fab.releasePointerCapture(activePointerId);
+            } catch (err) {
+                /* ignore */
+            }
+            activePointerId = null;
+            fab.classList.remove('dragging');
+            if (moved) {
+                fab.dataset.lastDragEnd = Date.now().toString();
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+                } catch (err) {
+                    /* ignore */
+                }
+            }
+        };
+
+        fab.addEventListener('pointerup', endDrag);
+        fab.addEventListener('pointercancel', endDrag);
+
+        window.addEventListener('resize', () => {
+            pos = clamp(pos.x, pos.y);
+            fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+            } catch (err) {
+                /* ignore */
             }
         });
     }
