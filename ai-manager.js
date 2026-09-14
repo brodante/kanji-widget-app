@@ -29,7 +29,8 @@ class AIManager {
                 'google/gemini-3.5-flash',
                 'openai/gpt-4o-mini',
                 'anthropic/claude-3.5-haiku',
-                'meta-llama/llama-3.2-3b-instruct:free'],
+                'meta-llama/llama-3.2-3b-instruct:free'
+            ],
             requiresKey: true
         },
         ollama: {
