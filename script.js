@@ -2419,7 +2419,17 @@ class KanjiLearningApp {
         const personaEl = document.getElementById('aiPersona');
         const apiKeyGroup = document.getElementById('aiApiKeyGroup');
         const endpointGroup = document.getElementById('aiEndpointGroup');
-
+        // Update the "Get your API key" link based on the selected provider
+        const keyLinkEl = document.getElementById('aiProviderKeyLink');
+        if (keyLinkEl && window.AIManager && AIManager.PROVIDER_DEFAULTS) {
+            const providerInfo = AIManager.PROVIDER_DEFAULTS[aiSettings.provider];
+            if (providerInfo && providerInfo.keyUrl) {
+                keyLinkEl.href = providerInfo.keyUrl;
+                keyLinkEl.style.display = 'inline';
+            } else {
+                keyLinkEl.style.display = 'none';
+            }
+        }
         if (providerEl) {
             providerEl.value = aiSettings.provider || 'gemini';
         }
