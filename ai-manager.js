@@ -6,8 +6,8 @@ class AIManager {
     static PROVIDER_DEFAULTS = {
         gemini: {
             name: 'Google Gemini',
-            defaultModel: 'gemini-3.6-flash',
-            models: ['gemini-3.6-flash', 'gemini-3.1-pro-preview'],
+            defaultModel: 'gemini-3.1-flash-lite',
+            models: ['gemini-3.1-flash-lite', 'gemini-3.1-pro-preview'],
             requiresKey: true,
             keyUrl: 'https://aistudio.google.com/api-keys'
         },
@@ -97,7 +97,9 @@ class AIManager {
         const provider = settings.provider || 'gemini';
         const apiKey = settings.apiKey ? settings.apiKey.trim() : '';
         const model =
-            settings.model || this.PROVIDER_DEFAULTS[provider]?.defaultModel || 'gemini-3.6-flash';
+            settings.model ||
+            this.PROVIDER_DEFAULTS[provider]?.defaultModel ||
+            'gemini-3.1-flash-lite';
 
         if (this.PROVIDER_DEFAULTS[provider]?.requiresKey && !apiKey) {
             throw new Error(
