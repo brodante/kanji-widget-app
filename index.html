@@ -1108,6 +1108,61 @@ filter: blur(10px) brightness(1) saturate(1);
                 <span class="ai-fab-text">AI Sensei</span>
             </button>
 
+            <!-- Kanji Practice (Drawing Pad) Modal -->
+            <div id="drawingPadModal" class="modal">
+                <div class="modal-content drawing-pad-modal-content">
+                    <div class="modal-header">
+                        <div class="modal-title-group">
+                            <h2 id="drawingPadTitle">Kanji Practice</h2>
+                        </div>
+                        <button class="close-btn" id="closeDrawingPad" title="Close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="drawing-pad-body">
+                        <div class="drawing-pad-canvas-wrap">
+                            <canvas id="drawingPadCanvas" width="300" height="300"></canvas>
+                        </div>
+                        <div id="drawingPadFeedback" class="drawing-pad-feedback"></div>
+                        <div id="drawingPadScore" class="drawing-pad-score"></div>
+                        <div class="drawing-pad-toolbar">
+                            <button
+                                type="button"
+                                id="drawingPadGridBtn"
+                                class="drawing-pad-btn"
+                                title="Toggle Grid"
+                            >
+                                <i class="fas fa-th"></i> Grid
+                            </button>
+                            <button
+                                type="button"
+                                id="drawingPadRefBtn"
+                                class="drawing-pad-btn"
+                                title="Toggle Reference"
+                            >
+                                <i class="fas fa-eye"></i> Trace
+                            </button>
+                            <button
+                                type="button"
+                                id="drawingPadUndoBtn"
+                                class="drawing-pad-btn"
+                                title="Undo Stroke"
+                            >
+                                <i class="fas fa-undo"></i> Undo
+                            </button>
+                            <button
+                                type="button"
+                                id="drawingPadClearBtn"
+                                class="drawing-pad-btn"
+                                title="Clear Canvas"
+                            >
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Notification Toast -->
             <div id="toast" class="toast">
                 <span id="toastMessage"></span>
@@ -1221,6 +1276,7 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="ai-tutor-modal.js"></script>
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
+        <script src="drawing-pad.js"></script>
         <script src="script.js"></script>
     </body>
 </html>

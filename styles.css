@@ -4515,6 +4515,165 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     opacity: 0.5;
     font-family: inherit;
 }
+.ai-trap-reason {
+    font-size: 0.72rem;
+}
+
+/* Drawing Pad Styles */
+.drawing-pad-modal-content {
+    width: 360px;
+    max-width: 90vw;
+}
+
+.drawing-pad-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1rem;
+    overflow-y: auto;
+}
+
+.drawing-pad-kanji-label {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.drawing-pad-kanji-char {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.drawing-pad-canvas-wrap {
+    flex: 1;
+    position: relative;
+    border-radius: 12px;
+    background: var(--surface-variant);
+    overflow: hidden;
+}
+
+#drawingPadCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.drawing-pad-feedback {
+    text-align: center;
+    font-weight: 600;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    min-height: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.drawing-pad-feedback.feedback-good {
+    background: rgba(46, 204, 113, 0.15);
+    color: var(--success-color);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.drawing-pad-feedback.feedback-ok {
+    background: rgba(241, 196, 15, 0.15);
+    color: var(--warning-color);
+    border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.drawing-pad-feedback.feedback-warn {
+    background: rgba(231, 76, 60, 0.15);
+    color: var(--error-color);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.drawing-pad-score {
+    text-align: center;
+    font-weight: 600;
+    font-family: var(--mono-font);
+    padding: 0.5rem;
+    background: rgba(var(--primary-color-rgb), 0.08);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.drawing-pad-toolbar {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.drawing-pad-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(var(--primary-color-rgb), 0.12);
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.drawing-pad-btn:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+    transform: translateY(-1px);
+}
+
+.drawing-pad-btn:active {
+    transform: translateY(0);
+}
+
+.drawing-pad-btn.active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+
+/* Toolbar button icon sizes */
+.drawing-pad-btn i {
+    font-size: 1rem;
+}
+
+/* Stroke order practice button */
+.stroke-order-practice {
+    margin-left: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    background: rgba(var(--primary-color-rgb), 0.12);
+}
+
+.stroke-order-practice:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+}
+
+/* Close button for drawing pad modal */
+#closeDrawingPad {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+    padding: 0;
+}
+
+#closeDrawingPad:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--on-surface);
+}
 
 .ai-trap-reason {
     font-size: 0.72rem;

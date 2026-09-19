@@ -17,6 +17,7 @@
         "SRSEngine": "readonly",
         "AIManager": "readonly",
         "AISenseiModule": "readonly",
+        "DrawingPad": "readonly",
         "gtag": "readonly"
     },
     "rules": {

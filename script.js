@@ -1340,6 +1340,7 @@ class KanjiLearningApp {
                     <div class="stroke-order-header">Stroke order</div>
                     <div class="stroke-order-toolbar">
                         <button class="stroke-order-play" onclick="app.playStrokeOrderAnimation()" type="button">Animate</button>
+                        <button class="stroke-order-practice" onclick="app.openDrawingPad()" type="button">Practice</button>
                     </div>
                     <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()"></div>
                 </div>
@@ -2405,6 +2406,25 @@ class KanjiLearningApp {
     closeSettings() {
         const modal = document.getElementById('settingsModal');
         modal.classList.remove('show');
+    }
+
+    openDrawingPad(character = null) {
+        if (!window.DrawingPad) {
+            console.warn('DrawingPad not loaded yet');
+            return;
+        }
+        if (!this.drawingPadInstance) {
+            this.drawingPadInstance = new window.DrawingPad();
+            this.drawingPadInstance.init();
+        }
+        const kanjiToOpen = character || (this.currentKanji ? this.currentKanji.character : null);
+        this.drawingPadInstance.open(kanjiToOpen);
+    }
+
+    closeDrawingPad() {
+        if (this.drawingPadInstance) {
+            this.drawingPadInstance.close();
+        }
     }
 
     syncAISettingsUI() {
