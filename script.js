@@ -1337,12 +1337,43 @@ class KanjiLearningApp {
                         : ''
                 }
                 <div class="stroke-order-section">
-                    <div class="stroke-order-header">Stroke order</div>
-                    <div class="stroke-order-toolbar">
-                        <button class="stroke-order-play" onclick="app.playStrokeOrderAnimation()" type="button">Animate</button>
-                        <button class="stroke-order-practice" onclick="app.openDrawingPad()" type="button">Practice</button>
+                    <div class="stroke-order-header-row">
+                        <div class="stroke-order-header">Stroke order</div>
+                        <div class="stroke-order-toolbar" id="strokeOrderToolbar">
+                            <button id="strokeOrderAnimateBtn" class="stroke-order-mode-btn stroke-order-play active" onclick="app.showStrokeOrderMode('animate')" type="button">Animate</button>
+                            <button id="strokeOrderPracticeBtn" class="stroke-order-mode-btn stroke-order-practice" onclick="app.showStrokeOrderMode('practice')" type="button">Practice</button>
+                        </div>
                     </div>
-                    <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()"></div>
+                    <div class="stroke-order-flip-card" id="strokeOrderFlipCard">
+                        <div class="stroke-order-flip-inner">
+                            <div class="stroke-order-flip-front" id="strokeOrderFront">
+                                <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()"></div>
+                            </div>
+                            <div class="stroke-order-flip-back" id="strokeOrderBack">
+                                <div class="drawing-pad-canvas-wrap">
+                                    <canvas id="drawingPadCanvas" width="300" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="drawing-pad-inline-controls" id="drawingPadInlineControls" style="display: none;">
+                        <div class="drawing-pad-toolbar">
+                            <button type="button" id="drawingPadGridBtn" class="drawing-pad-btn" title="Toggle Grid">
+                                <i class="fas fa-th"></i> Grid
+                            </button>
+                            <button type="button" id="drawingPadRefBtn" class="drawing-pad-btn" title="Toggle Reference">
+                                <i class="fas fa-eye"></i> Trace
+                            </button>
+                            <button type="button" id="drawingPadUndoBtn" class="drawing-pad-btn" title="Undo Stroke">
+                                <i class="fas fa-undo"></i> Undo
+                            </button>
+                            <button type="button" id="drawingPadClearBtn" class="drawing-pad-btn" title="Clear Canvas">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                        </div>
+                        <div id="drawingPadFeedback" class="drawing-pad-feedback"></div>
+                        <div id="drawingPadScore" class="drawing-pad-score"></div>
+                    </div>
                 </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
@@ -2408,23 +2439,67 @@ class KanjiLearningApp {
         modal.classList.remove('show');
     }
 
+    showStrokeOrderMode(mode) {
+        const flipCard = document.getElementById('strokeOrderFlipCard');
+        const controls = document.getElementById('drawingPadInlineControls');
+        const animateBtn = document.getElementById('strokeOrderAnimateBtn');
+        const practiceBtn = document.getElementById('strokeOrderPracticeBtn');
+
+        if (mode === 'practice') {
+            if (flipCard) {
+                flipCard.classList.add('flipped');
+            }
+            if (controls) {
+                controls.style.display = 'flex';
+            }
+            if (animateBtn) {
+                animateBtn.classList.remove('active');
+            }
+            if (practiceBtn) {
+                practiceBtn.classList.add('active');
+            }
+
+            if (window.DrawingPad) {
+                if (!this.drawingPadInstance) {
+                    this.drawingPadInstance = new window.DrawingPad();
+                }
+                this.drawingPadInstance.init();
+                if (this.currentKanji?.character) {
+                    this.drawingPadInstance.setKanji(this.currentKanji.character);
+                }
+            }
+        } else {
+            if (flipCard) {
+                flipCard.classList.remove('flipped');
+            }
+            if (controls) {
+                controls.style.display = 'none';
+            }
+            if (animateBtn) {
+                animateBtn.classList.add('active');
+            }
+            if (practiceBtn) {
+                practiceBtn.classList.remove('active');
+            }
+        }
+    }
+
     openDrawingPad(character = null) {
-        if (!window.DrawingPad) {
-            console.warn('DrawingPad not loaded yet');
-            return;
-        }
-        if (!this.drawingPadInstance) {
-            this.drawingPadInstance = new window.DrawingPad();
-            this.drawingPadInstance.init();
-        }
         const kanjiToOpen = character || (this.currentKanji ? this.currentKanji.character : null);
-        this.drawingPadInstance.open(kanjiToOpen);
+        this.showStrokeOrderMode('practice');
+        if (window.DrawingPad) {
+            if (!this.drawingPadInstance) {
+                this.drawingPadInstance = new window.DrawingPad();
+            }
+            this.drawingPadInstance.init();
+            if (kanjiToOpen) {
+                this.drawingPadInstance.setKanji(kanjiToOpen);
+            }
+        }
     }
 
     closeDrawingPad() {
-        if (this.drawingPadInstance) {
-            this.drawingPadInstance.close();
-        }
+        this.showStrokeOrderMode('animate');
     }
 
     syncAISettingsUI() {
