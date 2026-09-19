@@ -1358,18 +1358,25 @@ class KanjiLearningApp {
                     </div>
                     <div class="drawing-pad-inline-controls" id="drawingPadInlineControls" style="display: none;">
                         <div class="drawing-pad-toolbar">
-                            <button type="button" id="drawingPadGridBtn" class="drawing-pad-btn" title="Toggle Grid">
+                            <button type="button" id="drawingPadGridBtn" class="drawing-pad-btn" onclick="app.toggleDrawingPadGrid()" title="Toggle Grid">
                                 <i class="fas fa-th"></i> Grid
                             </button>
-                            <button type="button" id="drawingPadRefBtn" class="drawing-pad-btn" title="Toggle Reference">
+                            <button type="button" id="drawingPadRefBtn" class="drawing-pad-btn" onclick="app.toggleDrawingPadRef()" title="Toggle Reference">
                                 <i class="fas fa-eye"></i> Trace
                             </button>
-                            <button type="button" id="drawingPadUndoBtn" class="drawing-pad-btn" title="Undo Stroke">
+                            <button type="button" id="drawingPadUndoBtn" class="drawing-pad-btn" onclick="app.undoDrawingPadStroke()" title="Undo Stroke">
                                 <i class="fas fa-undo"></i> Undo
                             </button>
-                            <button type="button" id="drawingPadClearBtn" class="drawing-pad-btn" title="Clear Canvas">
+                            <button type="button" id="drawingPadClearBtn" class="drawing-pad-btn" onclick="app.clearDrawingPadStrokes()" title="Clear Canvas">
                                 <i class="fas fa-trash"></i> Clear
                             </button>
+                        </div>
+                        <div class="drawing-pad-width-row">
+                            <span class="drawing-pad-width-label"><i class="fas fa-pen-nib"></i> Thickness</span>
+                            <div class="drawing-pad-slider-wrap">
+                                <input type="range" id="drawingPadWidthSlider" min="2" max="8" step="1" value="4" oninput="app.setDrawingPadStrokeWidth(this.value)" class="drawing-pad-slider" title="Adjust stroke thickness">
+                            </div>
+                            <span id="drawingPadWidthVal" class="drawing-pad-width-val">4px</span>
                         </div>
                         <div id="drawingPadFeedback" class="drawing-pad-feedback"></div>
                         <div id="drawingPadScore" class="drawing-pad-score"></div>
@@ -2500,6 +2507,36 @@ class KanjiLearningApp {
 
     closeDrawingPad() {
         this.showStrokeOrderMode('animate');
+    }
+
+    toggleDrawingPadGrid() {
+        if (this.drawingPadInstance) {
+            this.drawingPadInstance.toggleGrid();
+        }
+    }
+
+    toggleDrawingPadRef() {
+        if (this.drawingPadInstance) {
+            this.drawingPadInstance.toggleReference();
+        }
+    }
+
+    undoDrawingPadStroke() {
+        if (this.drawingPadInstance) {
+            this.drawingPadInstance.undoStroke();
+        }
+    }
+
+    clearDrawingPadStrokes() {
+        if (this.drawingPadInstance) {
+            this.drawingPadInstance.clearStrokes();
+        }
+    }
+
+    setDrawingPadStrokeWidth(val) {
+        if (this.drawingPadInstance) {
+            this.drawingPadInstance.setStrokeWidth(val);
+        }
     }
 
     syncAISettingsUI() {

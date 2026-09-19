@@ -58,12 +58,15 @@ class DrawingPad {
         this.gridVisible = settings.drawingPadGrid !== undefined ? settings.drawingPadGrid : false;
         this.referenceVisible =
             settings.drawingPadRef !== undefined ? settings.drawingPadRef : true;
+        this.strokeWidth =
+            settings.drawingPadStrokeWidth !== undefined ? settings.drawingPadStrokeWidth : 4;
     }
 
     _saveSettings() {
         const settings = StorageManager.getItem(StorageManager.keys.SETTINGS, {});
         settings.drawingPadGrid = this.gridVisible;
         settings.drawingPadRef = this.referenceVisible;
+        settings.drawingPadStrokeWidth = this.strokeWidth;
         StorageManager.setItem(StorageManager.keys.SETTINGS, settings);
     }
 
@@ -78,6 +81,8 @@ class DrawingPad {
         this.refBtn = document.getElementById('drawingPadRefBtn');
         this.clearBtn = document.getElementById('drawingPadClearBtn');
         this.undoBtn = document.getElementById('drawingPadUndoBtn');
+        this.widthSlider = document.getElementById('drawingPadWidthSlider');
+        this.widthValEl = document.getElementById('drawingPadWidthVal');
         this.feedbackEl = document.getElementById('drawingPadFeedback');
         this.titleEl = document.getElementById('drawingPadTitle');
         this.scoreEl = document.getElementById('drawingPadScore');
@@ -642,7 +647,19 @@ class DrawingPad {
         this._repaint();
     }
 
+    setStrokeWidth(width) {
+        this.strokeWidth = Math.min(10, Math.max(2, parseInt(width, 10) || 4));
+        this._saveSettings();
+        this._syncButtons();
+        this._repaint();
+    }
+
     _syncButtons() {
+        this.gridBtn = document.getElementById('drawingPadGridBtn');
+        this.refBtn = document.getElementById('drawingPadRefBtn');
+        this.widthSlider = document.getElementById('drawingPadWidthSlider');
+        this.widthValEl = document.getElementById('drawingPadWidthVal');
+
         if (this.gridBtn) {
             this.gridBtn.classList.toggle('active', this.gridVisible);
             this.gridBtn.title = this.gridVisible ? 'Hide grid' : 'Show grid';
@@ -650,6 +667,12 @@ class DrawingPad {
         if (this.refBtn) {
             this.refBtn.classList.toggle('active', this.referenceVisible);
             this.refBtn.title = this.referenceVisible ? 'Hide reference' : 'Show reference';
+        }
+        if (this.widthSlider) {
+            this.widthSlider.value = this.strokeWidth;
+        }
+        if (this.widthValEl) {
+            this.widthValEl.textContent = `${this.strokeWidth}px`;
         }
     }
 
@@ -682,12 +705,17 @@ class DrawingPad {
         // 3. Completed strokes (use snapped points for visual correction if available)
         this.strokes.forEach((stroke) => {
             const pts = stroke.snappedPoints || stroke.points;
-            this._drawStroke(ctx, pts, stroke.color, DrawingPad.STROKE_WIDTH);
+            this._drawStroke(ctx, pts, stroke.color, this.strokeWidth || DrawingPad.STROKE_WIDTH);
         });
 
         // 4. Current (in-progress) stroke
         if (this.currentStroke.length > 1) {
-            this._drawStroke(ctx, this.currentStroke, 'rgba(100,100,100,0.6)', 3);
+            this._drawStroke(
+                ctx,
+                this.currentStroke,
+                'rgba(100,100,100,0.6)',
+                this.strokeWidth || DrawingPad.STROKE_WIDTH
+            );
         }
     }
 
