@@ -322,7 +322,11 @@ class KanjiLearningApp {
             defaultAudio: 'kunyomi',
             localBackupFreq: 'daily',
             onlineBackupFreq: 'never',
-            kanjiAliveKey: ''
+            kanjiAliveKey: '',
+            // Which stroke-order tab the user last had open ('animate' or
+            // 'practice'). Remembered so hopping to the next kanji reopens
+            // the practice board exactly as they left it.
+            strokeOrderMode: 'animate'
         };
 
         // Cache frequently-used DOM elements once instead of re-querying repeatedly
@@ -1405,6 +1409,13 @@ class KanjiLearningApp {
         widget.innerHTML = content;
         if (this.widgetSize !== 'small') {
             this.loadStrokeOrder();
+            // The markup above always renders with the Animate tab active.
+            // If the user was practising, reopen the practice board for the
+            // new kanji right away, with all their toggles (guide, grid,
+            // trace, snap, thickness) carried over from the saved settings.
+            if (this.settings.strokeOrderMode === 'practice') {
+                this.showStrokeOrderMode('practice');
+            }
         }
     }
 
@@ -2457,6 +2468,13 @@ class KanjiLearningApp {
     }
 
     showStrokeOrderMode(mode) {
+        // Remember the tab choice so the next kanji lands on the same one
+        // instead of always kicking the user back to the Animate tab.
+        if (this.settings.strokeOrderMode !== mode) {
+            this.settings.strokeOrderMode = mode;
+            this.saveSettings();
+        }
+
         const flipCard = document.getElementById('strokeOrderFlipCard');
         const controls = document.getElementById('drawingPadInlineControls');
         const animateBtn = document.getElementById('strokeOrderAnimateBtn');
