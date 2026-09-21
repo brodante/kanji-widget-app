@@ -32,6 +32,7 @@ jobs:
                   cp index.html deploy/
                   cp styles.css deploy/
                   cp script.js deploy/
+                  cp drawing-pad.js deploy/
                   cp kanji-data.js deploy/
                   cp audio-manager.js deploy/
                   cp ai-manager.js deploy/
