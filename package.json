@@ -6,10 +6,14 @@
         "start": "node server.js",
         "lint": "eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/",
         "lint:fix": "eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/ --fix",
-        "format": "prettier --write . --ignore-path .gitignore",
-        "format:check": "prettier --check . --ignore-path .gitignore",
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
+        "format:check": "prettier --check . --ignore-path .gitignore --ignore-path .prettierignore",
+        "test": "node test/test-srs-ai.js",
         "prepare": "husky install"
+    },
+    "lint-staged": {
+        "*.{js,html,css,json,md}": "prettier --write",
+        "*.js": "eslint --fix"
     },
     "keywords": [
         "kanji",
@@ -25,7 +29,9 @@
     },
     "devDependencies": {
         "eslint": "^8.53.0",
-        "prettier": "^3.1.0",
-        "husky": "^8.0.0"
+        "eslint-config-prettier": "^10.1.8",
+        "husky": "^8.0.3",
+        "lint-staged": "^15.5.2",
+        "prettier": "^3.1.0"
     }
 }

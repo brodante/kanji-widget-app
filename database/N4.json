@@ -2,12 +2,8 @@
     "N4": [
         {
             "character": "週",
-            "meanings": [
-                "week"
-            ],
-            "onyomi": [
-                "シュウ"
-            ],
+            "meanings": ["week"],
+            "onyomi": ["シュウ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -40,20 +36,9 @@
         },
         {
             "character": "朝",
-            "meanings": [
-                "(North) Korea",
-                "dynasty",
-                "epoch",
-                "morning",
-                "period",
-                "regime"
-            ],
-            "onyomi": [
-                "チョウ"
-            ],
-            "kunyomi": [
-                "あさ"
-            ],
+            "meanings": ["(North) Korea", "dynasty", "epoch", "morning", "period", "regime"],
+            "onyomi": ["チョウ"],
+            "kunyomi": ["あさ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -87,16 +72,9 @@
         },
         {
             "character": "昼",
-            "meanings": [
-                "daytime",
-                "noon"
-            ],
-            "onyomi": [
-                "チュウ"
-            ],
-            "kunyomi": [
-                "ひる"
-            ],
+            "meanings": ["daytime", "noon"],
+            "onyomi": ["チュウ"],
+            "kunyomi": ["ひる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -130,17 +108,9 @@
         },
         {
             "character": "夜",
-            "meanings": [
-                "evening",
-                "night"
-            ],
-            "onyomi": [
-                "ヤ"
-            ],
-            "kunyomi": [
-                "よ",
-                "よる"
-            ],
+            "meanings": ["evening", "night"],
+            "onyomi": ["ヤ"],
+            "kunyomi": ["よ", "よる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -175,15 +145,9 @@
         },
         {
             "character": "夕",
-            "meanings": [
-                "evening"
-            ],
-            "onyomi": [
-                "セキ"
-            ],
-            "kunyomi": [
-                "ゆう"
-            ],
+            "meanings": ["evening"],
+            "onyomi": ["セキ"],
+            "kunyomi": ["ゆう"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -217,24 +181,9 @@
         },
         {
             "character": "目",
-            "meanings": [
-                "care",
-                "class",
-                "experience",
-                "eye",
-                "favor",
-                "insight",
-                "look"
-            ],
-            "onyomi": [
-                "ボク",
-                "モク"
-            ],
-            "kunyomi": [
-                "-め",
-                "ま-",
-                "め"
-            ],
+            "meanings": ["care", "class", "experience", "eye", "favor", "insight", "look"],
+            "onyomi": ["ボク", "モク"],
+            "kunyomi": ["-め", "ま-", "め"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -271,16 +220,9 @@
         },
         {
             "character": "口",
-            "meanings": [
-                "mouth"
-            ],
-            "onyomi": [
-                "ク",
-                "コウ"
-            ],
-            "kunyomi": [
-                "くち"
-            ],
+            "meanings": ["mouth"],
+            "onyomi": ["ク", "コウ"],
+            "kunyomi": ["くち"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -315,19 +257,9 @@
         },
         {
             "character": "手",
-            "meanings": [
-                "hand"
-            ],
-            "onyomi": [
-                "シュ",
-                "ズ"
-            ],
-            "kunyomi": [
-                "-て",
-                "た-",
-                "て",
-                "て-"
-            ],
+            "meanings": ["hand"],
+            "onyomi": ["シュ", "ズ"],
+            "kunyomi": ["-て", "た-", "て", "て-"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -365,21 +297,9 @@
         },
         {
             "character": "足",
-            "meanings": [
-                "be sufficient",
-                "counter for pairs of footwear",
-                "foot",
-                "leg"
-            ],
-            "onyomi": [
-                "ソク"
-            ],
-            "kunyomi": [
-                "あし",
-                "た.す",
-                "た.りる",
-                "た.る"
-            ],
+            "meanings": ["be sufficient", "counter for pairs of footwear", "foot", "leg"],
+            "onyomi": ["ソク"],
+            "kunyomi": ["あし", "た.す", "た.りる", "た.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -416,16 +336,8 @@
         },
         {
             "character": "空",
-            "meanings": [
-                "empty",
-                "sky",
-                "vacant",
-                "vacuum",
-                "void"
-            ],
-            "onyomi": [
-                "クウ"
-            ],
+            "meanings": ["empty", "sky", "vacant", "vacuum", "void"],
+            "onyomi": ["クウ"],
             "kunyomi": [
                 "あ.き",
                 "あ.く",
@@ -476,17 +388,9 @@
         },
         {
             "character": "黒",
-            "meanings": [
-                "black"
-            ],
-            "onyomi": [
-                "コク"
-            ],
-            "kunyomi": [
-                "くろ",
-                "くろ.い",
-                "くろ.ずむ"
-            ],
+            "meanings": ["black"],
+            "onyomi": ["コク"],
+            "kunyomi": ["くろ", "くろ.い", "くろ.ずむ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -522,20 +426,9 @@
         },
         {
             "character": "赤",
-            "meanings": [
-                "red"
-            ],
-            "onyomi": [
-                "シャク",
-                "セキ"
-            ],
-            "kunyomi": [
-                "あか",
-                "あか-",
-                "あか.い",
-                "あか.らむ",
-                "あか.らめる"
-            ],
+            "meanings": ["red"],
+            "onyomi": ["シャク", "セキ"],
+            "kunyomi": ["あか", "あか-", "あか.い", "あか.らむ", "あか.らめる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -574,19 +467,9 @@
         },
         {
             "character": "青",
-            "meanings": [
-                "blue",
-                "green"
-            ],
-            "onyomi": [
-                "ショウ",
-                "セイ"
-            ],
-            "kunyomi": [
-                "あお",
-                "あお-",
-                "あお.い"
-            ],
+            "meanings": ["blue", "green"],
+            "onyomi": ["ショウ", "セイ"],
+            "kunyomi": ["あお", "あお-", "あお.い"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -623,18 +506,9 @@
         },
         {
             "character": "言",
-            "meanings": [
-                "say",
-                "word"
-            ],
-            "onyomi": [
-                "ゲン",
-                "ゴン"
-            ],
-            "kunyomi": [
-                "い.う",
-                "こと"
-            ],
+            "meanings": ["say", "word"],
+            "onyomi": ["ゲン", "ゴン"],
+            "kunyomi": ["い.う", "こと"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -670,15 +544,9 @@
         },
         {
             "character": "買",
-            "meanings": [
-                "buy"
-            ],
-            "onyomi": [
-                "バイ"
-            ],
-            "kunyomi": [
-                "か.う"
-            ],
+            "meanings": ["buy"],
+            "onyomi": ["バイ"],
+            "kunyomi": ["か.う"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -712,19 +580,9 @@
         },
         {
             "character": "飲",
-            "meanings": [
-                "drink",
-                "smoke",
-                "take"
-            ],
-            "onyomi": [
-                "イン",
-                "オン"
-            ],
-            "kunyomi": [
-                "-の.み",
-                "の.む"
-            ],
+            "meanings": ["drink", "smoke", "take"],
+            "onyomi": ["イン", "オン"],
+            "kunyomi": ["-の.み", "の.む"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -760,17 +618,8 @@
         },
         {
             "character": "立",
-            "meanings": [
-                "erect",
-                "rise",
-                "set up",
-                "stand up"
-            ],
-            "onyomi": [
-                "リットル",
-                "リツ",
-                "リュウ"
-            ],
+            "meanings": ["erect", "rise", "set up", "stand up"],
+            "onyomi": ["リットル", "リツ", "リュウ"],
             "kunyomi": [
                 "-た.つ",
                 "-た.て",
@@ -827,12 +676,8 @@
         },
         {
             "character": "駅",
-            "meanings": [
-                "station"
-            ],
-            "onyomi": [
-                "エキ"
-            ],
+            "meanings": ["station"],
+            "onyomi": ["エキ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -865,17 +710,9 @@
         },
         {
             "character": "店",
-            "meanings": [
-                "shop",
-                "store"
-            ],
-            "onyomi": [
-                "テン"
-            ],
-            "kunyomi": [
-                "たな",
-                "みせ"
-            ],
+            "meanings": ["shop", "store"],
+            "onyomi": ["テン"],
+            "kunyomi": ["たな", "みせ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -919,14 +756,8 @@
                 "street",
                 "teachings"
             ],
-            "onyomi": [
-                "トウ",
-                "ドウ"
-            ],
-            "kunyomi": [
-                "いう",
-                "みち"
-            ],
+            "onyomi": ["トウ", "ドウ"],
+            "kunyomi": ["いう", "みち"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -962,24 +793,9 @@
         },
         {
             "character": "安",
-            "meanings": [
-                "cheap",
-                "contented",
-                "low",
-                "peaceful",
-                "quiet",
-                "relax",
-                "rested"
-            ],
-            "onyomi": [
-                "アン"
-            ],
-            "kunyomi": [
-                "やす",
-                "やす.い",
-                "やす.まる",
-                "やす.らか"
-            ],
+            "meanings": ["cheap", "contented", "low", "peaceful", "quiet", "relax", "rested"],
+            "onyomi": ["アン"],
+            "kunyomi": ["やす", "やす.い", "やす.まる", "やす.らか"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1016,18 +832,9 @@
         },
         {
             "character": "新",
-            "meanings": [
-                "new"
-            ],
-            "onyomi": [
-                "シン"
-            ],
-            "kunyomi": [
-                "あたら.しい",
-                "あら-",
-                "あら.た",
-                "にい-"
-            ],
+            "meanings": ["new"],
+            "onyomi": ["シン"],
+            "kunyomi": ["あたら.しい", "あら-", "あら.た", "にい-"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1064,17 +871,9 @@
         },
         {
             "character": "古",
-            "meanings": [
-                "old"
-            ],
-            "onyomi": [
-                "コ"
-            ],
-            "kunyomi": [
-                "-ふる.す",
-                "ふる-",
-                "ふる.い"
-            ],
+            "meanings": ["old"],
+            "onyomi": ["コ"],
+            "kunyomi": ["-ふる.す", "ふる-", "ふる.い"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1110,19 +909,9 @@
         },
         {
             "character": "多",
-            "meanings": [
-                "frequent",
-                "many",
-                "much"
-            ],
-            "onyomi": [
-                "タ"
-            ],
-            "kunyomi": [
-                "おお.い",
-                "まさ.に",
-                "まさ.る"
-            ],
+            "meanings": ["frequent", "many", "much"],
+            "onyomi": ["タ"],
+            "kunyomi": ["おお.い", "まさ.に", "まさ.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1158,17 +947,9 @@
         },
         {
             "character": "少",
-            "meanings": [
-                "few",
-                "little"
-            ],
-            "onyomi": [
-                "ショウ"
-            ],
-            "kunyomi": [
-                "すく.ない",
-                "すこ.し"
-            ],
+            "meanings": ["few", "little"],
+            "onyomi": ["ショウ"],
+            "kunyomi": ["すく.ない", "すこ.し"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1203,18 +984,9 @@
         },
         {
             "character": "元",
-            "meanings": [
-                "beginning",
-                "former time",
-                "origin"
-            ],
-            "onyomi": [
-                "ガン",
-                "ゲン"
-            ],
-            "kunyomi": [
-                "もと"
-            ],
+            "meanings": ["beginning", "former time", "origin"],
+            "onyomi": ["ガン", "ゲン"],
+            "kunyomi": ["もと"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1249,17 +1021,8 @@
         },
         {
             "character": "不",
-            "meanings": [
-                "bad",
-                "clumsy",
-                "negative",
-                "non-",
-                "ugly"
-            ],
-            "onyomi": [
-                "フ",
-                "ブ"
-            ],
+            "meanings": ["bad", "clumsy", "negative", "non-", "ugly"],
+            "onyomi": ["フ", "ブ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -1293,20 +1056,9 @@
         },
         {
             "character": "世",
-            "meanings": [
-                "generation",
-                "public",
-                "society",
-                "world"
-            ],
-            "onyomi": [
-                "セ",
-                "セイ",
-                "ソウ"
-            ],
-            "kunyomi": [
-                "よ"
-            ],
+            "meanings": ["generation", "public", "society", "world"],
+            "onyomi": ["セ", "セイ", "ソウ"],
+            "kunyomi": ["よ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1342,23 +1094,9 @@
         },
         {
             "character": "主",
-            "meanings": [
-                "chief",
-                "lord",
-                "main thing",
-                "master",
-                "principal"
-            ],
-            "onyomi": [
-                "シュ",
-                "シュウ",
-                "ス"
-            ],
-            "kunyomi": [
-                "あるじ",
-                "おも",
-                "ぬし"
-            ],
+            "meanings": ["chief", "lord", "main thing", "master", "principal"],
+            "onyomi": ["シュ", "シュウ", "ス"],
+            "kunyomi": ["あるじ", "おも", "ぬし"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1396,23 +1134,9 @@
         },
         {
             "character": "事",
-            "meanings": [
-                "business",
-                "fact",
-                "matter",
-                "possibly",
-                "reason",
-                "thing"
-            ],
-            "onyomi": [
-                "ジ",
-                "ズ"
-            ],
-            "kunyomi": [
-                "こと",
-                "つか.う",
-                "つか.える"
-            ],
+            "meanings": ["business", "fact", "matter", "possibly", "reason", "thing"],
+            "onyomi": ["ジ", "ズ"],
+            "kunyomi": ["こと", "つか.う", "つか.える"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1449,18 +1173,9 @@
         },
         {
             "character": "京",
-            "meanings": [
-                "10**16",
-                "capital"
-            ],
-            "onyomi": [
-                "キョウ",
-                "キン",
-                "ケイ"
-            ],
-            "kunyomi": [
-                "みやこ"
-            ],
+            "meanings": ["10**16", "capital"],
+            "onyomi": ["キョウ", "キン", "ケイ"],
+            "kunyomi": ["みやこ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1496,19 +1211,9 @@
         },
         {
             "character": "仕",
-            "meanings": [
-                "attend",
-                "doing",
-                "official",
-                "serve"
-            ],
-            "onyomi": [
-                "シ",
-                "ジ"
-            ],
-            "kunyomi": [
-                "つか.える"
-            ],
+            "meanings": ["attend", "doing", "official", "serve"],
+            "onyomi": ["シ", "ジ"],
+            "kunyomi": ["つか.える"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1556,10 +1261,7 @@
                 "replace",
                 "substitute"
             ],
-            "onyomi": [
-                "タイ",
-                "ダイ"
-            ],
+            "onyomi": ["タイ", "ダイ"],
             "kunyomi": [
                 "-が.わり",
                 "-がわ.り",
@@ -1613,18 +1315,9 @@
         },
         {
             "character": "以",
-            "meanings": [
-                "because",
-                "by means of",
-                "compared with",
-                "in view of"
-            ],
-            "onyomi": [
-                "イ"
-            ],
-            "kunyomi": [
-                "もっ.て"
-            ],
+            "meanings": ["because", "by means of", "compared with", "in view of"],
+            "onyomi": ["イ"],
+            "kunyomi": ["もっ.て"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1658,23 +1351,9 @@
         },
         {
             "character": "会",
-            "meanings": [
-                "association",
-                "interview",
-                "join",
-                "meet",
-                "meeting",
-                "party"
-            ],
-            "onyomi": [
-                "エ",
-                "カイ"
-            ],
-            "kunyomi": [
-                "あ.う",
-                "あ.わせる",
-                "あつ.まる"
-            ],
+            "meanings": ["association", "interview", "join", "meet", "meeting", "party"],
+            "onyomi": ["エ", "カイ"],
+            "kunyomi": ["あ.う", "あ.わせる", "あつ.まる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1711,22 +1390,9 @@
         },
         {
             "character": "住",
-            "meanings": [
-                "dwell",
-                "inhabit",
-                "live",
-                "reside"
-            ],
-            "onyomi": [
-                "ジュウ",
-                "チュウ",
-                "ヂュウ"
-            ],
-            "kunyomi": [
-                "-ず.まい",
-                "す.まう",
-                "す.む"
-            ],
+            "meanings": ["dwell", "inhabit", "live", "reside"],
+            "onyomi": ["ジュウ", "チュウ", "ヂュウ"],
+            "kunyomi": ["-ず.まい", "す.まう", "す.む"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1764,21 +1430,9 @@
         },
         {
             "character": "体",
-            "meanings": [
-                "body",
-                "counter for images",
-                "object",
-                "reality",
-                "substance"
-            ],
-            "onyomi": [
-                "タイ",
-                "テイ"
-            ],
-            "kunyomi": [
-                "かたち",
-                "からだ"
-            ],
+            "meanings": ["body", "counter for images", "object", "reality", "substance"],
+            "onyomi": ["タイ", "テイ"],
+            "kunyomi": ["かたち", "からだ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1814,21 +1468,9 @@
         },
         {
             "character": "作",
-            "meanings": [
-                "build",
-                "make",
-                "prepare",
-                "production"
-            ],
-            "onyomi": [
-                "サ",
-                "サク"
-            ],
-            "kunyomi": [
-                "-づく.り",
-                "つく.り",
-                "つく.る"
-            ],
+            "meanings": ["build", "make", "prepare", "production"],
+            "onyomi": ["サ", "サク"],
+            "kunyomi": ["-づく.り", "つく.り", "つく.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1874,15 +1516,8 @@
                 "send on a mission",
                 "use"
             ],
-            "onyomi": [
-                "シ"
-            ],
-            "kunyomi": [
-                "-つか.い",
-                "-づか.い",
-                "つか.い",
-                "つか.う"
-            ],
+            "onyomi": ["シ"],
+            "kunyomi": ["-つか.い", "-づか.い", "つか.い", "つか.う"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1919,16 +1554,9 @@
         },
         {
             "character": "借",
-            "meanings": [
-                "borrow",
-                "rent"
-            ],
-            "onyomi": [
-                "シャク"
-            ],
-            "kunyomi": [
-                "か.りる"
-            ],
+            "meanings": ["borrow", "rent"],
+            "onyomi": ["シャク"],
+            "kunyomi": ["か.りる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -1962,17 +1590,9 @@
         },
         {
             "character": "兄",
-            "meanings": [
-                "big brother",
-                "elder brother"
-            ],
-            "onyomi": [
-                "キョウ",
-                "ケイ"
-            ],
-            "kunyomi": [
-                "あに"
-            ],
+            "meanings": ["big brother", "elder brother"],
+            "onyomi": ["キョウ", "ケイ"],
+            "kunyomi": ["あに"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2007,19 +1627,9 @@
         },
         {
             "character": "公",
-            "meanings": [
-                "governmental",
-                "official",
-                "prince",
-                "public"
-            ],
-            "onyomi": [
-                "ク",
-                "コウ"
-            ],
-            "kunyomi": [
-                "おおやけ"
-            ],
+            "meanings": ["governmental", "official", "prince", "public"],
+            "onyomi": ["ク", "コウ"],
+            "kunyomi": ["おおやけ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2054,21 +1664,9 @@
         },
         {
             "character": "写",
-            "meanings": [
-                "be photographed",
-                "copy",
-                "describe"
-            ],
-            "onyomi": [
-                "シャ",
-                "ジャ"
-            ],
-            "kunyomi": [
-                "うつ-",
-                "うつ.し",
-                "うつ.す",
-                "うつ.る"
-            ],
+            "meanings": ["be photographed", "copy", "describe"],
+            "onyomi": ["シャ", "ジャ"],
+            "kunyomi": ["うつ-", "うつ.し", "うつ.す", "うつ.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2106,15 +1704,9 @@
         },
         {
             "character": "冬",
-            "meanings": [
-                "winter"
-            ],
-            "onyomi": [
-                "トウ"
-            ],
-            "kunyomi": [
-                "ふゆ"
-            ],
+            "meanings": ["winter"],
+            "onyomi": ["トウ"],
+            "kunyomi": ["ふゆ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2148,15 +1740,8 @@
         },
         {
             "character": "切",
-            "meanings": [
-                "be sharp",
-                "cut",
-                "cutoff"
-            ],
-            "onyomi": [
-                "サイ",
-                "セツ"
-            ],
+            "meanings": ["be sharp", "cut", "cutoff"],
+            "onyomi": ["サイ", "セツ"],
             "kunyomi": [
                 "-き.り",
                 "-き.る",
@@ -2221,13 +1806,8 @@
                 "separate",
                 "specially"
             ],
-            "onyomi": [
-                "ベツ"
-            ],
-            "kunyomi": [
-                "わ.ける",
-                "わか.れる"
-            ],
+            "onyomi": ["ベツ"],
+            "kunyomi": ["わ.ける", "わか.れる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2262,22 +1842,9 @@
         },
         {
             "character": "力",
-            "meanings": [
-                "bear up",
-                "exert",
-                "power",
-                "strain",
-                "strength",
-                "strong"
-            ],
-            "onyomi": [
-                "リイ",
-                "リキ",
-                "リョク"
-            ],
-            "kunyomi": [
-                "ちから"
-            ],
+            "meanings": ["bear up", "exert", "power", "strain", "strength", "strong"],
+            "onyomi": ["リイ", "リキ", "リョク"],
+            "kunyomi": ["ちから"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2313,20 +1880,9 @@
         },
         {
             "character": "勉",
-            "meanings": [
-                "diligent",
-                "encourage",
-                "endeavour",
-                "exertion",
-                "make effort",
-                "strive"
-            ],
-            "onyomi": [
-                "ベン"
-            ],
-            "kunyomi": [
-                "つと.める"
-            ],
+            "meanings": ["diligent", "encourage", "endeavour", "exertion", "make effort", "strive"],
+            "onyomi": ["ベン"],
+            "kunyomi": ["つと.める"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2360,21 +1916,9 @@
         },
         {
             "character": "動",
-            "meanings": [
-                "change",
-                "confusion",
-                "motion",
-                "move",
-                "shake",
-                "shift"
-            ],
-            "onyomi": [
-                "ドウ"
-            ],
-            "kunyomi": [
-                "うご.かす",
-                "うご.く"
-            ],
+            "meanings": ["change", "confusion", "motion", "move", "shake", "shift"],
+            "onyomi": ["ドウ"],
+            "kunyomi": ["うご.かす", "うご.く"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2409,18 +1953,9 @@
         },
         {
             "character": "医",
-            "meanings": [
-                "doctor",
-                "medicine"
-            ],
-            "onyomi": [
-                "イ"
-            ],
-            "kunyomi": [
-                "い.する",
-                "い.やす",
-                "くすし"
-            ],
+            "meanings": ["doctor", "medicine"],
+            "onyomi": ["イ"],
+            "kunyomi": ["い.する", "い.やす", "くすし"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2456,23 +1991,9 @@
         },
         {
             "character": "去",
-            "meanings": [
-                "divorce",
-                "elapse",
-                "eliminate",
-                "gone",
-                "leave",
-                "past",
-                "quit"
-            ],
-            "onyomi": [
-                "キョ",
-                "コ"
-            ],
-            "kunyomi": [
-                "-さ.る",
-                "さ.る"
-            ],
+            "meanings": ["divorce", "elapse", "eliminate", "gone", "leave", "past", "quit"],
+            "onyomi": ["キョ", "コ"],
+            "kunyomi": ["-さ.る", "さ.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2508,20 +2029,9 @@
         },
         {
             "character": "台",
-            "meanings": [
-                "a stand",
-                "counter for machines and vehicles",
-                "pedestal"
-            ],
-            "onyomi": [
-                "タイ",
-                "ダイ"
-            ],
-            "kunyomi": [
-                "うてな",
-                "つかさ",
-                "われ"
-            ],
+            "meanings": ["a stand", "counter for machines and vehicles", "pedestal"],
+            "onyomi": ["タイ", "ダイ"],
+            "kunyomi": ["うてな", "つかさ", "われ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2558,17 +2068,9 @@
         },
         {
             "character": "同",
-            "meanings": [
-                "agree",
-                "equal",
-                "same"
-            ],
-            "onyomi": [
-                "ドウ"
-            ],
-            "kunyomi": [
-                "おな.じ"
-            ],
+            "meanings": ["agree", "equal", "same"],
+            "onyomi": ["ドウ"],
+            "kunyomi": ["おな.じ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2602,17 +2104,9 @@
         },
         {
             "character": "味",
-            "meanings": [
-                "flavor",
-                "taste"
-            ],
-            "onyomi": [
-                "ミ"
-            ],
-            "kunyomi": [
-                "あじ",
-                "あじ.わう"
-            ],
+            "meanings": ["flavor", "taste"],
+            "onyomi": ["ミ"],
+            "kunyomi": ["あじ", "あじ.わう"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2647,20 +2141,9 @@
         },
         {
             "character": "品",
-            "meanings": [
-                "article",
-                "counter for meal courses",
-                "dignity",
-                "goods",
-                "refinement"
-            ],
-            "onyomi": [
-                "ヒン",
-                "ホン"
-            ],
-            "kunyomi": [
-                "しな"
-            ],
+            "meanings": ["article", "counter for meal courses", "dignity", "goods", "refinement"],
+            "onyomi": ["ヒン", "ホン"],
+            "kunyomi": ["しな"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2695,15 +2178,8 @@
         },
         {
             "character": "員",
-            "meanings": [
-                "employee",
-                "member",
-                "number",
-                "the one in charge"
-            ],
-            "onyomi": [
-                "イン"
-            ],
+            "meanings": ["employee", "member", "number", "the one in charge"],
+            "onyomi": ["イン"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -2736,19 +2212,9 @@
         },
         {
             "character": "問",
-            "meanings": [
-                "ask",
-                "problem",
-                "question"
-            ],
-            "onyomi": [
-                "モン"
-            ],
-            "kunyomi": [
-                "と.い",
-                "と.う",
-                "とん"
-            ],
+            "meanings": ["ask", "problem", "question"],
+            "onyomi": ["モン"],
+            "kunyomi": ["と.い", "と.う", "とん"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2784,21 +2250,9 @@
         },
         {
             "character": "図",
-            "meanings": [
-                "audacious",
-                "drawing",
-                "extraordinary",
-                "map",
-                "plan"
-            ],
-            "onyomi": [
-                "ズ",
-                "ト"
-            ],
-            "kunyomi": [
-                "え",
-                "はか.る"
-            ],
+            "meanings": ["audacious", "drawing", "extraordinary", "map", "plan"],
+            "onyomi": ["ズ", "ト"],
+            "kunyomi": ["え", "はか.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2834,14 +2288,8 @@
         },
         {
             "character": "地",
-            "meanings": [
-                "earth",
-                "ground"
-            ],
-            "onyomi": [
-                "ジ",
-                "チ"
-            ],
+            "meanings": ["earth", "ground"],
+            "onyomi": ["ジ", "チ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -2875,13 +2323,8 @@
         },
         {
             "character": "堂",
-            "meanings": [
-                "hall",
-                "public chamber"
-            ],
-            "onyomi": [
-                "ドウ"
-            ],
+            "meanings": ["hall", "public chamber"],
+            "onyomi": ["ドウ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -2914,17 +2357,9 @@
         },
         {
             "character": "場",
-            "meanings": [
-                "location",
-                "place"
-            ],
-            "onyomi": [
-                "ジョウ",
-                "チョウ"
-            ],
-            "kunyomi": [
-                "ば"
-            ],
+            "meanings": ["location", "place"],
+            "onyomi": ["ジョウ", "チョウ"],
+            "kunyomi": ["ば"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -2959,16 +2394,9 @@
         },
         {
             "character": "売",
-            "meanings": [
-                "sell"
-            ],
-            "onyomi": [
-                "バイ"
-            ],
-            "kunyomi": [
-                "う.る",
-                "う.れる"
-            ],
+            "meanings": ["sell"],
+            "onyomi": ["バイ"],
+            "kunyomi": ["う.る", "う.れる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3003,17 +2431,9 @@
         },
         {
             "character": "夏",
-            "meanings": [
-                "summer"
-            ],
-            "onyomi": [
-                "カ",
-                "ガ",
-                "ゲ"
-            ],
-            "kunyomi": [
-                "なつ"
-            ],
+            "meanings": ["summer"],
+            "onyomi": ["カ", "ガ", "ゲ"],
+            "kunyomi": ["なつ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3049,15 +2469,9 @@
         },
         {
             "character": "妹",
-            "meanings": [
-                "younger sister"
-            ],
-            "onyomi": [
-                "マイ"
-            ],
-            "kunyomi": [
-                "いもうと"
-            ],
+            "meanings": ["younger sister"],
+            "onyomi": ["マイ"],
+            "kunyomi": ["いもうと"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3091,16 +2505,9 @@
         },
         {
             "character": "姉",
-            "meanings": [
-                "elder sister"
-            ],
-            "onyomi": [
-                "シ"
-            ],
-            "kunyomi": [
-                "あね",
-                "はは"
-            ],
+            "meanings": ["elder sister"],
+            "onyomi": ["シ"],
+            "kunyomi": ["あね", "はは"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3135,18 +2542,9 @@
         },
         {
             "character": "始",
-            "meanings": [
-                "begin",
-                "commence"
-            ],
-            "onyomi": [
-                "シ"
-            ],
-            "kunyomi": [
-                "-はじ.める",
-                "はじ.まる",
-                "はじ.める"
-            ],
+            "meanings": ["begin", "commence"],
+            "onyomi": ["シ"],
+            "kunyomi": ["-はじ.める", "はじ.まる", "はじ.める"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3182,20 +2580,9 @@
         },
         {
             "character": "字",
-            "meanings": [
-                "character",
-                "letter",
-                "section of village",
-                "word"
-            ],
-            "onyomi": [
-                "ジ"
-            ],
-            "kunyomi": [
-                "-な",
-                "あざ",
-                "あざな"
-            ],
+            "meanings": ["character", "letter", "section of village", "word"],
+            "onyomi": ["ジ"],
+            "kunyomi": ["-な", "あざ", "あざな"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3231,19 +2618,9 @@
         },
         {
             "character": "室",
-            "meanings": [
-                "apartment",
-                "cellar",
-                "chamber",
-                "greenhouse",
-                "room"
-            ],
-            "onyomi": [
-                "シツ"
-            ],
-            "kunyomi": [
-                "むろ"
-            ],
+            "meanings": ["apartment", "cellar", "chamber", "greenhouse", "room"],
+            "onyomi": ["シツ"],
+            "kunyomi": ["むろ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3277,23 +2654,9 @@
         },
         {
             "character": "家",
-            "meanings": [
-                "expert",
-                "family",
-                "home",
-                "house",
-                "performer",
-                "professional"
-            ],
-            "onyomi": [
-                "カ",
-                "ケ"
-            ],
-            "kunyomi": [
-                "いえ",
-                "うち",
-                "や"
-            ],
+            "meanings": ["expert", "family", "home", "house", "performer", "professional"],
+            "onyomi": ["カ", "ケ"],
+            "kunyomi": ["いえ", "うち", "や"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3330,19 +2693,9 @@
         },
         {
             "character": "屋",
-            "meanings": [
-                "dealer",
-                "house",
-                "roof",
-                "seller",
-                "shop"
-            ],
-            "onyomi": [
-                "オク"
-            ],
-            "kunyomi": [
-                "や"
-            ],
+            "meanings": ["dealer", "house", "roof", "seller", "shop"],
+            "onyomi": ["オク"],
+            "kunyomi": ["や"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3376,16 +2729,8 @@
         },
         {
             "character": "工",
-            "meanings": [
-                "construction",
-                "craft",
-                "katakana e radical (no. 48)"
-            ],
-            "onyomi": [
-                "ク",
-                "グ",
-                "コウ"
-            ],
+            "meanings": ["construction", "craft", "katakana e radical (no. 48)"],
+            "onyomi": ["ク", "グ", "コウ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -3420,21 +2765,9 @@
         },
         {
             "character": "帰",
-            "meanings": [
-                "arrive at",
-                "homecoming",
-                "lead to",
-                "result in"
-            ],
-            "onyomi": [
-                "キ"
-            ],
-            "kunyomi": [
-                "おく.る",
-                "かえ.す",
-                "かえ.る",
-                "とつ.ぐ"
-            ],
+            "meanings": ["arrive at", "homecoming", "lead to", "result in"],
+            "onyomi": ["キ"],
+            "kunyomi": ["おく.る", "かえ.す", "かえ.る", "とつ.ぐ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3471,21 +2804,9 @@
         },
         {
             "character": "広",
-            "meanings": [
-                "broad",
-                "spacious",
-                "wide"
-            ],
-            "onyomi": [
-                "コウ"
-            ],
-            "kunyomi": [
-                "ひろ.い",
-                "ひろ.がる",
-                "ひろ.げる",
-                "ひろ.まる",
-                "ひろ.める"
-            ],
+            "meanings": ["broad", "spacious", "wide"],
+            "onyomi": ["コウ"],
+            "kunyomi": ["ひろ.い", "ひろ.がる", "ひろ.げる", "ひろ.まる", "ひろ.める"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3531,15 +2852,8 @@
                 "occurrence",
                 "time"
             ],
-            "onyomi": [
-                "タク",
-                "ト",
-                "ド"
-            ],
-            "kunyomi": [
-                "-た.い",
-                "たび"
-            ],
+            "onyomi": ["タク", "ト", "ド"],
+            "kunyomi": ["-た.い", "たび"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3576,19 +2890,9 @@
         },
         {
             "character": "建",
-            "meanings": [
-                "build"
-            ],
-            "onyomi": [
-                "ケン",
-                "コン"
-            ],
-            "kunyomi": [
-                "-だ.て",
-                "た.つ",
-                "た.て",
-                "た.てる"
-            ],
+            "meanings": ["build"],
+            "onyomi": ["ケン", "コン"],
+            "kunyomi": ["-だ.て", "た.つ", "た.て", "た.てる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3626,18 +2930,9 @@
         },
         {
             "character": "弟",
-            "meanings": [
-                "faithful service to elders",
-                "younger brother"
-            ],
-            "onyomi": [
-                "ダイ",
-                "テイ",
-                "デ"
-            ],
-            "kunyomi": [
-                "おとうと"
-            ],
+            "meanings": ["faithful service to elders", "younger brother"],
+            "onyomi": ["ダイ", "テイ", "デ"],
+            "kunyomi": ["おとうと"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3673,20 +2968,9 @@
         },
         {
             "character": "強",
-            "meanings": [
-                "strong"
-            ],
-            "onyomi": [
-                "キョウ",
-                "ゴウ"
-            ],
-            "kunyomi": [
-                "こわ.い",
-                "し.いる",
-                "つよ.い",
-                "つよ.まる",
-                "つよ.める"
-            ],
+            "meanings": ["strong"],
+            "onyomi": ["キョウ", "ゴウ"],
+            "kunyomi": ["こわ.い", "し.いる", "つよ.い", "つよ.まる", "つよ.める"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3725,17 +3009,9 @@
         },
         {
             "character": "待",
-            "meanings": [
-                "depend on",
-                "wait"
-            ],
-            "onyomi": [
-                "タイ"
-            ],
-            "kunyomi": [
-                "-ま.ち",
-                "ま.つ"
-            ],
+            "meanings": ["depend on", "wait"],
+            "onyomi": ["タイ"],
+            "kunyomi": ["-ま.ち", "ま.つ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3770,19 +3046,9 @@
         },
         {
             "character": "心",
-            "meanings": [
-                "heart",
-                "heart radical (no. 61)",
-                "mind",
-                "spirit"
-            ],
-            "onyomi": [
-                "シン"
-            ],
-            "kunyomi": [
-                "-ごころ",
-                "こころ"
-            ],
+            "meanings": ["heart", "heart radical (no. 61)", "mind", "spirit"],
+            "onyomi": ["シン"],
+            "kunyomi": ["-ごころ", "こころ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3817,17 +3083,9 @@
         },
         {
             "character": "思",
-            "meanings": [
-                "think"
-            ],
-            "onyomi": [
-                "シ"
-            ],
-            "kunyomi": [
-                "おぼ.す",
-                "おも.う",
-                "おもえら.く"
-            ],
+            "meanings": ["think"],
+            "onyomi": ["シ"],
+            "kunyomi": ["おぼ.す", "おも.う", "おもえら.く"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3863,20 +3121,9 @@
         },
         {
             "character": "急",
-            "meanings": [
-                "emergency",
-                "hurry",
-                "steep",
-                "sudden"
-            ],
-            "onyomi": [
-                "キュウ"
-            ],
-            "kunyomi": [
-                "いそ.ぎ",
-                "いそ.ぐ",
-                "せ.く"
-            ],
+            "meanings": ["emergency", "hurry", "steep", "sudden"],
+            "onyomi": ["キュウ"],
+            "kunyomi": ["いそ.ぎ", "いそ.ぐ", "せ.く"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -3912,18 +3159,8 @@
         },
         {
             "character": "悪",
-            "meanings": [
-                "bad",
-                "evil",
-                "false",
-                "rascal",
-                "vice",
-                "wrong"
-            ],
-            "onyomi": [
-                "アク",
-                "オ"
-            ],
+            "meanings": ["bad", "evil", "false", "rascal", "vice", "wrong"],
+            "onyomi": ["アク", "オ"],
             "kunyomi": [
                 "-にく.い",
                 "あ.し",
@@ -3977,19 +3214,8 @@
         },
         {
             "character": "意",
-            "meanings": [
-                "care",
-                "desire",
-                "heart",
-                "idea",
-                "liking",
-                "mind",
-                "taste",
-                "thought"
-            ],
-            "onyomi": [
-                "イ"
-            ],
+            "meanings": ["care", "desire", "heart", "idea", "liking", "mind", "taste", "thought"],
+            "onyomi": ["イ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -4022,18 +3248,9 @@
         },
         {
             "character": "持",
-            "meanings": [
-                "have",
-                "hold"
-            ],
-            "onyomi": [
-                "ジ"
-            ],
-            "kunyomi": [
-                "-も.ち",
-                "も.つ",
-                "も.てる"
-            ],
+            "meanings": ["have", "hold"],
+            "onyomi": ["ジ"],
+            "kunyomi": ["-も.ち", "も.つ", "も.てる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4069,18 +3286,9 @@
         },
         {
             "character": "教",
-            "meanings": [
-                "doctrine",
-                "faith",
-                "teach"
-            ],
-            "onyomi": [
-                "キョウ"
-            ],
-            "kunyomi": [
-                "おし.える",
-                "おそ.わる"
-            ],
+            "meanings": ["doctrine", "faith", "teach"],
+            "onyomi": ["キョウ"],
+            "kunyomi": ["おし.える", "おそ.わる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4125,14 +3333,8 @@
                 "sentence",
                 "style"
             ],
-            "onyomi": [
-                "ブン",
-                "モン"
-            ],
-            "kunyomi": [
-                "あや",
-                "ふみ"
-            ],
+            "onyomi": ["ブン", "モン"],
+            "kunyomi": ["あや", "ふみ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4168,13 +3370,8 @@
         },
         {
             "character": "料",
-            "meanings": [
-                "fee",
-                "materials"
-            ],
-            "onyomi": [
-                "リョウ"
-            ],
+            "meanings": ["fee", "materials"],
+            "onyomi": ["リョウ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -4207,19 +3404,9 @@
         },
         {
             "character": "方",
-            "meanings": [
-                "alternative",
-                "direction",
-                "person"
-            ],
-            "onyomi": [
-                "ホウ"
-            ],
-            "kunyomi": [
-                "-かた",
-                "-がた",
-                "かた"
-            ],
+            "meanings": ["alternative", "direction", "person"],
+            "onyomi": ["ホウ"],
+            "kunyomi": ["-かた", "-がた", "かた"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4255,16 +3442,9 @@
         },
         {
             "character": "旅",
-            "meanings": [
-                "travel",
-                "trip"
-            ],
-            "onyomi": [
-                "リョ"
-            ],
-            "kunyomi": [
-                "たび"
-            ],
+            "meanings": ["travel", "trip"],
+            "onyomi": ["リョ"],
+            "kunyomi": ["たび"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4298,13 +3478,8 @@
         },
         {
             "character": "族",
-            "meanings": [
-                "family",
-                "tribe"
-            ],
-            "onyomi": [
-                "ゾク"
-            ],
+            "meanings": ["family", "tribe"],
+            "onyomi": ["ゾク"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -4337,22 +3512,9 @@
         },
         {
             "character": "早",
-            "meanings": [
-                "early",
-                "fast"
-            ],
-            "onyomi": [
-                "サッ",
-                "ソウ"
-            ],
-            "kunyomi": [
-                "さ-",
-                "はや",
-                "はや-",
-                "はや.い",
-                "はや.まる",
-                "はや.める"
-            ],
+            "meanings": ["early", "fast"],
+            "onyomi": ["サッ", "ソウ"],
+            "kunyomi": ["さ-", "はや", "はや-", "はや.い", "はや.まる", "はや.める"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4392,15 +3554,8 @@
         },
         {
             "character": "明",
-            "meanings": [
-                "bright",
-                "light"
-            ],
-            "onyomi": [
-                "ミョウ",
-                "ミン",
-                "メイ"
-            ],
+            "meanings": ["bright", "light"],
+            "onyomi": ["ミョウ", "ミン", "メイ"],
             "kunyomi": [
                 "-あ.け",
                 "あ.かす",
@@ -4457,20 +3612,9 @@
         },
         {
             "character": "映",
-            "meanings": [
-                "projection",
-                "reflect",
-                "reflection"
-            ],
-            "onyomi": [
-                "エイ"
-            ],
-            "kunyomi": [
-                "-ば.え",
-                "うつ.す",
-                "うつ.る",
-                "は.える"
-            ],
+            "meanings": ["projection", "reflect", "reflection"],
+            "onyomi": ["エイ"],
+            "kunyomi": ["-ば.え", "うつ.す", "うつ.る", "は.える"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4507,16 +3651,9 @@
         },
         {
             "character": "春",
-            "meanings": [
-                "spring (season)",
-                "springtime"
-            ],
-            "onyomi": [
-                "シュン"
-            ],
-            "kunyomi": [
-                "はる"
-            ],
+            "meanings": ["spring (season)", "springtime"],
+            "onyomi": ["シュン"],
+            "kunyomi": ["はる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4550,12 +3687,8 @@
         },
         {
             "character": "曜",
-            "meanings": [
-                "weekday"
-            ],
-            "onyomi": [
-                "ヨウ"
-            ],
+            "meanings": ["weekday"],
+            "onyomi": ["ヨウ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -4588,21 +3721,9 @@
         },
         {
             "character": "有",
-            "meanings": [
-                "approx",
-                "exist",
-                "happen",
-                "have",
-                "occur",
-                "possess"
-            ],
-            "onyomi": [
-                "ウ",
-                "ユウ"
-            ],
-            "kunyomi": [
-                "あ.る"
-            ],
+            "meanings": ["approx", "exist", "happen", "have", "occur", "possess"],
+            "onyomi": ["ウ", "ユウ"],
+            "kunyomi": ["あ.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4637,15 +3758,8 @@
         },
         {
             "character": "服",
-            "meanings": [
-                "admit",
-                "clothing",
-                "discharge",
-                "obey"
-            ],
-            "onyomi": [
-                "フク"
-            ],
+            "meanings": ["admit", "clothing", "discharge", "obey"],
+            "onyomi": ["フク"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -4678,19 +3792,9 @@
         },
         {
             "character": "業",
-            "meanings": [
-                "arts",
-                "business",
-                "performance",
-                "vocation"
-            ],
-            "onyomi": [
-                "ギョウ",
-                "ゴウ"
-            ],
-            "kunyomi": [
-                "わざ"
-            ],
+            "meanings": ["arts", "business", "performance", "vocation"],
+            "onyomi": ["ギョウ", "ゴウ"],
+            "kunyomi": ["わざ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4725,21 +3829,9 @@
         },
         {
             "character": "楽",
-            "meanings": [
-                "comfort",
-                "ease",
-                "music"
-            ],
-            "onyomi": [
-                "ガク",
-                "ゴウ",
-                "ラク"
-            ],
-            "kunyomi": [
-                "この.む",
-                "たの.しい",
-                "たの.しむ"
-            ],
+            "meanings": ["comfort", "ease", "music"],
+            "onyomi": ["ガク", "ゴウ", "ラク"],
+            "kunyomi": ["この.む", "たの.しい", "たの.しむ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4777,17 +3869,9 @@
         },
         {
             "character": "歌",
-            "meanings": [
-                "sing",
-                "song"
-            ],
-            "onyomi": [
-                "カ"
-            ],
-            "kunyomi": [
-                "うた",
-                "うた.う"
-            ],
+            "meanings": ["sing", "song"],
+            "onyomi": ["カ"],
+            "kunyomi": ["うた", "うた.う"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4822,13 +3906,8 @@
         },
         {
             "character": "止",
-            "meanings": [
-                "halt",
-                "stop"
-            ],
-            "onyomi": [
-                "シ"
-            ],
+            "meanings": ["halt", "stop"],
+            "onyomi": ["シ"],
             "kunyomi": [
                 "-さ.し",
                 "-さ.す",
@@ -4891,22 +3970,9 @@
         },
         {
             "character": "正",
-            "meanings": [
-                "10**40",
-                "correct",
-                "justice",
-                "righteous"
-            ],
-            "onyomi": [
-                "ショウ",
-                "セイ"
-            ],
-            "kunyomi": [
-                "ただ.しい",
-                "ただ.す",
-                "まさ",
-                "まさ.に"
-            ],
+            "meanings": ["10**40", "correct", "justice", "righteous"],
+            "onyomi": ["ショウ", "セイ"],
+            "kunyomi": ["ただ.しい", "ただ.す", "まさ", "まさ.に"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4944,19 +4010,9 @@
         },
         {
             "character": "歩",
-            "meanings": [
-                "counter for steps",
-                "walk"
-            ],
-            "onyomi": [
-                "フ",
-                "ブ",
-                "ホ"
-            ],
-            "kunyomi": [
-                "あゆ.む",
-                "ある.く"
-            ],
+            "meanings": ["counter for steps", "walk"],
+            "onyomi": ["フ", "ブ", "ホ"],
+            "kunyomi": ["あゆ.む", "ある.く"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -4993,17 +4049,9 @@
         },
         {
             "character": "死",
-            "meanings": [
-                "death",
-                "die"
-            ],
-            "onyomi": [
-                "シ"
-            ],
-            "kunyomi": [
-                "し.に-",
-                "し.ぬ"
-            ],
+            "meanings": ["death", "die"],
+            "onyomi": ["シ"],
+            "kunyomi": ["し.に-", "し.ぬ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5048,14 +4096,8 @@
                 "pour",
                 "shed (tears)"
             ],
-            "onyomi": [
-                "チュウ"
-            ],
-            "kunyomi": [
-                "さ.す",
-                "そそ.ぐ",
-                "つ.ぐ"
-            ],
+            "onyomi": ["チュウ"],
+            "kunyomi": ["さ.す", "そそ.ぐ", "つ.ぐ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5091,15 +4133,8 @@
         },
         {
             "character": "洋",
-            "meanings": [
-                "Western style",
-                "foreign",
-                "ocean",
-                "sea"
-            ],
-            "onyomi": [
-                "ヨウ"
-            ],
+            "meanings": ["Western style", "foreign", "ocean", "sea"],
+            "onyomi": ["ヨウ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -5132,16 +4167,9 @@
         },
         {
             "character": "海",
-            "meanings": [
-                "ocean",
-                "sea"
-            ],
-            "onyomi": [
-                "カイ"
-            ],
-            "kunyomi": [
-                "うみ"
-            ],
+            "meanings": ["ocean", "sea"],
+            "onyomi": ["カイ"],
+            "kunyomi": ["うみ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5175,13 +4203,8 @@
         },
         {
             "character": "漢",
-            "meanings": [
-                "China",
-                "Sino-"
-            ],
-            "onyomi": [
-                "カン"
-            ],
+            "meanings": ["China", "Sino-"],
+            "onyomi": ["カン"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -5214,15 +4237,9 @@
         },
         {
             "character": "牛",
-            "meanings": [
-                "cow"
-            ],
-            "onyomi": [
-                "ギュウ"
-            ],
-            "kunyomi": [
-                "うし"
-            ],
+            "meanings": ["cow"],
+            "onyomi": ["ギュウ"],
+            "kunyomi": ["うし"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5256,19 +4273,9 @@
         },
         {
             "character": "物",
-            "meanings": [
-                "matter",
-                "object",
-                "thing"
-            ],
-            "onyomi": [
-                "ブツ",
-                "モツ"
-            ],
-            "kunyomi": [
-                "もの",
-                "もの-"
-            ],
+            "meanings": ["matter", "object", "thing"],
+            "onyomi": ["ブツ", "モツ"],
+            "kunyomi": ["もの", "もの-"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5304,12 +4311,8 @@
         },
         {
             "character": "特",
-            "meanings": [
-                "special"
-            ],
-            "onyomi": [
-                "トク"
-            ],
+            "meanings": ["special"],
+            "onyomi": ["トク"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -5342,16 +4345,9 @@
         },
         {
             "character": "犬",
-            "meanings": [
-                "dog"
-            ],
-            "onyomi": [
-                "ケン"
-            ],
-            "kunyomi": [
-                "いぬ",
-                "いぬ-"
-            ],
+            "meanings": ["dog"],
+            "onyomi": ["ケン"],
+            "kunyomi": ["いぬ", "いぬ-"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5386,19 +4382,9 @@
         },
         {
             "character": "理",
-            "meanings": [
-                "arrangement",
-                "justice",
-                "logic",
-                "reason",
-                "truth"
-            ],
-            "onyomi": [
-                "リ"
-            ],
-            "kunyomi": [
-                "ことわり"
-            ],
+            "meanings": ["arrangement", "justice", "logic", "reason", "truth"],
+            "onyomi": ["リ"],
+            "kunyomi": ["ことわり"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5432,19 +4418,9 @@
         },
         {
             "character": "用",
-            "meanings": [
-                "business",
-                "employ",
-                "service",
-                "use",
-                "utilize"
-            ],
-            "onyomi": [
-                "ヨウ"
-            ],
-            "kunyomi": [
-                "もち.いる"
-            ],
+            "meanings": ["business", "employ", "service", "use", "utilize"],
+            "onyomi": ["ヨウ"],
+            "kunyomi": ["もち.いる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5478,16 +4454,9 @@
         },
         {
             "character": "田",
-            "meanings": [
-                "rice field",
-                "rice paddy"
-            ],
-            "onyomi": [
-                "デン"
-            ],
-            "kunyomi": [
-                "た"
-            ],
+            "meanings": ["rice field", "rice paddy"],
+            "onyomi": ["デン"],
+            "kunyomi": ["た"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5521,18 +4490,9 @@
         },
         {
             "character": "町",
-            "meanings": [
-                "block",
-                "street",
-                "town",
-                "village"
-            ],
-            "onyomi": [
-                "チョウ"
-            ],
-            "kunyomi": [
-                "まち"
-            ],
+            "meanings": ["block", "street", "town", "village"],
+            "onyomi": ["チョウ"],
+            "kunyomi": ["まち"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5566,23 +4526,9 @@
         },
         {
             "character": "画",
-            "meanings": [
-                "brush-stroke",
-                "picture"
-            ],
-            "onyomi": [
-                "エ",
-                "カイ",
-                "カク",
-                "ガ"
-            ],
-            "kunyomi": [
-                "えが.く",
-                "かぎ.る",
-                "かく.する",
-                "はか.る",
-                "はかりごと"
-            ],
+            "meanings": ["brush-stroke", "picture"],
+            "onyomi": ["エ", "カイ", "カク", "ガ"],
+            "kunyomi": ["えが.く", "かぎ.る", "かく.する", "はか.る", "はかりごと"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5623,13 +4569,8 @@
         },
         {
             "character": "界",
-            "meanings": [
-                "boundary",
-                "world"
-            ],
-            "onyomi": [
-                "カイ"
-            ],
+            "meanings": ["boundary", "world"],
+            "onyomi": ["カイ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -5662,19 +4603,9 @@
         },
         {
             "character": "病",
-            "meanings": [
-                "ill",
-                "sick"
-            ],
-            "onyomi": [
-                "ビョウ",
-                "ヘイ"
-            ],
-            "kunyomi": [
-                "-や.み",
-                "や.む",
-                "やまい"
-            ],
+            "meanings": ["ill", "sick"],
+            "onyomi": ["ビョウ", "ヘイ"],
+            "kunyomi": ["-や.み", "や.む", "やまい"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5720,17 +4651,8 @@
                 "publish",
                 "start from"
             ],
-            "onyomi": [
-                "ハツ",
-                "ホツ"
-            ],
-            "kunyomi": [
-                "あば.く",
-                "おこ.る",
-                "た.つ",
-                "つか.わす",
-                "はな.つ"
-            ],
+            "onyomi": ["ハツ", "ホツ"],
+            "kunyomi": ["あば.く", "おこ.る", "た.つ", "つか.わす", "はな.つ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5769,19 +4691,9 @@
         },
         {
             "character": "真",
-            "meanings": [
-                "Buddhist sect",
-                "reality",
-                "true"
-            ],
-            "onyomi": [
-                "シン"
-            ],
-            "kunyomi": [
-                "ま",
-                "ま-",
-                "まこと"
-            ],
+            "meanings": ["Buddhist sect", "reality", "true"],
+            "onyomi": ["シン"],
+            "kunyomi": ["ま", "ま-", "まこと"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5817,22 +4729,9 @@
         },
         {
             "character": "着",
-            "meanings": [
-                "arrive",
-                "counter for suits of clothing",
-                "don",
-                "wear"
-            ],
-            "onyomi": [
-                "ジャク",
-                "チャク"
-            ],
-            "kunyomi": [
-                "き.せる",
-                "き.る",
-                "つ.く",
-                "つ.ける"
-            ],
+            "meanings": ["arrive", "counter for suits of clothing", "don", "wear"],
+            "onyomi": ["ジャク", "チャク"],
+            "kunyomi": ["き.せる", "き.る", "つ.く", "つ.ける"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5870,17 +4769,9 @@
         },
         {
             "character": "知",
-            "meanings": [
-                "know",
-                "wisdom"
-            ],
-            "onyomi": [
-                "チ"
-            ],
-            "kunyomi": [
-                "し.らせる",
-                "し.る"
-            ],
+            "meanings": ["know", "wisdom"],
+            "onyomi": ["チ"],
+            "kunyomi": ["し.らせる", "し.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5915,17 +4806,9 @@
         },
         {
             "character": "研",
-            "meanings": [
-                "polish",
-                "sharpen",
-                "study of"
-            ],
-            "onyomi": [
-                "ケン"
-            ],
-            "kunyomi": [
-                "と.ぐ"
-            ],
+            "meanings": ["polish", "sharpen", "study of"],
+            "onyomi": ["ケン"],
+            "kunyomi": ["と.ぐ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -5959,19 +4842,9 @@
         },
         {
             "character": "社",
-            "meanings": [
-                "association",
-                "company",
-                "firm",
-                "office",
-                "shrine"
-            ],
-            "onyomi": [
-                "シャ"
-            ],
-            "kunyomi": [
-                "やしろ"
-            ],
+            "meanings": ["association", "company", "firm", "office", "shrine"],
+            "onyomi": ["シャ"],
+            "kunyomi": ["やしろ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6005,18 +4878,9 @@
         },
         {
             "character": "私",
-            "meanings": [
-                "I",
-                "me",
-                "private"
-            ],
-            "onyomi": [
-                "シ"
-            ],
-            "kunyomi": [
-                "わたくし",
-                "わたし"
-            ],
+            "meanings": ["I", "me", "private"],
+            "onyomi": ["シ"],
+            "kunyomi": ["わたくし", "わたし"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6051,16 +4915,9 @@
         },
         {
             "character": "秋",
-            "meanings": [
-                "autumn"
-            ],
-            "onyomi": [
-                "シュウ"
-            ],
-            "kunyomi": [
-                "あき",
-                "とき"
-            ],
+            "meanings": ["autumn"],
+            "onyomi": ["シュウ"],
+            "kunyomi": ["あき", "とき"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6095,17 +4952,9 @@
         },
         {
             "character": "究",
-            "meanings": [
-                "research",
-                "study"
-            ],
-            "onyomi": [
-                "キュウ",
-                "ク"
-            ],
-            "kunyomi": [
-                "きわ.める"
-            ],
+            "meanings": ["research", "study"],
+            "onyomi": ["キュウ", "ク"],
+            "kunyomi": ["きわ.める"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6140,17 +4989,9 @@
         },
         {
             "character": "答",
-            "meanings": [
-                "answer",
-                "solution"
-            ],
-            "onyomi": [
-                "トウ"
-            ],
-            "kunyomi": [
-                "こた.え",
-                "こた.える"
-            ],
+            "meanings": ["answer", "solution"],
+            "onyomi": ["トウ"],
+            "kunyomi": ["こた.え", "こた.える"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6185,15 +5026,9 @@
         },
         {
             "character": "紙",
-            "meanings": [
-                "paper"
-            ],
-            "onyomi": [
-                "シ"
-            ],
-            "kunyomi": [
-                "かみ"
-            ],
+            "meanings": ["paper"],
+            "onyomi": ["シ"],
+            "kunyomi": ["かみ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6227,21 +5062,9 @@
         },
         {
             "character": "終",
-            "meanings": [
-                "end",
-                "finish"
-            ],
-            "onyomi": [
-                "シュウ"
-            ],
-            "kunyomi": [
-                "-お.わる",
-                "お.える",
-                "お.わる",
-                "おわ.る",
-                "つい",
-                "つい.に"
-            ],
+            "meanings": ["end", "finish"],
+            "onyomi": ["シュウ"],
+            "kunyomi": ["-お.わる", "お.える", "お.わる", "おわ.る", "つい", "つい.に"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6280,17 +5103,9 @@
         },
         {
             "character": "習",
-            "meanings": [
-                "learn"
-            ],
-            "onyomi": [
-                "シュウ",
-                "ジュ"
-            ],
-            "kunyomi": [
-                "なら.い",
-                "なら.う"
-            ],
+            "meanings": ["learn"],
+            "onyomi": ["シュウ", "ジュ"],
+            "kunyomi": ["なら.い", "なら.う"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6326,17 +5141,9 @@
         },
         {
             "character": "考",
-            "meanings": [
-                "consider",
-                "think over"
-            ],
-            "onyomi": [
-                "コウ"
-            ],
-            "kunyomi": [
-                "かんが.え",
-                "かんが.える"
-            ],
+            "meanings": ["consider", "think over"],
+            "onyomi": ["コウ"],
+            "kunyomi": ["かんが.え", "かんが.える"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6371,16 +5178,9 @@
         },
         {
             "character": "者",
-            "meanings": [
-                "person",
-                "someone"
-            ],
-            "onyomi": [
-                "シャ"
-            ],
-            "kunyomi": [
-                "もの"
-            ],
+            "meanings": ["person", "someone"],
+            "onyomi": ["シャ"],
+            "kunyomi": ["もの"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6414,15 +5214,9 @@
         },
         {
             "character": "肉",
-            "meanings": [
-                "meat"
-            ],
-            "onyomi": [
-                "ニク"
-            ],
-            "kunyomi": [
-                "しし"
-            ],
+            "meanings": ["meat"],
+            "onyomi": ["ニク"],
+            "kunyomi": ["しし"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6456,18 +5250,9 @@
         },
         {
             "character": "自",
-            "meanings": [
-                "oneself"
-            ],
-            "onyomi": [
-                "シ",
-                "ジ"
-            ],
-            "kunyomi": [
-                "おの.ずから",
-                "おの.ずと",
-                "みずか.ら"
-            ],
+            "meanings": ["oneself"],
+            "onyomi": ["シ", "ジ"],
+            "kunyomi": ["おの.ずから", "おの.ずと", "みずか.ら"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6504,16 +5289,9 @@
         },
         {
             "character": "色",
-            "meanings": [
-                "color"
-            ],
-            "onyomi": [
-                "シキ",
-                "ショク"
-            ],
-            "kunyomi": [
-                "いろ"
-            ],
+            "meanings": ["color"],
+            "onyomi": ["シキ", "ショク"],
+            "kunyomi": ["いろ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6548,16 +5326,9 @@
         },
         {
             "character": "花",
-            "meanings": [
-                "flower"
-            ],
-            "onyomi": [
-                "カ",
-                "ケ"
-            ],
-            "kunyomi": [
-                "はな"
-            ],
+            "meanings": ["flower"],
+            "onyomi": ["カ", "ケ"],
+            "kunyomi": ["はな"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6592,19 +5363,9 @@
         },
         {
             "character": "英",
-            "meanings": [
-                "England",
-                "English",
-                "calyx",
-                "hero",
-                "outstanding"
-            ],
-            "onyomi": [
-                "エイ"
-            ],
-            "kunyomi": [
-                "はなぶさ"
-            ],
+            "meanings": ["England", "English", "calyx", "hero", "outstanding"],
+            "onyomi": ["エイ"],
+            "kunyomi": ["はなぶさ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6638,13 +5399,8 @@
         },
         {
             "character": "茶",
-            "meanings": [
-                "tea"
-            ],
-            "onyomi": [
-                "サ",
-                "チャ"
-            ],
+            "meanings": ["tea"],
+            "onyomi": ["サ", "チャ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -6678,22 +5434,9 @@
         },
         {
             "character": "親",
-            "meanings": [
-                "dealer (cards)",
-                "familiarity",
-                "intimacy",
-                "parent",
-                "relative"
-            ],
-            "onyomi": [
-                "シン"
-            ],
-            "kunyomi": [
-                "おや",
-                "おや-",
-                "した.しい",
-                "した.しむ"
-            ],
+            "meanings": ["dealer (cards)", "familiarity", "intimacy", "parent", "relative"],
+            "onyomi": ["シン"],
+            "kunyomi": ["おや", "おや-", "した.しい", "した.しむ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6730,19 +5473,9 @@
         },
         {
             "character": "計",
-            "meanings": [
-                "measure",
-                "plan",
-                "plot",
-                "scheme"
-            ],
-            "onyomi": [
-                "ケイ"
-            ],
-            "kunyomi": [
-                "はか.らう",
-                "はか.る"
-            ],
+            "meanings": ["measure", "plan", "plot", "scheme"],
+            "onyomi": ["ケイ"],
+            "kunyomi": ["はか.らう", "はか.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6777,20 +5510,9 @@
         },
         {
             "character": "試",
-            "meanings": [
-                "attempt",
-                "experiment",
-                "ordeal",
-                "test",
-                "try"
-            ],
-            "onyomi": [
-                "シ"
-            ],
-            "kunyomi": [
-                "こころ.みる",
-                "ため.す"
-            ],
+            "meanings": ["attempt", "experiment", "ordeal", "test", "try"],
+            "onyomi": ["シ"],
+            "kunyomi": ["こころ.みる", "ため.す"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6825,17 +5547,9 @@
         },
         {
             "character": "貸",
-            "meanings": [
-                "lend"
-            ],
-            "onyomi": [
-                "タイ"
-            ],
-            "kunyomi": [
-                "か.し-",
-                "か.す",
-                "かし-"
-            ],
+            "meanings": ["lend"],
+            "onyomi": ["タイ"],
+            "kunyomi": ["か.し-", "か.す", "かし-"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6871,23 +5585,9 @@
         },
         {
             "character": "質",
-            "meanings": [
-                "matter",
-                "quality",
-                "substance",
-                "temperament"
-            ],
-            "onyomi": [
-                "シチ",
-                "シツ",
-                "チ"
-            ],
-            "kunyomi": [
-                "ただ.す",
-                "たち",
-                "もと",
-                "わりふ"
-            ],
+            "meanings": ["matter", "quality", "substance", "temperament"],
+            "onyomi": ["シチ", "シツ", "チ"],
+            "kunyomi": ["ただ.す", "たち", "もと", "わりふ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6926,15 +5626,9 @@
         },
         {
             "character": "走",
-            "meanings": [
-                "run"
-            ],
-            "onyomi": [
-                "ソウ"
-            ],
-            "kunyomi": [
-                "はし.る"
-            ],
+            "meanings": ["run"],
+            "onyomi": ["ソウ"],
+            "kunyomi": ["はし.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -6968,21 +5662,9 @@
         },
         {
             "character": "起",
-            "meanings": [
-                "get up",
-                "rouse",
-                "wake up"
-            ],
-            "onyomi": [
-                "キ"
-            ],
-            "kunyomi": [
-                "お.きる",
-                "お.こす",
-                "お.こる",
-                "おこ.す",
-                "た.つ"
-            ],
+            "meanings": ["get up", "rouse", "wake up"],
+            "onyomi": ["キ"],
+            "kunyomi": ["お.きる", "お.こす", "お.こる", "おこ.す", "た.つ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7020,14 +5702,8 @@
         },
         {
             "character": "転",
-            "meanings": [
-                "change",
-                "revolve",
-                "turn around"
-            ],
-            "onyomi": [
-                "テン"
-            ],
+            "meanings": ["change", "revolve", "turn around"],
+            "onyomi": ["テン"],
             "kunyomi": [
                 "うたた",
                 "うつ.る",
@@ -7078,19 +5754,9 @@
         },
         {
             "character": "近",
-            "meanings": [
-                "akin",
-                "early",
-                "near",
-                "tantamount"
-            ],
-            "onyomi": [
-                "キン",
-                "コン"
-            ],
-            "kunyomi": [
-                "ちか.い"
-            ],
+            "meanings": ["akin", "early", "near", "tantamount"],
+            "onyomi": ["キン", "コン"],
+            "kunyomi": ["ちか.い"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7125,16 +5791,9 @@
         },
         {
             "character": "送",
-            "meanings": [
-                "escort",
-                "send"
-            ],
-            "onyomi": [
-                "ソウ"
-            ],
-            "kunyomi": [
-                "おく.る"
-            ],
+            "meanings": ["escort", "send"],
+            "onyomi": ["ソウ"],
+            "kunyomi": ["おく.る"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7175,10 +5834,7 @@
                 "pass through",
                 "traffic"
             ],
-            "onyomi": [
-                "ツ",
-                "ツウ"
-            ],
+            "onyomi": ["ツ", "ツウ"],
             "kunyomi": [
                 "-とお.り",
                 "-どお.し",
@@ -7240,12 +5896,8 @@
                 "progress",
                 "transport"
             ],
-            "onyomi": [
-                "ウン"
-            ],
-            "kunyomi": [
-                "はこ.ぶ"
-            ],
+            "onyomi": ["ウン"],
+            "kunyomi": ["はこ.ぶ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7289,19 +5941,8 @@
                 "pile up",
                 "respect"
             ],
-            "onyomi": [
-                "ジュウ",
-                "チョウ"
-            ],
-            "kunyomi": [
-                "え",
-                "おも",
-                "おも.い",
-                "おも.なう",
-                "おも.り",
-                "かさ.なる",
-                "かさ.ねる"
-            ],
+            "onyomi": ["ジュウ", "チョウ"],
+            "kunyomi": ["え", "おも", "おも.い", "おも.なう", "おも.り", "かさ.なる", "かさ.ねる"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7342,20 +5983,9 @@
         },
         {
             "character": "野",
-            "meanings": [
-                "civilian life",
-                "field",
-                "plains",
-                "rustic"
-            ],
-            "onyomi": [
-                "ショ",
-                "ヤ"
-            ],
-            "kunyomi": [
-                "の",
-                "の-"
-            ],
+            "meanings": ["civilian life", "field", "plains", "rustic"],
+            "onyomi": ["ショ", "ヤ"],
+            "kunyomi": ["の", "の-"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7391,15 +6021,9 @@
         },
         {
             "character": "銀",
-            "meanings": [
-                "silver"
-            ],
-            "onyomi": [
-                "ギン"
-            ],
-            "kunyomi": [
-                "しろがね"
-            ],
+            "meanings": ["silver"],
+            "onyomi": ["ギン"],
+            "kunyomi": ["しろがね"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7433,22 +6057,9 @@
         },
         {
             "character": "開",
-            "meanings": [
-                "open",
-                "unfold",
-                "unseal"
-            ],
-            "onyomi": [
-                "カイ"
-            ],
-            "kunyomi": [
-                "-びら.き",
-                "あ.く",
-                "あ.ける",
-                "ひら.き",
-                "ひら.く",
-                "ひら.ける"
-            ],
+            "meanings": ["open", "unfold", "unseal"],
+            "onyomi": ["カイ"],
+            "kunyomi": ["-びら.き", "あ.く", "あ.ける", "ひら.き", "ひら.く", "ひら.ける"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7487,16 +6098,8 @@
         },
         {
             "character": "院",
-            "meanings": [
-                "Inst.",
-                "institution",
-                "mansion",
-                "school",
-                "temple"
-            ],
-            "onyomi": [
-                "イン"
-            ],
+            "meanings": ["Inst.", "institution", "mansion", "school", "temple"],
+            "onyomi": ["イン"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -7529,21 +6132,9 @@
         },
         {
             "character": "集",
-            "meanings": [
-                "congregate",
-                "flock",
-                "gather",
-                "meet",
-                "swarm"
-            ],
-            "onyomi": [
-                "シュウ"
-            ],
-            "kunyomi": [
-                "あつ.まる",
-                "あつ.める",
-                "つど.う"
-            ],
+            "meanings": ["congregate", "flock", "gather", "meet", "swarm"],
+            "onyomi": ["シュウ"],
+            "kunyomi": ["あつ.まる", "あつ.める", "つど.う"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7579,19 +6170,9 @@
         },
         {
             "character": "音",
-            "meanings": [
-                "noise",
-                "sound"
-            ],
-            "onyomi": [
-                "-ノン",
-                "イン",
-                "オン"
-            ],
-            "kunyomi": [
-                "おと",
-                "ね"
-            ],
+            "meanings": ["noise", "sound"],
+            "onyomi": ["-ノン", "イン", "オン"],
+            "kunyomi": ["おと", "ね"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7628,13 +6209,8 @@
         },
         {
             "character": "題",
-            "meanings": [
-                "subject",
-                "topic"
-            ],
-            "onyomi": [
-                "ダイ"
-            ],
+            "meanings": ["subject", "topic"],
+            "onyomi": ["ダイ"],
             "kunyomi": [],
             "jlpt": "N4",
             "examples": [
@@ -7667,20 +6243,9 @@
         },
         {
             "character": "風",
-            "meanings": [
-                "air",
-                "manner",
-                "style",
-                "wind"
-            ],
-            "onyomi": [
-                "フ",
-                "フウ"
-            ],
-            "kunyomi": [
-                "かざ-",
-                "かぜ"
-            ],
+            "meanings": ["air", "manner", "style", "wind"],
+            "onyomi": ["フ", "フウ"],
+            "kunyomi": ["かざ-", "かぜ"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7716,16 +6281,9 @@
         },
         {
             "character": "飯",
-            "meanings": [
-                "boiled rice",
-                "meal"
-            ],
-            "onyomi": [
-                "ハン"
-            ],
-            "kunyomi": [
-                "めし"
-            ],
+            "meanings": ["boiled rice", "meal"],
+            "onyomi": ["ハン"],
+            "kunyomi": ["めし"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7759,19 +6317,9 @@
         },
         {
             "character": "館",
-            "meanings": [
-                "building",
-                "large building",
-                "mansion",
-                "palace"
-            ],
-            "onyomi": [
-                "カン"
-            ],
-            "kunyomi": [
-                "たて",
-                "やかた"
-            ],
+            "meanings": ["building", "large building", "mansion", "palace"],
+            "onyomi": ["カン"],
+            "kunyomi": ["たて", "やかた"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7806,21 +6354,9 @@
         },
         {
             "character": "験",
-            "meanings": [
-                "effect",
-                "testing",
-                "verification"
-            ],
-            "onyomi": [
-                "ケン",
-                "ゲン"
-            ],
-            "kunyomi": [
-                "あかし",
-                "しるし",
-                "ため.す",
-                "ためし"
-            ],
+            "meanings": ["effect", "testing", "verification"],
+            "onyomi": ["ケン", "ゲン"],
+            "kunyomi": ["あかし", "しるし", "ため.す", "ためし"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7858,17 +6394,9 @@
         },
         {
             "character": "魚",
-            "meanings": [
-                "fish"
-            ],
-            "onyomi": [
-                "ギョ"
-            ],
-            "kunyomi": [
-                "-ざかな",
-                "うお",
-                "さかな"
-            ],
+            "meanings": ["fish"],
+            "onyomi": ["ギョ"],
+            "kunyomi": ["-ざかな", "うお", "さかな"],
             "jlpt": "N4",
             "examples": [
                 {
@@ -7904,16 +6432,9 @@
         },
         {
             "character": "鳥",
-            "meanings": [
-                "bird",
-                "chicken"
-            ],
-            "onyomi": [
-                "チョウ"
-            ],
-            "kunyomi": [
-                "とり"
-            ],
+            "meanings": ["bird", "chicken"],
+            "onyomi": ["チョウ"],
+            "kunyomi": ["とり"],
             "jlpt": "N4",
             "examples": [
                 {

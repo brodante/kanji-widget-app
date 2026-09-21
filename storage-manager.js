@@ -3,7 +3,10 @@ class StorageManager {
         PROGRESS: 'kanji_progress',
         RECENT: 'kanji_recent',
         SETTINGS: 'kanji_settings',
-        CACHE: 'kanji_cache'
+        CACHE: 'kanji_cache',
+        SRS_DATA: 'kanji_srs_data',
+        AI_SETTINGS: 'kanji_ai_settings',
+        AI_CACHE: 'kanji_ai_cache'
     };
 
     static init() {
@@ -84,8 +87,9 @@ class StorageManager {
 
         // Update streak (simplified - just increment for now)
         const today = new Date().toDateString();
-        const lastStudiedDate = progress.lastStudied ?
-            new Date(progress.lastStudied).toDateString() : null;
+        const lastStudiedDate = progress.lastStudied
+            ? new Date(progress.lastStudied).toDateString()
+            : null;
 
         if (lastStudiedDate !== today) {
             progress.streak += 1;
@@ -150,7 +154,7 @@ class StorageManager {
         let recent = this.getItem(this.keys.RECENT, []);
 
         // Remove if already exists
-        recent = recent.filter(item => item.character !== kanjiData.character);
+        recent = recent.filter((item) => item.character !== kanjiData.character);
 
         // Add to beginning
         recent.unshift({
@@ -195,6 +199,59 @@ class StorageManager {
         const settings = this.getSettings();
         settings[key] = value;
         return this.saveSettings(settings);
+    }
+
+    // AI Settings management
+    static getAISettings() {
+        const defaultSettings = {
+            provider: 'gemini', // 'gemini', 'openai', 'claude', 'openrouter', 'ollama'
+            apiKey: '',
+            model: 'gemini-3.6-flash',
+            persona: 'encouraging', // 'encouraging', 'strict', 'mnemonic', 'anime'
+            customEndpoint: 'http://localhost:11434/api/generate',
+            temperature: 0.7,
+            enableCache: true
+        };
+
+        const settings = this.getItem(this.keys.AI_SETTINGS, defaultSettings);
+        // Migrate obsolete Gemini models saved by older versions.
+        if (
+            settings.provider === 'gemini' &&
+            ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'].includes(settings.model)
+        ) {
+            settings.model = 'gemini-3.6-flash';
+            this.saveAISettings(settings);
+        }
+
+        return {
+            ...defaultSettings,
+            ...settings
+        };
+    }
+
+    static saveAISettings(settings) {
+        return this.setItem(this.keys.AI_SETTINGS, settings);
+    }
+
+    static updateAISetting(key, value) {
+        const settings = this.getAISettings();
+        settings[key] = value;
+        return this.saveAISettings(settings);
+    }
+
+    // AI Cache management
+    static getAICacheItem(key) {
+        const cache = this.getItem(this.keys.AI_CACHE, {});
+        return cache[key] || null;
+    }
+
+    static setAICacheItem(key, value) {
+        const cache = this.getItem(this.keys.AI_CACHE, {});
+        cache[key] = {
+            data: value,
+            timestamp: Date.now()
+        };
+        return this.setItem(this.keys.AI_CACHE, cache);
     }
 
     // Cache management for offline support
@@ -260,7 +317,7 @@ class StorageManager {
     static getAveragePerDay() {
         const stats = this.getStats();
         const daysActive = stats.daysActive;
-        return daysActive > 0 ? Math.round(stats.totalStudied / daysActive * 10) / 10 : 0;
+        return daysActive > 0 ? Math.round((stats.totalStudied / daysActive) * 10) / 10 : 0;
     }
 
     // Export/Import functionality
@@ -269,8 +326,10 @@ class StorageManager {
             progress: this.getProgress(),
             recent: this.getRecent(50), // Export more recent items
             settings: this.getSettings(),
+            srsData: this.getItem(this.keys.SRS_DATA, {}),
+            aiSettings: this.getAISettings(),
             exportDate: Date.now(),
-            version: 1
+            version: 2
         };
 
         return JSON.stringify(data, null, 2);
@@ -299,8 +358,17 @@ class StorageManager {
                 this.saveSettings(data.settings);
             }
 
-            return true;
+            // Import SRS data
+            if (data.srsData) {
+                this.setItem(this.keys.SRS_DATA, data.srsData);
+            }
 
+            // Import AI settings
+            if (data.aiSettings) {
+                this.saveAISettings(data.aiSettings);
+            }
+
+            return true;
         } catch (error) {
             console.error('Error importing data:', error);
             return false;
@@ -313,7 +381,7 @@ class StorageManager {
         const cache = this.getItem(this.keys.CACHE, {});
         const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-        Object.keys(cache).forEach(key => {
+        Object.keys(cache).forEach((key) => {
             if (Date.now() - cache[key].timestamp > maxAge) {
                 delete cache[key];
             }
@@ -348,12 +416,14 @@ class StorageManager {
 }
 
 // Initialize storage when script loads
-document.addEventListener('DOMContentLoaded', () => {
-    StorageManager.init();
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        StorageManager.init();
 
-    // Cleanup old data periodically
-    StorageManager.cleanup();
-});
+        // Cleanup old data periodically
+        StorageManager.cleanup();
+    });
+}
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
