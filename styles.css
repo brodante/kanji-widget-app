@@ -1609,10 +1609,11 @@ body {
 /* ========================================== */
 
 /* 1. THE PREMIUM FROSTED GLASS EFFECT */
-/* Targeted specifically to your Kanji, Progress, and Journey widgets */
+/* Targeted specifically to your Kanji, Progress, Journey, and Recent widgets */
 [data-theme='midnight'] .kanji-widget,
 [data-theme='midnight'] .progress-section,
-[data-theme='midnight'] .journey-section {
+[data-theme='midnight'] .journey-section,
+[data-theme='midnight'] .recent-section {
     /* Changes solid color to a semi-transparent deep space blue */
     background-color: rgba(15, 20, 35, 0.65) !important;
 
@@ -2078,9 +2079,17 @@ body {
 }
 
 /* Recent Section */
+.recent-section {
+    background-color: var(--surface);
+    padding: 1.25rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--elevation-1);
+}
+
 .recent-section h3 {
     color: var(--primary-color);
     margin-bottom: 1rem;
+    margin-top: 0;
 }
 
 .recent-grid {
@@ -3665,7 +3674,8 @@ input:focus {
 /* 3. Apply Frosted Glass to Nami */
 [data-theme='nami'] .kanji-widget,
 [data-theme='nami'] .progress-section,
-[data-theme='nami'] .journey-section {
+[data-theme='nami'] .journey-section,
+[data-theme='nami'] .recent-section {
     background-color: rgba(10, 10, 10, 0.65) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -3732,7 +3742,8 @@ input:focus {
 /* 3. Apply Premium Frosted Glass */
 [data-theme='lumen'] .kanji-widget,
 [data-theme='lumen'] .progress-section,
-[data-theme='lumen'] .journey-section {
+[data-theme='lumen'] .journey-section,
+[data-theme='lumen'] .recent-section {
     background-color: rgba(10, 10, 10, 0.5) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -3835,7 +3846,8 @@ input:focus {
 
 [data-theme='obake'] .kanji-widget,
 [data-theme='obake'] .progress-section,
-[data-theme='obake'] .journey-section {
+[data-theme='obake'] .journey-section,
+[data-theme='obake'] .recent-section {
     background-color: rgba(10, 10, 15, 0.6) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -3957,7 +3969,8 @@ input:focus {
 [data-theme='ito'] .kanji-widget,
 [data-theme='ito'] .progress-section,
 [data-theme='ito'] .journey-section,
-[data-theme='ito'] .app-header {
+[data-theme='ito'] .app-header,
+[data-theme='ito'] .recent-section {
     background-color: rgba(10, 10, 15, 0.5) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
