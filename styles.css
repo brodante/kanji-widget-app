@@ -4692,32 +4692,7 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     font-size: 0.72rem;
 }
 
-/* Drawing Pad Styles */
-.drawing-pad-modal-content {
-    width: 360px;
-    max-width: 90vw;
-}
-
-.drawing-pad-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem;
-    gap: 1rem;
-    overflow-y: auto;
-}
-
-.drawing-pad-kanji-label {
-    text-align: center;
-    margin-bottom: 0.5rem;
-}
-
-.drawing-pad-kanji-char {
-    font-size: 4rem;
-    font-weight: 700;
-    line-height: 1;
-}
-
+/* Drawing Pad Styles (inline practice panel in the widget card) */
 .drawing-pad-canvas-wrap {
     flex: 1;
     position: relative;
@@ -4825,27 +4800,6 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
 
 .stroke-order-practice:hover {
     background: rgba(var(--primary-color-rgb), 0.18);
-}
-
-/* Close button for drawing pad modal */
-#closeDrawingPad {
-    background: none;
-    border: none;
-    font-size: 1.25rem;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: var(--on-surface-variant);
-    cursor: pointer;
-    padding: 0;
-}
-
-#closeDrawingPad:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: var(--on-surface);
 }
 
 .ai-trap-reason {

@@ -6,6 +6,11 @@
  * and snap-to-stroke scoring — all powered by KanjiVG path data that the
  * app already fetches via KanjiLearningApp.fetchStrokeOrderSvg().
  *
+ * The pad owns ALL of its event wiring (canvas pointer events + toolbar
+ * clicks + slider input). The toolbar markup must NOT also carry inline
+ * onclick handlers for these controls: a tap would then fire both wirings
+ * and every toggle would run twice, cancelling itself out.
+ *
  * Depends on: StorageManager (storage-manager.js)
  */
 class DrawingPad {
@@ -35,24 +40,25 @@ class DrawingPad {
         this.isDrawing = false;
         this.referencePaths = []; // parsed KanjiVG path 'd' strings
         this.referenceImg = null; // HTMLImageElement of the reference SVG
+        this._refPointCache = null; // sampled reference points, per kanji
         this.gridVisible = false;
         this.referenceVisible = true;
-        this.feedbackMessage = '';
         this.feedbackTimeout = null;
         this.svgViewBox = { x: 0, y: 0, w: 109, h: 109 }; // KanjiVG default
 
         this._loadSettings();
 
         // DOM references (set in init)
-        this.modal = null;
+        this.root = null;
         this.canvas = null;
         this.ctx = null;
         this.gridBtn = null;
         this.refBtn = null;
         this.clearBtn = null;
         this.undoBtn = null;
+        this.widthSlider = null;
+        this.widthValEl = null;
         this.feedbackEl = null;
-        this.titleEl = null;
         this.scoreEl = null;
     }
 
@@ -82,10 +88,12 @@ class DrawingPad {
     /**
      * Initialise the pad against a specific DOM scope.
      *
-     * The inline practice controls (rendered inside the widget card) and the
-     * standalone modal both contain a toolbar. Passing `root` lets us resolve
-     * the correct set of controls and avoids the duplicate-ID trap where
-     * getElementById() would always return the first match in the document.
+     * The practice canvas lives in the flip-card back of the widget's
+     * stroke-order section while the toolbar sits in the inline controls div,
+     * so `root` must be an element containing BOTH (the app passes the whole
+     * stroke-order section). This keeps every lookup scoped and avoids the
+     * duplicate-ID trap where document-level lookups match whichever element
+     * happens to come first in the document.
      *
      * @param {Element|Document} [root] Element to query controls within.
      */
@@ -106,10 +114,11 @@ class DrawingPad {
         }
 
         // Bind listeners to whatever controls this scope resolved. The pad
-        // tracks which nodes are already wired (_canvasBound / _boundControls),
-        // so repeated init() calls (e.g. every Animate <-> Practice switch, or
-        // re-rendered inline markup) bind only the new nodes and never stack
-        // duplicate handlers on the ones already listening.
+        // tracks which NODES are already wired (_boundCanvas /
+        // _boundControls), so repeated init() calls (e.g. every Animate <->
+        // Practice switch, or re-rendered widget markup) bind only the new
+        // nodes and never stack duplicate handlers on the ones already
+        // listening.
         this._bindEvents();
         this._syncButtons();
         this._repaint();
@@ -117,36 +126,33 @@ class DrawingPad {
 
     /**
      * Resolve every element the pad interacts with inside the current scope.
-     * Both the inline and modal control sets are supported: inline controls
-     * use an "Inline" infix while the modal keeps the original ids.
      */
     _queryElements() {
-        this.modal = this._resolveInScope('drawingPadModal');
         this.canvas = this._resolveInScope('drawingPadCanvas');
         this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
-        this.gridBtn = this._resolveControl('drawingPadGridBtn', 'drawingPadInlineGridBtn');
-        this.refBtn = this._resolveControl('drawingPadRefBtn', 'drawingPadInlineRefBtn');
-        this.clearBtn = this._resolveControl('drawingPadClearBtn', 'drawingPadInlineClearBtn');
-        this.undoBtn = this._resolveControl('drawingPadUndoBtn', 'drawingPadInlineUndoBtn');
-        this.widthSlider = this._resolveControl(
-            'drawingPadWidthSlider',
-            'drawingPadInlineWidthSlider'
-        );
-        this.widthValEl = this._resolveControl('drawingPadWidthVal', 'drawingPadInlineWidthVal');
-        this.feedbackEl = this._resolveControl('drawingPadFeedback', 'drawingPadInlineFeedback');
-        this.titleEl = this._resolveInScope('drawingPadTitle');
-        this.scoreEl = this._resolveControl('drawingPadScore', 'drawingPadInlineScore');
+        this._queryControls();
     }
 
     /**
-     * Resolve a control id inside the current scope, preferring the
-     * scope-local match.
-     *
-     * The inline practice panel and the modal both render toolbars, and the
-     * inline ids carry an "Inline" infix. Blindly trying the modal id first
-     * (via document.getElementById) returned the hidden modal element even
-     * when the visible inline control was in scope — which silently sent
-     * feedback text and `.active` toggles to the wrong element.
+     * Resolve the toolbar controls inside the current scope. Called both from
+     * init() and from _syncButtons(): the widget markup is rebuilt whenever
+     * the widget re-renders (kanji change, size change, mode switch), so
+     * cached nodes can become detached.
+     */
+    _queryControls() {
+        this.gridBtn = this._resolveInScope('drawingPadInlineGridBtn');
+        this.refBtn = this._resolveInScope('drawingPadInlineRefBtn');
+        this.clearBtn = this._resolveInScope('drawingPadInlineClearBtn');
+        this.undoBtn = this._resolveInScope('drawingPadInlineUndoBtn');
+        this.widthSlider = this._resolveInScope('drawingPadInlineWidthSlider');
+        this.widthValEl = this._resolveInScope('drawingPadInlineWidthVal');
+        this.feedbackEl = this._resolveInScope('drawingPadInlineFeedback');
+        this.scoreEl = this._resolveInScope('drawingPadInlineScore');
+    }
+
+    /**
+     * Resolve an id inside the current scope, preferring the scope-local
+     * match and falling back to the document.
      *
      * @param {string} id Element id to look up.
      * @returns {Element|null}
@@ -162,36 +168,17 @@ class DrawingPad {
         return document.getElementById(id);
     }
 
-    /**
-     * Resolve one of two id variants (modal id vs inline id), always
-     * preferring whichever variant actually exists inside the current scope.
-     *
-     * Both variants must be checked against the scope *before* falling back
-     * to the document, otherwise the `||` chain short-circuits on the hidden
-     * modal element and the visible inline control never gets resolved.
-     *
-     * @param {string} modalId Id used by the standalone modal markup.
-     * @param {string} inlineId Id used by the inline practice markup.
-     * @returns {Element|null}
-     */
-    _resolveControl(modalId, inlineId) {
-        const scope = this.root || document;
-        if (scope && scope !== document && scope.querySelector) {
-            const local = scope.querySelector(`#${modalId}`) || scope.querySelector(`#${inlineId}`);
-            if (local) {
-                return local;
-            }
-        }
-        return document.getElementById(modalId) || document.getElementById(inlineId);
-    }
-
     // ==========================================
     // EVENT BINDING
     // ==========================================
     _bindEvents() {
         // Pointer events for unified mouse / touch / pen input.
-        // Guard against re-binding the same canvas (e.g. across init calls).
-        if (this.canvas && !this._canvasBound) {
+        // Track the bound NODE, not a boolean: the widget re-renders its
+        // markup wholesale (new kanji, size change, ...), which replaces the
+        // canvas element. A boolean flag would leave the fresh canvas without
+        // any pointer listeners; comparing nodes re-binds it on the next
+        // init() while still never double-binding the same canvas.
+        if (this.canvas && this._boundCanvas !== this.canvas) {
             this.canvas.addEventListener('pointerdown', (e) => this._onPointerDown(e));
             this.canvas.addEventListener('pointermove', (e) => this._onPointerMove(e));
             this.canvas.addEventListener('pointerup', (e) => this._onPointerUp(e));
@@ -200,19 +187,24 @@ class DrawingPad {
             this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), {
                 passive: false
             });
-            this._canvasBound = true;
+            this._boundCanvas = this.canvas;
         }
 
-        // Toolbar. Each control is bound at most once (tracked in _boundControls)
-        // so repeated init() calls — which re-resolve controls against a new
-        // scope — pick up newly rendered inline buttons without stacking
-        // duplicate listeners on the ones that are already wired.
+        // Toolbar. Each control is bound at most once (tracked in
+        // _boundControls) so repeated init() calls — which re-resolve controls
+        // against a new scope — pick up newly rendered inline buttons without
+        // stacking duplicate listeners on the ones that are already wired.
+        //
+        // NOTE: these bindings are the ONLY wiring for the toolbar. The
+        // toolbar markup must not carry inline onclick/oninput attributes for
+        // the same actions, or every tap would fire twice and toggles would
+        // cancel out.
         this._boundControls = this._boundControls || new WeakSet();
-        const bind = (el, handler) => {
+        const bind = (el, handler, type = 'click') => {
             if (!el || this._boundControls.has(el)) {
                 return;
             }
-            el.addEventListener('click', handler);
+            el.addEventListener(type, handler);
             this._boundControls.add(el);
         };
 
@@ -220,57 +212,29 @@ class DrawingPad {
         bind(this.undoBtn, () => this.undoStroke());
         bind(this.gridBtn, () => this.toggleGrid());
         bind(this.refBtn, () => this.toggleReference());
-
-        const closeBtn = document.getElementById('closeDrawingPad');
-        bind(closeBtn, () => this.close());
-
-        if (this.modal && !this._modalBound) {
-            this.modal.addEventListener('click', (e) => {
-                if (e.target === this.modal) {
-                    this.close();
-                }
-            });
-            this._modalBound = true;
-        }
-    }
-
-    // ==========================================
-    // OPEN / CLOSE MODAL
-    // ==========================================
-    open(kanji) {
-        if (!this.modal) {
-            return;
-        }
-        this.modal.classList.add('show');
-
-        if (kanji) {
-            this.setKanji(kanji);
-        } else {
-            this._repaint();
-        }
-    }
-
-    close() {
-        if (!this.modal) {
-            return;
-        }
-        this.modal.classList.remove('show');
+        bind(this.widthSlider, (e) => this.setStrokeWidth(e.target.value), 'input');
     }
 
     // ==========================================
     // SET KANJI  (loads reference from KanjiVG)
     // ==========================================
     async setKanji(character) {
+        // Re-entering practice mode with the same kanji (Animate <-> Practice
+        // flips) must not wipe the user's strokes or re-fetch the reference
+        // SVG over the network. Only a genuine kanji change (or a previously
+        // failed fetch) resets the pad.
+        if (this.currentKanji === character && (this.referenceImg || this.referencePaths.length)) {
+            this._repaint();
+            return;
+        }
+
         this.currentKanji = character;
         this.strokes = [];
         this.currentStroke = [];
-        this.feedbackMessage = '';
         this.referencePaths = [];
         this.referenceImg = null;
+        this._refPointCache = null;
 
-        if (this.titleEl) {
-            this.titleEl.textContent = character;
-        }
         if (this.scoreEl) {
             this.scoreEl.textContent = '';
         }
@@ -279,15 +243,25 @@ class DrawingPad {
             this.feedbackEl.className = 'drawing-pad-feedback';
         }
 
-        // Fetch SVG via the existing app method
+        // Fetch SVG via the existing app method. Token-guard the async work:
+        // setKanji is fire-and-forget from the app side, so a slow response
+        // for one kanji must never overwrite the reference of a kanji the
+        // user has since switched to.
+        const requestToken = (this._setKanjiToken = (this._setKanjiToken || 0) + 1);
         let svgMarkup = null;
         if (window.app && typeof window.app.fetchStrokeOrderSvg === 'function') {
             svgMarkup = await window.app.fetchStrokeOrderSvg(character);
+        }
+        if (requestToken !== this._setKanjiToken) {
+            return; // superseded by a newer setKanji() call
         }
 
         if (svgMarkup) {
             this._parseReferenceSvg(svgMarkup);
             this.referenceImg = await this._svgToImage(svgMarkup);
+        }
+        if (requestToken !== this._setKanjiToken) {
+            return; // superseded while decoding the image
         }
 
         this._repaint();
@@ -401,6 +375,21 @@ class DrawingPad {
     // ==========================================
     // STROKE EVALUATION  (Phase 4 + Phase 5)
     // ==========================================
+    /**
+     * Sampled points for reference path `index`, computed lazily once per
+     * kanji. Sampling uses off-screen SVG DOM measurement, so caching matters:
+     * evaluating a single drawn stroke used to re-measure every reference
+     * path from scratch (getTotalLength/getPointAtLength per path).
+     */
+    _getRefPoints(index) {
+        if (!this._refPointCache) {
+            this._refPointCache = this.referencePaths.map((d) =>
+                this._sampleSvgPath(d, DrawingPad.RESAMPLE_POINTS)
+            );
+        }
+        return this._refPointCache[index];
+    }
+
     _evaluateStroke(strokeIndex, userPoints) {
         const result = {
             orderCorrect: true,
@@ -437,8 +426,7 @@ class DrawingPad {
         }
 
         // --- Phase 5: Snap-to-stroke scoring ---
-        const refD = this.referencePaths[strokeIndex];
-        const refPoints = this._sampleSvgPath(refD, DrawingPad.RESAMPLE_POINTS);
+        const refPoints = this._getRefPoints(strokeIndex);
         const drawnNorm = this._normalisePoints(userPoints);
         const refNorm = this._normalisePoints(refPoints);
         const dist = this._averagePointDistance(drawnNorm, refNorm);
@@ -479,8 +467,7 @@ class DrawingPad {
         const drawnNorm = this._normalisePoints(userPoints);
 
         for (let i = 0; i < this.referencePaths.length; i++) {
-            const refPts = this._sampleSvgPath(this.referencePaths[i], DrawingPad.RESAMPLE_POINTS);
-            const refNorm = this._normalisePoints(refPts);
+            const refNorm = this._normalisePoints(this._getRefPoints(i));
             const d = this._averagePointDistance(drawnNorm, refNorm);
             if (d < best.dist) {
                 best = { index: i, dist: d };
@@ -765,18 +752,10 @@ class DrawingPad {
     }
 
     _syncButtons() {
-        // Re-resolve controls each sync: the inline card markup is rebuilt
+        // Re-resolve controls each sync: the widget markup is rebuilt
         // whenever the widget re-renders (kanji change, size change, mode
         // switch), so cached nodes can become detached.
-        this.gridBtn = this._resolveControl('drawingPadGridBtn', 'drawingPadInlineGridBtn');
-        this.refBtn = this._resolveControl('drawingPadRefBtn', 'drawingPadInlineRefBtn');
-        this.clearBtn = this._resolveControl('drawingPadClearBtn', 'drawingPadInlineClearBtn');
-        this.undoBtn = this._resolveControl('drawingPadUndoBtn', 'drawingPadInlineUndoBtn');
-        this.widthSlider = this._resolveControl(
-            'drawingPadWidthSlider',
-            'drawingPadInlineWidthSlider'
-        );
-        this.widthValEl = this._resolveControl('drawingPadWidthVal', 'drawingPadInlineWidthVal');
+        this._queryControls();
 
         if (this.gridBtn) {
             this.gridBtn.classList.toggle('active', this.gridVisible);

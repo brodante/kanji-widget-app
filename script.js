@@ -1358,23 +1358,23 @@ class KanjiLearningApp {
                     </div>
                     <div class="drawing-pad-inline-controls" id="drawingPadInlineControls" style="display: none;">
                         <div class="drawing-pad-toolbar">
-                            <button type="button" id="drawingPadInlineGridBtn" class="drawing-pad-btn" onclick="app.toggleDrawingPadGrid()" title="Toggle Grid">
+                            <button type="button" id="drawingPadInlineGridBtn" class="drawing-pad-btn" title="Toggle Grid">
                                 <i class="fas fa-th"></i> Grid
                             </button>
-                            <button type="button" id="drawingPadInlineRefBtn" class="drawing-pad-btn" onclick="app.toggleDrawingPadRef()" title="Toggle Reference">
+                            <button type="button" id="drawingPadInlineRefBtn" class="drawing-pad-btn" title="Toggle Reference">
                                 <i class="fas fa-eye"></i> Trace
                             </button>
-                            <button type="button" id="drawingPadInlineUndoBtn" class="drawing-pad-btn" onclick="app.undoDrawingPadStroke()" title="Undo Stroke">
+                            <button type="button" id="drawingPadInlineUndoBtn" class="drawing-pad-btn" title="Undo Stroke">
                                 <i class="fas fa-undo"></i> Undo
                             </button>
-                            <button type="button" id="drawingPadInlineClearBtn" class="drawing-pad-btn" onclick="app.clearDrawingPadStrokes()" title="Clear Canvas">
+                            <button type="button" id="drawingPadInlineClearBtn" class="drawing-pad-btn" title="Clear Canvas">
                                 <i class="fas fa-trash"></i> Clear
                             </button>
                         </div>
                         <div class="drawing-pad-width-row">
                             <span class="drawing-pad-width-label"><i class="fas fa-pen-nib"></i> Thickness</span>
                             <div class="drawing-pad-slider-wrap">
-                                <input type="range" id="drawingPadInlineWidthSlider" min="2" max="8" step="1" value="4" oninput="app.setDrawingPadStrokeWidth(this.value)" class="drawing-pad-slider" title="Adjust stroke thickness">
+                                <input type="range" id="drawingPadInlineWidthSlider" min="2" max="8" step="1" value="4" class="drawing-pad-slider" title="Adjust stroke thickness">
                             </div>
                             <span id="drawingPadInlineWidthVal" class="drawing-pad-width-val">4px</span>
                         </div>
@@ -2493,60 +2493,23 @@ class KanjiLearningApp {
         }
     }
 
-    // The inline practice controls live inside the widget's stroke-order card,
-    // while the modal holds its own (differently-identified) controls. Returning
-    // the matching scope keeps element lookups unambiguous.
+    // The practice canvas lives in the flip-card back of the stroke-order
+    // section while the toolbar lives in the inline controls div, so the
+    // drawing pad must be scoped to an element containing BOTH. Returning
+    // just the controls div forced the canvas lookup to fall back to a
+    // document-wide getElementById, which only worked because of document
+    // ordering. Scoping to the whole stroke-order section keeps every pad
+    // lookup unambiguous.
     _drawingPadScope() {
-        return document.getElementById('drawingPadInlineControls') || document;
+        const controls = document.getElementById('drawingPadInlineControls');
+        return (controls && controls.closest('.stroke-order-section')) || document;
     }
 
-    openDrawingPad(character = null) {
-        const kanjiToOpen = character || (this.currentKanji ? this.currentKanji.character : null);
-        this.showStrokeOrderMode('practice');
-        if (window.DrawingPad) {
-            if (!this.drawingPadInstance) {
-                this.drawingPadInstance = new window.DrawingPad();
-            }
-            this.drawingPadInstance.init(this._drawingPadScope());
-            if (kanjiToOpen) {
-                this.drawingPadInstance.setKanji(kanjiToOpen);
-            }
-        }
-    }
-
-    closeDrawingPad() {
-        this.showStrokeOrderMode('animate');
-    }
-
-    toggleDrawingPadGrid() {
-        if (this.drawingPadInstance) {
-            this.drawingPadInstance.toggleGrid();
-        }
-    }
-
-    toggleDrawingPadRef() {
-        if (this.drawingPadInstance) {
-            this.drawingPadInstance.toggleReference();
-        }
-    }
-
-    undoDrawingPadStroke() {
-        if (this.drawingPadInstance) {
-            this.drawingPadInstance.undoStroke();
-        }
-    }
-
-    clearDrawingPadStrokes() {
-        if (this.drawingPadInstance) {
-            this.drawingPadInstance.clearStrokes();
-        }
-    }
-
-    setDrawingPadStrokeWidth(val) {
-        if (this.drawingPadInstance) {
-            this.drawingPadInstance.setStrokeWidth(val);
-        }
-    }
+    // NOTE: the drawing pad toolbar (Grid / Trace / Undo / Clear / thickness
+    // slider) is wired entirely by DrawingPad._bindEvents(). There are
+    // deliberately no app.toggleDrawingPad*() wrapper methods or inline
+    // onclick attributes for it — the pad must have exactly one wiring per
+    // control, or every tap toggles twice and cancels itself out.
 
     syncAISettingsUI() {
         if (!window.StorageManager) {
