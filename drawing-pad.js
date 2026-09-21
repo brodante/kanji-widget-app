@@ -50,6 +50,7 @@ class DrawingPad {
         this.guideVisible = false; // side-by-side reference panel next to the canvas
         this.feedbackTimeout = null;
         this._snapAnimFrame = null; // pending rAF id for snap glides
+        this._widthAnimFrame = null; // pending rAF id for stroke-width easing
         this.svgViewBox = { x: 0, y: 0, w: 109, h: 109 }; // KanjiVG default
 
         this._loadSettings();
@@ -85,6 +86,9 @@ class DrawingPad {
             settings.drawingPadGuide !== undefined ? settings.drawingPadGuide : false;
         this.strokeWidth =
             settings.drawingPadStrokeWidth !== undefined ? settings.drawingPadStrokeWidth : 4;
+        // Rendered width eases towards strokeWidth so slider drags feel smooth
+        // instead of snapping the ink to each new value.
+        this._displayStrokeWidth = this.strokeWidth;
     }
 
     _saveSettings() {
@@ -738,15 +742,17 @@ class DrawingPad {
         }
         const avg = scored.reduce((sum, s) => sum + s.score, 0) / scored.length;
         const orderOk = scored.every((s) => s.correct);
-        this.scoreEl.textContent = `Accuracy: ${Math.round(avg * 100)}%${
-            orderOk ? '' : '  ⚠ order'
-        }`;
+        const pct = Math.round(avg * 100);
+        this.scoreEl.textContent = `Accuracy: ${pct}%${orderOk ? '' : '  · 順番 (order)'}`;
 
+        // All strokes drawn: show a Japanese congratulation (or
+        // encouragement). No emoji — text only keeps it classy.
         if (scored.length === this.referencePaths.length) {
             if (avg >= 0.7 && orderOk) {
-                this.scoreEl.textContent += '  ✅ Well done!';
+                this.scoreEl.textContent +=
+                    pct >= 100 ? '  — パーフェクト！おめでとう！' : '  — すごい！おめでとう！';
             } else {
-                this.scoreEl.textContent += '  — try again for a better score';
+                this.scoreEl.textContent += '  — もう一度！ (once more)';
             }
         }
     }
@@ -826,10 +832,62 @@ class DrawingPad {
     }
 
     setStrokeWidth(width) {
-        this.strokeWidth = Math.min(10, Math.max(2, parseInt(width, 10) || 4));
+        const target = Math.min(10, Math.max(2, parseInt(width, 10) || 4));
+        const changed = target !== this.strokeWidth;
+        this.strokeWidth = target;
         this._saveSettings();
         this._syncButtons();
-        this._repaint();
+        if (changed) {
+            // Ease the rendered ink to the new thickness.
+            this._animateStrokeWidth();
+        } else {
+            this._repaint();
+        }
+    }
+
+    // ==========================================
+    // STROKE WIDTH EASING (smooth slider response)
+    // ==========================================
+    /**
+     * Advance the rendered stroke width one frame towards the target with an
+     * exponential ease. Split from the rAF driver so tests can step it
+     * deterministically.
+     *
+     * @returns {boolean} True if the width is still easing.
+     */
+    _strokeWidthStep() {
+        const target = this.strokeWidth;
+        const current = this._displayStrokeWidth ?? target;
+        if (current === target) {
+            return false;
+        }
+        const delta = target - current;
+        this._displayStrokeWidth = Math.abs(delta) < 0.05 ? target : current + delta * 0.3;
+        return this._displayStrokeWidth !== target;
+    }
+
+    /**
+     * Run the width easing on requestAnimationFrame until it settles. The
+     * loop only exists while an easing is in progress.
+     */
+    _animateStrokeWidth() {
+        if (this._widthAnimFrame) {
+            return;
+        }
+        if (typeof requestAnimationFrame !== 'function') {
+            this._displayStrokeWidth = this.strokeWidth;
+            this._repaint();
+            return;
+        }
+        const tick = () => {
+            this._widthAnimFrame = null;
+            const animating = this._strokeWidthStep();
+            this._repaint();
+            if (animating) {
+                this._widthAnimFrame = requestAnimationFrame(tick);
+            }
+        };
+        this._widthAnimFrame = requestAnimationFrame(tick);
     }
 
     // ==========================================
@@ -1070,21 +1128,17 @@ class DrawingPad {
 
         // 3. Completed strokes (snapped to the reference shape when enabled)
         const ink = this._inkColor();
+        const width = this._displayStrokeWidth ?? this.strokeWidth ?? DrawingPad.STROKE_WIDTH;
         this.strokes.forEach((stroke) => {
             const pts = this._getRenderPoints(stroke);
             // Accent ink for good strokes; keep semantic colours for feedback.
             const color = stroke.ink ? ink : stroke.color || ink;
-            this._drawStroke(ctx, pts, color, this.strokeWidth || DrawingPad.STROKE_WIDTH);
+            this._drawStroke(ctx, pts, color, width);
         });
 
         // 4. Current (in-progress) stroke — accent at reduced opacity
         if (this.currentStroke.length > 1) {
-            this._drawStroke(
-                ctx,
-                this.currentStroke,
-                this._withAlpha(ink, 0.55),
-                this.strokeWidth || DrawingPad.STROKE_WIDTH
-            );
+            this._drawStroke(ctx, this.currentStroke, this._withAlpha(ink, 0.55), width);
         }
     }
 

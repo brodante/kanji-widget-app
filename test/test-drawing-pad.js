@@ -260,7 +260,7 @@ async function main() {
         );
     }
 
-    console.log('\n== Scenario 4: thickness slider ==');
+    console.log('\n== Scenario 4: thickness slider (smooth easing) ==');
     {
         const dom = makeDom();
         const { window } = dom;
@@ -270,10 +270,126 @@ async function main() {
         slider.value = '7';
         slider.dispatchEvent(new window.Event('input', { bubbles: true }));
         check(
-            'slider input updates stroke width',
+            'slider input updates stroke width target',
             pad.strokeWidth === 7,
             `strokeWidth = ${pad.strokeWidth}`
         );
+        check('rendered width starts easing from the old value', pad._displayStrokeWidth === 4);
+
+        pad._strokeWidthStep();
+        check(
+            'one step lands between old and new width',
+            pad._displayStrokeWidth > 4 && pad._displayStrokeWidth < 7,
+            `_displayStrokeWidth = ${pad._displayStrokeWidth}`
+        );
+        let guard = 0;
+        while (pad._strokeWidthStep() && guard++ < 1000) {
+            /* pump the easing to completion */
+        }
+        check('easing settles exactly on the target', pad._displayStrokeWidth === 7);
+    }
+
+    console.log('\n== Scenario 11: score messages (no emoji, Japanese congrats) ==');
+    {
+        const diagonalRef = '<svg viewBox="0 0 109 109"><path d="M 10 10 L 50 50"/></svg>';
+        const twoStrokeRef =
+            '<svg viewBox="0 0 109 109"><path d="M 10 10 L 50 50"/><path d="M 20 10 L 20 50"/></svg>';
+        const map = (v) => (v / 109) * 300;
+        const EMOJIS = ['✅', '⚠️', '🎉', '❌'];
+        const noEmoji = (s) => !EMOJIS.some((e) => s.includes(e));
+
+        // Perfect stroke -> perfect congratulation.
+        {
+            const dom = makeDom();
+            const { window } = dom;
+            window.app = { fetchStrokeOrderSvg: async () => diagonalRef };
+            const pad = enterPracticeMode(window);
+            pad._svgToImage = async () => ({ ok: true });
+            stubPathSampling(pad);
+            await pad.setKanji('語');
+            commitStroke(pad, window, [
+                { x: map(10), y: map(10) },
+                { x: map(30), y: map(30) },
+                { x: map(50), y: map(50) }
+            ]);
+            const text = window.document.getElementById('drawingPadInlineScore').textContent;
+            check(
+                'perfect stroke -> パーフェクト！おめでとう！',
+                text.includes('パーフェクト') && text.includes('おめでとう') && noEmoji(text),
+                text
+            );
+        }
+
+        // Good (not perfect) stroke -> すごい！おめでとう！
+        {
+            const dom = makeDom();
+            const { window } = dom;
+            window.app = { fetchStrokeOrderSvg: async () => diagonalRef };
+            const pad = enterPracticeMode(window);
+            pad._svgToImage = async () => ({ ok: true });
+            stubPathSampling(pad);
+            await pad.setKanji('語');
+            commitStroke(pad, window, [
+                { x: 40, y: 40 },
+                { x: 140, y: 110 },
+                { x: 240, y: 240 }
+            ]);
+            const text = window.document.getElementById('drawingPadInlineScore').textContent;
+            check(
+                'good stroke -> すごい！おめでとう！ (not perfect)',
+                text.includes('すごい') &&
+                    text.includes('おめでとう') &&
+                    !text.includes('パーフェクト') &&
+                    noEmoji(text),
+                text
+            );
+        }
+
+        // Poor stroke -> もう一度！, no congratulation.
+        {
+            const dom = makeDom();
+            const { window } = dom;
+            window.app = { fetchStrokeOrderSvg: async () => diagonalRef };
+            const pad = enterPracticeMode(window);
+            pad._svgToImage = async () => ({ ok: true });
+            stubPathSampling(pad);
+            await pad.setKanji('語');
+            // Horizontal stroke vs a diagonal reference -> low score.
+            commitStroke(pad, window, [
+                { x: 30, y: 200 },
+                { x: 150, y: 200 },
+                { x: 270, y: 200 }
+            ]);
+            const text = window.document.getElementById('drawingPadInlineScore').textContent;
+            check(
+                'poor stroke -> もう一度！ (once more)',
+                text.includes('もう一度') && !text.includes('おめでとう') && noEmoji(text),
+                text
+            );
+        }
+
+        // Out-of-order stroke -> 順番 (order) marker, still no emoji.
+        {
+            const dom = makeDom();
+            const { window } = dom;
+            window.app = { fetchStrokeOrderSvg: async () => twoStrokeRef };
+            const pad = enterPracticeMode(window);
+            pad._svgToImage = async () => ({ ok: true });
+            stubPathSampling(pad);
+            await pad.setKanji('水');
+            // Draw the vertical stroke (reference path 2) first.
+            commitStroke(pad, window, [
+                { x: map(20), y: map(10) },
+                { x: map(20), y: map(30) },
+                { x: map(20), y: map(50) }
+            ]);
+            const text = window.document.getElementById('drawingPadInlineScore').textContent;
+            check(
+                'out-of-order stroke -> 順番 (order) marker',
+                text.includes('順番') && noEmoji(text),
+                text
+            );
+        }
     }
 
     console.log('\n== Scenario 5: Animate <-> Practice flip keeps strokes, no refetch ==');

@@ -2592,6 +2592,10 @@ body {
     transform: scale(1.2);
 }
 
+.drawing-pad-slider:active::-webkit-slider-thumb {
+    transform: scale(1.3);
+}
+
 .drawing-pad-slider::-moz-range-thumb {
     width: 16px;
     height: 16px;
@@ -2607,6 +2611,10 @@ body {
 
 .drawing-pad-slider::-moz-range-thumb:hover {
     transform: scale(1.2);
+}
+
+.drawing-pad-slider:active::-moz-range-thumb {
+    transform: scale(1.3);
 }
 
 .drawing-pad-width-val {
