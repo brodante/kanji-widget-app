@@ -28,3 +28,8 @@ jobs:
 
             - name: Check Prettier formatting
               run: npm run format:check
+
+            - name: Run test suites
+              run: |
+                  npm test
+                  npm run test:drawing-pad

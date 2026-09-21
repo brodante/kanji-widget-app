@@ -2368,27 +2368,275 @@ body {
     padding-top: 0.85rem;
 }
 
+.stroke-order-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
 .stroke-order-header {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--primary-color);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
 }
 
 .stroke-order-toolbar {
     display: flex;
+    gap: 0.35rem;
     justify-content: flex-end;
-    margin-bottom: 0.45rem;
 }
 
-.stroke-order-play {
+.stroke-order-mode-btn {
     border: none;
     border-radius: 999px;
-    padding: 0.35rem 0.7rem;
+    padding: 0.35rem 0.75rem;
     font-size: 0.8rem;
+    font-weight: 600;
     background: rgba(var(--primary-color-rgb), 0.12);
     color: var(--primary-color);
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.stroke-order-mode-btn:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+}
+
+.stroke-order-mode-btn.active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+
+/* Card Flip Animation for Stroke Order & Practice Drawing Pad */
+.stroke-order-flip-card {
+    perspective: 1000px;
+    width: 100%;
+}
+
+.stroke-order-flip-inner {
+    position: relative;
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.stroke-order-flip-card.flipped .stroke-order-flip-inner {
+    transform: rotateY(180deg);
+}
+
+.stroke-order-flip-front,
+.stroke-order-flip-back {
+    width: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 12px;
+}
+
+.stroke-order-flip-front {
+    position: relative;
+    z-index: 2;
+    transform: rotateY(0deg);
+}
+
+.stroke-order-flip-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    transform: rotateY(180deg);
+    background: rgba(var(--primary-color-rgb), 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stroke-order-flip-back .drawing-pad-canvas-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.stroke-order-flip-back #drawingPadCanvas {
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    touch-action: none;
+    border-radius: 12px;
+}
+
+/* Guide panel: side-by-side reference beside the practice canvas.
+   Toggled by the Guide toolbar button (adds .guide-on to the flip back). */
+.stroke-order-flip-back.guide-on {
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+}
+
+.stroke-order-flip-back.guide-on .drawing-pad-canvas-wrap {
+    width: auto;
+    flex: 1 1 auto;
+}
+
+.drawing-pad-guide {
+    display: none;
+    color: var(--primary-color);
+}
+
+.stroke-order-flip-back.guide-on .drawing-pad-guide {
+    display: flex;
+    flex: 0 0 42%;
+    aspect-ratio: 1 / 1;
+    align-items: center;
+    justify-content: center;
+    /* KanjiVG paths can touch the viewBox edges; without this padding the
+       topmost stroke gets clipped by the flip-card's overflow:hidden. */
+    box-sizing: border-box;
+    padding: 0.4rem;
+}
+
+.drawing-pad-guide svg {
+    width: 100%;
+    height: 100%;
+}
+
+.drawing-pad-guide path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.18;
+    transition:
+        opacity 0.2s ease,
+        stroke-width 0.2s ease;
+}
+
+.drawing-pad-guide path.guide-stroke-done {
+    opacity: 0.85;
+}
+
+.drawing-pad-guide path.guide-stroke-next {
+    opacity: 1;
+    stroke-width: 4.5;
+}
+
+.drawing-pad-guide text {
+    font-size: 8px !important;
+    font-family: sans-serif !important;
+    fill: rgba(255, 255, 255, 0.4) !important;
+}
+
+.drawing-pad-guide-fallback {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.drawing-pad-inline-controls {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.drawing-pad-width-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(var(--primary-color-rgb), 0.06);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.drawing-pad-width-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+    font-size: 0.78rem;
+    opacity: 0.9;
+}
+
+.drawing-pad-slider-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.drawing-pad-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(var(--primary-color-rgb), 0.2);
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.drawing-pad-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition:
+        transform 0.15s ease,
+        background 0.2s ease;
+}
+
+.drawing-pad-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.drawing-pad-slider:active::-webkit-slider-thumb {
+    transform: scale(1.3);
+}
+
+.drawing-pad-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition:
+        transform 0.15s ease,
+        background 0.2s ease;
+}
+
+.drawing-pad-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+.drawing-pad-slider:active::-moz-range-thumb {
+    transform: scale(1.3);
+}
+
+.drawing-pad-width-val {
+    min-width: 32px;
+    text-align: right;
+    font-family: var(--mono-font, monospace);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary-color);
 }
 
 .stroke-order-container {
@@ -4527,6 +4775,124 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     font-size: 0.75rem;
     opacity: 0.5;
     font-family: inherit;
+}
+.ai-trap-reason {
+    font-size: 0.72rem;
+}
+
+/* Drawing Pad Styles (inline practice panel in the widget card) */
+.drawing-pad-canvas-wrap {
+    flex: 1;
+    position: relative;
+    border-radius: 12px;
+    background: var(--surface-variant);
+    overflow: hidden;
+}
+
+#drawingPadCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.drawing-pad-feedback {
+    text-align: center;
+    font-weight: 600;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    min-height: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.drawing-pad-feedback.feedback-good {
+    background: rgba(46, 204, 113, 0.15);
+    color: var(--success-color);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.drawing-pad-feedback.feedback-ok {
+    background: rgba(241, 196, 15, 0.15);
+    color: var(--warning-color);
+    border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.drawing-pad-feedback.feedback-warn {
+    background: rgba(231, 76, 60, 0.15);
+    color: var(--error-color);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.drawing-pad-score {
+    text-align: center;
+    font-weight: 600;
+    font-family: var(--mono-font);
+    padding: 0.5rem;
+    background: rgba(var(--primary-color-rgb), 0.08);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.drawing-pad-toolbar {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.drawing-pad-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(var(--primary-color-rgb), 0.12);
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.drawing-pad-btn:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+    transform: translateY(-1px);
+}
+
+.drawing-pad-btn:active {
+    transform: translateY(0);
+}
+
+.drawing-pad-btn.active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+
+.drawing-pad-btn:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* Toolbar button icon sizes */
+.drawing-pad-btn i {
+    font-size: 1rem;
+}
+
+/* Stroke order practice button */
+.stroke-order-practice {
+    margin-left: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    background: rgba(var(--primary-color-rgb), 0.12);
+}
+
+.stroke-order-practice:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
 }
 
 .ai-trap-reason {

@@ -56,7 +56,7 @@ async function runTests() {
     await test('StorageManager default AI settings are initialized properly', () => {
         const settings = StorageManager.getAISettings();
         assert.strictEqual(settings.provider, 'gemini');
-        assert.strictEqual(settings.model, 'gemini-1.5-flash');
+        assert.strictEqual(settings.model, 'gemini-3.6-flash');
         assert.strictEqual(settings.persona, 'encouraging');
     });
 

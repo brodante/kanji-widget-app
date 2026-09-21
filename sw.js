@@ -1,9 +1,10 @@
-const CACHE_NAME = 'kanji-widgets-v4';
+const CACHE_NAME = 'kanji-widgets-v5';
 const urlsToCache = [
     '/',
     '/index.html',
     '/styles.css',
     '/script.js',
+    '/drawing-pad.js',
     '/kanji-data.js',
     '/audio-manager.js',
     '/storage-manager.js',
