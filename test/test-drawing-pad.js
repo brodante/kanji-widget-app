@@ -738,6 +738,99 @@ async function main() {
         );
     }
 
+    console.log('\n== Scenario 12: snap targets the CLOSEST stroke, not just the same shape ==');
+    {
+        // Three reference strokes: a diagonal, a horizontal at the TOP, and
+        // an identical horizontal at the BOTTOM. Shape-only matching cannot
+        // tell the two horizontals apart — position must break the tie.
+        const ref =
+            '<svg viewBox="0 0 109 109"><path d="M 10 10 L 50 50"/><path d="M 10 20 L 90 20"/><path d="M 10 80 L 90 80"/></svg>';
+        const map = (v) => (v / 109) * 300;
+
+        // a) Bottom horizontal drawn first (out of order): must snap to the
+        //    BOTTOM stroke (index 2), not the same-shaped top one (index 1).
+        {
+            const dom = makeDom();
+            const { window } = dom;
+            window.app = { fetchStrokeOrderSvg: async () => ref };
+            const pad = enterPracticeMode(window);
+            pad._svgToImage = async () => ({ ok: true });
+            stubPathSampling(pad);
+            await pad.setKanji('三');
+            commitStroke(pad, window, [
+                { x: map(15), y: map(80) },
+                { x: map(50), y: map(80) },
+                { x: map(85), y: map(80) }
+            ]);
+            const s = pad.strokes[0];
+            check(
+                'bottom horizontal snaps to the bottom stroke',
+                s.snapRefIndex === 2,
+                `snapRefIndex=${s.snapRefIndex} (1 = far-away same-shape stroke)`
+            );
+            check('still flagged out of order (it was)', s.correct === false);
+            pad.snapEnabled = true;
+            let guard = 0;
+            while (pad._snapAnimationStep() && guard++ < 1000) {
+                /* pump the glide to attachment */
+            }
+            const rp = pad._getRenderPoints(s);
+            check(
+                'snapped render lands on the bottom stroke position',
+                Math.abs(rp[0].y - map(80)) < 0.01 &&
+                    Math.abs(rp[rp.length - 1].y - map(80)) < 0.01,
+                `start.y=${rp[0].y.toFixed(2)}, end.y=${rp[rp.length - 1].y.toFixed(2)}, want ${map(80).toFixed(2)}`
+            );
+        }
+
+        // b) Diagonal drawn where it belongs -> snaps to the diagonal.
+        {
+            const dom = makeDom();
+            const { window } = dom;
+            window.app = { fetchStrokeOrderSvg: async () => ref };
+            const pad = enterPracticeMode(window);
+            pad._svgToImage = async () => ({ ok: true });
+            stubPathSampling(pad);
+            await pad.setKanji('三');
+            commitStroke(pad, window, [
+                { x: map(10), y: map(10) },
+                { x: map(30), y: map(30) },
+                { x: map(50), y: map(50) }
+            ]);
+            const s = pad.strokes[0];
+            check(
+                'in-place diagonal snaps to the diagonal',
+                s.snapRefIndex === 0 && s.correct === true,
+                `snapRefIndex=${s.snapRefIndex}, correct=${s.correct}`
+            );
+        }
+
+        // c) A scribble that resembles nothing -> never snaps.
+        {
+            const dom = makeDom();
+            const { window } = dom;
+            window.app = { fetchStrokeOrderSvg: async () => ref };
+            const pad = enterPracticeMode(window);
+            pad._svgToImage = async () => ({ ok: true });
+            stubPathSampling(pad);
+            await pad.setKanji('三');
+            const circleish = [];
+            for (let a = 0; a <= 360; a += 30) {
+                circleish.push({
+                    x: 150 + 90 * Math.cos((a * Math.PI) / 180),
+                    y: 150 + 90 * Math.sin((a * Math.PI) / 180)
+                });
+            }
+            commitStroke(pad, window, circleish);
+            const s = pad.strokes[0];
+            check(
+                'unrecognisable stroke never snaps',
+                s.snapRefIndex === null,
+                `snapRefIndex=${s.snapRefIndex}`
+            );
+        }
+    }
+
     console.log(`\n${pass} passed, ${fail} failed\n`);
     process.exit(fail ? 1 : 0);
 }

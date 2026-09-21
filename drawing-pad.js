@@ -21,6 +21,11 @@ class DrawingPad {
     static CANVAS_SIZE = 300;
     static RESAMPLE_POINTS = 64;
     static SNAP_THRESHOLD = 0.25; // normalised; lower = stricter
+    // How strongly stroke position (not just shape) picks the snap target.
+    // Shape-only matching is ambiguous in kanji — many strokes are the same
+    // shape (horizontals, diagonals...), so without this the matcher happily
+    // targets an identical stroke on the far side of the character.
+    static SNAP_POSITION_WEIGHT = 0.8;
     static STROKE_WIDTH = 4;
     static REF_OPACITY = 0.18;
     static GRID_COLOR = 'rgba(150,150,150,0.25)';
@@ -496,11 +501,13 @@ class DrawingPad {
             result.color = DrawingPad.COLOR_POOR; // poor match
         }
 
-        // A stroke that resembles a reference stroke is eligible for the
-        // snap-to-stroke render effect. Snap towards the shape the user
-        // actually drew (best match), not the order-expected one, so an
-        // out-of-order stroke still snaps to its own correct shape.
-        if (result.score > 0.2) {
+        // A stroke is eligible for the snap-to-stroke render effect when it
+        // resembles the stroke it snapped to (the one the user plausibly
+        // intended — closest + most similar), NOT the order-expected one:
+        // an out-of-order stroke scores poorly against the expected stroke
+        // but should still snap neatly onto the stroke actually drawn.
+        const matchScore = Math.max(0, 1 - bestMatch.shapeDist / DrawingPad.SNAP_THRESHOLD);
+        if (matchScore > 0.2) {
             result.snapRefIndex = bestMatch.index;
         }
 
@@ -508,20 +515,65 @@ class DrawingPad {
     }
 
     /**
-     * Find which reference path index best matches the user's drawn stroke.
+     * Find which reference stroke the user most plausibly intended to draw.
+     *
+     * Shape similarity alone is ambiguous in kanji: after normalisation many
+     * strokes look alike (every horizontal looks like every other
+     * horizontal), so a shape-only match happily targets an identical stroke
+     * on the opposite side of the character — and snap flies across the
+     * canvas. The combined metric adds the distance between the drawn
+     * stroke's centre and each reference stroke's centre (both in 0..1
+     * canvas units), so between equally-shaped candidates the NEAREST stroke
+     * wins.
+     *
+     * @param {Array<{x:number,y:number}>} userPoints Drawn stroke (canvas px).
+     * @returns {{index:number, shapeDist:number, posDist:number, dist:number}}
      */
     _findBestMatchingPath(userPoints) {
-        let best = { index: 0, dist: Infinity };
         const drawnNorm = this._normalisePoints(userPoints);
+        const drawnCentre = this._userCentreUnit(userPoints);
+        let best = { index: 0, shapeDist: Infinity, posDist: Infinity, dist: Infinity };
 
         for (let i = 0; i < this.referencePaths.length; i++) {
-            const refNorm = this._normalisePoints(this._getRefPoints(i));
-            const d = this._averagePointDistance(drawnNorm, refNorm);
-            if (d < best.dist) {
-                best = { index: i, dist: d };
+            const refPoints = this._getRefPoints(i);
+            const refNorm = this._normalisePoints(refPoints);
+            const shapeDist = this._averagePointDistance(drawnNorm, refNorm);
+            const posDist = this._centreDistance(drawnCentre, this._refCentreUnit(refPoints));
+            const dist = shapeDist + DrawingPad.SNAP_POSITION_WEIGHT * posDist;
+            if (dist < best.dist) {
+                best = { index: i, shapeDist, posDist, dist };
             }
         }
         return best;
+    }
+
+    /** Arithmetic mean point of a polyline. */
+    _centroidOf(points) {
+        let x = 0;
+        let y = 0;
+        for (const p of points) {
+            x += p.x;
+            y += p.y;
+        }
+        return { x: x / points.length, y: y / points.length };
+    }
+
+    /** Drawn stroke centre in 0..1 units of the canvas. */
+    _userCentreUnit(userPoints) {
+        const c = this._centroidOf(userPoints);
+        return { x: c.x / this.canvas.width, y: c.y / this.canvas.height };
+    }
+
+    /** Reference stroke centre in 0..1 units, mapped from the SVG viewBox. */
+    _refCentreUnit(refPoints) {
+        const c = this._centroidOf(refPoints);
+        const vb = this.svgViewBox;
+        return { x: (c.x - vb.x) / vb.w, y: (c.y - vb.y) / vb.h };
+    }
+
+    /** Distance between two 0..1-unit canvas points. */
+    _centreDistance(a, b) {
+        return Math.hypot(a.x - b.x, a.y - b.y);
     }
 
     // ==========================================
