@@ -1350,6 +1350,7 @@ class KanjiLearningApp {
                                 <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()"></div>
                             </div>
                             <div class="stroke-order-flip-back" id="strokeOrderBack">
+                                <div class="drawing-pad-guide" id="drawingPadInlineGuide" aria-hidden="true"></div>
                                 <div class="drawing-pad-canvas-wrap">
                                     <canvas id="drawingPadCanvas" width="300" height="300"></canvas>
                                 </div>
@@ -1358,14 +1359,23 @@ class KanjiLearningApp {
                     </div>
                     <div class="drawing-pad-inline-controls" id="drawingPadInlineControls" style="display: none;">
                         <div class="drawing-pad-toolbar">
+                            <button type="button" id="drawingPadInlineGuideBtn" class="drawing-pad-btn" title="Show reference beside the pad">
+                                <i class="fas fa-table-columns"></i> Guide
+                            </button>
                             <button type="button" id="drawingPadInlineGridBtn" class="drawing-pad-btn" title="Toggle Grid">
                                 <i class="fas fa-th"></i> Grid
                             </button>
                             <button type="button" id="drawingPadInlineRefBtn" class="drawing-pad-btn" title="Toggle Reference">
                                 <i class="fas fa-eye"></i> Trace
                             </button>
+                            <button type="button" id="drawingPadInlineSnapBtn" class="drawing-pad-btn" title="Snap strokes to the correct shape">
+                                <i class="fas fa-magnet"></i> Snap
+                            </button>
                             <button type="button" id="drawingPadInlineUndoBtn" class="drawing-pad-btn" title="Undo Stroke">
                                 <i class="fas fa-undo"></i> Undo
+                            </button>
+                            <button type="button" id="drawingPadInlineRedoBtn" class="drawing-pad-btn" title="Redo Stroke">
+                                <i class="fas fa-rotate-right"></i> Redo
                             </button>
                             <button type="button" id="drawingPadInlineClearBtn" class="drawing-pad-btn" title="Clear Canvas">
                                 <i class="fas fa-trash"></i> Clear

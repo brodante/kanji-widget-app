@@ -2465,6 +2465,69 @@ body {
     border-radius: 12px;
 }
 
+/* Guide panel: side-by-side reference beside the practice canvas.
+   Toggled by the Guide toolbar button (adds .guide-on to the flip back). */
+.stroke-order-flip-back.guide-on {
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+}
+
+.stroke-order-flip-back.guide-on .drawing-pad-canvas-wrap {
+    width: auto;
+    flex: 1 1 auto;
+}
+
+.drawing-pad-guide {
+    display: none;
+    color: var(--primary-color);
+}
+
+.stroke-order-flip-back.guide-on .drawing-pad-guide {
+    display: flex;
+    flex: 0 0 42%;
+    aspect-ratio: 1 / 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.drawing-pad-guide svg {
+    width: 100%;
+    height: 100%;
+}
+
+.drawing-pad-guide path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.18;
+    transition:
+        opacity 0.2s ease,
+        stroke-width 0.2s ease;
+}
+
+.drawing-pad-guide path.guide-stroke-done {
+    opacity: 0.85;
+}
+
+.drawing-pad-guide path.guide-stroke-next {
+    opacity: 1;
+    stroke-width: 4.5;
+}
+
+.drawing-pad-guide text {
+    font-size: 8px !important;
+    font-family: sans-serif !important;
+    fill: rgba(255, 255, 255, 0.4) !important;
+}
+
+.drawing-pad-guide-fallback {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
 .drawing-pad-inline-controls {
     margin-top: 0.75rem;
     display: flex;
@@ -4783,6 +4846,11 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
 .drawing-pad-btn.active {
     background: var(--primary-color);
     color: var(--on-primary);
+}
+
+.drawing-pad-btn:disabled {
+    opacity: 0.45;
+    pointer-events: none;
 }
 
 /* Toolbar button icon sizes */

@@ -3,8 +3,9 @@
  *
  * Provides a <canvas>-based drawing surface for practising kanji strokes.
  * Features: grid overlay, reference-stroke tracing, stroke-order validation,
- * and snap-to-stroke scoring — all powered by KanjiVG path data that the
- * app already fetches via KanjiLearningApp.fetchStrokeOrderSvg().
+ * snap-to-stroke scoring, redo, and a side-by-side reference guide panel —
+ * all powered by KanjiVG path data that the app already fetches via
+ * KanjiLearningApp.fetchStrokeOrderSvg().
  *
  * The pad owns ALL of its event wiring (canvas pointer events + toolbar
  * clicks + slider input). The toolbar markup must NOT also carry inline
@@ -36,13 +37,17 @@ class DrawingPad {
     constructor() {
         this.currentKanji = null;
         this.strokes = []; // completed strokes: [{points, color, correct}]
+        this.redoStack = []; // strokes removed by undoStroke(), restorable
         this.currentStroke = []; // in-progress points
         this.isDrawing = false;
         this.referencePaths = []; // parsed KanjiVG path 'd' strings
         this.referenceImg = null; // HTMLImageElement of the reference SVG
+        this.referenceSvgMarkup = null; // raw (sanitized) SVG markup, for the guide panel
         this._refPointCache = null; // sampled reference points, per kanji
         this.gridVisible = false;
         this.referenceVisible = true;
+        this.snapEnabled = false; // render completed strokes snapped to the reference shape
+        this.guideVisible = false; // side-by-side reference panel next to the canvas
         this.feedbackTimeout = null;
         this.svgViewBox = { x: 0, y: 0, w: 109, h: 109 }; // KanjiVG default
 
@@ -54,12 +59,16 @@ class DrawingPad {
         this.ctx = null;
         this.gridBtn = null;
         this.refBtn = null;
+        this.snapBtn = null;
+        this.guideBtn = null;
         this.clearBtn = null;
         this.undoBtn = null;
+        this.redoBtn = null;
         this.widthSlider = null;
         this.widthValEl = null;
         this.feedbackEl = null;
         this.scoreEl = null;
+        this.guideEl = null;
     }
 
     // ==========================================
@@ -70,6 +79,9 @@ class DrawingPad {
         this.gridVisible = settings.drawingPadGrid !== undefined ? settings.drawingPadGrid : false;
         this.referenceVisible =
             settings.drawingPadRef !== undefined ? settings.drawingPadRef : true;
+        this.snapEnabled = settings.drawingPadSnap !== undefined ? settings.drawingPadSnap : false;
+        this.guideVisible =
+            settings.drawingPadGuide !== undefined ? settings.drawingPadGuide : false;
         this.strokeWidth =
             settings.drawingPadStrokeWidth !== undefined ? settings.drawingPadStrokeWidth : 4;
     }
@@ -78,6 +90,8 @@ class DrawingPad {
         const settings = StorageManager.getItem(StorageManager.keys.SETTINGS, {});
         settings.drawingPadGrid = this.gridVisible;
         settings.drawingPadRef = this.referenceVisible;
+        settings.drawingPadSnap = this.snapEnabled;
+        settings.drawingPadGuide = this.guideVisible;
         settings.drawingPadStrokeWidth = this.strokeWidth;
         StorageManager.setItem(StorageManager.keys.SETTINGS, settings);
     }
@@ -121,6 +135,7 @@ class DrawingPad {
         // listening.
         this._bindEvents();
         this._syncButtons();
+        this._applyGuide();
         this._repaint();
     }
 
@@ -142,12 +157,16 @@ class DrawingPad {
     _queryControls() {
         this.gridBtn = this._resolveInScope('drawingPadInlineGridBtn');
         this.refBtn = this._resolveInScope('drawingPadInlineRefBtn');
+        this.snapBtn = this._resolveInScope('drawingPadInlineSnapBtn');
+        this.guideBtn = this._resolveInScope('drawingPadInlineGuideBtn');
         this.clearBtn = this._resolveInScope('drawingPadInlineClearBtn');
         this.undoBtn = this._resolveInScope('drawingPadInlineUndoBtn');
+        this.redoBtn = this._resolveInScope('drawingPadInlineRedoBtn');
         this.widthSlider = this._resolveInScope('drawingPadInlineWidthSlider');
         this.widthValEl = this._resolveInScope('drawingPadInlineWidthVal');
         this.feedbackEl = this._resolveInScope('drawingPadInlineFeedback');
         this.scoreEl = this._resolveInScope('drawingPadInlineScore');
+        this.guideEl = this._resolveInScope('drawingPadInlineGuide');
     }
 
     /**
@@ -210,8 +229,11 @@ class DrawingPad {
 
         bind(this.clearBtn, () => this.clearStrokes());
         bind(this.undoBtn, () => this.undoStroke());
+        bind(this.redoBtn, () => this.redoStroke());
         bind(this.gridBtn, () => this.toggleGrid());
         bind(this.refBtn, () => this.toggleReference());
+        bind(this.snapBtn, () => this.toggleSnap());
+        bind(this.guideBtn, () => this.toggleGuide());
         bind(this.widthSlider, (e) => this.setStrokeWidth(e.target.value), 'input');
     }
 
@@ -224,15 +246,20 @@ class DrawingPad {
         // SVG over the network. Only a genuine kanji change (or a previously
         // failed fetch) resets the pad.
         if (this.currentKanji === character && (this.referenceImg || this.referencePaths.length)) {
+            // The widget markup may have been re-rendered since (fresh, empty
+            // guide panel), so re-apply the guide state before repainting.
+            this._applyGuide();
             this._repaint();
             return;
         }
 
         this.currentKanji = character;
         this.strokes = [];
+        this.redoStack = [];
         this.currentStroke = [];
         this.referencePaths = [];
         this.referenceImg = null;
+        this.referenceSvgMarkup = null;
         this._refPointCache = null;
 
         if (this.scoreEl) {
@@ -263,7 +290,9 @@ class DrawingPad {
         if (requestToken !== this._setKanjiToken) {
             return; // superseded while decoding the image
         }
+        this.referenceSvgMarkup = svgMarkup || null;
 
+        this._renderGuide();
         this._repaint();
     }
 
@@ -363,12 +392,16 @@ class DrawingPad {
             color: result.color,
             correct: result.orderCorrect,
             score: result.score,
-            snappedPoints: result.snappedPoints
+            snapRefIndex: result.snapRefIndex
         });
+        // A freshly drawn stroke invalidates the redo history.
+        this.redoStack = [];
 
         this.currentStroke = [];
         this._showFeedback(idx, result);
         this._updateScore();
+        this._updateGuideHighlight();
+        this._syncButtons();
         this._repaint();
     }
 
@@ -399,7 +432,9 @@ class DrawingPad {
             // raw `var(--token)` strings on a stroke.
             ink: true,
             color: null,
-            snappedPoints: null
+            // Reference path index to snap this stroke to at render time
+            // (only set when the shape actually matched well enough).
+            snapRefIndex: null
         };
 
         if (this.referencePaths.length === 0) {
@@ -450,10 +485,12 @@ class DrawingPad {
             result.color = DrawingPad.COLOR_POOR; // poor match
         }
 
-        // Build snapped (interpolated) points for visual feedback
+        // A stroke that resembles a reference stroke is eligible for the
+        // snap-to-stroke render effect. Snap towards the shape the user
+        // actually drew (best match), not the order-expected one, so an
+        // out-of-order stroke still snaps to its own correct shape.
         if (result.score > 0.2) {
-            const t = Math.min(result.score, 1.0);
-            result.snappedPoints = this._interpolatePoints(userPoints, refPoints, t);
+            result.snapRefIndex = bestMatch.index;
         }
 
         return result;
@@ -710,6 +747,7 @@ class DrawingPad {
     // ==========================================
     clearStrokes() {
         this.strokes = [];
+        this.redoStack = [];
         this.currentStroke = [];
         this.isDrawing = false;
         if (this.feedbackEl) {
@@ -719,13 +757,27 @@ class DrawingPad {
         if (this.scoreEl) {
             this.scoreEl.textContent = '';
         }
+        this._updateGuideHighlight();
+        this._syncButtons();
         this._repaint();
     }
 
     undoStroke() {
         if (this.strokes.length > 0) {
-            this.strokes.pop();
+            this.redoStack.push(this.strokes.pop());
             this._updateScore();
+            this._updateGuideHighlight();
+            this._syncButtons();
+            this._repaint();
+        }
+    }
+
+    redoStroke() {
+        if (this.redoStack.length > 0) {
+            this.strokes.push(this.redoStack.pop());
+            this._updateScore();
+            this._updateGuideHighlight();
+            this._syncButtons();
             this._repaint();
         }
     }
@@ -744,11 +796,80 @@ class DrawingPad {
         this._repaint();
     }
 
+    toggleSnap() {
+        this.snapEnabled = !this.snapEnabled;
+        this._saveSettings();
+        this._syncButtons();
+        this._repaint();
+    }
+
+    toggleGuide() {
+        this.guideVisible = !this.guideVisible;
+        this._saveSettings();
+        this._syncButtons();
+        this._applyGuide();
+        this._repaint();
+    }
+
     setStrokeWidth(width) {
         this.strokeWidth = Math.min(10, Math.max(2, parseInt(width, 10) || 4));
         this._saveSettings();
         this._syncButtons();
         this._repaint();
+    }
+
+    // ==========================================
+    // GUIDE PANEL (side-by-side reference)
+    // ==========================================
+    /**
+     * Apply the guide visibility state to the DOM: toggles the layout class
+     * on the flip-card back (which shifts the canvas aside) and (re)builds
+     * the panel content when visible. Safe to call on every init().
+     */
+    _applyGuide() {
+        const back = this.canvas ? this.canvas.closest('.stroke-order-flip-back') : null;
+        if (!back || !this.guideEl) {
+            return;
+        }
+        back.classList.toggle('guide-on', this.guideVisible);
+        if (this.guideVisible) {
+            this._renderGuide();
+        }
+    }
+
+    /**
+     * Build the guide panel content from the current reference SVG. Falls
+     * back to a plain character rendering when no KanjiVG data is available.
+     */
+    _renderGuide() {
+        if (!this.guideVisible || !this.guideEl) {
+            return;
+        }
+        if (this.referenceSvgMarkup) {
+            this.guideEl.innerHTML = this.referenceSvgMarkup;
+        } else {
+            this.guideEl.innerHTML = this.currentKanji
+                ? `<div class="drawing-pad-guide-fallback japanese-text">${this.currentKanji}</div>`
+                : '';
+        }
+        this._updateGuideHighlight();
+    }
+
+    /**
+     * Highlight the guide's strokes to mirror the user's progress: strokes
+     * already drawn are accented, the upcoming stroke is emphasised, and the
+     * rest stay faint. Pure class toggling — cheap even per stroke.
+     */
+    _updateGuideHighlight() {
+        if (!this.guideVisible || !this.guideEl) {
+            return;
+        }
+        const paths = this.guideEl.querySelectorAll('path');
+        const done = this.strokes.length;
+        paths.forEach((path, i) => {
+            path.classList.toggle('guide-stroke-done', i < done);
+            path.classList.toggle('guide-stroke-next', i === done);
+        });
     }
 
     _syncButtons() {
@@ -764,6 +885,24 @@ class DrawingPad {
         if (this.refBtn) {
             this.refBtn.classList.toggle('active', this.referenceVisible);
             this.refBtn.title = this.referenceVisible ? 'Hide reference' : 'Show reference';
+        }
+        if (this.snapBtn) {
+            this.snapBtn.classList.toggle('active', this.snapEnabled);
+            this.snapBtn.title = this.snapEnabled
+                ? 'Disable snap to correct stroke shape'
+                : 'Snap strokes to the correct shape';
+        }
+        if (this.guideBtn) {
+            this.guideBtn.classList.toggle('active', this.guideVisible);
+            this.guideBtn.title = this.guideVisible
+                ? 'Hide reference panel'
+                : 'Show reference beside the pad';
+        }
+        if (this.undoBtn) {
+            this.undoBtn.disabled = this.strokes.length === 0;
+        }
+        if (this.redoBtn) {
+            this.redoBtn.disabled = this.redoStack.length === 0;
         }
         if (this.widthSlider) {
             this.widthSlider.value = this.strokeWidth;
@@ -806,6 +945,28 @@ class DrawingPad {
     // ==========================================
     // RENDERING
     // ==========================================
+    /**
+     * The points a completed stroke should be painted with. With snap
+     * enabled, a stroke that matched a reference stroke is rendered pulled
+     * towards that reference's shape (scaled by how well it matched), so the
+     * user sees where the stroke *should* have gone. With snap disabled the
+     * raw ink is shown as drawn.
+     *
+     * @param {object} stroke Completed stroke record.
+     * @returns {Array<{x:number,y:number}>} Points to paint.
+     */
+    _getRenderPoints(stroke) {
+        if (this.snapEnabled && typeof stroke.snapRefIndex === 'number' && stroke.score > 0.2) {
+            const t = Math.min(stroke.score, 1.0) * 0.85;
+            return this._interpolatePoints(
+                stroke.points,
+                this._getRefPoints(stroke.snapRefIndex),
+                t
+            );
+        }
+        return stroke.points;
+    }
+
     _repaint() {
         if (!this.ctx) {
             return;
@@ -829,10 +990,10 @@ class DrawingPad {
             this._drawGrid(ctx, w, h);
         }
 
-        // 3. Completed strokes (use snapped points for visual correction if available)
+        // 3. Completed strokes (snapped to the reference shape when enabled)
         const ink = this._inkColor();
         this.strokes.forEach((stroke) => {
-            const pts = stroke.snappedPoints || stroke.points;
+            const pts = this._getRenderPoints(stroke);
             // Accent ink for good strokes; keep semantic colours for feedback.
             const color = stroke.ink ? ink : stroke.color || ink;
             this._drawStroke(ctx, pts, color, this.strokeWidth || DrawingPad.STROKE_WIDTH);

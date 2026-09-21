@@ -8,6 +8,9 @@
  *  - canvas pointer listeners not re-binding after a widget re-render
  *  - mode flips (Animate <-> Practice) wiping strokes / re-fetching the SVG
  *
+ * Also covers the newer features: redo, snap-to-stroke, and the side-by-side
+ * guide panel.
+ *
  * Run: node test/test-drawing-pad.js
  */
 const fs = require('fs');
@@ -104,12 +107,40 @@ function enterPracticeMode(window) {
     return pad;
 }
 
+// jsdom does not implement SVGPathElement.getTotalLength/getPointAtLength.
+// Stub the sampler with a deterministic linear interpolation along the
+// "M x1 y1 L x2 y2" paths used in the mock SVGs below (test-side only).
+function stubPathSampling(pad) {
+    pad._sampleSvgPath = (d, n) => {
+        const nums = (d.match(/-?[\d.]+/g) || []).map(Number);
+        const x1 = nums[0];
+        const y1 = nums[1];
+        const x2 = nums[nums.length - 2];
+        const y2 = nums[nums.length - 1];
+        const pts = [];
+        for (let i = 0; i < n; i++) {
+            const t = n === 1 ? 0 : i / (n - 1);
+            pts.push({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t });
+        }
+        return pts;
+    };
+}
+
+// Commit a stroke through the real pointer-up code path.
+function commitStroke(pad, window, points) {
+    pad.isDrawing = true;
+    pad.currentStroke = points.map((p) => ({ ...p }));
+    pad._onPointerUp(new window.Event('pointerup'));
+}
+
 async function main() {
     console.log('\n== Guard: no double wiring in the real markup ==');
     {
         check(
             'script.js toolbar markup has no inline onclick for pad controls',
-            !/onclick="app\.(toggleDrawingPad|undoDrawingPad|clearDrawingPad)/.test(scriptSrc),
+            !/onclick="app\.(toggleDrawingPad|undoDrawingPad|redoDrawingPad|clearDrawingPad|setDrawingPad)/.test(
+                scriptSrc
+            ),
             'inline onclick would fire alongside DrawingPad listeners (double toggle)'
         );
         check(
@@ -172,15 +203,26 @@ async function main() {
                 points: [
                     { x: 1, y: 1 },
                     { x: 2, y: 2 }
-                ]
+                ],
+                ink: true,
+                color: null,
+                correct: true,
+                score: 0.9,
+                snapRefIndex: null
             },
             {
                 points: [
                     { x: 3, y: 3 },
                     { x: 4, y: 4 }
-                ]
+                ],
+                ink: true,
+                color: null,
+                correct: true,
+                score: 0.9,
+                snapRefIndex: null
             }
         ];
+        pad._syncButtons(); // real commits re-sync button states; mirror that
 
         window.document.getElementById('drawingPadInlineUndoBtn').click();
         check(
@@ -301,6 +343,226 @@ async function main() {
             'pad keeps the reference of the most recent kanji',
             pad.currentKanji === '水' && /^M 5,/.test(pad.referencePaths[0]),
             `currentKanji = ${pad.currentKanji}, referencePaths[0] = ${pad.referencePaths[0]}`
+        );
+    }
+
+    console.log('\n== Scenario 7: Redo restores undone strokes ==');
+    {
+        const dom = makeDom();
+        const { window } = dom;
+        const doc = window.document;
+        const pad = enterPracticeMode(window);
+        check(
+            'undo disabled with empty canvas',
+            doc.getElementById('drawingPadInlineUndoBtn').disabled === true
+        );
+        check(
+            'redo disabled with empty history',
+            doc.getElementById('drawingPadInlineRedoBtn').disabled === true
+        );
+
+        const mk = (n) => ({
+            points: [
+                { x: n, y: n },
+                { x: n + 1, y: n + 1 }
+            ],
+            ink: true,
+            color: null,
+            correct: true,
+            score: 0.9,
+            snapRefIndex: null
+        });
+        pad.strokes = [mk(1), mk(2)];
+        pad._syncButtons(); // real commits re-sync button states; mirror that
+
+        doc.getElementById('drawingPadInlineUndoBtn').click();
+        check(
+            'undo -> redo enabled, one stroke left',
+            pad.strokes.length === 1 &&
+                pad.redoStack.length === 1 &&
+                !doc.getElementById('drawingPadInlineRedoBtn').disabled
+        );
+
+        doc.getElementById('drawingPadInlineRedoBtn').click();
+        check(
+            'redo restores the stroke',
+            pad.strokes.length === 2 &&
+                pad.redoStack.length === 0 &&
+                doc.getElementById('drawingPadInlineRedoBtn').disabled
+        );
+
+        doc.getElementById('drawingPadInlineUndoBtn').click();
+        doc.getElementById('drawingPadInlineUndoBtn').click();
+        check(
+            'double undo empties canvas, history holds 2',
+            pad.strokes.length === 0 &&
+                pad.redoStack.length === 2 &&
+                doc.getElementById('drawingPadInlineUndoBtn').disabled
+        );
+
+        // Drawing a new stroke must invalidate the redo history.
+        commitStroke(pad, window, [
+            { x: 1, y: 1 },
+            { x: 2, y: 2 }
+        ]);
+        check(
+            'new stroke clears the redo history',
+            pad.strokes.length === 1 &&
+                pad.redoStack.length === 0 &&
+                doc.getElementById('drawingPadInlineRedoBtn').disabled
+        );
+    }
+
+    console.log('\n== Scenario 8: Snap-to-stroke rendering ==');
+    {
+        const dom = makeDom();
+        const { window } = dom;
+        const doc = window.document;
+        window.app = {
+            fetchStrokeOrderSvg: async () =>
+                '<svg viewBox="0 0 109 109"><path d="M 10 10 L 50 50"/></svg>'
+        };
+        const pad = enterPracticeMode(window);
+        pad._svgToImage = async () => ({ ok: true });
+        stubPathSampling(pad);
+        await pad.setKanji('語');
+
+        // Draw a diagonal resembling the reference stroke.
+        commitStroke(pad, window, [
+            { x: 30, y: 30 },
+            { x: 150, y: 150 },
+            { x: 270, y: 270 }
+        ]);
+        check('stroke committed', pad.strokes.length === 1);
+        const stroke = pad.strokes[0];
+        check(
+            'matched stroke records a snap target',
+            stroke.snapRefIndex === 0 && stroke.score > 0.2,
+            `score=${stroke.score}, snapRefIndex=${stroke.snapRefIndex}`
+        );
+
+        check('snap off -> raw points rendered', pad._getRenderPoints(stroke) === stroke.points);
+
+        doc.getElementById('drawingPadInlineSnapBtn').click();
+        check(
+            'snap toggle activates',
+            pad.snapEnabled === true &&
+                doc.getElementById('drawingPadInlineSnapBtn').classList.contains('active')
+        );
+
+        const snapped = pad._getRenderPoints(stroke);
+        check(
+            'snap on -> points pulled towards the reference shape',
+            snapped !== stroke.points &&
+                snapped.length === window.DrawingPad.RESAMPLE_POINTS &&
+                stroke.points.length !== snapped.length,
+            'render points unchanged after enabling snap'
+        );
+        // The reference diagonal maps to canvas coords (10..50)*300/109; the
+        // snapped midpoint must sit strictly between the raw and ideal midpoints.
+        const rawMid = stroke.points[1];
+        const snappedMid = snapped[1];
+        const idealMid = { x: 30 * (300 / 109), y: 30 * (300 / 109) };
+        const distRaw = Math.hypot(rawMid.x - idealMid.x, rawMid.y - idealMid.y);
+        const distSnapped = Math.hypot(snappedMid.x - idealMid.x, snappedMid.y - idealMid.y);
+        check(
+            'snapped stroke is closer to the ideal shape than the raw one',
+            distSnapped < distRaw,
+            `distSnapped=${distSnapped.toFixed(2)} >= distRaw=${distRaw.toFixed(2)}`
+        );
+
+        doc.getElementById('drawingPadInlineSnapBtn').click();
+        check(
+            'snap toggle deactivates and renders raw again',
+            pad.snapEnabled === false && pad._getRenderPoints(stroke) === stroke.points
+        );
+    }
+
+    console.log('\n== Scenario 9: Guide panel (side-by-side reference) ==');
+    {
+        const dom = makeDom();
+        const { window } = dom;
+        const doc = window.document;
+        window.app = {
+            fetchStrokeOrderSvg: async () =>
+                '<svg viewBox="0 0 109 109"><path d="M 10 10 L 50 50"/><path d="M 20 10 L 20 50"/></svg>'
+        };
+        const pad = enterPracticeMode(window);
+        pad._svgToImage = async () => ({ ok: true });
+        stubPathSampling(pad);
+        await pad.setKanji('水');
+
+        const back = doc.getElementById('strokeOrderBack');
+        const guide = doc.getElementById('drawingPadInlineGuide');
+        check(
+            'guide off by default (pad centred)',
+            !back.classList.contains('guide-on') && guide.innerHTML === ''
+        );
+
+        doc.getElementById('drawingPadInlineGuideBtn').click();
+        check(
+            'guide on shifts layout (guide-on class)',
+            back.classList.contains('guide-on') && pad.guideVisible === true
+        );
+        check('guide shows the reference SVG', !!guide.querySelector('svg'));
+        const paths = Array.from(guide.querySelectorAll('path'));
+        check(
+            'first stroke marked as next before drawing',
+            paths[0].classList.contains('guide-stroke-next') &&
+                !paths[0].classList.contains('guide-stroke-done')
+        );
+
+        commitStroke(pad, window, [
+            { x: 30, y: 30 },
+            { x: 150, y: 150 },
+            { x: 270, y: 270 }
+        ]);
+        check(
+            'after stroke 1: done on first, next on second',
+            paths[0].classList.contains('guide-stroke-done') &&
+                paths[1].classList.contains('guide-stroke-next')
+        );
+
+        doc.getElementById('drawingPadInlineUndoBtn').click();
+        check(
+            'undo moves the guide highlight back',
+            !paths[0].classList.contains('guide-stroke-done') &&
+                paths[0].classList.contains('guide-stroke-next') &&
+                !paths[1].classList.contains('guide-stroke-next')
+        );
+
+        doc.getElementById('drawingPadInlineGuideBtn').click();
+        check(
+            'guide off restores centred pad',
+            !back.classList.contains('guide-on') && pad.guideVisible === false
+        );
+
+        // Guide without KanjiVG data falls back to the plain character.
+        window.app.fetchStrokeOrderSvg = async () => null;
+        await pad.setKanji('字');
+        doc.getElementById('drawingPadInlineGuideBtn').click();
+        check('guide falls back to the raw character', guide.textContent.includes('字'));
+    }
+
+    console.log('\n== Scenario 10: snap & guide settings persist ==');
+    {
+        const dom = makeDom();
+        const { window } = dom;
+        const doc = window.document;
+        enterPracticeMode(window);
+
+        doc.getElementById('drawingPadInlineSnapBtn').click();
+        doc.getElementById('drawingPadInlineGuideBtn').click();
+        const stored = window.StorageManager.getItem('kw_settings', {});
+        check(
+            'toggles saved to settings',
+            stored.drawingPadSnap === true && stored.drawingPadGuide === true
+        );
+
+        const fresh = new window.DrawingPad();
+        check(
+            'new pad instance restores toggles',
+            fresh.snapEnabled === true && fresh.guideVisible === true
         );
     }
 
