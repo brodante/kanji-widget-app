@@ -1358,28 +1358,28 @@ class KanjiLearningApp {
                     </div>
                     <div class="drawing-pad-inline-controls" id="drawingPadInlineControls" style="display: none;">
                         <div class="drawing-pad-toolbar">
-                            <button type="button" id="drawingPadGridBtn" class="drawing-pad-btn" onclick="app.toggleDrawingPadGrid()" title="Toggle Grid">
+                            <button type="button" id="drawingPadInlineGridBtn" class="drawing-pad-btn" onclick="app.toggleDrawingPadGrid()" title="Toggle Grid">
                                 <i class="fas fa-th"></i> Grid
                             </button>
-                            <button type="button" id="drawingPadRefBtn" class="drawing-pad-btn" onclick="app.toggleDrawingPadRef()" title="Toggle Reference">
+                            <button type="button" id="drawingPadInlineRefBtn" class="drawing-pad-btn" onclick="app.toggleDrawingPadRef()" title="Toggle Reference">
                                 <i class="fas fa-eye"></i> Trace
                             </button>
-                            <button type="button" id="drawingPadUndoBtn" class="drawing-pad-btn" onclick="app.undoDrawingPadStroke()" title="Undo Stroke">
+                            <button type="button" id="drawingPadInlineUndoBtn" class="drawing-pad-btn" onclick="app.undoDrawingPadStroke()" title="Undo Stroke">
                                 <i class="fas fa-undo"></i> Undo
                             </button>
-                            <button type="button" id="drawingPadClearBtn" class="drawing-pad-btn" onclick="app.clearDrawingPadStrokes()" title="Clear Canvas">
+                            <button type="button" id="drawingPadInlineClearBtn" class="drawing-pad-btn" onclick="app.clearDrawingPadStrokes()" title="Clear Canvas">
                                 <i class="fas fa-trash"></i> Clear
                             </button>
                         </div>
                         <div class="drawing-pad-width-row">
                             <span class="drawing-pad-width-label"><i class="fas fa-pen-nib"></i> Thickness</span>
                             <div class="drawing-pad-slider-wrap">
-                                <input type="range" id="drawingPadWidthSlider" min="2" max="8" step="1" value="4" oninput="app.setDrawingPadStrokeWidth(this.value)" class="drawing-pad-slider" title="Adjust stroke thickness">
+                                <input type="range" id="drawingPadInlineWidthSlider" min="2" max="8" step="1" value="4" oninput="app.setDrawingPadStrokeWidth(this.value)" class="drawing-pad-slider" title="Adjust stroke thickness">
                             </div>
-                            <span id="drawingPadWidthVal" class="drawing-pad-width-val">4px</span>
+                            <span id="drawingPadInlineWidthVal" class="drawing-pad-width-val">4px</span>
                         </div>
-                        <div id="drawingPadFeedback" class="drawing-pad-feedback"></div>
-                        <div id="drawingPadScore" class="drawing-pad-score"></div>
+                        <div id="drawingPadInlineFeedback" class="drawing-pad-feedback"></div>
+                        <div id="drawingPadInlineScore" class="drawing-pad-score"></div>
                     </div>
                 </div>
                 <div class="widget-actions">
@@ -2470,7 +2470,9 @@ class KanjiLearningApp {
                 if (!this.drawingPadInstance) {
                     this.drawingPadInstance = new window.DrawingPad();
                 }
-                this.drawingPadInstance.init();
+                // Scope the pad to the inline controls so it never collides with
+                // the identically-purposed modal controls.
+                this.drawingPadInstance.init(this._drawingPadScope());
                 if (this.currentKanji?.character) {
                     this.drawingPadInstance.setKanji(this.currentKanji.character);
                 }
@@ -2491,6 +2493,13 @@ class KanjiLearningApp {
         }
     }
 
+    // The inline practice controls live inside the widget's stroke-order card,
+    // while the modal holds its own (differently-identified) controls. Returning
+    // the matching scope keeps element lookups unambiguous.
+    _drawingPadScope() {
+        return document.getElementById('drawingPadInlineControls') || document;
+    }
+
     openDrawingPad(character = null) {
         const kanjiToOpen = character || (this.currentKanji ? this.currentKanji.character : null);
         this.showStrokeOrderMode('practice');
@@ -2498,7 +2507,7 @@ class KanjiLearningApp {
             if (!this.drawingPadInstance) {
                 this.drawingPadInstance = new window.DrawingPad();
             }
-            this.drawingPadInstance.init();
+            this.drawingPadInstance.init(this._drawingPadScope());
             if (kanjiToOpen) {
                 this.drawingPadInstance.setKanji(kanjiToOpen);
             }

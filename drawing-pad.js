@@ -18,6 +18,12 @@ class DrawingPad {
     static STROKE_WIDTH = 4;
     static REF_OPACITY = 0.18;
     static GRID_COLOR = 'rgba(150,150,150,0.25)';
+    // Fallback accent used when --primary-color can't be resolved.
+    static FALLBACK_INK = '#6200ee';
+    // Semantic colours for stroke feedback (order / accuracy).
+    static COLOR_OUT_OF_ORDER = '#e67e22';
+    static COLOR_MEDIOCRE = '#f39c12';
+    static COLOR_POOR = '#e74c3c';
 
     // ==========================================
     // CONSTRUCTOR
@@ -73,19 +79,19 @@ class DrawingPad {
     // ==========================================
     // INITIALISATION (called once after DOM ready)
     // ==========================================
-    init() {
-        this.modal = document.getElementById('drawingPadModal');
-        this.canvas = document.getElementById('drawingPadCanvas');
-        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
-        this.gridBtn = document.getElementById('drawingPadGridBtn');
-        this.refBtn = document.getElementById('drawingPadRefBtn');
-        this.clearBtn = document.getElementById('drawingPadClearBtn');
-        this.undoBtn = document.getElementById('drawingPadUndoBtn');
-        this.widthSlider = document.getElementById('drawingPadWidthSlider');
-        this.widthValEl = document.getElementById('drawingPadWidthVal');
-        this.feedbackEl = document.getElementById('drawingPadFeedback');
-        this.titleEl = document.getElementById('drawingPadTitle');
-        this.scoreEl = document.getElementById('drawingPadScore');
+    /**
+     * Initialise the pad against a specific DOM scope.
+     *
+     * The inline practice controls (rendered inside the widget card) and the
+     * standalone modal both contain a toolbar. Passing `root` lets us resolve
+     * the correct set of controls and avoids the duplicate-ID trap where
+     * getElementById() would always return the first match in the document.
+     *
+     * @param {Element|Document} [root] Element to query controls within.
+     */
+    init(root = document) {
+        this.root = root || document;
+        this._queryElements();
 
         if (!this.canvas || !this.ctx) {
             console.warn('DrawingPad: canvas element not found.');
@@ -99,46 +105,132 @@ class DrawingPad {
             this.canvas.height = DrawingPad.CANVAS_SIZE;
         }
 
+        // Bind listeners to whatever controls this scope resolved. The pad
+        // tracks which nodes are already wired (_canvasBound / _boundControls),
+        // so repeated init() calls (e.g. every Animate <-> Practice switch, or
+        // re-rendered inline markup) bind only the new nodes and never stack
+        // duplicate handlers on the ones already listening.
         this._bindEvents();
         this._syncButtons();
+        this._repaint();
+    }
+
+    /**
+     * Resolve every element the pad interacts with inside the current scope.
+     * Both the inline and modal control sets are supported: inline controls
+     * use an "Inline" infix while the modal keeps the original ids.
+     */
+    _queryElements() {
+        this.modal = this._resolveInScope('drawingPadModal');
+        this.canvas = this._resolveInScope('drawingPadCanvas');
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+        this.gridBtn = this._resolveControl('drawingPadGridBtn', 'drawingPadInlineGridBtn');
+        this.refBtn = this._resolveControl('drawingPadRefBtn', 'drawingPadInlineRefBtn');
+        this.clearBtn = this._resolveControl('drawingPadClearBtn', 'drawingPadInlineClearBtn');
+        this.undoBtn = this._resolveControl('drawingPadUndoBtn', 'drawingPadInlineUndoBtn');
+        this.widthSlider = this._resolveControl(
+            'drawingPadWidthSlider',
+            'drawingPadInlineWidthSlider'
+        );
+        this.widthValEl = this._resolveControl('drawingPadWidthVal', 'drawingPadInlineWidthVal');
+        this.feedbackEl = this._resolveControl('drawingPadFeedback', 'drawingPadInlineFeedback');
+        this.titleEl = this._resolveInScope('drawingPadTitle');
+        this.scoreEl = this._resolveControl('drawingPadScore', 'drawingPadInlineScore');
+    }
+
+    /**
+     * Resolve a control id inside the current scope, preferring the
+     * scope-local match.
+     *
+     * The inline practice panel and the modal both render toolbars, and the
+     * inline ids carry an "Inline" infix. Blindly trying the modal id first
+     * (via document.getElementById) returned the hidden modal element even
+     * when the visible inline control was in scope — which silently sent
+     * feedback text and `.active` toggles to the wrong element.
+     *
+     * @param {string} id Element id to look up.
+     * @returns {Element|null}
+     */
+    _resolveInScope(id) {
+        const scope = this.root || document;
+        if (scope && scope !== document && scope.querySelector) {
+            const local = scope.querySelector(`#${id}`);
+            if (local) {
+                return local;
+            }
+        }
+        return document.getElementById(id);
+    }
+
+    /**
+     * Resolve one of two id variants (modal id vs inline id), always
+     * preferring whichever variant actually exists inside the current scope.
+     *
+     * Both variants must be checked against the scope *before* falling back
+     * to the document, otherwise the `||` chain short-circuits on the hidden
+     * modal element and the visible inline control never gets resolved.
+     *
+     * @param {string} modalId Id used by the standalone modal markup.
+     * @param {string} inlineId Id used by the inline practice markup.
+     * @returns {Element|null}
+     */
+    _resolveControl(modalId, inlineId) {
+        const scope = this.root || document;
+        if (scope && scope !== document && scope.querySelector) {
+            const local = scope.querySelector(`#${modalId}`) || scope.querySelector(`#${inlineId}`);
+            if (local) {
+                return local;
+            }
+        }
+        return document.getElementById(modalId) || document.getElementById(inlineId);
     }
 
     // ==========================================
     // EVENT BINDING
     // ==========================================
     _bindEvents() {
-        // Pointer events for unified mouse / touch / pen input
-        this.canvas.addEventListener('pointerdown', (e) => this._onPointerDown(e));
-        this.canvas.addEventListener('pointermove', (e) => this._onPointerMove(e));
-        this.canvas.addEventListener('pointerup', (e) => this._onPointerUp(e));
-        this.canvas.addEventListener('pointerleave', (e) => this._onPointerUp(e));
-        // Prevent default touch scroll / zoom while drawing
-        this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        // Pointer events for unified mouse / touch / pen input.
+        // Guard against re-binding the same canvas (e.g. across init calls).
+        if (this.canvas && !this._canvasBound) {
+            this.canvas.addEventListener('pointerdown', (e) => this._onPointerDown(e));
+            this.canvas.addEventListener('pointermove', (e) => this._onPointerMove(e));
+            this.canvas.addEventListener('pointerup', (e) => this._onPointerUp(e));
+            this.canvas.addEventListener('pointerleave', (e) => this._onPointerUp(e));
+            // Prevent default touch scroll / zoom while drawing
+            this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), {
+                passive: false
+            });
+            this._canvasBound = true;
+        }
 
-        // Toolbar
-        if (this.clearBtn) {
-            this.clearBtn.addEventListener('click', () => this.clearStrokes());
-        }
-        if (this.undoBtn) {
-            this.undoBtn.addEventListener('click', () => this.undoStroke());
-        }
-        if (this.gridBtn) {
-            this.gridBtn.addEventListener('click', () => this.toggleGrid());
-        }
-        if (this.refBtn) {
-            this.refBtn.addEventListener('click', () => this.toggleReference());
-        }
+        // Toolbar. Each control is bound at most once (tracked in _boundControls)
+        // so repeated init() calls — which re-resolve controls against a new
+        // scope — pick up newly rendered inline buttons without stacking
+        // duplicate listeners on the ones that are already wired.
+        this._boundControls = this._boundControls || new WeakSet();
+        const bind = (el, handler) => {
+            if (!el || this._boundControls.has(el)) {
+                return;
+            }
+            el.addEventListener('click', handler);
+            this._boundControls.add(el);
+        };
+
+        bind(this.clearBtn, () => this.clearStrokes());
+        bind(this.undoBtn, () => this.undoStroke());
+        bind(this.gridBtn, () => this.toggleGrid());
+        bind(this.refBtn, () => this.toggleReference());
 
         const closeBtn = document.getElementById('closeDrawingPad');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => this.close());
-        }
-        if (this.modal) {
+        bind(closeBtn, () => this.close());
+
+        if (this.modal && !this._modalBound) {
             this.modal.addEventListener('click', (e) => {
                 if (e.target === this.modal) {
                     this.close();
                 }
             });
+            this._modalBound = true;
         }
     }
 
@@ -292,6 +384,8 @@ class DrawingPad {
 
         this.strokes.push({
             points: this.currentStroke.slice(),
+            // `ink` = paint with the live theme accent at render time.
+            ink: result.ink,
             color: result.color,
             correct: result.orderCorrect,
             score: result.score,
@@ -311,7 +405,11 @@ class DrawingPad {
         const result = {
             orderCorrect: true,
             score: 1.0,
-            color: 'var(--primary-color, #2c3e50)',
+            // `ink: true` means "paint with the live theme accent" at render
+            // time. Canvas 2D cannot resolve CSS variables, so we never store
+            // raw `var(--token)` strings on a stroke.
+            ink: true,
+            color: null,
             snappedPoints: null
         };
 
@@ -326,13 +424,15 @@ class DrawingPad {
         const bestMatch = this._findBestMatchingPath(userPoints);
         if (bestMatch.index !== strokeIndex) {
             result.orderCorrect = false;
-            result.color = '#e67e22'; // orange = out-of-order
+            result.ink = false;
+            result.color = DrawingPad.COLOR_OUT_OF_ORDER;
         }
 
         // If the user has drawn more strokes than the reference has, skip scoring
         if (strokeIndex >= this.referencePaths.length) {
             result.score = 0;
-            result.color = '#e74c3c'; // red = extra stroke
+            result.ink = false;
+            result.color = DrawingPad.COLOR_POOR; // red = extra stroke
             return result;
         }
 
@@ -345,11 +445,21 @@ class DrawingPad {
         result.score = Math.max(0, 1.0 - dist / DrawingPad.SNAP_THRESHOLD);
 
         if (result.score >= 0.7) {
-            result.color = result.orderCorrect ? 'var(--primary-color, #27ae60)' : '#e67e22';
+            // Good + correctly ordered => theme accent ink (matches the
+            // stroke-order preview). Out-of-order keeps the warning colour.
+            if (result.orderCorrect) {
+                result.ink = true;
+                result.color = null;
+            } else {
+                result.ink = false;
+                result.color = DrawingPad.COLOR_OUT_OF_ORDER;
+            }
         } else if (result.score >= 0.35) {
-            result.color = '#f39c12'; // mediocre
+            result.ink = false;
+            result.color = DrawingPad.COLOR_MEDIOCRE; // mediocre
         } else {
-            result.color = '#e74c3c'; // poor match
+            result.ink = false;
+            result.color = DrawingPad.COLOR_POOR; // poor match
         }
 
         // Build snapped (interpolated) points for visual feedback
@@ -655,10 +765,18 @@ class DrawingPad {
     }
 
     _syncButtons() {
-        this.gridBtn = document.getElementById('drawingPadGridBtn');
-        this.refBtn = document.getElementById('drawingPadRefBtn');
-        this.widthSlider = document.getElementById('drawingPadWidthSlider');
-        this.widthValEl = document.getElementById('drawingPadWidthVal');
+        // Re-resolve controls each sync: the inline card markup is rebuilt
+        // whenever the widget re-renders (kanji change, size change, mode
+        // switch), so cached nodes can become detached.
+        this.gridBtn = this._resolveControl('drawingPadGridBtn', 'drawingPadInlineGridBtn');
+        this.refBtn = this._resolveControl('drawingPadRefBtn', 'drawingPadInlineRefBtn');
+        this.clearBtn = this._resolveControl('drawingPadClearBtn', 'drawingPadInlineClearBtn');
+        this.undoBtn = this._resolveControl('drawingPadUndoBtn', 'drawingPadInlineUndoBtn');
+        this.widthSlider = this._resolveControl(
+            'drawingPadWidthSlider',
+            'drawingPadInlineWidthSlider'
+        );
+        this.widthValEl = this._resolveControl('drawingPadWidthVal', 'drawingPadInlineWidthVal');
 
         if (this.gridBtn) {
             this.gridBtn.classList.toggle('active', this.gridVisible);
@@ -674,6 +792,36 @@ class DrawingPad {
         if (this.widthValEl) {
             this.widthValEl.textContent = `${this.strokeWidth}px`;
         }
+    }
+
+    // ==========================================
+    // COLOUR RESOLUTION
+    // ==========================================
+    /**
+     * Resolve a CSS custom property to a concrete colour string.
+     *
+     * Canvas 2D strokeStyle/fillStyle cannot understand `var(--token)` values:
+     * assigning one is silently ignored and the context keeps its previous
+     * colour (which is why ink stayed black). We therefore read the computed
+     * value off the document root and use that instead.
+     *
+     * @param {string} token CSS custom property name, e.g. '--primary-color'.
+     * @returns {string} A concrete colour usable by canvas, or the fallback.
+     */
+    _resolveCssColor(token) {
+        if (typeof window === 'undefined' || !document?.documentElement) {
+            return DrawingPad.FALLBACK_INK;
+        }
+        const value = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+        return value || DrawingPad.FALLBACK_INK;
+    }
+
+    /**
+     * The live ink colour: always the theme accent, matching the stroke-order
+     * preview. Resolved on every paint so theme changes apply immediately.
+     */
+    _inkColor() {
+        return this._resolveCssColor('--primary-color');
     }
 
     // ==========================================
@@ -703,20 +851,58 @@ class DrawingPad {
         }
 
         // 3. Completed strokes (use snapped points for visual correction if available)
+        const ink = this._inkColor();
         this.strokes.forEach((stroke) => {
             const pts = stroke.snappedPoints || stroke.points;
-            this._drawStroke(ctx, pts, stroke.color, this.strokeWidth || DrawingPad.STROKE_WIDTH);
+            // Accent ink for good strokes; keep semantic colours for feedback.
+            const color = stroke.ink ? ink : stroke.color || ink;
+            this._drawStroke(ctx, pts, color, this.strokeWidth || DrawingPad.STROKE_WIDTH);
         });
 
-        // 4. Current (in-progress) stroke
+        // 4. Current (in-progress) stroke — accent at reduced opacity
         if (this.currentStroke.length > 1) {
             this._drawStroke(
                 ctx,
                 this.currentStroke,
-                'rgba(100,100,100,0.6)',
+                this._withAlpha(ink, 0.55),
                 this.strokeWidth || DrawingPad.STROKE_WIDTH
             );
         }
+    }
+
+    /**
+     * Apply an alpha channel to a CSS colour for canvas use.
+     * Supports #rgb, #rrggbb, rgb()/rgba(); otherwise returns the input.
+     */
+    _withAlpha(color, alpha) {
+        if (!color) {
+            return color;
+        }
+        const value = String(color).trim();
+
+        if (value.startsWith('#')) {
+            let r, g, b;
+            if (value.length === 4) {
+                r = parseInt(value[1] + value[1], 16);
+                g = parseInt(value[2] + value[2], 16);
+                b = parseInt(value[3] + value[3], 16);
+            } else if (value.length === 7) {
+                r = parseInt(value.slice(1, 3), 16);
+                g = parseInt(value.slice(3, 5), 16);
+                b = parseInt(value.slice(5, 7), 16);
+            }
+            if (r !== undefined && !Number.isNaN(r) && !Number.isNaN(g) && !Number.isNaN(b)) {
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+        }
+
+        const rgb = value.match(/^rgba?\(([^)]+)\)$/i);
+        if (rgb) {
+            const parts = rgb[1].split(',').map((p) => p.trim());
+            return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+        }
+
+        return value;
     }
 
     _drawStroke(ctx, points, color, width) {
