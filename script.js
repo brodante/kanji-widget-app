@@ -1368,7 +1368,7 @@ class KanjiLearningApp {
                             <button type="button" id="drawingPadInlineRefBtn" class="drawing-pad-btn" title="Toggle Reference">
                                 <i class="fas fa-eye"></i> Trace
                             </button>
-                            <button type="button" id="drawingPadInlineSnapBtn" class="drawing-pad-btn" title="Snap strokes to the correct shape">
+                            <button type="button" id="drawingPadInlineSnapBtn" class="drawing-pad-btn" title="Snap strokes perfectly onto the reference">
                                 <i class="fas fa-magnet"></i> Snap
                             </button>
                             <button type="button" id="drawingPadInlineUndoBtn" class="drawing-pad-btn" title="Undo Stroke">

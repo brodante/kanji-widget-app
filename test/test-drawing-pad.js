@@ -413,7 +413,7 @@ async function main() {
         );
     }
 
-    console.log('\n== Scenario 8: Snap-to-stroke rendering ==');
+    console.log('\n== Scenario 8: Snap-to-stroke rendering (perfect attachment) ==');
     {
         const dom = makeDom();
         const { window } = dom;
@@ -450,31 +450,87 @@ async function main() {
                 doc.getElementById('drawingPadInlineSnapBtn').classList.contains('active')
         );
 
+        // One glide step must land strictly between raw (0) and attached (1).
+        pad._snapAnimationStep();
+        check(
+            'glide is progressive (starts from the drawn ink)',
+            stroke._snapDisplayT > 0 && stroke._snapDisplayT < 1,
+            `_snapDisplayT = ${stroke._snapDisplayT}`
+        );
+
+        // Pump the glide to completion (as the rAF loop would).
+        let guard = 0;
+        while (pad._snapAnimationStep() && guard++ < 1000) {
+            /* pump the glide to completion */
+        }
+        check('glide settles at full attachment', stroke._snapDisplayT === 1);
+
         const snapped = pad._getRenderPoints(stroke);
         check(
-            'snap on -> points pulled towards the reference shape',
-            snapped !== stroke.points &&
-                snapped.length === window.DrawingPad.RESAMPLE_POINTS &&
-                stroke.points.length !== snapped.length,
+            'attached stroke renders as the reference polyline',
+            snapped !== stroke.points && snapped.length === window.DrawingPad.RESAMPLE_POINTS,
             'render points unchanged after enabling snap'
         );
-        // The reference diagonal maps to canvas coords (10..50)*300/109; the
-        // snapped midpoint must sit strictly between the raw and ideal midpoints.
-        const rawMid = stroke.points[1];
-        const snappedMid = snapped[1];
-        const idealMid = { x: 30 * (300 / 109), y: 30 * (300 / 109) };
-        const distRaw = Math.hypot(rawMid.x - idealMid.x, rawMid.y - idealMid.y);
-        const distSnapped = Math.hypot(snappedMid.x - idealMid.x, snappedMid.y - idealMid.y);
+
+        // PERFECT ATTACHMENT: the rendered points must coincide exactly with
+        // the reference stroke mapped into canvas coordinates.
+        // viewBox 0 0 109 109, canvas 300x300, path M 10 10 L 50 50.
+        const map = (v) => (v / 109) * 300;
+        const eps = 0.01;
         check(
-            'snapped stroke is closer to the ideal shape than the raw one',
-            distSnapped < distRaw,
-            `distSnapped=${distSnapped.toFixed(2)} >= distRaw=${distRaw.toFixed(2)}`
+            'stroke start lands exactly on the reference start',
+            Math.abs(snapped[0].x - map(10)) < eps && Math.abs(snapped[0].y - map(10)) < eps,
+            `start=(${snapped[0].x.toFixed(2)}, ${snapped[0].y.toFixed(2)}), expected=(${map(10).toFixed(2)}, ${map(10).toFixed(2)})`
+        );
+        check(
+            'stroke end lands exactly on the reference end',
+            Math.abs(snapped[snapped.length - 1].x - map(50)) < eps &&
+                Math.abs(snapped[snapped.length - 1].y - map(50)) < eps,
+            `end=(${snapped[snapped.length - 1].x.toFixed(2)}, ${snapped[snapped.length - 1].y.toFixed(2)}), expected=(${map(50).toFixed(2)}, ${map(50).toFixed(2)})`
+        );
+        const midIdx = Math.floor(snapped.length / 2);
+        const midRef = 10 + 40 * (midIdx / (snapped.length - 1)); // point midIdx along M 10 10 L 50 50
+        check(
+            'stroke midpoint lands exactly on the reference midpoint',
+            Math.abs(snapped[midIdx].x - map(midRef)) < eps &&
+                Math.abs(snapped[midIdx].y - map(midRef)) < eps
         );
 
         doc.getElementById('drawingPadInlineSnapBtn').click();
+        let guard2 = 0;
+        while (pad._snapAnimationStep() && guard2++ < 1000) {
+            /* pump the glide back down */
+        }
         check(
-            'snap toggle deactivates and renders raw again',
-            pad.snapEnabled === false && pad._getRenderPoints(stroke) === stroke.points
+            'snap toggle deactivates and glides back to raw ink',
+            pad.snapEnabled === false &&
+                stroke._snapDisplayT === 0 &&
+                pad._getRenderPoints(stroke) === stroke.points
+        );
+
+        // Committing while snap is ON must glide the fresh stroke from the
+        // drawn ink to perfect attachment.
+        doc.getElementById('drawingPadInlineSnapBtn').click(); // snap back on
+        pad.clearStrokes();
+        commitStroke(pad, window, [
+            { x: 40, y: 40 },
+            { x: 140, y: 140 },
+            { x: 240, y: 240 }
+        ]);
+        const s2 = pad.strokes[0];
+        check(
+            'fresh stroke starts unsnapped (glide begins at the drawn position)',
+            (s2._snapDisplayT ?? 0) === 0
+        );
+        let guard3 = 0;
+        while (pad._snapAnimationStep() && guard3++ < 1000) {
+            /* pump the fresh stroke to attachment */
+        }
+        const snapped2 = pad._getRenderPoints(s2);
+        check(
+            'fresh stroke ends perfectly attached',
+            s2._snapDisplayT === 1 && Math.abs(snapped2[0].x - map(10)) < eps,
+            `_snapDisplayT=${s2._snapDisplayT}, start.x=${snapped2[0].x.toFixed(2)}`
         );
     }
 

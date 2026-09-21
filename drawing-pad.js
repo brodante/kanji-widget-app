@@ -3,9 +3,9 @@
  *
  * Provides a <canvas>-based drawing surface for practising kanji strokes.
  * Features: grid overlay, reference-stroke tracing, stroke-order validation,
- * snap-to-stroke scoring, redo, and a side-by-side reference guide panel —
- * all powered by KanjiVG path data that the app already fetches via
- * KanjiLearningApp.fetchStrokeOrderSvg().
+ * snap-to-stroke scoring with perfect-attachment snap rendering, redo, and a
+ * side-by-side reference guide panel — all powered by KanjiVG path data that
+ * the app already fetches via KanjiLearningApp.fetchStrokeOrderSvg().
  *
  * The pad owns ALL of its event wiring (canvas pointer events + toolbar
  * clicks + slider input). The toolbar markup must NOT also carry inline
@@ -49,6 +49,7 @@ class DrawingPad {
         this.snapEnabled = false; // render completed strokes snapped to the reference shape
         this.guideVisible = false; // side-by-side reference panel next to the canvas
         this.feedbackTimeout = null;
+        this._snapAnimFrame = null; // pending rAF id for snap glides
         this.svgViewBox = { x: 0, y: 0, w: 109, h: 109 }; // KanjiVG default
 
         this._loadSettings();
@@ -137,6 +138,9 @@ class DrawingPad {
         this._syncButtons();
         this._applyGuide();
         this._repaint();
+        // Self-heal any snap glide interrupted by a re-render (e.g. a stroke
+        // caught mid-transition when the widget markup was rebuilt).
+        this._scheduleSnapAnimation();
     }
 
     /**
@@ -403,6 +407,9 @@ class DrawingPad {
         this._updateGuideHighlight();
         this._syncButtons();
         this._repaint();
+        if (this.snapEnabled) {
+            this._scheduleSnapAnimation();
+        }
     }
 
     // ==========================================
@@ -625,7 +632,9 @@ class DrawingPad {
 
     /**
      * Linearly interpolate two point arrays by factor t (0=user, 1=reference).
-     * Used for the snap-to-stroke visual correction effect.
+     * Used for the snap-to-stroke effect: t=1 lands EXACTLY on the reference
+     * stroke (mapped from SVG viewBox space into canvas space), t=0 is the
+     * raw ink, and values in between are the transient glide.
      */
     _interpolatePoints(userPts, refPts, t) {
         const userResampled = this._resampleToN(userPts, DrawingPad.RESAMPLE_POINTS);
@@ -639,8 +648,8 @@ class DrawingPad {
             y: ((p.y - vb.y) / vb.h) * ch
         }));
         return userResampled.map((p, i) => ({
-            x: p.x + (mapped[i].x - p.x) * t * 0.5,
-            y: p.y + (mapped[i].y - p.y) * t * 0.5
+            x: p.x + (mapped[i].x - p.x) * t,
+            y: p.y + (mapped[i].y - p.y) * t
         }));
     }
 
@@ -779,6 +788,9 @@ class DrawingPad {
             this._updateGuideHighlight();
             this._syncButtons();
             this._repaint();
+            if (this.snapEnabled) {
+                this._scheduleSnapAnimation();
+            }
         }
     }
 
@@ -801,6 +813,8 @@ class DrawingPad {
         this._saveSettings();
         this._syncButtons();
         this._repaint();
+        // Glide every matched stroke onto (or off) the reference strokes.
+        this._scheduleSnapAnimation();
     }
 
     toggleGuide() {
@@ -889,8 +903,8 @@ class DrawingPad {
         if (this.snapBtn) {
             this.snapBtn.classList.toggle('active', this.snapEnabled);
             this.snapBtn.title = this.snapEnabled
-                ? 'Disable snap to correct stroke shape'
-                : 'Snap strokes to the correct shape';
+                ? 'Disable snap to reference strokes'
+                : 'Snap strokes perfectly onto the reference';
         }
         if (this.guideBtn) {
             this.guideBtn.classList.toggle('active', this.guideVisible);
@@ -946,25 +960,89 @@ class DrawingPad {
     // RENDERING
     // ==========================================
     /**
-     * The points a completed stroke should be painted with. With snap
-     * enabled, a stroke that matched a reference stroke is rendered pulled
-     * towards that reference's shape (scaled by how well it matched), so the
-     * user sees where the stroke *should* have gone. With snap disabled the
-     * raw ink is shown as drawn.
+     * The points a completed stroke should be painted with.
+     *
+     * A stroke that matched a reference stroke carries `snapRefIndex`; its
+     * render position is interpolated between the raw ink (t = 0) and the
+     * reference stroke itself in canvas coordinates (t = 1). `t` comes from
+     * the per-stroke snap glide (`_snapDisplayT`): when Snap is enabled the
+     * glide settles at exactly 1, i.e. the stroke is rendered PERFECTLY
+     * attached to the reference stroke's position and shape. When Snap is
+     * disabled (or the stroke never matched a reference), the raw ink is
+     * shown as drawn.
      *
      * @param {object} stroke Completed stroke record.
      * @returns {Array<{x:number,y:number}>} Points to paint.
      */
     _getRenderPoints(stroke) {
-        if (this.snapEnabled && typeof stroke.snapRefIndex === 'number' && stroke.score > 0.2) {
-            const t = Math.min(stroke.score, 1.0) * 0.85;
-            return this._interpolatePoints(
-                stroke.points,
-                this._getRefPoints(stroke.snapRefIndex),
-                t
-            );
+        if (typeof stroke.snapRefIndex !== 'number') {
+            return stroke.points; // never matched a reference stroke
         }
-        return stroke.points;
+        const t = Math.min(stroke._snapDisplayT ?? 0, 1);
+        if (t <= 0) {
+            return stroke.points;
+        }
+        return this._interpolatePoints(stroke.points, this._getRefPoints(stroke.snapRefIndex), t);
+    }
+
+    // ==========================================
+    // SNAP ANIMATION
+    // ==========================================
+    /**
+     * Advance every snappable stroke's snap glide one frame towards its
+     * target (1 = attached to the reference stroke, 0 = raw ink) with an
+     * exponential ease. Returns whether any stroke is still in transit.
+     *
+     * Split from the rAF driver so tests can step it deterministically.
+     *
+     * @returns {boolean} True if any stroke is still animating.
+     */
+    _snapAnimationStep() {
+        let animating = false;
+        this.strokes.forEach((stroke) => {
+            if (typeof stroke.snapRefIndex !== 'number') {
+                return; // not snappable; always rendered as raw ink
+            }
+            const target = this.snapEnabled ? 1 : 0;
+            const current = stroke._snapDisplayT ?? 0;
+            if (current !== target) {
+                animating = true;
+                const next = current + (target - current) * 0.22;
+                stroke._snapDisplayT = Math.abs(target - next) < 0.005 ? target : next;
+            }
+        });
+        return animating;
+    }
+
+    /**
+     * Run the snap glides on requestAnimationFrame until they settle (~250ms
+     * after a stroke commit or a Snap toggle, so the user SEES the stroke
+     * land on the reference). The loop only exists while a glide is in
+     * progress — the steady state costs nothing.
+     */
+    _scheduleSnapAnimation() {
+        if (this._snapAnimFrame) {
+            return;
+        }
+        if (typeof requestAnimationFrame !== 'function') {
+            // No rAF available (exotic embeds): jump straight to the end state.
+            this.strokes.forEach((stroke) => {
+                if (typeof stroke.snapRefIndex === 'number') {
+                    stroke._snapDisplayT = this.snapEnabled ? 1 : 0;
+                }
+            });
+            this._repaint();
+            return;
+        }
+        const tick = () => {
+            this._snapAnimFrame = null;
+            const animating = this._snapAnimationStep();
+            this._repaint();
+            if (animating) {
+                this._snapAnimFrame = requestAnimationFrame(tick);
+            }
+        };
+        this._snapAnimFrame = requestAnimationFrame(tick);
     }
 
     _repaint() {
