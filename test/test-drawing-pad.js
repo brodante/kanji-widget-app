@@ -831,6 +831,58 @@ async function main() {
         }
     }
 
+    console.log('\n== Scenario 13: guide numbers stay contained (viewBox margin) ==');
+    {
+        // KanjiVG places a faint stroke-order number at each stroke's start
+        // point; one starting near the box edge renders partly outside the
+        // 109x109 viewBox and gets clipped by the root <svg> itself.
+        const ref =
+            '<svg viewBox="0 0 109 109"><path d="M 5 10 L 50 50"/><text transform="translate(5 10)">1</text></svg>';
+        const dom = makeDom();
+        const { window } = dom;
+        const doc = window.document;
+        window.app = { fetchStrokeOrderSvg: async () => ref };
+        const pad = enterPracticeMode(window);
+        pad._svgToImage = async () => ({ ok: true });
+        stubPathSampling(pad);
+        await pad.setKanji('語');
+
+        doc.getElementById('drawingPadInlineGuideBtn').click();
+        const guideSvg = doc.getElementById('drawingPadInlineGuide').querySelector('svg');
+        check(
+            'guide viewBox expanded with margin on every side',
+            guideSvg.getAttribute('viewBox') === '-8 -8 125 125',
+            `viewBox = ${guideSvg.getAttribute('viewBox')}`
+        );
+
+        // The snap coordinate system must NOT shift: it still maps the
+        // original 109-unit box onto the canvas.
+        check(
+            'snap viewBox mapping unchanged (0 0 109 109)',
+            pad.svgViewBox.x === 0 &&
+                pad.svgViewBox.y === 0 &&
+                pad.svgViewBox.w === 109 &&
+                pad.svgViewBox.h === 109
+        );
+        commitStroke(pad, window, [
+            { x: 30, y: 30 },
+            { x: 150, y: 150 },
+            { x: 270, y: 270 }
+        ]);
+        pad.snapEnabled = true;
+        let guard = 0;
+        while (pad._snapAnimationStep() && guard++ < 1000) {
+            /* pump the glide to attachment */
+        }
+        const rp = pad._getRenderPoints(pad.strokes[0]);
+        const map = (v) => (v / 109) * 300;
+        check(
+            'snap still attaches to the exact reference coordinates',
+            Math.abs(rp[0].x - map(5)) < 0.01 && Math.abs(rp[0].y - map(10)) < 0.01,
+            `start=(${rp[0].x.toFixed(2)}, ${rp[0].y.toFixed(2)})`
+        );
+    }
+
     console.log(`\n${pass} passed, ${fail} failed\n`);
     process.exit(fail ? 1 : 0);
 }

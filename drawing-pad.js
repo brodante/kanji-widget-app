@@ -971,12 +971,49 @@ class DrawingPad {
         }
         if (this.referenceSvgMarkup) {
             this.guideEl.innerHTML = this.referenceSvgMarkup;
+            this._containGuideSvg();
         } else {
             this.guideEl.innerHTML = this.currentKanji
                 ? `<div class="drawing-pad-guide-fallback japanese-text">${this.currentKanji}</div>`
                 : '';
         }
         this._updateGuideHighlight();
+    }
+
+    /**
+     * Keep the guide glyph and its stroke numbers fully inside the panel.
+     *
+     * KanjiVG marks the stroke order with a faint number placed at each
+     * stroke's start point. When a stroke begins near the edge of the
+     * viewBox the number renders partly outside the 109x109 box, and the
+     * root <svg> clips it there — panel padding cannot help because the cut
+     * happens inside the SVG itself. Expanding this copy's viewBox adds a
+     * small margin around the glyph so every number stays visible.
+     *
+     * Only the guide's DOM copy is touched: the trace image and the snap
+     * coordinate mapping keep using the original viewBox, so snapping stays
+     * perfectly aligned with the reference strokes.
+     */
+    _containGuideSvg() {
+        const svg = this.guideEl ? this.guideEl.querySelector('svg') : null;
+        if (!svg) {
+            return;
+        }
+        const vb = svg.getAttribute('viewBox');
+        if (!vb) {
+            return;
+        }
+        const parts = vb.split(/[\s,]+/).map(Number);
+        if (parts.length !== 4 || parts.some((n) => Number.isNaN(n))) {
+            return;
+        }
+        const margin = 8; // viewBox units, roughly 7% of the 109-unit grid
+        svg.setAttribute(
+            'viewBox',
+            `${parts[0] - margin} ${parts[1] - margin} ${parts[2] + margin * 2} ${
+                parts[3] + margin * 2
+            }`
+        );
     }
 
     /**
