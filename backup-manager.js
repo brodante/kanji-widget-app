@@ -333,7 +333,7 @@ class BackupManager {
                     this.status(
                         `Connected as ${about.user.emailAddress}. Access lasts about one hour; reconnect when requested.`
                     );
-                    await this.sync();
+                    await this.sync(false, true);
                 });
             },
             error_callback: () => {
@@ -349,7 +349,7 @@ class BackupManager {
             this.status(error.message);
         }
     }
-    async api(path, options = {}) {
+    async api(path, options = {}, withEtag = false) {
         if (!this.authorized()) {
             this.token = null;
             throw new Error(
@@ -367,12 +367,29 @@ class BackupManager {
             this.token = null;
             throw new Error('Google access expired. Reconnect to continue.');
         }
+        if (response.status === 412) {
+            throw new Error(
+                'Cloud checkpoint changed on another device. Nothing was overwritten. Quick save again to review it.'
+            );
+        }
         if (!response.ok) {
             throw new Error(
                 `Drive request failed (${response.status}). Check connectivity, Drive API setup, permissions and storage quota.`
             );
         }
-        return response.status === 204 ? null : response.json();
+        if (response.status === 204) {
+            return null;
+        }
+        let data;
+        try {
+            data = await response.json();
+        } catch (error) {
+            if (!withEtag) {
+                throw error;
+            }
+            data = null;
+        }
+        return withEtag ? { data, etag: response.headers.get('ETag') } : data;
     }
     async find(q) {
         const files = [];
@@ -382,9 +399,9 @@ class BackupManager {
                 `/files?${new URLSearchParams({
                     q,
                     spaces: 'drive',
-                    fields: 'nextPageToken,files(id,name,createdTime,size)',
+                    fields: 'nextPageToken,files(id,name,createdTime,modifiedTime,size,appProperties)',
                     pageSize: '100',
-                    orderBy: 'createdTime desc',
+                    orderBy: 'modifiedTime desc',
                     pageToken
                 })}`
             );
@@ -430,7 +447,7 @@ class BackupManager {
         for (const file of this.files) {
             const row = document.createElement('li');
             const label = document.createElement('span');
-            label.textContent = `${file.name} · ${new Date(file.createdTime).toLocaleString()} · ${Math.ceil(Number(file.size || 0) / 1024)} KB`;
+            label.textContent = `${file.appProperties?.backupKind === 'checkpoint' ? 'Quick-save checkpoint' : 'Saved backup'} · ${file.name} · ${new Date(file.modifiedTime || file.createdTime).toLocaleString()} · ${Math.ceil(Number(file.size || 0) / 1024)} KB`;
             row.append(label);
             for (const action of ['Download', 'Restore', 'Delete']) {
                 const button = document.createElement('button');
@@ -474,15 +491,24 @@ class BackupManager {
             list.append(row);
         }
     }
-    async backup() {
+    async backup({ data = null, checkpoint = false, target = null, etag = null } = {}) {
         const folder = await this.ensureFolder();
-        const data = await BackupManager.snapshot();
+        data = data || (await BackupManager.snapshot());
         const prefix =
             (this.config.prefix || 'kanji-backup').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) ||
             'kanji-backup';
-        const name = `${prefix}-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+        const name = `${prefix}-${checkpoint ? 'quicksave-' : ''}${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
         const boundary = `kanji_${crypto.randomUUID()}`;
-        const metadata = { name, parents: [folder], appProperties: { kanjiBackup: 'v3' } };
+        const metadata = {
+            name,
+            appProperties: { kanjiBackup: 'v3', backupKind: checkpoint ? 'checkpoint' : 'manual' }
+        };
+        if (!target) {
+            metadata.parents = [folder];
+        }
+        if (target && !etag) {
+            throw new Error('Cannot safely update a checkpoint without its revision.');
+        }
         const body = new Blob([
             `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,
             JSON.stringify(metadata),
@@ -490,11 +516,17 @@ class BackupManager {
             JSON.stringify(data),
             `\r\n--${boundary}--`
         ]);
-        const uploaded = await this.api('/upload/drive/v3/files?uploadType=multipart&fields=id', {
-            method: 'POST',
-            headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
-            body
-        });
+        const uploaded = await this.api(
+            `/upload/drive/v3/files${target ? `/${encodeURIComponent(target.id)}` : ''}?uploadType=multipart&fields=id`,
+            {
+                method: target ? 'PATCH' : 'POST',
+                headers: {
+                    'Content-Type': `multipart/related; boundary=${boundary}`,
+                    ...(etag ? { 'If-Match': etag } : {})
+                },
+                body
+            }
+        );
         if (this.user) {
             await this.remember(uploaded.id, data);
         }
@@ -513,7 +545,9 @@ class BackupManager {
             }
             await this.list();
         }
-        this.status(`Backup saved ${new Date(this.config.lastBackup).toLocaleString()}.`);
+        this.status(
+            `${target ? 'Checkpoint updated' : checkpoint ? 'New checkpoint saved; previous copies kept according to your retention setting' : 'New backup created'} ${new Date(this.config.lastBackup).toLocaleString()}.`
+        );
     }
     static due(config, now = Date.now()) {
         const days = { daily: 1, weekly: 7, monthly: 30 }[config.frequency];
@@ -608,6 +642,7 @@ class BackupManager {
                 'Disconnected. Cloud files are kept; automatic backups require reconnecting.'
             );
         };
+        root.querySelector('#driveQuickSave').onclick = () => this.run(() => this.sync());
         root.querySelector('#driveNow').onclick = () => this.run(() => this.backup());
         root.querySelector('#driveRefresh').onclick = () => this.run(() => this.list());
         this.status(
@@ -775,7 +810,6 @@ class BackupManager {
                 image.removeAttribute('src');
             }
         }
-        document.getElementById('avatarReset').disabled = !this.avatarURL;
     }
 
     async setAvatar(file) {
@@ -831,7 +865,6 @@ class BackupManager {
     async initAvatar() {
         const input = document.getElementById('avatarFile');
         const upload = document.getElementById('avatarUpload');
-        const reset = document.getElementById('avatarReset');
         const feedback = document.getElementById('avatarStatus');
         upload.disabled = true;
         try {
@@ -852,24 +885,13 @@ class BackupManager {
             if (!file) {
                 return;
             }
-            upload.disabled = reset.disabled = true;
+            upload.disabled = true;
             try {
                 await this.setAvatar(file);
             } catch (error) {
                 feedback.textContent = error.message;
             } finally {
                 input.value = '';
-                upload.disabled = false;
-                this.renderAvatar();
-            }
-        };
-        reset.onclick = async () => {
-            upload.disabled = reset.disabled = true;
-            try {
-                await this.setAvatar(null);
-            } catch (error) {
-                feedback.textContent = error.message;
-            } finally {
                 upload.disabled = false;
                 this.renderAvatar();
             }
@@ -897,7 +919,34 @@ class BackupManager {
         this.save();
     }
 
-    async sync(forceBackup = false) {
+    // Do not replace a checkpoint if it would erase durable progress or uploaded media.
+    static losesData(previous, next) {
+        if (Object.keys(previous.storage).some((key) => !(key in next.storage))) {
+            return true;
+        }
+        if (Object.entries(previous.media).some(([key, value]) => next.media[key] !== value)) {
+            return true;
+        }
+        const oldProgress = JSON.parse(previous.storage.kanji_progress || '{}');
+        const newProgress = JSON.parse(next.storage.kanji_progress || '{}');
+        for (const key of ['mastered', 'studied', 'skipped']) {
+            if ((oldProgress[key] || []).some((item) => !(newProgress[key] || []).includes(item))) {
+                return true;
+            }
+        }
+        const oldSrs = JSON.parse(previous.storage.kanji_srs_data || '{}');
+        const newSrs = JSON.parse(next.storage.kanji_srs_data || '{}');
+        const missingKey = (old, current) =>
+            old &&
+            typeof old === 'object' &&
+            !Array.isArray(old) &&
+            Object.keys(old).some(
+                (key) => !current || !(key in Object(current)) || missingKey(old[key], current[key])
+            );
+        return Boolean(missingKey(oldSrs, newSrs));
+    }
+
+    async sync(_scheduled = false, checkOnly = false) {
         if (!this.authorized() || !this.user) {
             throw new Error('Connect with Google before syncing.');
         }
@@ -906,27 +955,65 @@ class BackupManager {
         const data = await BackupManager.snapshot();
         const hash = await BackupManager.fingerprint(data);
         const base = this.config.syncStates?.[this.user.emailAddress];
-        if (newest && newest.id !== base?.id) {
-            const cloud = BackupManager.validate(
-                await this.api(`/files/${encodeURIComponent(newest.id)}?alt=media`)
+        let cloud, etag;
+        if (newest) {
+            // Read content on every check: a checkpoint can change without its ID changing.
+            const result = await this.api(
+                `/files/${encodeURIComponent(newest.id)}?alt=media`,
+                {},
+                true
             );
-            if ((await BackupManager.fingerprint(cloud)) === hash) {
-                await this.remember(newest.id, data);
-            } else {
-                this.pendingCloud = newest;
-                this.status(
-                    `Cloud copy from ${new Date(newest.createdTime).toLocaleString()} is available. Open Account & sync to choose cloud or this device. Automatic uploads paused to protect both versions.`
-                );
-                document
-                    .getElementById('accountBtn')
-                    .setAttribute('aria-label', 'Account & sync — cloud copy needs review');
+            etag = result.etag;
+            try {
+                cloud = BackupManager.validate(result.data);
+            } catch {
+                if (checkOnly) {
+                    this.status(
+                        'Latest cloud file is not a valid backup. Quick save will create a separate checkpoint, keeping that file.'
+                    );
+                    return;
+                }
+                await this.backup({ data, checkpoint: true });
                 return;
             }
-        } else if (!newest || hash !== base?.hash || forceBackup) {
-            await this.backup();
+            const cloudHash = await BackupManager.fingerprint(cloud);
+            if (cloudHash === hash) {
+                await this.remember(newest.id, data);
+                this.pendingCloud = null;
+                this.config.lastBackup = Date.now();
+                this.save();
+                this.status(
+                    'Already saved — no changes, so no upload or extra backup was created.'
+                );
+                return;
+            }
+            if (!base || newest.id !== base.id || cloudHash !== base.hash) {
+                this.pendingCloud = newest;
+                this.status(
+                    `Cloud copy from ${new Date(newest.modifiedTime || newest.createdTime).toLocaleString()} needs review. Choose cloud or this device; automatic saving is paused.`
+                );
+                return;
+            }
         }
-        this.pendingCloud = null;
-        this.status(`Up to date with Google Drive. Checked ${new Date().toLocaleTimeString()}.`);
+        if (checkOnly) {
+            this.status(
+                newest
+                    ? 'Connected. This device has unsaved changes. Quick save or enable automatic sync to save them.'
+                    : 'Connected. No cloud save yet. Choose Quick save or enable automatic sync.'
+            );
+            return;
+        }
+        const canUpdate =
+            newest?.appProperties?.backupKind === 'checkpoint' &&
+            etag &&
+            cloud &&
+            !BackupManager.losesData(cloud, data);
+        await this.backup({
+            data,
+            checkpoint: true,
+            target: canUpdate ? newest : null,
+            etag: canUpdate ? etag : null
+        });
     }
 }
 window.BackupManager = BackupManager;

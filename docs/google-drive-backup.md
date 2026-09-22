@@ -4,12 +4,12 @@ No paid hosting, backend or client secret is needed. This feature uses Google Id
 
 ## Account menu and multi-device use
 
-The header's **user-circle icon** opens Account & sync. It shows Guest user until Google access is authorized, then shows the account name/email. You can connect/switch accounts, disconnect, sync now, back up now, or jump directly to backup settings/history. The mobile header wraps into two rows instead of squeezing the Settings button offscreen.
+The header's **user-circle icon** opens Account & sync. It shows Guest user until Google access is authorized, then shows the account name/email. You can connect/switch accounts, disconnect, quick save, create a new backup, or jump directly to backup settings/history. The mobile header wraps into two rows instead of squeezing the Settings button offscreen.
 
-1. On device A, connect Google and select **Sync automatically while this app is open**. Sync now checks immediately; automatic checks run about every minute while visible and online.
+1. On device A, connect Google and select **Sync automatically while this app is open**. Quick save checks immediately; automatic checks run about every minute while visible and online.
 2. On device B, connect the **same Google account using the same site/OAuth client**. A differing cloud copy is presented for review. Choose **Use cloud copy** to restore it (replacing device B's local data). Restore reloads the app, so reconnect afterward.
-3. Changes on a device upload automatically when its known cloud copy has not changed. Unchanged snapshots do not create duplicate sync backups. Scheduled backups can still create periodic snapshots.
-4. When another device has a newer differing cloud copy, automatic uploads pause. Choose cloud or explicitly **Save this device's copy**. No field-by-field merge or silent cloud restore is performed. A direct **Back up now** is an explicit upload and makes that device's copy the latest.
+3. Changes on a device upload automatically when its known cloud copy has not changed. Unchanged snapshots do not create duplicate sync backups. Scheduled saves use the same checkpoint logic and skip unchanged data.
+4. When another device has a newer differing cloud copy, automatic uploads pause. Choose cloud or explicitly **Save this device's copy**. No field-by-field merge or silent cloud restore is performed. A direct **Create new backup** is an explicit upload to a separate file and makes that device's copy the latest.
 
 Baselines are scoped to each Google account on each device. Google access tokens remain in memory, so reloads/expired access require reconnecting. This is foreground snapshot sync, **not permanent SSO, real-time collaborative editing, or closed-browser sync**. Simultaneous uploads can both create history entries; the newest entry becomes the proposed cloud state. Keep history if you use multiple devices; automatic retention applies across them.
 
@@ -37,7 +37,7 @@ Changes in a working branch are not automatically live on `kanji.qd.je`. The exi
     };
     ```
     This ID is public and safe to commit. **Never put a client secret, access token or refresh token in the repository.** Alternatively, enter a public client ID in Settings → Google connection setup for a device-local test.
-7. Deploy these files with your normal GitHub Pages workflow. Open the header Account & sync menu → Connect with Google (also available in Settings → Backup & Data). Opening the account panel preloads Google’s library; if it is still loading, follow the prompt to click Connect again. Grant Drive access and click Back up now.
+7. Deploy these files with your normal GitHub Pages workflow. Open the header Account & sync menu → Connect with Google (also available in Settings → Backup & Data). Opening the account panel preloads Google’s library; if it is still loading, follow the prompt to click Connect again. Grant Drive access and click Quick save.
 
 ### About free/shared subdomains
 
@@ -48,7 +48,7 @@ A custom HTTPS subdomain can host this client-side code; buying hosting is not r
 - Creates/reuses an app-tagged **Kanji Widgets Backups** folder in the selected account's My Drive. The app deliberately manages its own folder rather than requesting permission to arbitrary existing folders. “Open backup folder” opens it in Drive.
 - Full version-3 backups include progress, SRS cards, recent kanji, streak, preferences from both settings stores, theme selection, custom CSS/theme configuration, uploaded custom-theme media, AI preferences/cache and floating button position.
 - Downloaded kanji/offline caches, bundled assets, old backup copies, device-local backup connection/schedule settings, API keys and OAuth credentials are excluded. AI keys already on the restoring device are preserved. Re-enter them on new devices. AI cached responses and custom themes may contain personal content: treat downloaded JSON files as private. Files are not app-encrypted.
-- Automatic scheduling is off by default. Choose daily, every 7 days or every 30 days and a local time. The first backup is due at that time today. Subsequent due dates are counted from the last successful upload's local date. A manual upload resets the schedule. Missed runs are caught up once the app is visible, online and authorized. Checks run every minute and when returning to the app or coming online.
+- Automatic scheduling is off by default. Choose daily, every 7 days or every 30 days and a local time. The first backup is due at that time today. Subsequent due dates are counted from the last successful upload's local date. A manual upload resets the schedule; an unchanged-data check postpones the next scheduled check without uploading a duplicate. Missed runs are caught up once the app is visible, online and authorized. Checks run every minute and when returning to the app or coming online.
 - Tokens exist only in memory and normally expire in about an hour. Reloading or closing the app loses access. Expired access requires another explicit Connect click. The app never opens automatic consent popups and cannot back up while closed, offline or reliably while backgrounded. Truly unattended backups require a backend with secure refresh-token handling, outside this GitHub Pages-only design.
 - History supports refresh, download, restore and move-to-trash. Optional retention keeps the newest 5, 10 or 20 app backups in the folder; the default keeps all. Retention includes backups made by other devices using this OAuth app. If a partial operation fails after upload, inspect history before retrying.
 - Restore requires confirmation and **replaces**, rather than merges, the current device's included data. Invalid versions/keys/media are rejected before mutation. Storage failures attempt rollback. Keep a local backup before restoring. Existing legacy local JSON imports remain supported; old exports did not include all themes/settings.
@@ -77,6 +77,18 @@ In Account & sync, **Upload photo** accepts browser-decodable image formats, inc
 animated GIFs, strictly smaller than 2 MiB (2,097,152 bytes). Original bytes are kept,
 so GIF animation is preserved. The custom photo is an app-profile preference (also
 visible in guest mode), not a change to the actual Google account photo. It is stored
-in IndexedDB and included in full backups and sync. **Use Google photo** removes the
-custom override; guests fall back to the neutral icon. Restoring an older backup with
+in IndexedDB and included in full backups and sync. An uploaded custom photo remains selected until you upload a replacement or restore different app data. Without a custom photo, Google’s image is automatic when connected, and guests see the neutral icon. Restoring an older backup with
 no avatar removes the custom override as part of replacing the app's saved state.
+
+## Quick saves and checkpoints
+
+- **Connecting Google is read-only for backup content.** It lists and checks cloud saves but does not upload your local state. A first connection may create the app folder. Enabled automatic sync/scheduling continues independently after connecting.
+- **Quick save** and automatic/scheduled saves compare content fingerprints (not timestamps). If nothing changed, they do not upload, rename or create files.
+- With changed local data and unchanged cloud state, the latest valid **quick-save checkpoint** is updated in place with the new JSON and a timestamped name. History uses Drive's **modified time**, not creation time.
+- **Create new backup** always creates a separate snapshot. Manual snapshots and legacy untyped backups are never reused as writable checkpoints; the next quick save creates a checkpoint beside them.
+- Removing saved storage keys, mastered/studied/skipped progress, SRS entries, or removing/replacing uploaded media starts a separate checkpoint instead of erasing the old copy. Normal settings changes and SRS review updates can reuse the checkpoint.
+- Cloud content is rechecked even if the file ID is unchanged. A differing cloud revision that this device has not seen pauses saving for review. Choosing **Save this device's copy** explicitly creates a separate snapshot rather than overwriting the conflicting one.
+- Checkpoint writes send the Drive response ETag in `If-Match`. A rejected revision (HTTP 412) stops the operation and asks you to check again. If a revision token isn't available to the browser, the app conservatively creates a separate checkpoint rather than doing an unguarded overwrite. Live revision-header/conditional-write behavior still needs verification with your Drive account; automated tests mock the service.
+- A malformed latest backup is kept untouched and a separate checkpoint is created on the next explicit/automatic save. Network/permission failures do not count as permission to overwrite it.
+- Your retention limit still applies to **all** app backup files. Use **Keep all** if you never want previous manual snapshots or safety checkpoints automatically trashed. Unchanged checks do not run retention cleanup.
+- Update the app on every device before using checkpoints. Older clients only detect new file IDs and cannot reliably recognize in-place saves made by this version.

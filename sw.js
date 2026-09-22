@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanji-widgets-v7';
+const CACHE_NAME = 'kanji-widgets-v8';
 const urlsToCache = [
     '/',
     '/index.html',

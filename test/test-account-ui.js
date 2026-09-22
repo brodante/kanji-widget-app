@@ -44,6 +44,8 @@ test('header guest menu opens, exposes Google action and closes accessibly', asy
         assert.equal(doc.getElementById('accountBtn').getAttribute('aria-expanded'), 'true');
         assert.equal(doc.activeElement.id, 'accountClose');
         assert.match(doc.getElementById('accountConnect').textContent, /Connect with Google/);
+        assert.equal(doc.getElementById('avatarReset'), null);
+        assert.match(doc.getElementById('accountSync').textContent, /Quick save/);
         doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
         assert.equal(doc.getElementById('accountPanel').hidden, true);
         assert.equal(doc.activeElement.id, 'accountBtn');
@@ -61,7 +63,9 @@ test('mocked Google authorization updates account identity and disconnect return
         manager.api = async () => ({
             user: { emailAddress: 'learner@example.com', displayName: 'Learner' }
         });
-        manager.sync = async () => {};
+        manager.sync = async (_scheduled, checkOnly) => {
+            assert.equal(checkOnly, true);
+        };
         window.document.getElementById('accountConnect').click();
         assert.match(oauth().client_id, /98852004824/);
         oauth().callback({ access_token: 'mock-token', expires_in: 3600 });

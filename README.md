@@ -59,3 +59,7 @@ scheduled uploads while the app is open and authorized, history, download and re
 The site owner must configure a public Google OAuth client ID first.
 See [GitHub Pages / Google Drive setup](docs/google-drive-backup.md) for domain setup,
 privacy details and browser-only scheduling limits.
+
+Quick save reuses safe cloud checkpoints and skips unchanged data. Create new backup
+keeps an independent snapshot; connecting Google only checks the cloud state. Update
+all devices to the checkpoint-enabled version before using multi-device sync.

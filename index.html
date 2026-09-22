@@ -227,9 +227,6 @@
                             <button id="avatarUpload" type="button" class="backup-btn">
                                 Upload photo
                             </button>
-                            <button id="avatarReset" type="button" class="backup-btn" disabled>
-                                Use Google photo
-                            </button>
                         </div>
                     </div>
                     <input
@@ -262,9 +259,11 @@
                         this app is open</label
                     >
                     <div class="backup-buttons">
-                        <button id="accountSync" type="button" class="backup-btn">Sync now</button>
+                        <button id="accountSync" type="button" class="backup-btn">
+                            Quick save
+                        </button>
                         <button id="accountBackup" type="button" class="backup-btn">
-                            Back up now
+                            Create new backup
                         </button>
                         <button id="accountSettings" type="button" class="backup-btn">
                             Backup settings & history
@@ -803,12 +802,22 @@
                                 backups from other devices.
                             </p>
                             <div class="backup-buttons">
+                                <button id="driveQuickSave" class="backup-btn" type="button">
+                                    Quick save
+                                </button>
                                 <button id="driveNow" class="backup-btn" type="button">
-                                    Back up now</button
+                                    Create new backup</button
                                 ><button id="driveRefresh" class="backup-btn" type="button">
                                     Refresh backup history
                                 </button>
                             </div>
+                            <p>
+                                Quick save skips unchanged data and updates the latest quick-save
+                                checkpoint when safe. Manual backups stay separate. If progress or
+                                media would be removed, a new checkpoint preserves the previous copy
+                                (subject to your retention limit). Connecting Google only checks
+                                your saves.
+                            </p>
                             <p id="driveStatus" role="status" aria-live="polite"></p>
                             <a id="driveFolder" hidden target="_blank" rel="noopener"
                                 >Open backup folder in Google Drive</a
