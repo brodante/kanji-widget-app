@@ -90,3 +90,7 @@ The default progress-saving flow now uses Google app sign-in plus Firestore, not
 ### Development checks
 
 Use Node **22.22.2 or newer in the Node 22 line**, or a newer Node release supported by JSDOM. Run `npm ci` and `npm test` to check the learning/account/sync behavior and the live drawing-pad regression suite together. `npm run test:drawing-pad` runs the practice checks alone. CI runs the combined tests so account work cannot silently drop practice coverage.
+
+### Website analytics
+
+The existing GA4 stream (`G-Q6XNG2ETFL`) remains the sole Analytics destination configured by the app. `analytics.js` loads it only on the production custom domain and this project's GitHub Pages URL, not localhost or previews. Firebase Analytics is not separately initialized. See [Analytics setup and release check](docs/analytics.md).

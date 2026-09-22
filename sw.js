@@ -1,7 +1,8 @@
-const CACHE_NAME = 'kanji-widgets-v17';
+const CACHE_NAME = 'kanji-widgets-v18';
 const urlsToCache = [
     '/',
     '/index.html',
+    '/analytics.js?v=analytics-v1',
     '/styles.css',
     '/styles.css?v=practice-merge-v1',
     '/script.js',

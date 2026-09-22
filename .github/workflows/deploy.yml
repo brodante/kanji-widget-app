@@ -33,6 +33,7 @@ jobs:
                   cp CNAME deploy/
                   cp styles.css deploy/
                   cp script.js deploy/
+                  cp analytics.js deploy/
                   cp drawing-pad.js deploy/
                   cp -r assets deploy/
                   cp -r database deploy/
