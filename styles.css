@@ -5719,3 +5719,165 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     cursor: pointer;
     font-weight: 600;
 }
+
+/* Compact account popover: essentials first, secondary controls disclosed on demand. */
+#accountPanel {
+    width: min(448px, calc(100% - 24px));
+    max-height: min(720px, var(--account-panel-room, 75vh));
+    padding: 16px;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    color-scheme: normal;
+}
+#accountPanel .account-panel-heading {
+    gap: 12px;
+}
+#accountPanel .account-avatar-large {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+    font-size: 36px;
+}
+.account-heading-copy {
+    flex: 1;
+    min-width: 0;
+}
+#accountPanel #accountHeading {
+    overflow-wrap: anywhere;
+}
+#accountPanel #accountIdentity {
+    font-size: 0.77rem;
+    line-height: 1.4;
+    margin: 3px 0 0;
+    opacity: 0.75;
+}
+#accountPanel .account-primary-actions {
+    margin: 14px 0 10px;
+}
+#accountPanel #saveHealth {
+    font-size: 0.76rem;
+    line-height: 1.5;
+    margin: 8px 0;
+}
+#accountPanel #accountStatus {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin: 8px 0 12px;
+}
+#accountPanel p:empty {
+    display: none;
+}
+.account-details {
+    border-top: 1px solid var(--border-color, #8884);
+}
+.account-details > summary {
+    cursor: pointer;
+    padding: 12px 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    list-style-position: inside;
+}
+.account-details > summary::marker {
+    color: currentColor;
+    font-size: 0.7em;
+}
+.account-details[open] {
+    padding-bottom: 12px;
+}
+.account-details small {
+    font-size: 0.75rem;
+    margin-block: 8px;
+}
+#accountProfileForm {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px 12px;
+}
+#accountProfileForm label {
+    font-size: 0.8rem;
+    grid-column: 1 / -1;
+}
+#accountProfileForm label span {
+    opacity: 0.65;
+}
+#accountProfileForm input {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    border: 1px solid var(--border-color, #8886);
+    border-radius: 8px;
+    background: var(--background);
+    color: inherit;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 0.85rem;
+}
+#accountProfileForm input:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+#accountProfileForm button {
+    grid-column: 1 / -1;
+}
+#accountPanel .account-photo-controls {
+    margin: 12px 0 0;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+#accountPanel .account-sync-toggle {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+}
+#accountPanel .account-settings-link {
+    width: 100%;
+    margin-top: 10px;
+    background: transparent;
+    color: inherit;
+    border: 1px solid var(--border-color, #8885);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Minimal scrollbars follow the current theme; keep scroll affordance and keyboard access. */
+#accountPanel,
+.modal-content,
+#driveFiles {
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+    scrollbar-color: color-mix(in srgb, var(--on-surface) 25%, transparent) transparent;
+}
+:is(#accountPanel, .modal-content, #driveFiles)::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+:is(#accountPanel, .modal-content, #driveFiles)::-webkit-scrollbar-track {
+    background: transparent;
+}
+:is(#accountPanel, .modal-content, #driveFiles)::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--on-surface) 25%, transparent);
+    border-radius: 100px;
+}
+:is(#accountPanel, .modal-content, #driveFiles)::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--on-surface) 45%, transparent);
+}
+@media (max-width: 520px) {
+    #accountPanel {
+        position: fixed;
+        top: auto;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        right: 12px;
+        width: calc(100vw - 24px);
+        max-height: 82vh;
+        max-height: 82dvh;
+        padding: 14px;
+        border-radius: 20px;
+    }
+}
+@media (forced-colors: active) {
+    #accountPanel,
+    .modal-content,
+    #driveFiles {
+        scrollbar-color: auto;
+    }
+}

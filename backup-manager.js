@@ -2,6 +2,7 @@
 // Static-site OAuth: access tokens stay in memory, never in a backup or storage.
 class BackupManager {
     static keys = [
+        'kanji_profile',
         'kanji_progress',
         'kanji_recent',
         'kanji_settings',
@@ -118,6 +119,16 @@ class BackupManager {
                 if (!parsed || typeof parsed !== 'object') {
                     throw new Error('Invalid settings or progress.');
                 }
+            }
+        }
+        if (data.storage.kanji_profile) {
+            const profile = JSON.parse(data.storage.kanji_profile);
+            if (
+                Array.isArray(profile) ||
+                typeof profile.nickname !== 'string' ||
+                profile.nickname.length > 40
+            ) {
+                throw new Error('Invalid profile nickname in backup.');
             }
         }
         if (data.storage.kanji_progress) {
@@ -880,7 +891,7 @@ class BackupManager {
         for (const file of this.files) {
             const row = document.createElement('li');
             const label = document.createElement('span');
-            label.textContent = `${BackupManager.isPinned(file) ? '📌 Pinned · ' : ''}${file.appProperties?.backupKind === 'checkpoint' ? 'Quick-save checkpoint' : 'Saved backup'} · ${file.name} · ${new Date(file.modifiedTime || file.createdTime).toLocaleString()} · ${Math.ceil(Number(file.size || 0) / 1024)} KB`;
+            label.textContent = `${BackupManager.isPinned(file) ? '📌 Pinned · ' : ''}${file.appProperties?.backupKind === 'checkpoint' ? 'Quick-save checkpoint' : 'Saved backup'} · ${file.name}${file.appProperties?.deviceLabel ? ` · From ${file.appProperties.deviceLabel}` : ''} · ${new Date(file.modifiedTime || file.createdTime).toLocaleString()} · ${Math.ceil(Number(file.size || 0) / 1024)} KB`;
             row.append(label);
             for (const action of [
                 'Download',
@@ -975,7 +986,8 @@ class BackupManager {
             appProperties: {
                 kanjiBackup: 'v3',
                 backupKind: checkpoint ? 'checkpoint' : 'manual',
-                pinned: checkpoint ? 'false' : 'true'
+                pinned: checkpoint ? 'false' : 'true',
+                deviceLabel: (this.config.deviceLabel || '').slice(0, 24)
             }
         };
         if (!target) {
@@ -1148,9 +1160,17 @@ class BackupManager {
         document.getElementById('accountHeading').textContent = connected
             ? this.user.displayName || 'Google account'
             : 'Guest user';
+        try {
+            const nickname = JSON.parse(localStorage.getItem('kanji_profile') || '{}').nickname;
+            if (typeof nickname === 'string' && nickname.trim()) {
+                document.getElementById('accountHeading').textContent = nickname;
+            }
+        } catch {
+            /* A malformed local profile must not prevent connecting. */
+        }
         document.getElementById('accountIdentity').textContent = connected
             ? this.user.emailAddress
-            : 'Your learning data is saved on this device. Connect to resume cloud access.';
+            : 'Local profile · connect to save to Drive.';
         document.getElementById('accountConnect').textContent = connected
             ? 'Switch Google account'
             : 'Connect with Google';
@@ -1164,6 +1184,15 @@ class BackupManager {
     initAccount() {
         const panel = document.getElementById('accountPanel');
         const button = document.getElementById('accountBtn');
+        const fitPanel = () => {
+            const bottom = button.closest('.app-header').getBoundingClientRect().bottom;
+            panel.style.setProperty(
+                '--account-panel-room',
+                `${Math.max(160, window.innerHeight - bottom - 24)}px`
+            );
+        };
+        window.addEventListener('resize', fitPanel);
+        this.initProfile();
         const close = () => {
             panel.hidden = true;
             button.setAttribute('aria-expanded', 'false');
@@ -1173,6 +1202,7 @@ class BackupManager {
             button.setAttribute('aria-expanded', String(!panel.hidden));
             this.renderAccount();
             if (!panel.hidden) {
+                fitPanel();
                 document.getElementById('accountClose').focus();
                 // Preload on opening the panel, so the Connect click remains a user gesture.
                 this.loadIdentity().catch((e) => this.status(e.message));
@@ -1251,6 +1281,47 @@ class BackupManager {
             });
         this.renderAccount();
         this.initAvatar();
+    }
+
+    initProfile() {
+        const nickname = document.getElementById('profileNickname');
+        const device = document.getElementById('profileDeviceLabel');
+        const feedback = document.getElementById('profileStatus');
+        try {
+            nickname.value =
+                JSON.parse(localStorage.getItem('kanji_profile') || '{}').nickname || '';
+        } catch {
+            nickname.value = '';
+        }
+        device.value = this.config.deviceLabel || '';
+        document.getElementById('accountProfileForm').onsubmit = (event) => {
+            event.preventDefault();
+            const name = nickname.value.trim();
+            const label = device.value.trim();
+            if (
+                name.length > 40 ||
+                label.length > 24 ||
+                Array.from(name + label).some(
+                    (char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127
+                )
+            ) {
+                feedback.textContent =
+                    'Use a name up to 40 characters and a device label up to 24 characters, without control characters.';
+                return;
+            }
+            try {
+                localStorage.setItem('kanji_profile', JSON.stringify({ nickname: name }));
+                this.config.deviceLabel = label;
+                this.save();
+                this.renderAccount();
+                this.refreshSaveStatus();
+                feedback.textContent =
+                    'Profile saved on this device. Quick save to include your name in the cloud copy. Device labels appear on future saves.';
+            } catch {
+                feedback.textContent =
+                    'Could not save the complete profile. Browser storage may be full or unavailable; free space and retry.';
+            }
+        };
     }
 
     static validateAvatar(file) {

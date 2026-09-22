@@ -525,3 +525,29 @@ test('connection error guidance distinguishes full storage, quota limits and per
     assert.match(Manager.driveError(403, ''), /test-user/);
     assert.match(Manager.driveError(503, ''), /temporarily unavailable/);
 });
+
+test('nickname is backed up and validated; local device-label preference is excluded', async () => {
+    const { Manager, storage } = setup();
+    storage.kanji_profile = '{"nickname":"Mizu"}';
+    storage.kanji_drive_backup = '{"deviceLabel":"Laptop"}';
+    const data = await Manager.snapshot();
+    assert.equal(JSON.parse(data.storage.kanji_profile).nickname, 'Mizu');
+    assert.equal(data.storage.kanji_drive_backup, undefined);
+    Manager.validate(data);
+    data.storage.kanji_profile = '{"nickname":123}';
+    assert.throws(() => Manager.validate(data), /profile nickname/);
+});
+
+test('cloud upload labels the source device in metadata without changing backup contents', async () => {
+    const { manager, cloud } = await checkpointSetup();
+    manager.config.deviceLabel = 'Laptop';
+    manager.ensureFolder = async () => 'folder';
+    let body;
+    manager.api = async (_path, options) => {
+        body = await options.body.text();
+        return { id: 'new' };
+    };
+    await manager.backup({ data: cloud });
+    assert.match(body, /"deviceLabel":"Laptop"/);
+    assert.equal(cloud.storage.kanji_drive_backup, undefined);
+});

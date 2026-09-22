@@ -207,12 +207,6 @@
                 </div>
                 <section id="accountPanel" hidden aria-labelledby="accountHeading">
                     <div class="account-panel-heading">
-                        <h2 id="accountHeading">Guest user</h2>
-                        <button id="accountClose" type="button" aria-label="Close account panel">
-                            ×
-                        </button>
-                    </div>
-                    <div class="account-photo-controls">
                         <div class="account-avatar-large">
                             <img
                                 id="accountAvatarPreview"
@@ -223,52 +217,27 @@
                             />
                             <i class="fas fa-circle-user" aria-hidden="true"></i>
                         </div>
-                        <div>
-                            <button id="avatarUpload" type="button" class="backup-btn">
-                                Upload photo
-                            </button>
+                        <div class="account-heading-copy">
+                            <h2 id="accountHeading">Guest user</h2>
+                            <p id="accountIdentity">Learning data stays on this device.</p>
                         </div>
+                        <button id="accountClose" type="button" aria-label="Close account panel">
+                            ×
+                        </button>
                     </div>
-                    <input
-                        id="avatarFile"
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        aria-label="Choose profile photo"
-                    />
-                    <small
-                        >Images and animated GIFs under 2 MB. Formats must be supported by your
-                        browser. Custom photos are included in backups and sync.</small
-                    >
-                    <p id="avatarStatus" role="status" aria-live="polite"></p>
-                    <p id="accountIdentity">Your learning data is saved on this device.</p>
-                    <div class="backup-buttons">
+                    <div class="backup-buttons account-primary-actions">
                         <button id="accountConnect" type="button" class="backup-btn">
                             Connect with Google
                         </button>
                         <button id="accountDisconnect" type="button" class="backup-btn" hidden>
                             Disconnect
                         </button>
-                    </div>
-                    <p>
-                        Use the same Google account on your devices to share progress, settings and
-                        themes through Drive.
-                    </p>
-                    <label class="account-sync-toggle"
-                        ><input id="accountAutoSync" type="checkbox" /> Sync automatically while
-                        this app is open</label
-                    >
-                    <div class="backup-buttons">
                         <button id="accountSync" type="button" class="backup-btn">
                             Quick save
                         </button>
-                        <button id="accountBackup" type="button" class="backup-btn">
-                            Create new backup
-                        </button>
-                        <button id="accountSettings" type="button" class="backup-btn">
-                            Backup settings & history
-                        </button>
                     </div>
+                    <p id="saveHealth" role="status" aria-live="polite"></p>
+                    <p id="accountStatus" role="status" aria-live="polite"></p>
                     <div id="syncConflict" hidden>
                         <div id="saveComparison"></div>
                         <button id="downloadCloudConflict" class="backup-btn" type="button">
@@ -288,13 +257,74 @@
                             Save this device’s copy
                         </button>
                     </div>
-                    <p id="saveHealth" role="status" aria-live="polite"></p>
-                    <p id="accountStatus" role="status" aria-live="polite"></p>
-                    <small
-                        >Google access expires and must be reconnected after a reload. Sync pauses
-                        when closed or offline. GitHub connection is not available on this static
-                        site.</small
+
+                    <details id="accountProfileDetails" class="account-details">
+                        <summary>Profile &amp; device</summary>
+                        <form id="accountProfileForm">
+                            <label for="profileNickname"
+                                >Display name <span>(optional)</span></label
+                            >
+                            <input
+                                id="profileNickname"
+                                type="text"
+                                maxlength="40"
+                                autocomplete="nickname"
+                                placeholder="Google name or Guest user"
+                            />
+                            <label for="profileDeviceLabel"
+                                >This device’s label <span>(optional)</span></label
+                            >
+                            <input
+                                id="profileDeviceLabel"
+                                type="text"
+                                maxlength="24"
+                                autocomplete="off"
+                                placeholder="e.g. My phone"
+                            />
+                            <button type="submit" class="backup-btn">Save profile</button>
+                        </form>
+                        <div class="account-photo-controls">
+                            <button id="avatarUpload" type="button" class="backup-btn">
+                                Upload photo
+                            </button>
+                            <small>Image or GIF · under 2 MB</small>
+                        </div>
+                        <input
+                            id="avatarFile"
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            aria-label="Choose profile photo"
+                        />
+                        <p id="avatarStatus" role="status" aria-live="polite"></p>
+                        <p id="profileStatus" role="status" aria-live="polite"></p>
+                        <small
+                            >Your name and photo sync with backups. The device label stays here and
+                            identifies new cloud saves; it is not a login session.</small
+                        >
+                    </details>
+                    <details id="accountSaveDetails" class="account-details">
+                        <summary>Save options &amp; help</summary>
+                        <label class="account-sync-toggle"
+                            ><input id="accountAutoSync" type="checkbox" /> Sync automatically while
+                            this app is open</label
+                        >
+                        <button id="accountBackup" type="button" class="backup-btn">
+                            Create new backup
+                        </button>
+                        <small
+                            >Use the same Google account on each device. Access expires and needs
+                            reconnecting after a reload. Sync pauses when closed or offline. GitHub
+                            login isn’t available yet.</small
+                        >
+                    </details>
+                    <button
+                        id="accountSettings"
+                        type="button"
+                        class="backup-btn account-settings-link"
                     >
+                        Backup settings &amp; history <span aria-hidden="true">↗</span>
+                    </button>
                 </section>
                 <!-- SEARCH PANEL -->
                 <div id="searchPanel" class="search-panel">

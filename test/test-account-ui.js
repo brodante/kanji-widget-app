@@ -430,3 +430,68 @@ test('failed diagnostic preserves learning files and attempts temporary-file cle
         dom.window.close();
     }
 });
+
+test('compact account menu keeps secondary sections collapsed and primary controls reachable', async () => {
+    const { dom, window } = await setupUI();
+    try {
+        const doc = window.document;
+        doc.getElementById('accountBtn').click();
+        assert.equal(doc.getElementById('accountProfileDetails').open, false);
+        assert.equal(doc.getElementById('accountSaveDetails').open, false);
+        assert.equal(doc.getElementById('accountSync').closest('details'), null);
+        assert.equal(doc.getElementById('accountSettings').closest('details'), null);
+        assert.equal(
+            doc.getElementById('avatarUpload').closest('details').id,
+            'accountProfileDetails'
+        );
+        assert.ok(
+            doc.getElementById('accountPanel').style.getPropertyValue('--account-panel-room')
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('nickname saves safely and clearing it returns to the Google name', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        manager.token = 'test';
+        manager.expires = Date.now() + 60000;
+        manager.user = { displayName: 'Google Name', emailAddress: 'learner@example.com' };
+        const doc = window.document;
+        doc.getElementById('profileNickname').value = 'Mizu <b>name</b>';
+        doc.getElementById('profileDeviceLabel').value = 'My phone';
+        doc.getElementById('accountProfileForm').dispatchEvent(
+            new window.Event('submit', { cancelable: true })
+        );
+        assert.equal(doc.getElementById('accountHeading').textContent, 'Mizu <b>name</b>');
+        assert.equal(doc.getElementById('accountHeading').querySelector('b'), null);
+        assert.equal(
+            JSON.parse(window.localStorage.getItem('kanji_profile')).nickname,
+            'Mizu <b>name</b>'
+        );
+        assert.equal(manager.config.deviceLabel, 'My phone');
+        doc.getElementById('profileNickname').value = '';
+        doc.getElementById('accountProfileForm').dispatchEvent(
+            new window.Event('submit', { cancelable: true })
+        );
+        assert.equal(doc.getElementById('accountHeading').textContent, 'Google Name');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('profile form rejects oversized values without changing saved data', async () => {
+    const { dom, window } = await setupUI();
+    try {
+        const doc = window.document;
+        doc.getElementById('profileNickname').value = 'x'.repeat(41);
+        doc.getElementById('accountProfileForm').dispatchEvent(
+            new window.Event('submit', { cancelable: true })
+        );
+        assert.equal(window.localStorage.getItem('kanji_profile'), null);
+        assert.match(doc.getElementById('profileStatus').textContent, /40 characters/);
+    } finally {
+        dom.window.close();
+    }
+});

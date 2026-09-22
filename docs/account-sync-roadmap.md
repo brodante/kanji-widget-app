@@ -45,12 +45,17 @@ This checklist tracks the agreed priorities. Checked items mean implemented and 
 
 ## Should add — everyday usability
 
-- [ ] Editable display name/nickname, stored with the profile and included in backups (not globally unique).
+The account popover now shows essential controls first, with collapsed Profile & device
+and Save options & help sections. It is wider on desktop and a compact bottom sheet on
+phones. Scrollbars remain available when needed (expanded controls, conflicts, or small
+screens), using a thin theme-matched treatment rather than hiding accessible scrolling.
+
+- [x] Editable display name/nickname, stored with the profile and included in backups (not globally unique).
 - [ ] Dedicated profile page: avatar, nickname, learning start date, stats and save controls.
 - [ ] Guided first-connection onboarding: local/cloud explanation and first checkpoint vs restore.
 - [ ] Debounced autosave after meaningful changes, grouped writes and exponential backoff.
 - [ ] Backup previews and editable labels such as “Before N4 reset”; app/backup version details.
-- [ ] Device labels such as Phone/Laptop on saves (not a secure session-management system).
+- [x] Device labels such as Phone/Laptop on saves (not a secure session-management system).
 - [ ] Explicit migration framework, newer-version warnings and older-backup compatibility tests.
 
 ## Could add — requires an account service

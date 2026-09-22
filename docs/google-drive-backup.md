@@ -108,3 +108,18 @@ Open Settings → Backup & Data → **Recovery, privacy & connection help**.
 
 The full prioritized checklist and live acceptance steps are in
 [Account and cloud-save roadmap](account-sync-roadmap.md).
+
+## Compact account menu and profile labels
+
+The account menu keeps connection, quick save, and status visible. Expand **Profile & device**
+to change your photo, set an optional display name (40 characters), or name this device
+(24 characters). Expand **Save options & help** for automatic sync and a new manual backup.
+Settings/history remain one click away. On phones the menu opens as a bottom sheet;
+expanded content remains scrollable with a slim theme-matched scrollbar.
+
+Your display name is part of backup/sync data. It is a nickname, not a unique username,
+and does not change your Google name or email. Clear it to use the Google name (or Guest
+user) again. The device-label preference is local and is not restored from another
+device's backup; its text is attached to future cloud saves and shown in backup history.
+It is not a secure device/session identifier. Update all devices to this version before
+syncing profiles, because older versions do not recognize the new profile storage key.
