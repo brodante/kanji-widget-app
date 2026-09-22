@@ -5881,3 +5881,22 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
         scrollbar-color: auto;
     }
 }
+
+.account-onboarding {
+    padding: 12px;
+    margin-block: 12px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 10px;
+}
+.account-onboarding[hidden] {
+    display: none;
+}
+#driveFiles .backup-preview {
+    padding: 12px;
+    margin: 10px 0;
+    background: var(--background);
+    border-radius: 8px;
+    line-height: 1.6;
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;
+}

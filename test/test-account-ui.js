@@ -495,3 +495,71 @@ test('profile form rejects oversized values without changing saved data', async 
         dom.window.close();
     }
 });
+
+test('first-connection guidance describes local vs cloud and lets users remain local', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        manager.user = { emailAddress: 'new@example.com' };
+        manager.onboardingPending = true;
+        manager.files = [];
+        manager.config.autoSync = true;
+        manager.showOnboarding();
+        const doc = window.document;
+        assert.equal(doc.getElementById('accountOnboarding').hidden, false);
+        assert.match(doc.getElementById('onboardingStart').textContent, /Create first/);
+        manager.files = [{ id: 'cloud' }];
+        manager.showOnboarding();
+        assert.match(doc.getElementById('onboardingStart').textContent, /Review cloud/);
+        doc.getElementById('onboardingLater').click();
+        assert.equal(manager.config.autoSync, false);
+        assert.equal(manager.config.frequency, 'never');
+        assert.equal(manager.config.onboarded['new@example.com'], true);
+        assert.equal(doc.getElementById('accountOnboarding').hidden, true);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('backup preview does not restore data and labels are a separate metadata update', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        const file = {
+            id: 'backup',
+            name: 'backup.json',
+            createdTime: new Date().toISOString(),
+            appProperties: { backupKind: 'manual', pinned: 'true' }
+        };
+        manager.ensureFolder = async () => 'folder';
+        manager.find = async () => [file];
+        const patches = [];
+        manager.api = async (_path, options) => {
+            if (options) {
+                patches.push(JSON.parse(options.body));
+                return {};
+            }
+            return {
+                app: 'kanji-widgets',
+                version: 3,
+                storage: { theme: 'cloud-theme' },
+                media: {}
+            };
+        };
+        window.localStorage.setItem('theme', 'local-theme');
+        await manager.list();
+        const button = (text) =>
+            [...window.document.querySelectorAll('#driveFiles button')].find(
+                (b) => b.textContent === text
+            );
+        button('Preview').click();
+        await new Promise((resolve) => setImmediate(resolve));
+        assert.match(window.document.querySelector('.backup-preview').textContent, /Backup v3/);
+        assert.equal(window.localStorage.getItem('theme'), 'local-theme');
+        window.prompt = () => 'Before N4 reset';
+        button('Label').click();
+        await new Promise((resolve) => setImmediate(resolve));
+        assert.equal(patches[0].appProperties.backupLabel, 'Before N4 reset');
+        assert.equal(patches[0].appProperties.pinned, undefined);
+    } finally {
+        dom.window.close();
+    }
+});

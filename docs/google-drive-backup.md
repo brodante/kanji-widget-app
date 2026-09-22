@@ -88,7 +88,7 @@ no avatar removes the custom override as part of replacing the app's saved state
 - **Create new backup** always creates a separate snapshot. Manual snapshots and legacy untyped backups are never reused as writable checkpoints; the next quick save creates a checkpoint beside them.
 - Removing saved storage keys, mastered/studied/skipped progress, SRS entries, or removing/replacing uploaded media starts a separate checkpoint instead of erasing the old copy. Normal settings changes and SRS review updates can reuse the checkpoint.
 - Cloud content is rechecked even if the file ID is unchanged. A differing cloud revision that this device has not seen pauses saving for review. Choosing **Save this device's copy** explicitly creates a separate snapshot rather than overwriting the conflicting one.
-- Checkpoint writes send the Drive response ETag in `If-Match`. A rejected revision (HTTP 412) stops the operation and asks you to check again. If a revision token isn't available to the browser, the app conservatively creates a separate checkpoint rather than doing an unguarded overwrite. Live revision-header/conditional-write behavior still needs verification with your Drive account; automated tests mock the service.
+- Checkpoint reads obtain `etag` from Drive v2 JSON metadata before and after the content read. Guarded v2 updates send that same token in `If-Match`. A rejected revision (HTTP 412) stops the operation and asks you to check again. If a revision token isn't available to the browser, the app conservatively creates a separate checkpoint rather than doing an unguarded overwrite. In-place updates require a PASS from the current metadata-ETag diagnostic on this account/device. Live behavior still needs your rerun; automated tests mock the service.
 - A malformed latest backup is kept untouched and a separate checkpoint is created on the next explicit/automatic save. Network/permission failures do not count as permission to overwrite it.
 - Your retention limit applies only to **unpinned** app backup files. Manual/legacy snapshots are pinned by default; pin safety checkpoints to protect them as well. Unchanged checks do not run retention cleanup.
 - Update the app on every device before using checkpoints. Older clients only detect new file IDs and cannot reliably recognize in-place saves made by this version.
@@ -123,3 +123,42 @@ user) again. The device-label preference is local and is not restored from anoth
 device's backup; its text is attached to future cloud saves and shown in backup history.
 It is not a secure device/session identifier. Update all devices to this version before
 syncing profiles, because older versions do not recognize the new profile storage key.
+
+## Missing revision-token diagnostic: updated protocol
+
+A user reported **NOT VERIFIED: Drive did not expose a usable revision token/readback**
+with the earlier test. That test depended on an ETag HTTP response header from a v3
+media download, which was not available to the app. Do not fix this by disabling the
+conflict guard or changing OAuth secrets.
+
+The updated implementation reads the documented [`etag` field of a Drive v2 file](https://developers.google.com/workspace/drive/api/reference/rest/v2/files)
+as JSON. It reads metadata before and after downloading content and refuses a changed
+revision. Conditional writes use the matching [v2 files.update endpoint](https://developers.google.com/workspace/drive/api/reference/rest/v2/files/update)
+with `PUT` and `If-Match`. Creation, listing and most other operations still use v3.
+V2 metadata uses `title` and private `properties` in place of v3 `name`/`appProperties`.
+The diagnostic uses the same read/update path, verifies readback and stale-write
+rejection, and trashes its temporary file afterward. The same Drive API project and
+`drive.file` authorization are used; no new secret or Console setting is required.
+
+After updating **all devices**, reconnect and run **Test Drive checkpoint safety** again.
+A new PASS is required to enable in-place updates. Old header-test results do not count.
+Until then, unchanged saves are skipped and changed saves remain separate checkpoints.
+A failure still keeps the safe fallback; share its exact text, not tokens or credentials.
+
+## New usability controls
+
+- First-connection guidance appears once per Google account per device. Choose the first
+  checkpoint, review cloud data, or **Keep local for now** (turns off autosync and scheduled
+  cloud saves). Connecting itself does not upload learning data.
+- **Preview** in history shows progress/theme totals and backup/build version without
+  restoring. **Label** gives a file a short name such as “Before N4 reset”; empty removes
+  it. Labels do not change content or pin state. The displayed save time and sync ordering
+  follow the content-save timestamp, not the later label/pin edit.
+- Autosave observes app storage/media changes every five seconds and waits for a
+  15-second quiet window. It groups edits and skips unchanged uploads. Cloud checks still
+  run approximately once per minute while visible/authorized. Failed operations back off
+  15, 30, 60 seconds and upward to five minutes; a longer server Retry-After is respected.
+  Explicit clicks may retry immediately. Closed/offline browsers still cannot upload.
+- A backup from a newer schema now explicitly asks you to update the app, and cannot be
+  automatically superseded as though it were corrupt. The full legacy migration project
+  remains pending in the roadmap.

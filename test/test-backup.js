@@ -269,6 +269,8 @@ test('sync baselines are separated by Google account and require authorization',
 
 async function checkpointSetup() {
     const env = syncSetup();
+    env.manager.config.checkpointDiagnostics = { 'learner@example.com': true };
+    env.manager.config.checkpointProtocols = { 'learner@example.com': 'metadata-etag-v1' };
     env.storage.theme = 'old';
     const cloud = await env.Manager.snapshot();
     await env.manager.remember('checkpoint', cloud);
@@ -369,7 +371,7 @@ test('manual backups, invalid cloud files and missing revision tokens are never 
     }
 });
 
-test('checkpoint upload uses PATCH with If-Match and does not change folder parents', async () => {
+test('checkpoint upload uses PUT with If-Match and does not change folder parents', async () => {
     const { manager, cloud } = await checkpointSetup();
     manager.ensureFolder = async () => 'folder';
     let request;
@@ -384,7 +386,7 @@ test('checkpoint upload uses PATCH with If-Match and does not change folder pare
         etag: '"v1"'
     });
     assert.match(request.path, /files\/checkpoint\?uploadType/);
-    assert.equal(request.options.method, 'PATCH');
+    assert.equal(request.options.method, 'PUT');
     assert.equal(request.options.headers['If-Match'], '"v1"');
     assert.equal((await request.options.body.text()).includes('"parents"'), false);
 });
@@ -550,4 +552,108 @@ test('cloud upload labels the source device in metadata without changing backup 
     await manager.backup({ data: cloud });
     assert.match(body, /"deviceLabel":"Laptop"/);
     assert.equal(cloud.storage.kanji_drive_backup, undefined);
+});
+
+test('checkpoint revision is read from JSON metadata without any exposed response header', async () => {
+    const { manager, context } = syncSetup();
+    const calls = [];
+    context.fetch = async (url) => {
+        calls.push(url);
+        return {
+            ok: true,
+            status: 200,
+            json: async () =>
+                url.includes('/drive/v2/') ? { etag: '"metadata-r1"' } : { value: 'file-content' }
+        };
+    };
+    const result = await manager.api('/files/file-id?alt=media', {}, true);
+    assert.equal(result.etag, '"metadata-r1"');
+    assert.equal(result.data.value, 'file-content');
+    assert.equal(calls.length, 3);
+    assert.match(calls[0], /drive\/v2\/files\/file-id\?fields=etag$/);
+    assert.match(calls[1], /drive\/v3\/files\/file-id\?alt=media$/);
+    assert.equal(calls[2], calls[0]);
+});
+
+test('changed metadata revision during download rejects the read before writing', async () => {
+    const { manager, context } = syncSetup();
+    let revisionReads = 0;
+    context.fetch = async (url) => ({
+        ok: true,
+        status: 200,
+        json: async () =>
+            url.includes('/drive/v2/') ? { etag: `"r${++revisionReads}"` } : { value: 'data' }
+    });
+    await assert.rejects(
+        () => manager.api('/files/id?alt=media', {}, true),
+        (error) => error.status === 412
+    );
+});
+
+test('old header-based diagnostic approval does not enable the new update protocol', async () => {
+    const { manager, storage } = await checkpointSetup();
+    delete manager.config.checkpointProtocols;
+    storage.theme = 'changed';
+    manager.backup = async (options) => assert.equal(options.target, null);
+    await manager.sync();
+});
+
+test('newer backup schema pauses sync rather than treating the backup as corrupt', async () => {
+    const { manager, cloud } = await checkpointSetup();
+    manager.api = async () => ({ data: { ...cloud, version: 4 }, etag: '"v4"' });
+    manager.backup = async () => assert.fail('must not supersede a newer-version backup');
+    await assert.rejects(() => manager.sync(), /newer app/);
+});
+
+test('autosave groups local changes into a 15-second quiet window and ignores unrelated storage', () => {
+    const { manager, storage } = syncSetup();
+    manager.renderSaveStatus = () => {};
+    manager.observeLocalChanges(1000);
+    storage.theme = 'first';
+    manager.observeLocalChanges(2000);
+    assert.equal(manager.nextAutoSave, 17000);
+    storage.theme = 'second';
+    manager.observeLocalChanges(5000);
+    assert.equal(manager.nextAutoSave, 20000);
+    storage.unrelated = 'does not affect backup';
+    manager.observeLocalChanges(6000);
+    assert.equal(manager.nextAutoSave, 20000);
+});
+
+test('autosave observes uploaded-media changes without repeatedly reading the media database', () => {
+    const { Manager, manager } = syncSetup();
+    manager.renderSaveStatus = () => {};
+    manager.observeLocalChanges(1000);
+    Manager.mediaRevision = 1;
+    manager.observeLocalChanges(2000);
+    assert.equal(manager.nextAutoSave, 17000);
+});
+
+test('retry delay increases exponentially with a five-minute cap', () => {
+    const { Manager } = setup();
+    assert.equal(Manager.retryDelay(1), 15000);
+    assert.equal(Manager.retryDelay(2), 30000);
+    assert.equal(Manager.retryDelay(3), 60000);
+    assert.equal(Manager.retryDelay(99), 300000);
+});
+
+test('autosave never starts while first-connection onboarding is awaiting a choice', () => {
+    const { manager, context } = syncSetup();
+    context.navigator = { onLine: true };
+    context.document.hidden = false;
+    manager.config.autoSync = true;
+    manager.onboardingPending = true;
+    manager.run = () => assert.fail('must wait for onboarding choice');
+    manager.tick();
+});
+
+test('save ordering uses content-save timestamp, not a later label/pin metadata edit', () => {
+    const { Manager } = setup();
+    const first = {
+        createdTime: '2026-09-01T00:00:00Z',
+        modifiedTime: '2026-09-22T00:00:00Z',
+        appProperties: { savedAt: String(Date.parse('2026-09-01T00:00:00Z')) }
+    };
+    const second = { createdTime: '2026-09-20T00:00:00Z', modifiedTime: '2026-09-20T00:00:00Z' };
+    assert.ok(Manager.savedTime(first) < Manager.savedTime(second));
 });

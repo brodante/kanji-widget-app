@@ -52,11 +52,12 @@ screens), using a thin theme-matched treatment rather than hiding accessible scr
 
 - [x] Editable display name/nickname, stored with the profile and included in backups (not globally unique).
 - [ ] Dedicated profile page: avatar, nickname, learning start date, stats and save controls.
-- [ ] Guided first-connection onboarding: local/cloud explanation and first checkpoint vs restore.
-- [ ] Debounced autosave after meaningful changes, grouped writes and exponential backoff.
-- [ ] Backup previews and editable labels such as “Before N4 reset”; app/backup version details.
+- [x] Guided first-connection onboarding: local/cloud explanation and first checkpoint vs restore.
+- [x] Debounced autosave after meaningful changes, grouped writes and exponential backoff (15-second quiet window, 5-second observation, retries from 15 seconds up to 5 minutes; respects server Retry-After).
+- [x] Backup previews and editable labels such as “Before N4 reset”; app/backup version details.
 - [x] Device labels such as Phone/Laptop on saves (not a secure session-management system).
-- [ ] Explicit migration framework, newer-version warnings and older-backup compatibility tests.
+- [ ] Explicit migration framework and full older-backup compatibility tests.
+    - [x] Newer-version warning blocks both restore and automatic checkpoint creation instead of treating an unknown version as corruption.
 
 ## Could add — requires an account service
 
@@ -79,6 +80,15 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - [ ] Email magic-link sign-in.
 - [ ] Backup health reminders and storage-usage estimates.
 
+## Current implementation notes
+
+- The reported missing-header diagnostic was addressed without removing the overwrite guard. Most operations still use Drive v3; guarded checkpoint reads/updates use the v2 metadata `etag` and v2 conditional update endpoint. Same OAuth client, project and `drive.file` scope; no client secret or additional setup.
+- First connection presents a choice between creating a first checkpoint, reviewing an existing cloud save, or keeping local data only. Automatic saving pauses until the choice is made; the preference is tracked per account on this device.
+- History offers Preview and Label. Previews load validated progress/theme/version details without restoring; restore confirmations also include totals. Labels are limited to 24 characters, stored as metadata, and do not change snapshot contents or pin state.
+- Save order uses the content-save timestamp; label and pin edits preserve it. Legacy files are given a saved timestamp when their metadata is first edited.
+- Autosave batches observed app data/media changes, never opens consent popups, and still pauses offline, while hidden, during conflicts, and during account switching. Changed data is saved after 15 seconds without another observed change; cloud checks remain roughly once per minute when idle. Normal failure retries back off; explicit user actions can retry immediately.
+- Remaining Should work: dedicated profile page and a complete migration framework. Backend account features remain in Could.
+
 ## Live must-have acceptance checklist
 
 Use disposable/test progress and export your real data before testing. Update both devices first.
@@ -95,6 +105,7 @@ Use disposable/test progress and export your real data before testing. Update bo
 
 Record live results here (date, browser/device, pass/fail and relevant error text). Never record credentials or access tokens.
 
-- Live Drive diagnostic: **not run in this development session**.
+- Previous header-based Drive diagnostic: **user ran it and reported NOT VERIFIED: no usable revision token/readback**. This is not a successful live verification.
+- Updated metadata-ETag diagnostic: **pending user rerun**. It reads `etag` from v2 file metadata, checks stability across the content read, and uses v2 conditional updates. Guarded overwrites require a PASS for this protocol and account; old test approvals do not count.
 - Real two-device acceptance: **pending**.
 - Automated regression suite: run `npm test`; service responses and browser DOM are simulated, with fake IndexedDB transaction tests.

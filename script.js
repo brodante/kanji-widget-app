@@ -3021,6 +3021,9 @@ class KanjiLearningApp {
         reader.onload = async (e) => {
             try {
                 const data = JSON.parse(e.target.result);
+                if (data.app === 'kanji-widgets') {
+                    BackupManager.validate(data);
+                }
                 if (
                     !confirm('Replace this device’s saved progress and settings with this backup?')
                 ) {
