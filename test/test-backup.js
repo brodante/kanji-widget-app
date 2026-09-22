@@ -657,3 +657,82 @@ test('save ordering uses content-save timestamp, not a later label/pin metadata 
     const second = { createdTime: '2026-09-20T00:00:00Z', modifiedTime: '2026-09-20T00:00:00Z' };
     assert.ok(Manager.savedTime(first) < Manager.savedTime(second));
 });
+
+test('legacy v1 migration preserves sections it never backed up and uses effective app settings', async () => {
+    const { Manager, storage } = setup();
+    storage.theme = 'nami';
+    storage.kanji_profile = '{"nickname":"Mizu"}';
+    storage.kanjiSettings = '{"kanjiFont":"serif","showFurigana":true}';
+    const current = await Manager.snapshot();
+    current.media.avatar = 'data:image/gif;base64,R0lGODlh';
+    Manager.snapshot = async () => current;
+    const converted = await Manager.normalizeImport({
+        version: 1,
+        progress: { mastered: ['日'], studied: ['日'] },
+        settings: { showFurigana: false },
+        recent: []
+    });
+    assert.equal(converted.version, 3);
+    assert.equal(converted.migratedFrom, 1);
+    assert.equal(converted.storage.theme, 'nami');
+    assert.equal(JSON.parse(converted.storage.kanji_profile).nickname, 'Mizu');
+    assert.equal(converted.media.avatar, 'data:image/gif;base64,R0lGODlh');
+    assert.equal(JSON.parse(converted.storage.kanjiSettings).kanjiFont, 'serif');
+    assert.equal(JSON.parse(converted.storage.kanjiSettings).showFurigana, false);
+    assert.equal(JSON.parse(converted.storage.kanji_progress).skipped.length, 0);
+    assert.equal(storage.kanjiSettings, '{"kanjiFont":"serif","showFurigana":true}');
+});
+
+test('legacy v2 import restores SRS and AI preferences without importing credentials', async () => {
+    const { Manager, storage } = setup();
+    storage.kanji_ai_settings = '{"apiKey":"device-secret","provider":"openai"}';
+    const converted = await Manager.normalizeImport({
+        version: 2,
+        progress: { mastered: [], studied: ['月'], skipped: [] },
+        srsData: { 月: { totalReviews: 4 } },
+        aiSettings: { provider: 'gemini', apiKey: 'untrusted-secret' }
+    });
+    assert.equal(JSON.stringify(converted).includes('untrusted-secret'), false);
+    await Manager.restore(converted);
+    assert.equal(JSON.parse(storage.kanji_srs_data)['月'].totalReviews, 4);
+    assert.equal(JSON.parse(storage.kanji_ai_settings).provider, 'gemini');
+    assert.equal(JSON.parse(storage.kanji_ai_settings).apiKey, 'device-secret');
+    Manager.validate(await Manager.snapshot());
+});
+
+test('migration rejects malformed or unknown formats before reading or changing device data', async () => {
+    const { Manager, storage } = setup();
+    storage.theme = 'untouched';
+    Manager.snapshot = async () => assert.fail('invalid input must be rejected before snapshot');
+    for (const source of [
+        null,
+        { version: 99 },
+        { version: 1, progress: 'bad' },
+        { version: 2, progress: { mastered: [], studied: [] }, settings: [] }
+    ]) {
+        await assert.rejects(() => Manager.normalizeImport(source));
+    }
+    assert.equal(storage.theme, 'untouched');
+});
+
+test('current v3 backups need no conversion and future versions remain blocked', async () => {
+    const { Manager } = setup();
+    const current = await Manager.snapshot();
+    assert.equal(await Manager.normalizeImport(current), current);
+    await assert.rejects(() => Manager.normalizeImport({ ...current, version: 4 }), /newer app/);
+});
+
+test('legacy import still stops if a recovery copy cannot be saved', async () => {
+    const { Manager, storage } = setup();
+    storage.theme = 'original';
+    const converted = await Manager.normalizeImport({
+        version: 1,
+        progress: { mastered: [], studied: [] }
+    });
+    Manager.recoveryStore = async () => {
+        throw new Error('quota');
+    };
+    await assert.rejects(() => Manager.restore(converted), /Restore stopped/);
+    assert.equal(storage.theme, 'original');
+    assert.equal(storage.kanji_progress, undefined);
+});

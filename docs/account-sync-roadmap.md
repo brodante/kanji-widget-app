@@ -8,12 +8,13 @@ This checklist tracks the agreed priorities. Checked items mean implemented and 
     - Guest, connected, reconnect required, offline, working, unsaved changes and cloud-review states.
     - Last successful upload from this device is distinct from the last unchanged-data check.
     - Local fingerprint checks run about every 30 seconds; status is not instantaneous and does not promise background saving.
-- [ ] **Verify checkpoints against real Google Drive**: live acceptance still pending.
+- [ ] **Verify checkpoints against real Google Drive**: localhost diagnostic passed; production-origin and two-device acceptance remain.
     - [x] Add an opt-in diagnostic using a temporary non-learning-data file.
     - [x] Verify create/read/update/readback and attempt a stale-revision write; clean up the test file.
     - [x] Disable in-place updates for the tested account if the diagnostic fails.
     - [x] Mock-service regression tests for conditional writes and same-ID cloud changes.
-    - [ ] Run the diagnostic on the deployed authorized origin with a real account.
+    - [x] User ran the metadata-ETag diagnostic against real Drive on localhost: PASS, 2026-09-22T16:52:02.499Z.
+    - [ ] Confirm the diagnostic on the deployed production origin.
     - [ ] Complete the two-device simultaneous-save/conflict acceptance test below.
 - [x] **Recovery copy before restoring**
     - Save a full recovery snapshot in a separate IndexedDB store before local/cloud restore.
@@ -56,8 +57,9 @@ screens), using a thin theme-matched treatment rather than hiding accessible scr
 - [x] Debounced autosave after meaningful changes, grouped writes and exponential backoff (15-second quiet window, 5-second observation, retries from 15 seconds up to 5 minutes; respects server Retry-After).
 - [x] Backup previews and editable labels such as “Before N4 reset”; app/backup version details.
 - [x] Device labels such as Phone/Laptop on saves (not a secure session-management system).
-- [ ] Explicit migration framework and full older-backup compatibility tests.
+- [x] Explicit version handling and compatibility tests for the app’s known v1, v2 and v3 exports. Legacy imports are normalized to v3 and use the same recovery/restore path. Data absent from partial legacy exports is preserved.
     - [x] Newer-version warning blocks both restore and automatic checkpoint creation instead of treating an unknown version as corruption.
+    - [x] Invalid legacy inputs are rejected before mutation; imported credentials are excluded, existing device keys are preserved, and recovery failures stop imports.
 
 ## Could add: requires an account service
 
@@ -88,7 +90,8 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - Save order uses the content-save timestamp; label and pin edits preserve it. Legacy files are given a saved timestamp when their metadata is first edited.
 - Autosave batches observed app data/media changes, never opens consent popups, and still pauses offline, while hidden, during conflicts, and during account switching. Changed data is saved after 15 seconds without another observed change; cloud checks remain roughly once per minute when idle. Normal failure retries back off; explicit user actions can retry immediately.
 - Dedicated profile page is implemented as an in-app `#profile` view, keeping Google access in memory. It includes avatar, nickname/device editing, recorded learning start date, progress/review stats, save controls and conflict/recovery navigation.
-- Remaining Should work: a complete migration framework. Backend account features remain in Could.
+- All listed Should items are implemented for the existing app and its known backup formats. No new backend or optional account features are being added in this pass. Future backup schema changes will need their own migration step and tests.
+- Settings now has an always-visible My profile entry and shortcuts for Learning, Appearance, Audio, AI Sensei, Backups & sync, and Recovery & privacy. Shortcuts scroll/focus existing sections rather than duplicating their controls.
 
 ## Live must-have acceptance checklist
 
@@ -107,7 +110,7 @@ Use disposable/test progress and export your real data before testing. Update bo
 Record live results here (date, browser/device, pass/fail and relevant error text). Never record credentials or access tokens.
 
 - Previous header-based Drive diagnostic: **user ran it and reported NOT VERIFIED: no usable revision token/readback**. This is not a successful live verification.
-- Updated metadata-ETag diagnostic: **pending a build-identified user rerun**. The repeated report used the older diagnostic wording, so it does not establish whether the current metadata test was running. The `profile-v1` build shows its runtime version and timestamps every fresh test; older saved results are not replayed as fresh errors. It reads `etag` from v2 file metadata, checks stability across the content read, and uses v2 conditional updates. Guarded overwrites require a PASS for this protocol and account; old test approvals do not count.
+- Updated metadata-ETag diagnostic: **PASS, user-reported**, on `http://localhost:5000`, build `profile-v1`, protocol `metadata-etag-v1`, at `2026-09-22T16:52:02.499Z`. Create, read, update and stale-revision rejection succeeded on a real Google account. No account email or credentials are recorded here.
 - Real two-device acceptance: **pending**.
 - Automated regression suite: run `npm test`; service responses and browser DOM are simulated, with fake IndexedDB transaction tests.
 
@@ -116,7 +119,7 @@ Record live results here (date, browser/device, pass/fail and relevant error tex
 - [x] Local/Google/custom nickname and avatar rendering, shared profile-edit validation, progress/review counts, and save actions have automated DOM/data tests.
 - [x] Build marker, old diagnostic-history labelling, versioned asset references and deployment inclusion have automated coverage.
 - [ ] Check the profile page on a phone and desktop in a real browser: native dialog focus, Escape/Back, photo/GIF upload, theme contrast, and responsive layout.
-- [ ] Run the live Drive diagnostic while **Loaded app: profile-v1** is visible. A fresh result must start with `profile-v1 / metadata-etag-v1` and include its run timestamp.
+- [x] User supplied a successful build-identified Drive diagnostic from localhost. Production-origin confirmation remains in the live acceptance list above.
 
 Em dashes were removed from the authored site text and maintained source/docs. User
 nicknames, imported data and generated third-party content are not rewritten.

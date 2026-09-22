@@ -169,9 +169,9 @@ test('app entry points and offline cache use the same versioned profile assets',
     const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
     const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
     for (const asset of [
-        'backup-manager.js?v=profile-v1',
-        'profile-page.js?v=profile-v1',
-        'styles.css?v=profile-v1'
+        'backup-manager.js?v=settings-v1',
+        'profile-page.js?v=settings-v1',
+        'styles.css?v=settings-v1'
     ]) {
         assert.ok(html.includes(asset), asset);
         assert.ok(worker.includes(asset), asset);
@@ -181,4 +181,32 @@ test('app entry points and offline cache use the same versioned profile assets',
             .readFileSync(require.resolve('../.github/workflows/deploy.yml'), 'utf8')
             .includes('cp profile-page.js deploy/')
     );
+});
+
+test('settings shortcuts open profile and navigate to all existing sections', async () => {
+    const { dom, window, dialog } = await setup();
+    try {
+        const doc = window.document;
+        const modal = doc.getElementById('settingsModal');
+        modal.classList.add('show');
+        doc.getElementById('closeSettings').onclick = () => modal.classList.remove('show');
+        doc.getElementById('settingsOpenProfile').click();
+        assert.equal(dialog.open, true);
+        assert.equal(modal.classList.contains('show'), false);
+        doc.getElementById('profilePageBack').click();
+        for (const button of doc.querySelectorAll('[data-settings-target]')) {
+            const target = doc.getElementById(button.dataset.settingsTarget);
+            assert.ok(target, button.dataset.settingsTarget);
+            let scrolled = false;
+            target.scrollIntoView = () => {
+                scrolled = true;
+            };
+            button.click();
+            assert.ok(scrolled);
+            assert.equal(doc.activeElement, target);
+        }
+        assert.equal(doc.getElementById('backupSafety').open, true);
+    } finally {
+        dom.window.close();
+    }
 });

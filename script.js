@@ -3020,36 +3020,23 @@ class KanjiLearningApp {
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
-                const data = JSON.parse(e.target.result);
-                if (data.app === 'kanji-widgets') {
-                    BackupManager.validate(data);
-                }
-                if (
-                    !confirm('Replace this device’s saved progress and settings with this backup?')
-                ) {
+                const source = JSON.parse(e.target.result);
+                const data = await BackupManager.normalizeImport(source);
+                const notice = data.migratedFrom
+                    ? 'Import this older backup? Included progress/settings will be restored. Current photos, uploaded themes and sections missing from the file will be kept. A recovery copy is saved first.'
+                    : 'Replace this device’s saved progress and settings with this backup? A recovery copy is saved first.';
+                if (!confirm(notice)) {
                     return;
                 }
-                if (data.version !== 3) {
-                    await BackupManager.createRecovery();
-                }
-                const success =
-                    data.version === 3
-                        ? (await BackupManager.restore(data), true)
-                        : StorageManager.importData(e.target.result);
-                if (success) {
-                    const backupConfig = JSON.parse(
-                        localStorage.getItem('kanji_drive_backup') || '{}'
-                    );
-                    backupConfig.dataOwner = '__imported_local_data__';
-                    backupConfig.syncStates = {};
-                    localStorage.setItem('kanji_drive_backup', JSON.stringify(backupConfig));
-                    this.showToast('Backup restored successfully! Reloading...');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                } else {
-                    this.showToast('Error restoring backup. Invalid file format.');
-                }
+                await BackupManager.restore(data);
+                const backupConfig = JSON.parse(localStorage.getItem('kanji_drive_backup') || '{}');
+                backupConfig.dataOwner = '__imported_local_data__';
+                backupConfig.syncStates = {};
+                localStorage.setItem('kanji_drive_backup', JSON.stringify(backupConfig));
+                this.showToast('Backup restored successfully! Reloading...');
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
             } catch (error) {
                 console.error('Error restoring backup:', error);
                 this.showToast(error.message || 'Error restoring backup. Please check the file.');

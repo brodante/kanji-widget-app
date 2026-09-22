@@ -1,14 +1,14 @@
-const CACHE_NAME = 'kanji-widgets-v12';
+const CACHE_NAME = 'kanji-widgets-v13';
 const urlsToCache = [
     '/',
     '/index.html',
     '/styles.css',
-    '/styles.css?v=profile-v1',
+    '/styles.css?v=settings-v1',
     '/script.js',
     '/backup-config.js',
     '/backup-manager.js',
-    '/backup-manager.js?v=profile-v1',
-    '/profile-page.js?v=profile-v1',
+    '/backup-manager.js?v=settings-v1',
+    '/profile-page.js?v=settings-v1',
     '/kanji-data.js',
     '/audio-manager.js',
     '/storage-manager.js',

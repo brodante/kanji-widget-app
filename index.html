@@ -73,7 +73,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css?v=profile-v1" />
+        <link rel="stylesheet" href="styles.css?v=settings-v1" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -471,8 +471,32 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
+                    <nav class="settings-shortcuts" aria-label="Settings sections">
+                        <button
+                            id="settingsOpenProfile"
+                            class="settings-profile-shortcut"
+                            type="button"
+                        >
+                            <i class="fas fa-circle-user" aria-hidden="true"></i> My profile
+                            <span aria-hidden="true">↗</span>
+                        </button>
+                        <button type="button" data-settings-target="settingsLearning">
+                            Learning
+                        </button>
+                        <button type="button" data-settings-target="settingsAppearance">
+                            Appearance
+                        </button>
+                        <button type="button" data-settings-target="settingsAudio">Audio</button>
+                        <button type="button" data-settings-target="settingsAI">AI Sensei</button>
+                        <button type="button" data-settings-target="driveBackup">
+                            Backups &amp; sync
+                        </button>
+                        <button type="button" data-settings-target="backupSafety">
+                            Recovery &amp; privacy
+                        </button>
+                    </nav>
                     <div class="modal-body">
-                        <div class="settings-section-header">
+                        <div id="settingsLearning" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-graduation-cap"></i>
                             <span>Learning</span>
                         </div>
@@ -509,7 +533,7 @@
                             </select>
                         </div>
 
-                        <div class="settings-section-header">
+                        <div id="settingsAppearance" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-palette"></i>
                             <span>Appearance</span>
                         </div>
@@ -644,7 +668,7 @@
                             </select>
                         </div>
 
-                        <div class="settings-section-header">
+                        <div id="settingsAudio" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-volume-high"></i>
                             <span>Audio</span>
                         </div>
@@ -663,7 +687,7 @@
                             </select>
                         </div>
 
-                        <div class="settings-section-header">
+                        <div id="settingsAI" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-brain"></i>
                             <span>AI Sensei &amp; LLM Configuration</span>
                         </div>
@@ -779,7 +803,7 @@
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
                         </select>
-                        <section id="driveBackup" aria-labelledby="driveHeading">
+                        <section id="driveBackup" tabindex="-1" aria-labelledby="driveHeading">
                             <h3 id="driveHeading">Google Drive backups</h3>
                             <p>
                                 Connect your Google account to save progress, review schedules,
@@ -881,7 +905,7 @@
                                 (subject to your retention limit). Connecting Google only checks
                                 your saves.
                             </p>
-                            <details id="backupSafety">
+                            <details id="backupSafety" tabindex="-1">
                                 <summary>Recovery, privacy &amp; connection help</summary>
                                 <p>
                                     Before every restore, a recovery copy is saved on this device.
@@ -1781,8 +1805,8 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="kanji-data.js"></script>
         <script src="drawing-pad.js"></script>
         <script src="backup-config.js"></script>
-        <script src="backup-manager.js?v=profile-v1"></script>
-        <script src="profile-page.js?v=profile-v1"></script>
+        <script src="backup-manager.js?v=settings-v1"></script>
+        <script src="profile-page.js?v=settings-v1"></script>
         <script src="script.js"></script>
     </body>
 </html>

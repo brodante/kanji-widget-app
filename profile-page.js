@@ -149,6 +149,23 @@ class ProfilePage {
     }
 
     init() {
+        document.getElementById('settingsOpenProfile').onclick = () => {
+            document.getElementById('closeSettings').click();
+            this.open();
+        };
+        document.querySelectorAll('[data-settings-target]').forEach((button) => {
+            button.onclick = () => {
+                const section = document.getElementById(button.dataset.settingsTarget);
+                if (!section) {
+                    return;
+                }
+                if (section.tagName === 'DETAILS') {
+                    section.open = true;
+                }
+                section.scrollIntoView({ block: 'start', behavior: 'auto' });
+                section.focus({ preventScroll: true });
+            };
+        });
         document.getElementById('openProfilePage').onclick = () => this.open();
         document.getElementById('profilePageBack').onclick = () => this.close();
         this.dialog.addEventListener('cancel', (event) => {

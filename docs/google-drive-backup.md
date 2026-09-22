@@ -77,18 +77,17 @@ In Account & sync, **Upload photo** accepts browser-decodable image formats, inc
 animated GIFs, strictly smaller than 2 MiB (2,097,152 bytes). Original bytes are kept,
 so GIF animation is preserved. The custom photo is an app-profile preference (also
 visible in guest mode), not a change to the actual Google account photo. It is stored
-in IndexedDB and included in full backups and sync. An uploaded custom photo remains selected until you upload a replacement or restore different app data. Without a custom photo, Google’s image is automatic when connected, and guests see the neutral icon. Restoring an older backup with
-no avatar removes the custom override as part of replacing the app's saved state.
+in IndexedDB and included in full backups and sync. An uploaded custom photo remains selected until you upload a replacement or restore different app data. Without a custom photo, Google’s image is automatic when connected, and guests see the neutral icon. Restoring a full v3 backup with no avatar removes the custom override as part of replacing saved state. Partial legacy v1/v2 imports preserve media they never included.
 
 ## Quick saves and checkpoints
 
 - **Connecting Google is read-only for backup content.** It lists and checks cloud saves but does not upload your local state. A first connection may create the app folder. Enabled automatic sync/scheduling continues independently after connecting.
 - **Quick save** and automatic/scheduled saves compare content fingerprints (not timestamps). If nothing changed, they do not upload, rename or create files.
-- With changed local data and unchanged cloud state, the latest valid **quick-save checkpoint** is updated in place with the new JSON and a timestamped name. History uses Drive's **modified time**, not creation time.
+- With changed local data and unchanged cloud state, the latest valid **quick-save checkpoint** is updated in place with the new JSON and a timestamped name. History uses the content-save timestamp, falling back to Drive's modified time for legacy entries.
 - **Create new backup** always creates a separate snapshot. Manual snapshots and legacy untyped backups are never reused as writable checkpoints; the next quick save creates a checkpoint beside them.
 - Removing saved storage keys, mastered/studied/skipped progress, SRS entries, or removing/replacing uploaded media starts a separate checkpoint instead of erasing the old copy. Normal settings changes and SRS review updates can reuse the checkpoint.
 - Cloud content is rechecked even if the file ID is unchanged. A differing cloud revision that this device has not seen pauses saving for review. Choosing **Save this device's copy** explicitly creates a separate snapshot rather than overwriting the conflicting one.
-- Checkpoint reads obtain `etag` from Drive v2 JSON metadata before and after the content read. Guarded v2 updates send that same token in `If-Match`. A rejected revision (HTTP 412) stops the operation and asks you to check again. If a revision token isn't available to the browser, the app conservatively creates a separate checkpoint rather than doing an unguarded overwrite. In-place updates require a PASS from the current metadata-ETag diagnostic on this account/device. Live behavior still needs your rerun; automated tests mock the service.
+- Checkpoint reads obtain `etag` from Drive v2 JSON metadata before and after the content read. Guarded v2 updates send that same token in `If-Match`. A rejected revision (HTTP 412) stops the operation and asks you to check again. If a revision token isn't available to the browser, the app conservatively creates a separate checkpoint rather than doing an unguarded overwrite. In-place updates require a PASS from the current metadata-ETag diagnostic on this account/device. The user has reported a PASS against real Drive on localhost; production-origin and two-device checks remain separate. Automated tests mock the service.
 - A malformed latest backup is kept untouched and a separate checkpoint is created on the next explicit/automatic save. Network/permission failures do not count as permission to overwrite it.
 - Your retention limit applies only to **unpinned** app backup files. Manual/legacy snapshots are pinned by default; pin safety checkpoints to protect them as well. Unchanged checks do not run retention cleanup.
 - Update the app on every device before using checkpoints. Older clients only detect new file IDs and cannot reliably recognize in-place saves made by this version.
@@ -160,8 +159,7 @@ A failure still keeps the safe fallback; share its exact text, not tokens or cre
   15, 30, 60 seconds and upward to five minutes; a longer server Retry-After is respected.
   Explicit clicks may retry immediately. Closed/offline browsers still cannot upload.
 - A backup from a newer schema now explicitly asks you to update the app, and cannot be
-  automatically superseded as though it were corrupt. The full legacy migration project
-  remains pending in the roadmap.
+  automatically superseded as though it were corrupt. Known v1/v2 exports now have explicit converters and compatibility tests, described below.
 
 ## Repeated older diagnostic messages
 
@@ -181,8 +179,7 @@ Pull the latest branch, stop any old local server, then run `npm start` from thi
 Open `http://localhost:5000`, reload, and verify **Loaded app: profile-v1** before testing.
 If that marker is absent, check your working directory, port and checked-out commit.
 Do not clear site data. Reloading loses the in-memory Google token, so reconnect before
-running the test. Share the new build-prefixed result if it fails; successful live Drive
-verification is still pending and is not inferred from the automated tests.
+running the test. Share the new build-prefixed result if it fails. A user-reported localhost PASS is now recorded below; production-origin and two-device checks are not inferred from that result.
 
 ## My profile
 
@@ -201,3 +198,23 @@ The view uses the current theme, a native modal dialog with Back/Escape navigati
 and a responsive one-column layout on smaller screens. Statistics are derived from
 saved app data, not a separate public account database. The profile name/photo are
 included in normal backups; the device-label preference remains local.
+
+## Settings shortcuts and older backup imports
+
+The Settings sidebar now keeps **My profile** and section shortcuts above the scrolling
+content. Learning, Appearance, Audio, AI Sensei, Backups & sync, and Recovery & privacy
+are reachable without searching through the whole sidebar. Recovery & privacy opens the
+existing disclosure automatically. No controls or data stores are duplicated.
+
+Local imports recognize this app’s known v1/v2 partial exports and v3 full backups.
+Legacy exports are validated and converted to v3 before using the same recovery-protected
+restore path. Their included progress/settings/recent/SRS/AI sections are restored; sections
+absent from the old file, including uploaded themes and avatar, stay as they are. Imported
+API keys are discarded and existing device keys remain. Old settings are mapped into both
+settings stores so the current UI uses them. Unsupported/newer formats and malformed legacy
+records are rejected. A recovery failure stops the import before data changes.
+
+The user reported a successful real-Drive diagnostic on `http://localhost:5000` at
+`2026-09-22T16:52:02.499Z`, using `profile-v1 / metadata-etag-v1`. This confirms the tested
+conditional read/update path. The Settings/navigation update does not change that protocol
+or invalidate the saved PASS. Production-origin and two-device acceptance are separate checks.

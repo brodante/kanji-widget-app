@@ -71,3 +71,6 @@ live Google Drive acceptance tests.
 Open Account → **My profile** for profile editing, learning statistics and save controls
 without leaving the app. The checkpoint diagnostic displays its loaded build and run
 time; verify `profile-v1` before reporting a new diagnostic result.
+
+Settings now includes profile and section shortcuts. Imports of known v1/v2 exports use
+the same validated, recovery-protected restore path as current backups.

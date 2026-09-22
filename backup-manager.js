@@ -174,6 +174,58 @@ class BackupManager {
         }
         return data;
     }
+    // Legacy exports only contain selected sections. Preserve data they never included.
+    static async normalizeImport(data) {
+        if (data?.app === 'kanji-widgets' || data?.version === 3) {
+            return this.validate(data);
+        }
+        if (![1, 2].includes(data?.version)) {
+            throw new Error(
+                'Unsupported backup version. Update the app if this file came from a newer version.'
+            );
+        }
+        const object = (value) => value && typeof value === 'object' && !Array.isArray(value);
+        if (
+            !object(data.progress) ||
+            !Array.isArray(data.progress.mastered) ||
+            !Array.isArray(data.progress.studied)
+        ) {
+            throw new Error('Invalid legacy progress. Nothing has been imported.');
+        }
+        if (data.progress.skipped !== undefined && !Array.isArray(data.progress.skipped)) {
+            throw new Error('Invalid legacy skipped list.');
+        }
+        if (data.recent !== undefined && !Array.isArray(data.recent)) {
+            throw new Error('Invalid legacy recent list.');
+        }
+        for (const key of ['settings', 'srsData', 'aiSettings']) {
+            if (data[key] !== undefined && !object(data[key])) {
+                throw new Error(`Invalid legacy ${key}.`);
+            }
+        }
+        const migrated = await this.snapshot();
+        migrated.migratedFrom = data.version;
+        migrated.storage.kanji_progress = JSON.stringify(
+            this.scrub({ ...data.progress, skipped: data.progress.skipped || [] })
+        );
+        for (const [old, key] of [
+            ['recent', 'kanji_recent'],
+            ['srsData', 'kanji_srs_data'],
+            ['aiSettings', 'kanji_ai_settings']
+        ]) {
+            if (data[old] !== undefined) {
+                migrated.storage[key] = JSON.stringify(this.scrub(data[old]));
+            }
+        }
+        if (data.settings !== undefined) {
+            const settings = this.scrub(data.settings);
+            migrated.storage.kanji_settings = JSON.stringify(settings);
+            const current = JSON.parse(migrated.storage.kanjiSettings || '{}');
+            migrated.storage.kanjiSettings = JSON.stringify({ ...current, ...settings });
+        }
+        return this.validate(migrated);
+    }
+
     static async restore(data, { recovery = true } = {}) {
         this.validate(data);
         if (recovery) {
