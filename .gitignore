@@ -70,3 +70,11 @@ docs/planning/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Downloaded OAuth credentials must never be published
+client_secret_*.json
+
+# Local Firebase emulator logs and state
+.firebase/
+*-debug.log
+*-debug.log.*

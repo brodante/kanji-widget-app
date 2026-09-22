@@ -4,7 +4,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Serve static files from current directory
-app.use(express.static(__dirname));
+app.use(
+    express.static(__dirname, {
+        setHeaders(res, filePath) {
+            if (/\.(html|js|css)$/.test(filePath)) {
+                res.setHeader('Cache-Control', 'no-cache');
+            }
+        }
+    })
+);
 
 // Serve main route
 app.get('/', (req, res) => {

@@ -49,3 +49,48 @@ GPLv3. See `LICENSE`.
 ---
 
 Made with 愛 by [d4nte](https://github.com/brodante).
+
+### Google Drive backup
+
+The header Account & sync menu shows guest/Google account status and supports safe
+foreground multi-device sync with cloud-change review.
+Settings → Backup & Data supports Google account authorization, full Drive backups,
+scheduled uploads while the app is open and authorized, history, download and restore.
+The site owner must configure a public Google OAuth client ID first.
+See [GitHub Pages / Google Drive setup](docs/google-drive-backup.md) for domain setup,
+privacy details and browser-only scheduling limits.
+
+Quick save reuses safe cloud checkpoints and skips unchanged data. Create new backup
+keeps an independent snapshot; connecting Google only checks the cloud state. Update
+all devices to the checkpoint-enabled version before using multi-device sync.
+
+See the [account and cloud-save roadmap](docs/account-sync-roadmap.md) for the full
+Must / Should / Could / Optional checklist, implemented safeguards, and remaining
+live Google Drive acceptance tests.
+
+Open Account → **My profile** for profile editing, learning statistics and save controls
+without leaving the app. The checkpoint diagnostic displays its loaded build and run
+time; verify `profile-v1` before reporting a new diagnostic result.
+
+Settings now includes profile and section shortcuts. Imports of known v1/v2 exports use
+the same validated, recovery-protected restore path as current backups.
+
+### Persistent Google app sign-in (Firebase Spark)
+
+Persistent app sign-in is implemented separately from Google Drive permissions. The owner's public `kanji-widgets` project configuration is now in `firebase-config.js`. Google sign-in has been confirmed working by the owner. See [Firebase setup and phased plan](docs/firebase-auth-setup.md) for the exact free-plan setup steps and verification checklist.
+
+Keep the project on **Spark with no billing account linked**. Google login does not require moving the site off GitHub Pages. The new Firestore progress-sync layer requires published rules and first-sync consent. It does not renew Drive access. Signing out of the app does not disconnect Drive; both controls are explicitly labeled. Firebase session credentials are excluded from learning backups. Real Firestore and two-device verification remain pending.
+
+### Firestore progress sync
+
+The default progress-saving flow now uses Google app sign-in plus Firestore, not Drive. Follow [Firestore setup and verification](docs/firestore-sync-setup.md) and publish the owner-only `firestore.rules` before testing. The database is in Singapore. First sync asks which progress to keep; approved changes save at 30-second intervals while the app is visible and online. New remote revisions pause for review instead of silently replacing local progress. Uploaded media and AI credentials stay local. Drive full backups remain under Settings → Advanced: optional Google Drive backups.
+
+`npm test` covers application behavior with a mock adapter. `npm run test:rules` separately exercises security rules in a demo-project emulator and needs Java 21+. That emulator could not run in the sandbox, so security-rule execution and real two-device acceptance are still pending. Keep Firebase on Spark without billing.
+
+### Development checks
+
+Use Node **22.22.2 or newer in the Node 22 line**, or a newer Node release supported by JSDOM. Run `npm ci` and `npm test` to check the learning/account/sync behavior and the live drawing-pad regression suite together. `npm run test:drawing-pad` runs the practice checks alone. CI runs the combined tests so account work cannot silently drop practice coverage.
+
+### Website analytics
+
+The existing GA4 stream (`G-Q6XNG2ETFL`) remains the sole Analytics destination configured by the app. `analytics.js` loads it only on the production custom domain and this project's GitHub Pages URL, not localhost or previews. Firebase Analytics is not separately initialized. See [Analytics setup and release check](docs/analytics.md).

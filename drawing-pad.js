@@ -4,7 +4,7 @@
  * Provides a <canvas>-based drawing surface for practising kanji strokes.
  * Features: grid overlay, reference-stroke tracing, stroke-order validation,
  * snap-to-stroke scoring with perfect-attachment snap rendering, redo, and a
- * side-by-side reference guide panel — all powered by KanjiVG path data that
+ * side-by-side reference guide panel - all powered by KanjiVG path data that
  * the app already fetches via KanjiLearningApp.fetchStrokeOrderSvg().
  *
  * The pad owns ALL of its event wiring (canvas pointer events + toolbar
@@ -22,7 +22,7 @@ class DrawingPad {
     static RESAMPLE_POINTS = 64;
     static SNAP_THRESHOLD = 0.25; // normalised; lower = stricter
     // How strongly stroke position (not just shape) picks the snap target.
-    // Shape-only matching is ambiguous in kanji — many strokes are the same
+    // Shape-only matching is ambiguous in kanji - many strokes are the same
     // shape (horizontals, diagonals...), so without this the matcher happily
     // targets an identical stroke on the far side of the character.
     static SNAP_POSITION_WEIGHT = 0.8;
@@ -223,8 +223,8 @@ class DrawingPad {
         }
 
         // Toolbar. Each control is bound at most once (tracked in
-        // _boundControls) so repeated init() calls — which re-resolve controls
-        // against a new scope — pick up newly rendered inline buttons without
+        // _boundControls) so repeated init() calls - which re-resolve controls
+        // against a new scope - pick up newly rendered inline buttons without
         // stacking duplicate listeners on the ones that are already wired.
         //
         // NOTE: these bindings are the ONLY wiring for the toolbar. The
@@ -503,7 +503,7 @@ class DrawingPad {
 
         // A stroke is eligible for the snap-to-stroke render effect when it
         // resembles the stroke it snapped to (the one the user plausibly
-        // intended — closest + most similar), NOT the order-expected one:
+        // intended - closest + most similar), NOT the order-expected one:
         // an out-of-order stroke scores poorly against the expected stroke
         // but should still snap neatly onto the stroke actually drawn.
         const matchScore = Math.max(0, 1 - bestMatch.shapeDist / DrawingPad.SNAP_THRESHOLD);
@@ -520,7 +520,7 @@ class DrawingPad {
      * Shape similarity alone is ambiguous in kanji: after normalisation many
      * strokes look alike (every horizontal looks like every other
      * horizontal), so a shape-only match happily targets an identical stroke
-     * on the opposite side of the character — and snap flies across the
+     * on the opposite side of the character - and snap flies across the
      * canvas. The combined metric adds the distance between the drawn
      * stroke's centre and each reference stroke's centre (both in 0..1
      * canvas units), so between equally-shaped candidates the NEAREST stroke
@@ -798,13 +798,13 @@ class DrawingPad {
         this.scoreEl.textContent = `Accuracy: ${pct}%${orderOk ? '' : '  · 順番 (order)'}`;
 
         // All strokes drawn: show a Japanese congratulation (or
-        // encouragement). No emoji — text only keeps it classy.
+        // encouragement). No emoji - text only keeps it classy.
         if (scored.length === this.referencePaths.length) {
             if (avg >= 0.7 && orderOk) {
                 this.scoreEl.textContent +=
-                    pct >= 100 ? '  — パーフェクト！おめでとう！' : '  — すごい！おめでとう！';
+                    pct >= 100 ? '  - パーフェクト！おめでとう！' : '  - すごい！おめでとう！';
             } else {
-                this.scoreEl.textContent += '  — もう一度！ (once more)';
+                this.scoreEl.textContent += '  - もう一度！ (once more)';
             }
         }
     }
@@ -986,7 +986,7 @@ class DrawingPad {
      * KanjiVG marks the stroke order with a faint number placed at each
      * stroke's start point. When a stroke begins near the edge of the
      * viewBox the number renders partly outside the 109x109 box, and the
-     * root <svg> clips it there — panel padding cannot help because the cut
+     * root <svg> clips it there - panel padding cannot help because the cut
      * happens inside the SVG itself. Expanding this copy's viewBox adds a
      * small margin around the glyph so every number stays visible.
      *
@@ -1019,7 +1019,7 @@ class DrawingPad {
     /**
      * Highlight the guide's strokes to mirror the user's progress: strokes
      * already drawn are accented, the upcoming stroke is emphasised, and the
-     * rest stay faint. Pure class toggling — cheap even per stroke.
+     * rest stay faint. Pure class toggling - cheap even per stroke.
      */
     _updateGuideHighlight() {
         if (!this.guideVisible || !this.guideEl) {
@@ -1165,7 +1165,7 @@ class DrawingPad {
      * Run the snap glides on requestAnimationFrame until they settle (~250ms
      * after a stroke commit or a Snap toggle, so the user SEES the stroke
      * land on the reference). The loop only exists while a glide is in
-     * progress — the steady state costs nothing.
+     * progress - the steady state costs nothing.
      */
     _scheduleSnapAnimation() {
         if (this._snapAnimFrame) {
@@ -1225,7 +1225,7 @@ class DrawingPad {
             this._drawStroke(ctx, pts, color, width);
         });
 
-        // 4. Current (in-progress) stroke — accent at reduced opacity
+        // 4. Current (in-progress) stroke - accent at reduced opacity
         if (this.currentStroke.length > 1) {
             this._drawStroke(ctx, this.currentStroke, this._withAlpha(ink, 0.55), width);
         }

@@ -30,9 +30,21 @@ jobs:
                   mkdir -p deploy
                   # Copy only necessary files for static hosting
                   cp index.html deploy/
+                  cp CNAME deploy/
                   cp styles.css deploy/
                   cp script.js deploy/
+                  cp analytics.js deploy/
                   cp drawing-pad.js deploy/
+                  cp -r assets deploy/
+                  cp -r database deploy/
+                  cp backup-config.js deploy/
+                  cp firebase-config.js deploy/
+                  cp app-auth.js deploy/
+                  cp cloud-sync.js deploy/
+                  cp ui-feedback.js deploy/
+                  cp firestore.rules deploy/
+                  cp backup-manager.js deploy/
+                  cp profile-page.js deploy/
                   cp kanji-data.js deploy/
                   cp audio-manager.js deploy/
                   cp ai-manager.js deploy/

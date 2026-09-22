@@ -33,16 +33,8 @@
             content="https://brodante.github.io/kanji-widget-app/preview.png"
         />
 
-        <!-- Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6XNG2ETFL"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-            gtag('js', new Date());
-            gtag('config', 'G-Q6XNG2ETFL');
-        </script>
+        <!-- Existing GA4 stream, production sites only. No duplicate Firebase Analytics SDK. -->
+        <script defer src="analytics.js?v=analytics-v1"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
         <!-- NEW: Post-Processing Addons for Dracula's Glow and VHS Glitch -->
@@ -73,7 +65,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="styles.css?v=practice-merge-v1" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -180,6 +172,24 @@
                         </div>
                     </div>
 
+                    <button
+                        id="accountBtn"
+                        class="icon-btn"
+                        type="button"
+                        title="Account & sync"
+                        aria-label="Account & sync"
+                        aria-expanded="false"
+                        aria-controls="accountPanel"
+                    >
+                        <img
+                            id="accountAvatar"
+                            class="account-avatar"
+                            alt=""
+                            referrerpolicy="no-referrer"
+                            hidden
+                        />
+                        <i class="fas fa-circle-user" aria-hidden="true"></i>
+                    </button>
                     <button id="settingsBtn" class="icon-btn" title="Settings">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -187,6 +197,142 @@
                         <i class="fas fa-moon"></i>
                     </button>
                 </div>
+                <section id="accountPanel" hidden aria-labelledby="accountHeading">
+                    <div class="account-panel-heading">
+                        <div class="account-avatar-large">
+                            <img
+                                id="accountAvatarPreview"
+                                class="account-avatar"
+                                alt="Profile photo"
+                                referrerpolicy="no-referrer"
+                                hidden
+                            />
+                            <i class="fas fa-circle-user" aria-hidden="true"></i>
+                        </div>
+                        <div class="account-heading-copy">
+                            <h2 id="accountHeading">Guest user</h2>
+                            <p id="accountIdentity">Learning data stays on this device.</p>
+                        </div>
+                        <button id="accountClose" type="button" aria-label="Close account panel">
+                            ×
+                        </button>
+                    </div>
+                    <div class="app-auth-section" aria-label="App sign-in">
+                        <p class="app-auth-label">KanjiWidgets account</p>
+                        <p data-app-auth-status role="status" aria-live="polite">
+                            Checking app sign-in…
+                        </p>
+                        <div class="backup-buttons">
+                            <button type="button" class="backup-btn" data-app-sign-in disabled>
+                                Sign in with Google
+                            </button>
+                            <button
+                                type="button"
+                                class="backup-btn danger-action"
+                                data-app-sign-out
+                                hidden
+                            >
+                                Sign out of app
+                            </button>
+                            <button type="button" class="backup-btn" data-app-auth-retry hidden>
+                                Retry connection
+                            </button>
+                        </div>
+                    </div>
+                    <section class="cloud-progress" aria-label="Cloud progress">
+                        <h3>Cloud progress</h3>
+                        <p data-cloud-status role="status" aria-live="polite">
+                            Sign in to save progress across devices.
+                        </p>
+                        <p data-cloud-summary></p>
+                        <div class="backup-buttons">
+                            <button type="button" class="backup-btn" data-cloud-action="save">
+                                Save this device
+                            </button>
+                            <button type="button" class="backup-btn" data-cloud-action="check">
+                                Check cloud
+                            </button>
+                            <button type="button" class="backup-btn" data-cloud-action="pause">
+                                Pause autosave
+                            </button>
+                            <button
+                                type="button"
+                                class="backup-btn"
+                                data-cloud-action="restore"
+                                hidden
+                            >
+                                Use cloud progress
+                            </button>
+                            <button type="button" class="backup-btn" data-cloud-action="download">
+                                Download Drive copy
+                            </button>
+                        </div>
+                        <small
+                            >Progress, reviews, nickname and learning settings. Uploaded photos,
+                            backgrounds and AI credentials stay on this device. Saves run while the
+                            app is open.</small
+                        >
+                    </section>
+                    <button
+                        id="openProfilePage"
+                        type="button"
+                        class="backup-btn account-settings-link"
+                    >
+                        My profile <span aria-hidden="true">↗</span>
+                    </button>
+                    <details id="accountProfileDetails" class="account-details">
+                        <summary>Profile &amp; device</summary>
+                        <form id="accountProfileForm">
+                            <label for="profileNickname"
+                                >Display name <span>(optional)</span></label
+                            >
+                            <input
+                                id="profileNickname"
+                                type="text"
+                                maxlength="40"
+                                autocomplete="nickname"
+                                placeholder="Google name or Guest user"
+                            />
+                            <label for="profileDeviceLabel"
+                                >This device’s label <span>(optional)</span></label
+                            >
+                            <input
+                                id="profileDeviceLabel"
+                                type="text"
+                                maxlength="24"
+                                autocomplete="off"
+                                placeholder="e.g. My phone"
+                            />
+                            <button type="submit" class="backup-btn">Save profile</button>
+                        </form>
+                        <div class="account-photo-controls">
+                            <button id="avatarUpload" type="button" class="backup-btn">
+                                Upload photo
+                            </button>
+                            <small>Image or GIF · under 2 MB</small>
+                        </div>
+                        <input
+                            id="avatarFile"
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            aria-label="Choose profile photo"
+                        />
+                        <p id="avatarStatus" role="status" aria-live="polite"></p>
+                        <p id="profileStatus" role="status" aria-live="polite"></p>
+                        <small
+                            >Your name and photo sync with backups. The device label stays here and
+                            identifies new cloud saves; it is not a login session.</small
+                        >
+                    </details>
+                    <button
+                        id="accountSettings"
+                        type="button"
+                        class="backup-btn account-settings-link"
+                    >
+                        Advanced backups &amp; recovery <span aria-hidden="true">↗</span>
+                    </button>
+                </section>
                 <!-- SEARCH PANEL -->
                 <div id="searchPanel" class="search-panel">
                     <div class="search-input-wrapper">
@@ -308,8 +454,32 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
+                    <nav class="settings-shortcuts" aria-label="Settings sections">
+                        <button
+                            id="settingsOpenProfile"
+                            class="settings-profile-shortcut"
+                            type="button"
+                        >
+                            <i class="fas fa-circle-user" aria-hidden="true"></i> My profile
+                            <span aria-hidden="true">↗</span>
+                        </button>
+                        <button type="button" data-settings-target="settingsLearning">
+                            Learning
+                        </button>
+                        <button type="button" data-settings-target="settingsAppearance">
+                            Appearance
+                        </button>
+                        <button type="button" data-settings-target="settingsAudio">Audio</button>
+                        <button type="button" data-settings-target="settingsAI">AI Sensei</button>
+                        <button type="button" data-settings-target="cloudSettings">
+                            Cloud progress
+                        </button>
+                        <button type="button" data-settings-target="backupSafety">
+                            Recovery &amp; privacy
+                        </button>
+                    </nav>
                     <div class="modal-body">
-                        <div class="settings-section-header">
+                        <div id="settingsLearning" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-graduation-cap"></i>
                             <span>Learning</span>
                         </div>
@@ -346,7 +516,7 @@
                             </select>
                         </div>
 
-                        <div class="settings-section-header">
+                        <div id="settingsAppearance" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-palette"></i>
                             <span>Appearance</span>
                         </div>
@@ -481,7 +651,7 @@
                             </select>
                         </div>
 
-                        <div class="settings-section-header">
+                        <div id="settingsAudio" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-volume-high"></i>
                             <span>Audio</span>
                         </div>
@@ -500,7 +670,7 @@
                             </select>
                         </div>
 
-                        <div class="settings-section-header">
+                        <div id="settingsAI" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-brain"></i>
                             <span>AI Sensei &amp; LLM Configuration</span>
                         </div>
@@ -535,8 +705,8 @@
                                 </button>
                             </div>
                             <small class="setting-help-text" id="aiKeyHelpText">
-                                Stored locally in your browser only &mdash; never sent to any
-                                KanjiWidgets server.
+                                Stored locally in your browser only - never sent to any KanjiWidgets
+                                server.
                             </small>
                             <small class="setting-help-text">
                                 <a
@@ -609,21 +779,416 @@
                                 <option value="monthly">Monthly</option>
                             </select>
                         </div>
-                        <div class="setting-group">
-                            <label for="onlineBackupFreq">Online Backup Frequency:</label>
-                            <select id="onlineBackupFreq">
-                                <option value="never" selected>Never</option>
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
-                        </div>
+                        <!-- Kept for compatibility with existing device settings. Cloud scheduling is separate. -->
+                        <select id="onlineBackupFreq" hidden aria-hidden="true">
+                            <option value="never">Never</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                        <section
+                            id="cloudSettings"
+                            tabindex="-1"
+                            aria-label="Cloud progress settings"
+                        >
+                            <section class="cloud-progress" aria-label="Cloud progress">
+                                <h3>Cloud progress</h3>
+                                <p data-cloud-status role="status" aria-live="polite">
+                                    Sign in to save progress across devices.
+                                </p>
+                                <p data-cloud-summary></p>
+                                <div class="backup-buttons">
+                                    <button
+                                        type="button"
+                                        class="backup-btn"
+                                        data-cloud-action="save"
+                                    >
+                                        Save this device
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="backup-btn"
+                                        data-cloud-action="check"
+                                    >
+                                        Check cloud
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="backup-btn"
+                                        data-cloud-action="pause"
+                                    >
+                                        Pause autosave
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="backup-btn"
+                                        data-cloud-action="restore"
+                                        hidden
+                                    >
+                                        Use cloud progress
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="backup-btn"
+                                        data-cloud-action="download"
+                                    >
+                                        Download Drive copy
+                                    </button>
+                                </div>
+                                <small
+                                    >Progress, reviews, nickname and learning settings. Uploaded
+                                    photos, backgrounds and AI credentials stay on this device.
+                                    Saves run while the app is open.</small
+                                >
+                            </section>
+                        </section>
+                        <details id="driveBackup" tabindex="-1">
+                            <summary>Advanced: optional Google Drive backups</summary>
+                            <p>
+                                Not needed for progress sync. Use Drive only for full backups,
+                                including uploaded media. Drive authorization expires separately.
+                            </p>
+                            <p class="app-auth-label">Google Drive backups (separate connection)</p>
+                            <div class="backup-buttons account-primary-actions">
+                                <button id="accountConnect" type="button" class="backup-btn">
+                                    Connect with Google
+                                </button>
+                                <button
+                                    id="accountDisconnect"
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                    hidden
+                                >
+                                    Disconnect
+                                </button>
+                                <button id="accountSync" type="button" class="backup-btn">
+                                    Quick save
+                                </button>
+                            </div>
+                            <p id="saveHealth" role="status" aria-live="polite"></p>
+                            <p id="accountStatus" role="status" aria-live="polite"></p>
+                            <div id="syncConflict" hidden>
+                                <div id="saveComparison"></div>
+                                <button id="downloadCloudConflict" class="backup-btn" type="button">
+                                    Download Drive copy
+                                </button>
+                                <button id="downloadBoth" class="backup-btn" type="button">
+                                    Download this device
+                                </button>
+                                <p>
+                                    A cloud copy needs your review. Choose which version to use.
+                                    Nothing has been overwritten.
+                                </p>
+                                <button
+                                    id="syncUseCloud"
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                >
+                                    Use cloud copy
+                                </button>
+                                <button
+                                    id="syncUseLocal"
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                >
+                                    Save this device’s copy
+                                </button>
+                            </div>
+
+                            <section
+                                id="accountOnboarding"
+                                class="account-onboarding"
+                                hidden
+                                aria-labelledby="onboardingTitle"
+                            >
+                                <strong id="onboardingTitle">Choose how to save</strong>
+                                <p id="onboardingText"></p>
+                                <div class="backup-buttons">
+                                    <button id="onboardingStart" class="backup-btn" type="button">
+                                        Create first checkpoint
+                                    </button>
+                                    <button id="onboardingLater" class="backup-btn" type="button">
+                                        Keep local for now
+                                    </button>
+                                </div>
+                            </section>
+                            <details id="accountSaveDetails" class="account-details">
+                                <summary>Save options &amp; help</summary>
+                                <label class="account-sync-toggle"
+                                    ><input id="accountAutoSync" type="checkbox" /> Autosave after
+                                    changes while this app is open</label
+                                >
+                                <button id="accountBackup" type="button" class="backup-btn">
+                                    Create new backup
+                                </button>
+                                <small
+                                    >Use the same Google account on each device. Access expires and
+                                    needs reconnecting after a reload. Sync pauses when closed or
+                                    offline. GitHub login isn’t available yet.</small
+                                >
+                            </details>
+                            <section class="profile-card" aria-labelledby="profileSavesTitle">
+                                <h2 id="profileSavesTitle">Full backup tools</h2>
+                                <p id="profilePageSaveHealth" role="status" aria-live="polite"></p>
+                                <div class="profile-save-actions">
+                                    <button
+                                        id="profilePageConnect"
+                                        type="button"
+                                        class="backup-btn profile-cloud-action"
+                                    >
+                                        Connect with Google
+                                    </button>
+                                    <button
+                                        id="profilePageQuickSave"
+                                        type="button"
+                                        class="backup-btn profile-cloud-action"
+                                    >
+                                        Quick save
+                                    </button>
+                                    <button
+                                        id="profilePageNewBackup"
+                                        type="button"
+                                        class="backup-btn profile-cloud-action"
+                                    >
+                                        Create new backup
+                                    </button>
+                                    <button
+                                        id="profilePageExport"
+                                        type="button"
+                                        class="profile-subtle-btn profile-cloud-action"
+                                    >
+                                        Download local backup
+                                    </button>
+                                    <button
+                                        id="profilePageHistory"
+                                        type="button"
+                                        class="profile-subtle-btn"
+                                    >
+                                        Drive history &amp; recovery
+                                    </button>
+                                    <button
+                                        id="profilePageReview"
+                                        type="button"
+                                        class="profile-subtle-btn"
+                                        hidden
+                                    >
+                                        Review cloud changes
+                                    </button>
+                                </div>
+                                <p id="profilePageCloudStatus" role="status" aria-live="polite"></p>
+                                <p class="profile-hint">
+                                    You can learn without signing in. Drive access expires
+                                    separately; local data stays on this device.
+                                </p>
+                            </section>
+                            <h3 id="driveHeading">Google Drive backups</h3>
+                            <p>
+                                Connect your Google account to save progress, review schedules,
+                                settings, themes and uploaded backgrounds in a dedicated Drive
+                                folder. API keys are excluded. Backups are private to your Drive,
+                                but not encrypted by this app.
+                            </p>
+                            <p>
+                                <strong
+                                    >Automatic backups require this app to be open and Google access
+                                    to be valid.</strong
+                                >
+                                Google access expires (usually in about an hour); reconnect when
+                                prompted. Missed backups run when you return and reconnect.
+                                Restoring replaces this device’s data. This is not live multi-device
+                                sync.
+                            </p>
+                            <details id="driveClientSetup">
+                                <summary>Google connection setup</summary>
+                                <div class="setting-group">
+                                    <label for="driveClientId">Public Google OAuth client ID</label
+                                    ><input
+                                        id="driveClientId"
+                                        type="text"
+                                        autocomplete="off"
+                                        placeholder="…apps.googleusercontent.com"
+                                    />
+                                </div>
+                                <p>
+                                    The site owner can configure this once for everyone. Never enter
+                                    a client secret.
+                                </p>
+                            </details>
+                            <p>
+                                <a href="docs/google-drive-backup.md" target="_blank" rel="noopener"
+                                    >Setup guide for GitHub Pages</a
+                                >
+                            </p>
+                            <div class="backup-buttons">
+                                <button id="driveConnect" class="backup-btn" type="button">
+                                    Connect with Google
+                                </button>
+                                <button
+                                    id="driveDisconnect"
+                                    class="backup-btn danger-action"
+                                    type="button"
+                                >
+                                    Disconnect Google
+                                </button>
+                            </div>
+                            <div class="setting-group">
+                                <label for="driveFrequency">Automatic cloud backup</label
+                                ><select id="driveFrequency">
+                                    <option value="never">Off (manual only)</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Every 7 days</option>
+                                    <option value="monthly">Every 30 days</option>
+                                </select>
+                            </div>
+                            <div class="setting-group">
+                                <label for="driveTime">Backup time (this device’s local time)</label
+                                ><input id="driveTime" type="time" value="19:00" required />
+                            </div>
+                            <div class="setting-group">
+                                <label for="drivePrefix">Backup filename prefix</label
+                                ><input
+                                    id="drivePrefix"
+                                    type="text"
+                                    maxlength="50"
+                                    pattern="[a-zA-Z0-9_-]+"
+                                    value="kanji-backup"
+                                />
+                            </div>
+                            <div class="setting-group">
+                                <label for="driveKeep">Keep cloud backups</label
+                                ><select id="driveKeep">
+                                    <option value="0">All (no automatic deletion)</option>
+                                    <option value="5">Newest 5</option>
+                                    <option value="10">Newest 10</option>
+                                    <option value="20">Newest 20</option>
+                                </select>
+                            </div>
+                            <p>
+                                When a limit is selected, only older unpinned backups are moved to
+                                Drive trash after a successful upload. Manual and legacy backups are
+                                pinned by default. Pin/unpin individual files in history. This
+                                includes unpinned checkpoints from other devices.
+                            </p>
+                            <div class="backup-buttons">
+                                <button id="driveQuickSave" class="backup-btn" type="button">
+                                    Quick save
+                                </button>
+                                <button id="driveNow" class="backup-btn" type="button">
+                                    Create new backup</button
+                                ><button id="driveRefresh" class="backup-btn" type="button">
+                                    Refresh backup history
+                                </button>
+                            </div>
+                            <p>
+                                Quick save skips unchanged data and updates the latest quick-save
+                                checkpoint when safe. Manual backups stay separate. If progress or
+                                media would be removed, a new checkpoint preserves the previous copy
+                                (subject to your retention limit). Connecting Google only checks
+                                your saves.
+                            </p>
+                            <details id="backupSafety" tabindex="-1">
+                                <summary>Recovery, privacy &amp; connection help</summary>
+                                <p>
+                                    Before every restore, a recovery copy is saved on this device.
+                                    Restore stops if that copy cannot be stored. Undo restores the
+                                    previous state, not a merge; later changes will be replaced.
+                                    Recovery copies are not uploaded and exclude API keys.
+                                </p>
+                                <div class="backup-buttons">
+                                    <button
+                                        id="undoRestore"
+                                        class="backup-btn danger-action"
+                                        type="button"
+                                    >
+                                        Undo last restore
+                                    </button>
+                                    <button id="downloadRecovery" class="backup-btn" type="button">
+                                        Download recovery copy
+                                    </button>
+                                    <button id="privacyExport" class="backup-btn" type="button">
+                                        Export all learning data
+                                    </button>
+                                </div>
+                                <p>
+                                    Disconnecting keeps local progress and cloud files. Deleting
+                                    local data removes progress, settings, local API keys, media,
+                                    backups and recovery data only on this device. Deleting cloud
+                                    backups moves this app’s files to Drive trash, including pinned
+                                    copies, without clearing local progress.
+                                </p>
+                                <div class="backup-buttons">
+                                    <button
+                                        id="clearLocalAccount"
+                                        class="backup-btn danger-action"
+                                        type="button"
+                                    >
+                                        Disconnect &amp; clear this device
+                                    </button>
+                                    <button
+                                        id="deleteCloudBackups"
+                                        class="backup-btn danger-action"
+                                        type="button"
+                                    >
+                                        Delete all cloud backups
+                                    </button>
+                                </div>
+                                <p>
+                                    Backups contain progress, review schedules, settings, themes,
+                                    avatar and AI cached responses. They are not app-encrypted. API
+                                    keys and Google tokens are excluded. Anyone with a downloaded
+                                    JSON copy can read its contents.
+                                </p>
+                                <p>
+                                    <a
+                                        href="https://myaccount.google.com/connections"
+                                        target="_blank"
+                                        rel="noopener"
+                                        >Manage/revoke Google access</a
+                                    >
+                                    ·
+                                    <a
+                                        href="docs/google-drive-backup.md"
+                                        target="_blank"
+                                        rel="noopener"
+                                        >Setup and privacy guide</a
+                                    >
+                                </p>
+                                <p>
+                                    For <strong>origin_mismatch</strong>, add this browser’s exact
+                                    origin to the Web OAuth client’s Authorized JavaScript origins.
+                                    For access_denied, check test users and grant Drive permission.
+                                    Reloading or expired access requires reconnecting; local
+                                    learning still works.
+                                </p>
+                                <button id="driveDiagnostic" class="backup-btn" type="button">
+                                    Test Drive checkpoint safety
+                                </button>
+                                <p id="driveDiagnosticBuild"></p>
+                                <p id="driveDiagnosticResult" role="status"></p>
+                                <button id="reloadApp" class="backup-btn" type="button">
+                                    Check for app update
+                                </button>
+                                <p>
+                                    If a result mentions “did not expose a usable revision
+                                    token/readback”, check the loaded build above. That wording
+                                    belongs to an older test. Saved results are labelled separately.
+                                    You do not need to clear site data.
+                                </p>
+                            </details>
+                            <p id="driveStatus" role="status" aria-live="polite"></p>
+                            <a id="driveFolder" hidden target="_blank" rel="noopener"
+                                >Open backup folder in Google Drive</a
+                            >
+                            <ul id="driveFiles" aria-label="Google Drive backup files"></ul>
+                        </details>
                         <div class="setting-group">
                             <div class="backup-buttons">
                                 <button id="createBackup" class="backup-btn">
                                     Create Local Backup
                                 </button>
-                                <button id="restoreBackup" class="backup-btn">Import Backup</button>
+                                <button id="restoreBackup" class="backup-btn danger-action">
+                                    Import Backup
+                                </button>
                             </div>
                         </div>
 
@@ -632,7 +1197,9 @@
                             <span>Danger Zone</span>
                         </div>
                         <div class="setting-group">
-                            <button id="resetProgress" class="reset-btn">Reset All Progress</button>
+                            <button id="resetProgress" class="reset-btn danger-action">
+                                Reset All Progress
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -694,7 +1261,7 @@
                                     accept="image/*,video/mp4,video/webm"
                                 />
                                 <div class="custom-css-hint">
-                                    For video: 720p-1080p, 8-15 seconds works best — it's always
+                                    For video: 720p-1080p, 8-15 seconds works best. It's always
                                     blurred, so higher resolution just adds file size with no
                                     visible benefit.
                                 </div>
@@ -786,8 +1353,8 @@
                                 </div>
                                 <div id="customThemeCSSPanel" class="custom-css-panel">
                                     <div class="custom-css-hint">
-                                        Only affects the background image layer — one property per
-                                        line, no selectors or braces.
+                                        Only affects the background image layer. Use one property
+                                        per line, no selectors or braces.
                                     </div>
                                     <label
                                         for="customThemeCSSFileInput"
@@ -1215,13 +1782,166 @@ filter: blur(10px) brightness(1) saturate(1);
             </div>
         </footer>
 
+        <dialog id="profilePage" class="profile-page" aria-labelledby="profilePageTitle">
+            <div class="profile-page-shell">
+                <header class="profile-page-header">
+                    <button id="profilePageBack" type="button" class="profile-subtle-btn">
+                        ← Back to learning
+                    </button>
+                    <span>YOUR LEARNING SPACE</span>
+                </header>
+                <section class="profile-hero">
+                    <div class="profile-page-avatar">
+                        <img
+                            id="profilePageAvatar"
+                            alt="Your profile photo"
+                            referrerpolicy="no-referrer"
+                            hidden
+                        /><i class="fas fa-circle-user" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <p class="profile-eyebrow">My profile</p>
+                        <h1 id="profilePageTitle">Guest user</h1>
+                        <p id="profilePageIdentity">Learning locally</p>
+                        <p id="profileLearningSince"></p>
+                    </div>
+                </section>
+                <section class="profile-stat-grid" aria-label="Learning statistics">
+                    <div><strong id="profileStudied">0</strong><span>Kanji studied</span></div>
+                    <div><strong id="profileMastered">0</strong><span>Kanji mastered</span></div>
+                    <div>
+                        <strong id="profileReviewTotal">0</strong><span>Reviews completed</span>
+                    </div>
+                    <div><strong id="profileReviewDue">0</strong><span>Reviews due</span></div>
+                </section>
+                <div class="profile-page-columns">
+                    <section class="profile-card" aria-labelledby="profileEditTitle">
+                        <h2 id="profileEditTitle">Make it yours</h2>
+                        <form id="profilePageForm">
+                            <label for="profilePageNickname">Display name</label>
+                            <input
+                                id="profilePageNickname"
+                                type="text"
+                                maxlength="40"
+                                autocomplete="nickname"
+                                placeholder="Your Google name, or a nickname"
+                            />
+                            <label for="profilePageDevice">This device</label>
+                            <input
+                                id="profilePageDevice"
+                                type="text"
+                                maxlength="24"
+                                placeholder="e.g. My laptop"
+                            />
+                            <button class="backup-btn" type="submit">Save changes</button>
+                        </form>
+                        <div class="profile-photo-actions">
+                            <button id="profilePagePhoto" type="button" class="profile-subtle-btn">
+                                Change photo
+                            </button>
+                            <button
+                                id="profilePageRemovePhoto"
+                                type="button"
+                                class="profile-subtle-btn danger-action remove-photo-button"
+                                title="Remove DP"
+                                aria-label="Remove uploaded profile photo"
+                                data-tooltip="Remove DP"
+                                hidden
+                            >
+                                <i class="fas fa-trash-can" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <input
+                            id="profilePagePhotoFile"
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            aria-label="Choose your profile photo"
+                        />
+                        <p class="profile-hint">
+                            Images and GIFs under 2 MB. Your uploaded photo takes priority over your
+                            Google photo.
+                        </p>
+                        <p id="profilePageFeedback" role="status" aria-live="polite"></p>
+                    </section>
+                    <section class="profile-card" aria-label="Account sign-in">
+                        <div class="app-auth-section" aria-label="App sign-in">
+                            <p class="app-auth-label">KanjiWidgets account</p>
+                            <p data-app-auth-status role="status" aria-live="polite">
+                                Checking app sign-in…
+                            </p>
+                            <div class="backup-buttons">
+                                <button type="button" class="backup-btn" data-app-sign-in disabled>
+                                    Sign in with Google
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                    data-app-sign-out
+                                    hidden
+                                >
+                                    Sign out of app
+                                </button>
+                                <button type="button" class="backup-btn" data-app-auth-retry hidden>
+                                    Retry connection
+                                </button>
+                            </div>
+                        </div>
+                        <p class="profile-hint">
+                            Sign-in does not upload, restore or separate this browser’s learning
+                            data. Only sign in on a trusted device. Drive authorization is separate.
+                        </p>
+                    </section>
+                </div>
+                <section class="cloud-progress" aria-label="Cloud progress">
+                    <h3>Cloud progress</h3>
+                    <p data-cloud-status role="status" aria-live="polite">
+                        Sign in to save progress across devices.
+                    </p>
+                    <p data-cloud-summary></p>
+                    <div class="backup-buttons">
+                        <button type="button" class="backup-btn" data-cloud-action="save">
+                            Save this device
+                        </button>
+                        <button type="button" class="backup-btn" data-cloud-action="check">
+                            Check cloud
+                        </button>
+                        <button type="button" class="backup-btn" data-cloud-action="pause">
+                            Pause autosave
+                        </button>
+                        <button type="button" class="backup-btn" data-cloud-action="restore" hidden>
+                            Use cloud progress
+                        </button>
+                        <button type="button" class="backup-btn" data-cloud-action="download">
+                            Download Drive copy
+                        </button>
+                    </div>
+                    <small
+                        >Progress, reviews, nickname and learning settings. Uploaded photos,
+                        backgrounds and AI credentials stay on this device. Saves run while the app
+                        is open.</small
+                    >
+                </section>
+                <footer class="profile-page-footer">
+                    <span id="profileLastStudied"></span><span id="profileAppBuild"></span>
+                </footer>
+            </div>
+        </dialog>
+
         <script src="storage-manager.js"></script>
         <script src="srs-engine.js"></script>
         <script src="ai-manager.js"></script>
         <script src="ai-tutor-modal.js"></script>
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
-        <script src="drawing-pad.js"></script>
-        <script src="script.js"></script>
+        <script src="drawing-pad.js?v=practice-merge-v1"></script>
+        <script src="ui-feedback.js?v=practice-merge-v1"></script>
+        <script src="backup-config.js"></script>
+        <script src="backup-manager.js?v=practice-merge-v1"></script>
+        <script src="profile-page.js?v=practice-merge-v1"></script>
+        <script src="firebase-config.js?v=practice-merge-v1"></script>
+        <script src="app-auth.js?v=practice-merge-v1"></script>
+        <script src="cloud-sync.js?v=practice-merge-v1"></script>
+        <script src="script.js?v=practice-merge-v1"></script>
     </body>
 </html>

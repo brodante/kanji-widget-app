@@ -1,3 +1,4 @@
+/* global BackupManager */
 // ==========================================
 // GLOBAL ANIMATION TRACKERS
 // ==========================================
@@ -23,7 +24,7 @@ function katakanaToHiragana(str) {
 
 // Small greedy romaji -> hiragana converter. Covers standard mora,
 // youon (kya/sha/etc.), and sokuon (doubled consonant -> っ). Not a
-// full IME — good enough for matching search queries against readings.
+// full IME - good enough for matching search queries against readings.
 const ROMAJI_TO_HIRAGANA = {
     kya: 'きゃ',
     kyu: 'きゅ',
@@ -181,7 +182,7 @@ function readingMatches(reading, lowerQuery, romajiHiragana) {
 // ==========================================
 // CUSTOM THEME IMAGE STORAGE (IndexedDB)
 // ==========================================
-// Images can easily be several MB — localStorage's ~5-10MB *text-only*
+// Images can easily be several MB - localStorage's ~5-10MB *text-only*
 // quota is shared with all saved progress, so storing images there risks
 // corrupting unrelated data. IndexedDB has no such practical limit and
 // stores binary Blobs natively (no base64 bloat).
@@ -223,7 +224,7 @@ async function getCustomThemeImage(slot) {
 // DEV'S FAVORITE THEMES (curated preset backgrounds)
 // ==========================================
 // Static files live in assets/dev-themes/ (landscape, for desktop) and
-// assets/dev-themes/mobile/ (portrait, for phones) — auto-swapped based on
+// assets/dev-themes/mobile/ (portrait, for phones) - auto-swapped based on
 // screen size so nobody sees a wallpaper cropped for the wrong orientation.
 // To add one: drop the image/gif in the right folder AND add its filename
 // to that folder's manifest.json. Display name is derived from the filename.
@@ -244,7 +245,7 @@ async function loadDevFavoritesManifest() {
         const files = await res.json();
         return { folder, files: Array.isArray(files) ? files : [] };
     } catch (err) {
-        return { folder, files: [] }; // manifest missing or unreadable — just show no dev picks, not an error state
+        return { folder, files: [] }; // manifest missing or unreadable - just show no dev picks, not an error state
     }
 }
 
@@ -486,7 +487,7 @@ class KanjiLearningApp {
 
         // Re-check the mobile/desktop blur compensation whenever the window
         // is resized (e.g. a PC window maximized after picking a mobile theme
-        // while narrow) — debounced so it doesn't run on every pixel of a drag.
+        // while narrow) - debounced so it doesn't run on every pixel of a drag.
         let resizeDebounceTimer = null;
         window.addEventListener('resize', () => {
             clearTimeout(resizeDebounceTimer);
@@ -743,7 +744,7 @@ class KanjiLearningApp {
                 return;
             }
 
-            // Use the File's actual MIME type, not the URL — a blob: URL has
+            // Use the File's actual MIME type, not the URL - a blob: URL has
             // no file extension, so extension-sniffing wouldn't work here.
             const isVideo = file.type.startsWith('video/');
             const url = URL.createObjectURL(file);
@@ -752,11 +753,11 @@ class KanjiLearningApp {
             if (isVideo) {
                 const sizeMB = file.size / (1024 * 1024);
                 if (sizeMB > 20) {
-                    this.showToast(
-                        `That clip is ${sizeMB.toFixed(1)}MB — quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`
+                    this.showWarning(
+                        `That clip is ${sizeMB.toFixed(1)}MB, which is quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`
                     );
                 } else if (sizeMB > 8) {
-                    this.showToast(
+                    this.showWarning(
                         `This clip is ${sizeMB.toFixed(1)}MB. For best performance, aim for 720p-1080p and 8-15 seconds.`
                     );
                 }
@@ -775,7 +776,7 @@ class KanjiLearningApp {
                 .querySelectorAll('.dev-favorite-thumb')
                 .forEach((t) => t.classList.remove('selected'));
 
-            // Default to checked on upload — most people uploading their own
+            // Default to checked on upload - most people uploading their own
             // image/video want a matching accent without an extra click.
             document.getElementById('autoAccentToggle').checked = true;
 
@@ -799,7 +800,7 @@ class KanjiLearningApp {
             const isVideo = isVideoFile(file);
             const previewEl = document.getElementById('customThemePreview');
 
-            // Videos can't be a CSS background-image — clear it so a stale
+            // Videos can't be a CSS background-image - clear it so a stale
             // image doesn't show through behind the small preview box.
             previewEl.style.backgroundImage = isVideo ? 'none' : `url(${file})`;
             previewEl.dataset.imageUrl = file;
@@ -811,7 +812,7 @@ class KanjiLearningApp {
                 .forEach((t) => t.classList.remove('selected'));
             thumb.classList.add('selected');
 
-            // Dev's picks are curated to already look good — apply instantly
+            // Dev's picks are curated to already look good - apply instantly
             // with a light blur, no manual tweaking needed.
             document.getElementById('customThemeBlur').value = 2;
             document.getElementById('customThemeBlurValue').textContent = '2px';
@@ -845,7 +846,7 @@ class KanjiLearningApp {
             }
         });
 
-        // Accent color presets — quick picks, still fully overridable
+        // Accent color presets - quick picks, still fully overridable
         document.querySelectorAll('.accent-swatch').forEach((swatch) => {
             swatch.addEventListener('click', () => {
                 document.getElementById('customThemeAccent').value = swatch.dataset.color;
@@ -1381,7 +1382,7 @@ class KanjiLearningApp {
                             <button type="button" id="drawingPadInlineRedoBtn" class="drawing-pad-btn" title="Redo Stroke">
                                 <i class="fas fa-rotate-right"></i> Redo
                             </button>
-                            <button type="button" id="drawingPadInlineClearBtn" class="drawing-pad-btn" title="Clear Canvas">
+                            <button type="button" id="drawingPadInlineClearBtn" class="drawing-pad-btn danger-action" title="Clear Canvas">
                                 <i class="fas fa-trash"></i> Clear
                             </button>
                         </div>
@@ -1500,7 +1501,7 @@ class KanjiLearningApp {
             }
         }
 
-        // Nothing unmastered left anywhere in the level — reuse the existing
+        // Nothing unmastered left anywhere in the level - reuse the existing
         // "level complete" flow (congrats toast + reset to the start).
         this.loadCurrentKanji();
     }
@@ -1525,7 +1526,7 @@ class KanjiLearningApp {
         const MAX_RESULTS = 30;
 
         // Only attempt romaji conversion when the query looks like plain
-        // latin letters (e.g. "ima") — never run it on kanji/kana input.
+        // latin letters (e.g. "ima") - never run it on kanji/kana input.
         const romajiHiragana = /^[a-z]+$/i.test(trimmed) ? romajiToHiragana(lowerQuery) : null;
 
         for (const level of levels) {
@@ -1538,7 +1539,7 @@ class KanjiLearningApp {
 
                 const isMatch =
                     trimmed.includes(kanji.character) || // handles single AND compound queries, e.g. "今夜" matches both 今 and 夜
-                    examples.some((ex) => ex.word === trimmed) || // exact compound-word match only — avoids flooding results for common single kanji
+                    examples.some((ex) => ex.word === trimmed) || // exact compound-word match only - avoids flooding results for common single kanji
                     meanings.some((m) => m.toLowerCase().includes(lowerQuery)) ||
                     onyomi.some((r) => readingMatches(r, lowerQuery, romajiHiragana)) ||
                     kunyomi.some((r) => readingMatches(r, lowerQuery, romajiHiragana));
@@ -1667,7 +1668,7 @@ class KanjiLearningApp {
         progress.mastered = progress.mastered.filter((char) => char !== character);
         StorageManager.saveProgress(progress);
 
-        this.showToast(`"${character}" unmarked — moved back to pending.`);
+        this.showToast(`"${character}" unmarked and moved back to pending.`);
 
         this.renderKanji(); // refresh so the ✕ button hides again
         this.updateProgress();
@@ -2433,11 +2434,11 @@ class KanjiLearningApp {
                     setTimeout(() => this.playPronunciation(), 800);
                 }
             } else {
-                this.showToast(`Could not find details for "${character}"`);
+                this.showWarning(`Could not find details for "${character}"`);
             }
         } catch (error) {
             console.error('Error showing kanji from recent:', error);
-            this.showToast(`Error loading "${character}"`);
+            this.showWarning(`Error loading "${character}"`);
         }
     }
 
@@ -2536,7 +2537,7 @@ class KanjiLearningApp {
     // NOTE: the drawing pad toolbar (Grid / Trace / Undo / Clear / thickness
     // slider) is wired entirely by DrawingPad._bindEvents(). There are
     // deliberately no app.toggleDrawingPad*() wrapper methods or inline
-    // onclick attributes for it — the pad must have exactly one wiring per
+    // onclick attributes for it - the pad must have exactly one wiring per
     // control, or every tap toggles twice and cancels itself out.
 
     syncAISettingsUI() {
@@ -2979,9 +2980,9 @@ class KanjiLearningApp {
         }
     }
 
-    createLocalBackup() {
+    async createLocalBackup() {
         try {
-            const backupData = StorageManager.exportData();
+            const backupData = JSON.stringify(await BackupManager.snapshot(), null, 2);
             const blob = new Blob([backupData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
@@ -2998,7 +2999,7 @@ class KanjiLearningApp {
             this.showToast('Local backup created successfully!');
         } catch (error) {
             console.error('Error creating backup:', error);
-            this.showToast('Error creating backup. Please try again.');
+            this.showWarning('Error creating backup. Please try again.');
         }
     }
 
@@ -3008,20 +3009,28 @@ class KanjiLearningApp {
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
-                const success = StorageManager.importData(e.target.result);
-                if (success) {
-                    this.showToast('Backup restored successfully! Reloading...');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                } else {
-                    this.showToast('Error restoring backup. Invalid file format.');
+                const source = JSON.parse(e.target.result);
+                const data = await BackupManager.normalizeImport(source);
+                const notice = data.migratedFrom
+                    ? 'Import this older backup? Included progress/settings will be restored. Current photos, uploaded themes and sections missing from the file will be kept. A recovery copy is saved first.'
+                    : 'Replace this device’s saved progress and settings with this backup? A recovery copy is saved first.';
+                if (!confirm(notice)) {
+                    return;
                 }
+                await BackupManager.restore(data);
+                const backupConfig = JSON.parse(localStorage.getItem('kanji_drive_backup') || '{}');
+                backupConfig.dataOwner = '__imported_local_data__';
+                backupConfig.syncStates = {};
+                localStorage.setItem('kanji_drive_backup', JSON.stringify(backupConfig));
+                this.showToast('Backup restored successfully! Reloading...');
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
             } catch (error) {
                 console.error('Error restoring backup:', error);
-                this.showToast('Error restoring backup. Please check the file.');
+                this.showWarning(error.message || 'Error restoring backup. Please check the file.');
             }
         };
         reader.readAsText(file);
@@ -3055,10 +3064,7 @@ class KanjiLearningApp {
             }
         }
 
-        // Online backup would be implemented here with cloud storage API
-        if (this.settings.onlineBackupFreq !== 'never') {
-            this.showToast('Online backup feature coming soon!');
-        }
+        // Google Drive scheduling is managed independently by BackupManager.
     }
 
     checkBackupDue() {
@@ -3083,9 +3089,9 @@ class KanjiLearningApp {
         }
     }
 
-    autoCreateBackup() {
+    async autoCreateBackup() {
         try {
-            const backupData = StorageManager.exportData();
+            const backupData = JSON.stringify(await BackupManager.snapshot());
             localStorage.setItem(`autoBackup_${Date.now()}`, backupData);
             localStorage.setItem('lastLocalBackup', Date.now().toString());
 
@@ -3102,6 +3108,14 @@ class KanjiLearningApp {
             console.log('Auto backup created');
         } catch (error) {
             console.error('Error creating auto backup:', error);
+        }
+    }
+
+    showWarning(message) {
+        if (window.KanjiFeedback) {
+            window.KanjiFeedback.show(message);
+        } else {
+            this.showToast(message);
         }
     }
 
@@ -3725,7 +3739,7 @@ function sanitizeAccentColor(hex, mode) {
 // (high saturation, avoiding near-black/near-white) to use as an accent color.
 function extractVibrantColor(imgElement) {
     const canvas = document.createElement('canvas');
-    const size = 40; // small on purpose — this is a rough pick, not precision color science
+    const size = 40; // small on purpose - this is a rough pick, not precision color science
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext('2d');
@@ -3784,7 +3798,7 @@ function loadVideoFrame(url) {
         video.playsInline = true;
         video.preload = 'auto';
         // Detached video elements can fail to reliably decode frames or fire
-        // seek events in some browsers — keep it in the DOM, just off-screen
+        // seek events in some browsers - keep it in the DOM, just off-screen
         // and invisible. The caller removes it after drawing from it.
         video.style.position = 'fixed';
         video.style.left = '-9999px';
@@ -3829,7 +3843,7 @@ function loadVideoFrame(url) {
 }
 
 // Ties extraction + the existing contrast safety net together. Works for
-// both still images and videos — reads dataset.isVideo itself, so every
+// both still images and videos - reads dataset.isVideo itself, so every
 // call site can use this the same way regardless of media type.
 // Returns a safe hex string, or null if there's no usable media.
 async function autoPickAccentFromMedia(mode) {
@@ -3844,7 +3858,7 @@ async function autoPickAccentFromMedia(mode) {
     try {
         mediaEl = isVideo ? await loadVideoFrame(url) : await loadImageElement(url);
     } catch (err) {
-        return null; // failed to load/decode — fail safely instead of throwing into the caller
+        return null; // failed to load/decode - fail safely instead of throwing into the caller
     }
 
     const extracted = extractVibrantColor(mediaEl);
