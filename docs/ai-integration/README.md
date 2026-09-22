@@ -2,7 +2,7 @@
 
 ## 🧭 System Architecture & Design Principles
 
-To maintain KanjiWidgets' core philosophy — **lightning-fast, zero-build-step, offline-capable, lightweight vanilla JS/PWA** — the AI integration follows these architectural principles:
+To maintain KanjiWidgets' core philosophy - **lightning-fast, zero-build-step, offline-capable, lightweight vanilla JS/PWA** - the AI integration follows these architectural principles:
 
 1. **Zero Bloat & Modular Architecture**:
     - All AI logic lives in clean, decoupled vanilla JS modules (`ai-manager.js`, `srs-engine.js`, `ai-tutor-modal.js`).
@@ -10,7 +10,7 @@ To maintain KanjiWidgets' core philosophy — **lightning-fast, zero-build-step,
     - No node build pipelines, heavyweight frameworks, or server requirements.
 2. **Provider Agnostic (BYOK - Bring Your Own Key)**:
     - Supports **Google Gemini** (Gemini 1.5 Flash / Pro - generous free tier), **OpenAI** (GPT-4o / GPT-4o-mini), **Anthropic Claude** (Claude 3.5 Sonnet / Haiku), **OpenRouter**, and local **Ollama** endpoints (`http://localhost:11434`).
-    - Users can plug in their own free or paid API key in Settings. Keys are stored locally in `localStorage` (plain text, browser-only — never transmitted to any KanjiWidgets server).
+    - Users can plug in their own free or paid API key in Settings. Keys are stored locally in `localStorage` (plain text, browser-only - never transmitted to any KanjiWidgets server).
 3. **Graceful Offline & Fallback Handling**:
     - If offline or no API key is provided, the app falls back to rule-based algorithmic analysis (SM-2 statistical heuristics and local diagnostics).
     - Smart local caching (`localStorage` / memory) ensures generated mnemonics, analyses, and quiz feedback don't trigger repeated API requests for the same kanji.

@@ -37,6 +37,7 @@ jobs:
                   cp -r database deploy/
                   cp backup-config.js deploy/
                   cp backup-manager.js deploy/
+                  cp profile-page.js deploy/
                   cp kanji-data.js deploy/
                   cp audio-manager.js deploy/
                   cp ai-manager.js deploy/

@@ -67,3 +67,7 @@ all devices to the checkpoint-enabled version before using multi-device sync.
 See the [account and cloud-save roadmap](docs/account-sync-roadmap.md) for the full
 Must / Should / Could / Optional checklist, implemented safeguards, and remaining
 live Google Drive acceptance tests.
+
+Open Account → **My profile** for profile editing, learning statistics and save controls
+without leaving the app. The checkpoint diagnostic displays its loaded build and run
+time; verify `profile-v1` before reporting a new diagnostic result.

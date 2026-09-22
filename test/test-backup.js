@@ -302,7 +302,7 @@ test('scheduled save with unchanged data skips upload too', async () => {
     const { manager } = await checkpointSetup();
     manager.backup = async () => assert.fail('unchanged checkpoint must not upload');
     await manager.sync(true);
-    assert.match(manager.message, /no changes/);
+    assert.match(manager.message, /no changes/i);
 });
 
 test('connecting is read-only even with unsaved local changes or no cloud file', async () => {

@@ -3,7 +3,7 @@
  *
  * Provides a <canvas>-based drawing surface for practising kanji strokes.
  * Features: grid overlay, reference-stroke tracing, stroke-order validation,
- * and snap-to-stroke scoring — all powered by KanjiVG path data that the
+ * and snap-to-stroke scoring - all powered by KanjiVG path data that the
  * app already fetches via KanjiLearningApp.fetchStrokeOrderSvg().
  *
  * Depends on: StorageManager (storage-manager.js)
@@ -145,7 +145,7 @@ class DrawingPad {
      * The inline practice panel and the modal both render toolbars, and the
      * inline ids carry an "Inline" infix. Blindly trying the modal id first
      * (via document.getElementById) returned the hidden modal element even
-     * when the visible inline control was in scope — which silently sent
+     * when the visible inline control was in scope - which silently sent
      * feedback text and `.active` toggles to the wrong element.
      *
      * @param {string} id Element id to look up.
@@ -204,8 +204,8 @@ class DrawingPad {
         }
 
         // Toolbar. Each control is bound at most once (tracked in _boundControls)
-        // so repeated init() calls — which re-resolve controls against a new
-        // scope — pick up newly rendered inline buttons without stacking
+        // so repeated init() calls - which re-resolve controls against a new
+        // scope - pick up newly rendered inline buttons without stacking
         // duplicate listeners on the ones that are already wired.
         this._boundControls = this._boundControls || new WeakSet();
         const bind = (el, handler) => {
@@ -713,7 +713,7 @@ class DrawingPad {
             if (avg >= 0.7 && orderOk) {
                 this.scoreEl.textContent += '  ✅ Well done!';
             } else {
-                this.scoreEl.textContent += '  — try again for a better score';
+                this.scoreEl.textContent += ' · Try again for a better score.';
             }
         }
     }
@@ -859,7 +859,7 @@ class DrawingPad {
             this._drawStroke(ctx, pts, color, this.strokeWidth || DrawingPad.STROKE_WIDTH);
         });
 
-        // 4. Current (in-progress) stroke — accent at reduced opacity
+        // 4. Current (in-progress) stroke - accent at reduced opacity
         if (this.currentStroke.length > 1) {
             this._drawStroke(
                 ctx,

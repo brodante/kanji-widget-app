@@ -2,13 +2,13 @@
 
 This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app currently connects to Drive using browser OAuth. It does not have a permanent app-account database, password sign-up, or backend sessions.
 
-## Must add — reliability and trust
+## Must add: reliability and trust
 
 - [x] **Clear account and save status**
     - Guest, connected, reconnect required, offline, working, unsaved changes and cloud-review states.
     - Last successful upload from this device is distinct from the last unchanged-data check.
     - Local fingerprint checks run about every 30 seconds; status is not instantaneous and does not promise background saving.
-- [ ] **Verify checkpoints against real Google Drive** — live acceptance still pending.
+- [ ] **Verify checkpoints against real Google Drive**: live acceptance still pending.
     - [x] Add an opt-in diagnostic using a temporary non-learning-data file.
     - [x] Verify create/read/update/readback and attempt a stale-revision write; clean up the test file.
     - [x] Disable in-place updates for the tested account if the diagnostic fails.
@@ -43,7 +43,7 @@ This checklist tracks the agreed priorities. Checked items mean implemented and 
     - Full learning-data export, cloud-backup deletion, local-data deletion and Google revocation link are separate actions.
     - Bulk cloud deletion disables automatic saves, including on partial failure, and reports partial completion.
 
-## Should add — everyday usability
+## Should add: everyday usability
 
 The account popover now shows essential controls first, with collapsed Profile & device
 and Save options & help sections. It is wider on desktop and a compact bottom sheet on
@@ -51,7 +51,7 @@ phones. Scrollbars remain available when needed (expanded controls, conflicts, o
 screens), using a thin theme-matched treatment rather than hiding accessible scrolling.
 
 - [x] Editable display name/nickname, stored with the profile and included in backups (not globally unique).
-- [ ] Dedicated profile page: avatar, nickname, learning start date, stats and save controls.
+- [x] Dedicated profile page: avatar, nickname, learning start date, stats and save controls.
 - [x] Guided first-connection onboarding: local/cloud explanation and first checkpoint vs restore.
 - [x] Debounced autosave after meaningful changes, grouped writes and exponential backoff (15-second quiet window, 5-second observation, retries from 15 seconds up to 5 minutes; respects server Retry-After).
 - [x] Backup previews and editable labels such as “Before N4 reset”; app/backup version details.
@@ -59,7 +59,7 @@ screens), using a thin theme-matched treatment rather than hiding accessible scr
 - [ ] Explicit migration framework and full older-backup compatibility tests.
     - [x] Newer-version warning blocks both restore and automatic checkpoint creation instead of treating an unknown version as corruption.
 
-## Could add — requires an account service
+## Could add: requires an account service
 
 The frontend can remain on GitHub Pages; these features require a managed authentication/database service or secure backend. Evaluate current Firebase/Supabase capabilities and pricing before selecting one. Do not build custom password storage as a shortcut.
 
@@ -70,7 +70,7 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - [ ] Structured cross-device database sync with defined review/reset/deletion conflict rules.
 - [ ] Account recovery, session list/revocation and safe provider unlinking that preserves a login method.
 
-## Optional — nice extras
+## Optional: nice extras
 
 - [ ] Named save slots for separate learning journeys.
 - [ ] Selective progress/settings/theme import and export.
@@ -87,7 +87,8 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - History offers Preview and Label. Previews load validated progress/theme/version details without restoring; restore confirmations also include totals. Labels are limited to 24 characters, stored as metadata, and do not change snapshot contents or pin state.
 - Save order uses the content-save timestamp; label and pin edits preserve it. Legacy files are given a saved timestamp when their metadata is first edited.
 - Autosave batches observed app data/media changes, never opens consent popups, and still pauses offline, while hidden, during conflicts, and during account switching. Changed data is saved after 15 seconds without another observed change; cloud checks remain roughly once per minute when idle. Normal failure retries back off; explicit user actions can retry immediately.
-- Remaining Should work: dedicated profile page and a complete migration framework. Backend account features remain in Could.
+- Dedicated profile page is implemented as an in-app `#profile` view, keeping Google access in memory. It includes avatar, nickname/device editing, recorded learning start date, progress/review stats, save controls and conflict/recovery navigation.
+- Remaining Should work: a complete migration framework. Backend account features remain in Could.
 
 ## Live must-have acceptance checklist
 
@@ -106,6 +107,16 @@ Use disposable/test progress and export your real data before testing. Update bo
 Record live results here (date, browser/device, pass/fail and relevant error text). Never record credentials or access tokens.
 
 - Previous header-based Drive diagnostic: **user ran it and reported NOT VERIFIED: no usable revision token/readback**. This is not a successful live verification.
-- Updated metadata-ETag diagnostic: **pending user rerun**. It reads `etag` from v2 file metadata, checks stability across the content read, and uses v2 conditional updates. Guarded overwrites require a PASS for this protocol and account; old test approvals do not count.
+- Updated metadata-ETag diagnostic: **pending a build-identified user rerun**. The repeated report used the older diagnostic wording, so it does not establish whether the current metadata test was running. The `profile-v1` build shows its runtime version and timestamps every fresh test; older saved results are not replayed as fresh errors. It reads `etag` from v2 file metadata, checks stability across the content read, and uses v2 conditional updates. Guarded overwrites require a PASS for this protocol and account; old test approvals do not count.
 - Real two-device acceptance: **pending**.
 - Automated regression suite: run `npm test`; service responses and browser DOM are simulated, with fake IndexedDB transaction tests.
+
+## Profile-page acceptance checklist
+
+- [x] Local/Google/custom nickname and avatar rendering, shared profile-edit validation, progress/review counts, and save actions have automated DOM/data tests.
+- [x] Build marker, old diagnostic-history labelling, versioned asset references and deployment inclusion have automated coverage.
+- [ ] Check the profile page on a phone and desktop in a real browser: native dialog focus, Escape/Back, photo/GIF upload, theme contrast, and responsive layout.
+- [ ] Run the live Drive diagnostic while **Loaded app: profile-v1** is visible. A fresh result must start with `profile-v1 / metadata-etag-v1` and include its run timestamp.
+
+Em dashes were removed from the authored site text and maintained source/docs. User
+nicknames, imported data and generated third-party content are not rewritten.

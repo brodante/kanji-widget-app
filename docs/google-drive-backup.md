@@ -162,3 +162,42 @@ A failure still keeps the safe fallback; share its exact text, not tokens or cre
 - A backup from a newer schema now explicitly asks you to update the app, and cannot be
   automatically superseded as though it were corrupt. The full legacy migration project
   remains pending in the roadmap.
+
+## Repeated older diagnostic messages
+
+The message beginning “Drive did not expose a usable revision token/readback” belongs
+to the original header-based diagnostic, not the current metadata-based implementation.
+It could be old running code or a previously saved result. The `profile-v1` update:
+
+- shows the **loaded app build**, diagnostic protocol and browser origin beside the test;
+- distinguishes historical results from fresh runs and does not replay older-build error text;
+- prefixes new results with `profile-v1 / metadata-etag-v1` and a timestamp;
+- versions the JS/CSS URLs and updates the app service-worker cache;
+- adds **Check for app update**, which checks the service worker and reloads without
+  deleting progress, settings, IndexedDB media or local backups;
+- asks the local Express server to revalidate HTML/JS/CSS rather than reuse them silently.
+
+Pull the latest branch, stop any old local server, then run `npm start` from this checkout.
+Open `http://localhost:5000`, reload, and verify **Loaded app: profile-v1** before testing.
+If that marker is absent, check your working directory, port and checked-out commit.
+Do not clear site data. Reloading loses the in-memory Google token, so reconnect before
+running the test. Share the new build-prefixed result if it fails; successful live Drive
+verification is still pending and is not inferred from the automated tests.
+
+## My profile
+
+Account menu → **My profile** opens a dedicated in-app page at `#profile`. It does not
+navigate away from the app or discard the in-memory Google authorization. It shows:
+
+- your custom or Google photo, nickname, Google email/guest state;
+- the recorded learning start date and last study date (unknown dates are labelled,
+  not replaced with today's date);
+- unique kanji studied/mastered, completed SRS reviews and reviews currently due;
+- the same validated nickname/device-label form and image/GIF upload controls;
+- Google connection, quick save, new manual backup, local export, history/recovery,
+  and a link back to cloud conflict/onboarding choices when those need attention.
+
+The view uses the current theme, a native modal dialog with Back/Escape navigation,
+and a responsive one-column layout on smaller screens. Statistics are derived from
+saved app data, not a separate public account database. The profile name/photo are
+included in normal backups; the device-label preference remains local.

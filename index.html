@@ -73,7 +73,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="styles.css?v=profile-v1" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -275,6 +275,13 @@
                             </button>
                         </div>
                     </section>
+                    <button
+                        id="openProfilePage"
+                        type="button"
+                        class="backup-btn account-settings-link"
+                    >
+                        My profile <span aria-hidden="true">↗</span>
+                    </button>
                     <details id="accountProfileDetails" class="account-details">
                         <summary>Profile &amp; device</summary>
                         <form id="accountProfileForm">
@@ -691,8 +698,8 @@
                                 </button>
                             </div>
                             <small class="setting-help-text" id="aiKeyHelpText">
-                                Stored locally in your browser only &mdash; never sent to any
-                                KanjiWidgets server.
+                                Stored locally in your browser only - never sent to any KanjiWidgets
+                                server.
                             </small>
                             <small class="setting-help-text">
                                 <a
@@ -787,8 +794,8 @@
                                 >
                                 Google access expires (usually in about an hour); reconnect when
                                 prompted. Missed backups run when you return and reconnect.
-                                Restoring replaces this device’s data — this is not live
-                                multi-device sync.
+                                Restoring replaces this device’s data. This is not live multi-device
+                                sync.
                             </p>
                             <details id="driveClientSetup">
                                 <summary>Google connection setup</summary>
@@ -943,7 +950,17 @@
                                 <button id="driveDiagnostic" class="backup-btn" type="button">
                                     Test Drive checkpoint safety
                                 </button>
+                                <p id="driveDiagnosticBuild"></p>
                                 <p id="driveDiagnosticResult" role="status"></p>
+                                <button id="reloadApp" class="backup-btn" type="button">
+                                    Check for app update
+                                </button>
+                                <p>
+                                    If a result mentions “did not expose a usable revision
+                                    token/readback”, check the loaded build above. That wording
+                                    belongs to an older test. Saved results are labelled separately.
+                                    You do not need to clear site data.
+                                </p>
                             </details>
                             <p id="driveStatus" role="status" aria-live="polite"></p>
                             <a id="driveFolder" hidden target="_blank" rel="noopener"
@@ -1027,7 +1044,7 @@
                                     accept="image/*,video/mp4,video/webm"
                                 />
                                 <div class="custom-css-hint">
-                                    For video: 720p-1080p, 8-15 seconds works best — it's always
+                                    For video: 720p-1080p, 8-15 seconds works best. It's always
                                     blurred, so higher resolution just adds file size with no
                                     visible benefit.
                                 </div>
@@ -1119,8 +1136,8 @@
                                 </div>
                                 <div id="customThemeCSSPanel" class="custom-css-panel">
                                     <div class="custom-css-hint">
-                                        Only affects the background image layer — one property per
-                                        line, no selectors or braces.
+                                        Only affects the background image layer. Use one property
+                                        per line, no selectors or braces.
                                     </div>
                                     <label
                                         for="customThemeCSSFileInput"
@@ -1626,6 +1643,136 @@ filter: blur(10px) brightness(1) saturate(1);
             </div>
         </footer>
 
+        <dialog id="profilePage" class="profile-page" aria-labelledby="profilePageTitle">
+            <div class="profile-page-shell">
+                <header class="profile-page-header">
+                    <button id="profilePageBack" type="button" class="profile-subtle-btn">
+                        ← Back to learning
+                    </button>
+                    <span>YOUR LEARNING SPACE</span>
+                </header>
+                <section class="profile-hero">
+                    <div class="profile-page-avatar">
+                        <img
+                            id="profilePageAvatar"
+                            alt="Your profile photo"
+                            referrerpolicy="no-referrer"
+                            hidden
+                        /><i class="fas fa-circle-user" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <p class="profile-eyebrow">My profile</p>
+                        <h1 id="profilePageTitle">Guest user</h1>
+                        <p id="profilePageIdentity">Learning locally</p>
+                        <p id="profileLearningSince"></p>
+                    </div>
+                </section>
+                <section class="profile-stat-grid" aria-label="Learning statistics">
+                    <div><strong id="profileStudied">0</strong><span>Kanji studied</span></div>
+                    <div><strong id="profileMastered">0</strong><span>Kanji mastered</span></div>
+                    <div>
+                        <strong id="profileReviewTotal">0</strong><span>Reviews completed</span>
+                    </div>
+                    <div><strong id="profileReviewDue">0</strong><span>Reviews due</span></div>
+                </section>
+                <div class="profile-page-columns">
+                    <section class="profile-card" aria-labelledby="profileEditTitle">
+                        <h2 id="profileEditTitle">Make it yours</h2>
+                        <form id="profilePageForm">
+                            <label for="profilePageNickname">Display name</label>
+                            <input
+                                id="profilePageNickname"
+                                type="text"
+                                maxlength="40"
+                                autocomplete="nickname"
+                                placeholder="Your Google name, or a nickname"
+                            />
+                            <label for="profilePageDevice">This device</label>
+                            <input
+                                id="profilePageDevice"
+                                type="text"
+                                maxlength="24"
+                                placeholder="e.g. My laptop"
+                            />
+                            <button class="backup-btn" type="submit">Save changes</button>
+                        </form>
+                        <button id="profilePagePhoto" type="button" class="profile-subtle-btn">
+                            Change photo
+                        </button>
+                        <input
+                            id="profilePagePhotoFile"
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            aria-label="Choose your profile photo"
+                        />
+                        <p class="profile-hint">
+                            Images and GIFs under 2 MB. Your uploaded photo takes priority over your
+                            Google photo.
+                        </p>
+                        <p id="profilePageFeedback" role="status" aria-live="polite"></p>
+                    </section>
+                    <section class="profile-card" aria-labelledby="profileSavesTitle">
+                        <h2 id="profileSavesTitle">Your saves</h2>
+                        <p id="profilePageSaveHealth" role="status" aria-live="polite"></p>
+                        <div class="profile-save-actions">
+                            <button
+                                id="profilePageConnect"
+                                type="button"
+                                class="backup-btn profile-cloud-action"
+                            >
+                                Connect with Google
+                            </button>
+                            <button
+                                id="profilePageQuickSave"
+                                type="button"
+                                class="backup-btn profile-cloud-action"
+                            >
+                                Quick save
+                            </button>
+                            <button
+                                id="profilePageNewBackup"
+                                type="button"
+                                class="backup-btn profile-cloud-action"
+                            >
+                                Create new backup
+                            </button>
+                            <button
+                                id="profilePageExport"
+                                type="button"
+                                class="profile-subtle-btn profile-cloud-action"
+                            >
+                                Download local backup
+                            </button>
+                            <button
+                                id="profilePageHistory"
+                                type="button"
+                                class="profile-subtle-btn"
+                            >
+                                Backup history &amp; recovery
+                            </button>
+                            <button
+                                id="profilePageReview"
+                                type="button"
+                                class="profile-subtle-btn"
+                                hidden
+                            >
+                                Review cloud changes
+                            </button>
+                        </div>
+                        <p id="profilePageCloudStatus" role="status" aria-live="polite"></p>
+                        <p class="profile-hint">
+                            You can learn without connecting an account. Google access expires;
+                            local data stays on this device.
+                        </p>
+                    </section>
+                </div>
+                <footer class="profile-page-footer">
+                    <span id="profileLastStudied"></span><span id="profileAppBuild"></span>
+                </footer>
+            </div>
+        </dialog>
+
         <script src="storage-manager.js"></script>
         <script src="srs-engine.js"></script>
         <script src="ai-manager.js"></script>
@@ -1634,7 +1781,8 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="kanji-data.js"></script>
         <script src="drawing-pad.js"></script>
         <script src="backup-config.js"></script>
-        <script src="backup-manager.js"></script>
+        <script src="backup-manager.js?v=profile-v1"></script>
+        <script src="profile-page.js?v=profile-v1"></script>
         <script src="script.js"></script>
     </body>
 </html>

@@ -1,6 +1,8 @@
 /* global openCustomThemeDB */
 // Static-site OAuth: access tokens stay in memory, never in a backup or storage.
 class BackupManager {
+    static BUILD = 'profile-v1';
+    static DIAGNOSTIC = 'metadata-etag-v1';
     static keys = [
         'kanji_profile',
         'kanji_progress',
@@ -92,7 +94,7 @@ class BackupManager {
         }
         return {
             app: 'kanji-widgets',
-            appVersion: 'checkpoint-metadata-v1',
+            appVersion: this.BUILD,
             version: 3,
             createdAt: new Date().toISOString(),
             storage,
@@ -346,7 +348,7 @@ class BackupManager {
             const heading = document.createElement('strong');
             heading.textContent = name;
             const detail = document.createElement('p');
-            detail.textContent = `${time} — ${BackupManager.summary(data)}`;
+            detail.textContent = `${time}. ${BackupManager.summary(data)}`;
             section.append(heading, detail);
             panel.append(section);
         }
@@ -372,7 +374,7 @@ class BackupManager {
         const state = this.busy
             ? 'Working…'
             : this.lastError
-              ? 'Action failed — see details below'
+              ? 'Action failed. See details below'
               : this.needsAccountChoice()
                 ? 'Account choice required; uploads blocked'
                 : this.pendingCloud
@@ -388,6 +390,7 @@ class BackupManager {
             ? new Date(this.config.lastBackup).toLocaleString()
             : 'None from this device';
         element.textContent = `${account} · ${state}${navigator.onLine === false ? ' · Offline' : ''}. Last successful upload from this device: ${upload}.`;
+        window.kanjiProfilePage?.refresh();
     }
 
     async refreshSaveStatus() {
@@ -499,6 +502,10 @@ class BackupManager {
         ) {
             return;
         }
+        const runtime = `${BackupManager.BUILD} / ${BackupManager.DIAGNOSTIC}`;
+        document.getElementById('driveDiagnosticResult').textContent =
+            `Running ${runtime} on ${location.origin}…`;
+        this.status('Testing a temporary Drive file. Your learning data is not part of this test.');
         let id,
             result = '';
         try {
@@ -576,8 +583,9 @@ class BackupManager {
                 this.config.checkpointDiagnostics[this.user.emailAddress] =
                     this.config.checkpointVerified;
             }
-            this.config.diagnosticResult = `${this.config.diagnosticAccount || 'Not connected'}: ${result}`;
-            this.save();
+            this.config.diagnosticBuild = BackupManager.BUILD;
+            this.config.diagnosticProtocol = BackupManager.DIAGNOSTIC;
+            this.config.diagnosticTime = new Date().toISOString();
             if (id) {
                 try {
                     await this.api(`/files/${encodeURIComponent(id)}`, {
@@ -589,8 +597,15 @@ class BackupManager {
                     result += ` Cleanup failed. Delete temporary diagnostic file ${id} in Drive manually.`;
                 }
             }
-            document.getElementById('driveDiagnosticResult').textContent = result;
-            this.status(result);
+            this.config.diagnosticResult = `${runtime} · ${this.config.diagnosticTime} · ${this.config.diagnosticAccount || 'Not connected'}: ${result}`;
+            this.save();
+            document.getElementById('driveDiagnosticResult').textContent =
+                this.config.diagnosticResult;
+            this.status(
+                this.config.checkpointVerified
+                    ? 'Checkpoint test passed. Details are below.'
+                    : 'Checkpoint test needs attention. See the fresh result below.'
+            );
         }
     }
 
@@ -643,8 +658,33 @@ class BackupManager {
             this.run(() => this.clearLocalData());
         document.getElementById('driveDiagnostic').onclick = () =>
             this.run(() => this.diagnoseDrive());
-        document.getElementById('driveDiagnosticResult').textContent =
-            this.config.diagnosticResult || 'Not yet tested with your Google account.';
+        document.getElementById('driveDiagnosticBuild').textContent =
+            `Loaded app: ${BackupManager.BUILD} · Test: ${BackupManager.DIAGNOSTIC} · Origin: ${location.origin}`;
+        document.getElementById('driveDiagnosticResult').textContent = this.config.diagnosticResult
+            ? this.config.diagnosticBuild === BackupManager.BUILD
+                ? `Saved result (not a new test): ${this.config.diagnosticResult}`
+                : 'Older saved result: this used an earlier build. Run the current test for a fresh result.'
+            : 'No test has been run on this device.';
+        document.getElementById('reloadApp').onclick = async () => {
+            if (
+                !confirm(
+                    'Reload to check for the latest app? Your saved learning data will stay. You will need to reconnect Google.'
+                )
+            ) {
+                return;
+            }
+            try {
+                const registration = await navigator.serviceWorker?.getRegistration();
+                if (registration) {
+                    await registration.update();
+                }
+                location.reload();
+            } catch {
+                this.status(
+                    'Could not check for updates. Check your connection, then reload. Do not clear your site data.'
+                );
+            }
+        };
         setInterval(() => this.refreshSaveStatus(), 30000);
         window.addEventListener('offline', () => this.refreshSaveStatus());
         window.addEventListener('online', () => this.refreshSaveStatus());
@@ -686,7 +726,7 @@ class BackupManager {
         this.status('Working… Local learning data stays on this device.');
         document
             .querySelectorAll(
-                '#driveBackup button, #accountConnect, #accountDisconnect, #accountSync, #accountBackup, #syncUseCloud, #syncUseLocal'
+                '#profilePage .profile-cloud-action, #driveBackup button, #accountConnect, #accountDisconnect, #accountSync, #accountBackup, #syncUseCloud, #syncUseLocal'
             )
             .forEach((b) => {
                 b.disabled = true;
@@ -713,7 +753,7 @@ class BackupManager {
             this.refreshSaveStatus?.();
             document
                 .querySelectorAll(
-                    '#driveBackup button, #accountConnect, #accountDisconnect, #accountSync, #accountBackup, #syncUseCloud, #syncUseLocal'
+                    '#profilePage .profile-cloud-action, #driveBackup button, #accountConnect, #accountDisconnect, #accountSync, #accountBackup, #syncUseCloud, #syncUseLocal'
                 )
                 .forEach((b) => {
                     b.disabled = false;
@@ -1322,7 +1362,7 @@ class BackupManager {
         button.dataset.connected = String(connected);
         button.setAttribute(
             'aria-label',
-            this.pendingCloud ? 'Account & sync — cloud copy needs review' : 'Account & sync'
+            this.pendingCloud ? 'Account & sync: cloud copy needs review' : 'Account & sync'
         );
         document.getElementById('accountHeading').textContent = connected
             ? this.user.displayName || 'Google account'
@@ -1549,30 +1589,43 @@ class BackupManager {
             event.preventDefault();
             const name = nickname.value.trim();
             const label = device.value.trim();
-            if (
-                name.length > 40 ||
-                label.length > 24 ||
-                Array.from(name + label).some(
-                    (char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127
-                )
-            ) {
-                feedback.textContent =
-                    'Use a name up to 40 characters and a device label up to 24 characters, without control characters.';
-                return;
-            }
             try {
-                localStorage.setItem('kanji_profile', JSON.stringify({ nickname: name }));
-                this.config.deviceLabel = label;
-                this.save();
-                this.renderAccount();
-                this.refreshSaveStatus();
+                this.saveProfilePreferences(name, label);
                 feedback.textContent =
                     'Profile saved on this device. Quick save to include your name in the cloud copy. Device labels appear on future saves.';
-            } catch {
-                feedback.textContent =
-                    'Could not save the complete profile. Browser storage may be full or unavailable; free space and retry.';
+            } catch (error) {
+                feedback.textContent = error.message;
             }
         };
+    }
+
+    saveProfilePreferences(name, label) {
+        name = name.trim();
+        label = label.trim();
+        if (
+            name.length > 40 ||
+            label.length > 24 ||
+            Array.from(name + label).some(
+                (char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127
+            )
+        ) {
+            throw new Error(
+                'Use a name up to 40 characters and a device label up to 24 characters, without control characters.'
+            );
+        }
+        try {
+            localStorage.setItem('kanji_profile', JSON.stringify({ nickname: name }));
+            this.config.deviceLabel = label;
+            this.save();
+        } catch {
+            throw new Error(
+                'Could not save the complete profile. Browser storage may be full or unavailable. Free space and retry.'
+            );
+        }
+        document.getElementById('profileNickname').value = name;
+        document.getElementById('profileDeviceLabel').value = label;
+        this.renderAccount();
+        this.refreshSaveStatus();
     }
 
     static validateAvatar(file) {
@@ -1618,6 +1671,7 @@ class BackupManager {
                 image.removeAttribute('src');
             }
         }
+        window.kanjiProfilePage?.refresh();
     }
 
     async setAvatar(file) {
@@ -1665,6 +1719,7 @@ class BackupManager {
         }
         this.avatarURL = url || '';
         this.renderAvatar();
+        window.kanjiProfilePage?.refresh();
         document.getElementById('avatarStatus').textContent = file
             ? 'Profile photo saved. Included in your next backup or sync.'
             : 'Custom photo removed. Using your Google photo when connected.';
@@ -1807,9 +1862,7 @@ class BackupManager {
                 this.pendingCloud = null;
                 this.config.lastChecked = Date.now();
                 this.save();
-                this.status(
-                    'Already saved — no changes, so no upload or extra backup was created.'
-                );
+                this.status('Already saved. No changes, so no upload or extra backup was created.');
                 return;
             }
             if (!base || newest.id !== base.id || cloudHash !== base.hash) {

@@ -1,11 +1,14 @@
-const CACHE_NAME = 'kanji-widgets-v11';
+const CACHE_NAME = 'kanji-widgets-v12';
 const urlsToCache = [
     '/',
     '/index.html',
     '/styles.css',
+    '/styles.css?v=profile-v1',
     '/script.js',
     '/backup-config.js',
     '/backup-manager.js',
+    '/backup-manager.js?v=profile-v1',
+    '/profile-page.js?v=profile-v1',
     '/kanji-data.js',
     '/audio-manager.js',
     '/storage-manager.js',
@@ -32,7 +35,9 @@ self.addEventListener('activate', (event) => {
             .keys()
             .then((keys) =>
                 Promise.all(
-                    keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+                    keys
+                        .filter((key) => key.startsWith('kanji-widgets-') && key !== CACHE_NAME)
+                        .map((key) => caches.delete(key))
                 )
             )
             .then(() => self.clients.claim())

@@ -3335,7 +3335,7 @@ input:focus {
     transform: scale(1.15);
 }
 
-/* Only one of these shows at a time — toggled explicitly via JS, since a
+/* Only one of these shows at a time. toggled explicitly via JS, since a
    custom theme's background is either a still image or a video, never both. */
 [data-theme='custom-1'] .custom-theme-background.active {
     display: block;
@@ -5899,4 +5899,226 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     line-height: 1.6;
     font-size: 0.82rem;
     overflow-wrap: anywhere;
+}
+
+/* Dedicated profile view, presented in the top layer without losing Google access. */
+.profile-page-open {
+    overflow: hidden;
+}
+.profile-page {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--background);
+    color: var(--on-background);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+}
+.profile-page:not([open]) {
+    display: none;
+}
+.profile-page::backdrop {
+    background: var(--background);
+}
+.profile-page-shell {
+    max-width: 1000px;
+    margin-inline: auto;
+    padding: max(20px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+}
+.profile-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 32px;
+}
+.profile-page-header > span,
+.profile-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    opacity: 0.65;
+}
+.profile-subtle-btn {
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+    min-height: 44px;
+}
+.profile-subtle-btn:hover {
+    background: color-mix(in srgb, currentColor 7%, transparent);
+}
+.profile-page :is(button, input):focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+}
+.profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 18px 0 32px;
+}
+.profile-hero h1 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    margin: 8px 0;
+    overflow-wrap: anywhere;
+}
+.profile-hero p {
+    line-height: 1.5;
+    opacity: 0.8;
+    overflow-wrap: anywhere;
+}
+.profile-page-avatar {
+    width: 96px;
+    height: 96px;
+    flex: 0 0 96px;
+    display: grid;
+    place-items: center;
+    font-size: 72px;
+}
+.profile-page-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.profile-page [hidden] {
+    display: none !important;
+}
+.profile-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.profile-stat-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 14px;
+}
+.profile-stat-grid strong {
+    font-size: 1.8rem;
+    font-variant-numeric: tabular-nums;
+}
+.profile-stat-grid span {
+    font-size: 0.8rem;
+    opacity: 0.75;
+}
+.profile-page-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.profile-card {
+    min-width: 0;
+    background: var(--surface);
+    padding: 24px;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 16px;
+}
+.profile-card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 18px;
+}
+.profile-card p {
+    font-size: 0.86rem;
+    line-height: 1.65;
+    margin-block: 12px;
+    overflow-wrap: anywhere;
+}
+.profile-card p:empty {
+    display: none;
+}
+#profilePageForm {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+#profilePageForm label {
+    font-size: 0.82rem;
+}
+#profilePageForm input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border-radius: 9px;
+    border: 1px solid var(--border-color, #8886);
+    background: var(--background);
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+}
+.profile-hint {
+    opacity: 0.65;
+}
+.profile-save-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.profile-save-actions > :first-child {
+    grid-column: 1 / -1;
+}
+.profile-page-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    opacity: 0.65;
+    margin-top: 28px;
+}
+.profile-page button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+@media (max-width: 640px) {
+    .profile-page-shell {
+        padding-inline: 16px;
+    }
+    .profile-page-header {
+        padding-bottom: 14px;
+    }
+    .profile-page-header > span {
+        display: none;
+    }
+    .profile-hero {
+        gap: 16px;
+    }
+    .profile-page-avatar {
+        width: 72px;
+        height: 72px;
+        flex-basis: 72px;
+        font-size: 56px;
+    }
+    .profile-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .profile-page-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .profile-card {
+        padding: 18px;
+    }
+}
+#driveDiagnosticBuild {
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+    opacity: 0.75;
 }

@@ -24,7 +24,7 @@ function katakanaToHiragana(str) {
 
 // Small greedy romaji -> hiragana converter. Covers standard mora,
 // youon (kya/sha/etc.), and sokuon (doubled consonant -> っ). Not a
-// full IME — good enough for matching search queries against readings.
+// full IME - good enough for matching search queries against readings.
 const ROMAJI_TO_HIRAGANA = {
     kya: 'きゃ',
     kyu: 'きゅ',
@@ -182,7 +182,7 @@ function readingMatches(reading, lowerQuery, romajiHiragana) {
 // ==========================================
 // CUSTOM THEME IMAGE STORAGE (IndexedDB)
 // ==========================================
-// Images can easily be several MB — localStorage's ~5-10MB *text-only*
+// Images can easily be several MB - localStorage's ~5-10MB *text-only*
 // quota is shared with all saved progress, so storing images there risks
 // corrupting unrelated data. IndexedDB has no such practical limit and
 // stores binary Blobs natively (no base64 bloat).
@@ -224,7 +224,7 @@ async function getCustomThemeImage(slot) {
 // DEV'S FAVORITE THEMES (curated preset backgrounds)
 // ==========================================
 // Static files live in assets/dev-themes/ (landscape, for desktop) and
-// assets/dev-themes/mobile/ (portrait, for phones) — auto-swapped based on
+// assets/dev-themes/mobile/ (portrait, for phones) - auto-swapped based on
 // screen size so nobody sees a wallpaper cropped for the wrong orientation.
 // To add one: drop the image/gif in the right folder AND add its filename
 // to that folder's manifest.json. Display name is derived from the filename.
@@ -245,7 +245,7 @@ async function loadDevFavoritesManifest() {
         const files = await res.json();
         return { folder, files: Array.isArray(files) ? files : [] };
     } catch (err) {
-        return { folder, files: [] }; // manifest missing or unreadable — just show no dev picks, not an error state
+        return { folder, files: [] }; // manifest missing or unreadable - just show no dev picks, not an error state
     }
 }
 
@@ -483,7 +483,7 @@ class KanjiLearningApp {
 
         // Re-check the mobile/desktop blur compensation whenever the window
         // is resized (e.g. a PC window maximized after picking a mobile theme
-        // while narrow) — debounced so it doesn't run on every pixel of a drag.
+        // while narrow) - debounced so it doesn't run on every pixel of a drag.
         let resizeDebounceTimer = null;
         window.addEventListener('resize', () => {
             clearTimeout(resizeDebounceTimer);
@@ -740,7 +740,7 @@ class KanjiLearningApp {
                 return;
             }
 
-            // Use the File's actual MIME type, not the URL — a blob: URL has
+            // Use the File's actual MIME type, not the URL - a blob: URL has
             // no file extension, so extension-sniffing wouldn't work here.
             const isVideo = file.type.startsWith('video/');
             const url = URL.createObjectURL(file);
@@ -750,7 +750,7 @@ class KanjiLearningApp {
                 const sizeMB = file.size / (1024 * 1024);
                 if (sizeMB > 20) {
                     this.showToast(
-                        `That clip is ${sizeMB.toFixed(1)}MB — quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`
+                        `That clip is ${sizeMB.toFixed(1)}MB, which is quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`
                     );
                 } else if (sizeMB > 8) {
                     this.showToast(
@@ -772,7 +772,7 @@ class KanjiLearningApp {
                 .querySelectorAll('.dev-favorite-thumb')
                 .forEach((t) => t.classList.remove('selected'));
 
-            // Default to checked on upload — most people uploading their own
+            // Default to checked on upload - most people uploading their own
             // image/video want a matching accent without an extra click.
             document.getElementById('autoAccentToggle').checked = true;
 
@@ -796,7 +796,7 @@ class KanjiLearningApp {
             const isVideo = isVideoFile(file);
             const previewEl = document.getElementById('customThemePreview');
 
-            // Videos can't be a CSS background-image — clear it so a stale
+            // Videos can't be a CSS background-image - clear it so a stale
             // image doesn't show through behind the small preview box.
             previewEl.style.backgroundImage = isVideo ? 'none' : `url(${file})`;
             previewEl.dataset.imageUrl = file;
@@ -808,7 +808,7 @@ class KanjiLearningApp {
                 .forEach((t) => t.classList.remove('selected'));
             thumb.classList.add('selected');
 
-            // Dev's picks are curated to already look good — apply instantly
+            // Dev's picks are curated to already look good - apply instantly
             // with a light blur, no manual tweaking needed.
             document.getElementById('customThemeBlur').value = 2;
             document.getElementById('customThemeBlurValue').textContent = '2px';
@@ -842,7 +842,7 @@ class KanjiLearningApp {
             }
         });
 
-        // Accent color presets — quick picks, still fully overridable
+        // Accent color presets - quick picks, still fully overridable
         document.querySelectorAll('.accent-swatch').forEach((swatch) => {
             swatch.addEventListener('click', () => {
                 document.getElementById('customThemeAccent').value = swatch.dataset.color;
@@ -1480,7 +1480,7 @@ class KanjiLearningApp {
             }
         }
 
-        // Nothing unmastered left anywhere in the level — reuse the existing
+        // Nothing unmastered left anywhere in the level - reuse the existing
         // "level complete" flow (congrats toast + reset to the start).
         this.loadCurrentKanji();
     }
@@ -1505,7 +1505,7 @@ class KanjiLearningApp {
         const MAX_RESULTS = 30;
 
         // Only attempt romaji conversion when the query looks like plain
-        // latin letters (e.g. "ima") — never run it on kanji/kana input.
+        // latin letters (e.g. "ima") - never run it on kanji/kana input.
         const romajiHiragana = /^[a-z]+$/i.test(trimmed) ? romajiToHiragana(lowerQuery) : null;
 
         for (const level of levels) {
@@ -1518,7 +1518,7 @@ class KanjiLearningApp {
 
                 const isMatch =
                     trimmed.includes(kanji.character) || // handles single AND compound queries, e.g. "今夜" matches both 今 and 夜
-                    examples.some((ex) => ex.word === trimmed) || // exact compound-word match only — avoids flooding results for common single kanji
+                    examples.some((ex) => ex.word === trimmed) || // exact compound-word match only - avoids flooding results for common single kanji
                     meanings.some((m) => m.toLowerCase().includes(lowerQuery)) ||
                     onyomi.some((r) => readingMatches(r, lowerQuery, romajiHiragana)) ||
                     kunyomi.some((r) => readingMatches(r, lowerQuery, romajiHiragana));
@@ -1647,7 +1647,7 @@ class KanjiLearningApp {
         progress.mastered = progress.mastered.filter((char) => char !== character);
         StorageManager.saveProgress(progress);
 
-        this.showToast(`"${character}" unmarked — moved back to pending.`);
+        this.showToast(`"${character}" unmarked and moved back to pending.`);
 
         this.renderKanji(); // refresh so the ✕ button hides again
         this.updateProgress();
@@ -3753,7 +3753,7 @@ function sanitizeAccentColor(hex, mode) {
 // (high saturation, avoiding near-black/near-white) to use as an accent color.
 function extractVibrantColor(imgElement) {
     const canvas = document.createElement('canvas');
-    const size = 40; // small on purpose — this is a rough pick, not precision color science
+    const size = 40; // small on purpose - this is a rough pick, not precision color science
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext('2d');
@@ -3812,7 +3812,7 @@ function loadVideoFrame(url) {
         video.playsInline = true;
         video.preload = 'auto';
         // Detached video elements can fail to reliably decode frames or fire
-        // seek events in some browsers — keep it in the DOM, just off-screen
+        // seek events in some browsers - keep it in the DOM, just off-screen
         // and invisible. The caller removes it after drawing from it.
         video.style.position = 'fixed';
         video.style.left = '-9999px';
@@ -3857,7 +3857,7 @@ function loadVideoFrame(url) {
 }
 
 // Ties extraction + the existing contrast safety net together. Works for
-// both still images and videos — reads dataset.isVideo itself, so every
+// both still images and videos - reads dataset.isVideo itself, so every
 // call site can use this the same way regardless of media type.
 // Returns a safe hex string, or null if there's no usable media.
 async function autoPickAccentFromMedia(mode) {
@@ -3872,7 +3872,7 @@ async function autoPickAccentFromMedia(mode) {
     try {
         mediaEl = isVideo ? await loadVideoFrame(url) : await loadImageElement(url);
     } catch (err) {
-        return null; // failed to load/decode — fail safely instead of throwing into the caller
+        return null; // failed to load/decode - fail safely instead of throwing into the caller
     }
 
     const extracted = extractVibrantColor(mediaEl);
