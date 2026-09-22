@@ -1,4 +1,4 @@
-# KanjiWidgets
+# [KanjiWidgets](https://brodante.github.io/kanji-widget-app/)
 
 A Japanese learning app I built because I got tired of switching between five different apps just to review kanji, hear the pronunciation, and track what I'd actually learned. It's plain HTML/CSS/JS. No framework, no build step. Runs entirely in the browser.
 
@@ -86,3 +86,7 @@ Keep the project on **Spark with no billing account linked**. Google login does 
 The default progress-saving flow now uses Google app sign-in plus Firestore, not Drive. Follow [Firestore setup and verification](docs/firestore-sync-setup.md) and publish the owner-only `firestore.rules` before testing. The database is in Singapore. First sync asks which progress to keep; approved changes save at 30-second intervals while the app is visible and online. New remote revisions pause for review instead of silently replacing local progress. Uploaded media and AI credentials stay local. Drive full backups remain under Settings → Advanced: optional Google Drive backups.
 
 `npm test` covers application behavior with a mock adapter. `npm run test:rules` separately exercises security rules in a demo-project emulator and needs Java 21+. That emulator could not run in the sandbox, so security-rule execution and real two-device acceptance are still pending. Keep Firebase on Spark without billing.
+
+### Development checks
+
+Use Node **22.22.2 or newer in the Node 22 line**, or a newer Node release supported by JSDOM. Run `npm ci` and `npm test` to check the learning/account/sync behavior and the live drawing-pad regression suite together. `npm run test:drawing-pad` runs the practice checks alone. CI runs the combined tests so account work cannot silently drop practice coverage.

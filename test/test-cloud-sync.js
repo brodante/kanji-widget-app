@@ -303,7 +303,7 @@ test('Drive is confined to advanced Settings while cloud controls appear in acco
             assert.ok(
                 fs
                     .readFileSync(require.resolve(file), 'utf8')
-                    .includes('cloud-sync.js?v=feedback-v1')
+                    .includes('cloud-sync.js?v=practice-merge-v1')
             );
         }
     } finally {

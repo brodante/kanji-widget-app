@@ -73,7 +73,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css?v=feedback-v1" />
+        <link rel="stylesheet" href="styles.css?v=practice-merge-v1" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -1683,84 +1683,6 @@ filter: blur(10px) brightness(1) saturate(1);
                 <span class="ai-fab-text">AI Sensei</span>
             </button>
 
-            <!-- Kanji Practice (Drawing Pad) Modal -->
-            <div id="drawingPadModal" class="modal">
-                <div class="modal-content drawing-pad-modal-content">
-                    <div class="modal-header">
-                        <div class="modal-title-group">
-                            <h2 id="drawingPadTitle">Kanji Practice</h2>
-                        </div>
-                        <button class="close-btn" id="closeDrawingPad" title="Close">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="drawing-pad-body">
-                        <div class="drawing-pad-canvas-wrap">
-                            <canvas id="drawingPadCanvas" width="300" height="300"></canvas>
-                        </div>
-                        <div id="drawingPadFeedback" class="drawing-pad-feedback"></div>
-                        <div id="drawingPadScore" class="drawing-pad-score"></div>
-                        <div class="drawing-pad-toolbar">
-                            <button
-                                type="button"
-                                id="drawingPadGridBtn"
-                                class="drawing-pad-btn"
-                                onclick="app.toggleDrawingPadGrid()"
-                                title="Toggle Grid"
-                            >
-                                <i class="fas fa-th"></i> Grid
-                            </button>
-                            <button
-                                type="button"
-                                id="drawingPadRefBtn"
-                                class="drawing-pad-btn"
-                                onclick="app.toggleDrawingPadRef()"
-                                title="Toggle Reference"
-                            >
-                                <i class="fas fa-eye"></i> Trace
-                            </button>
-                            <button
-                                type="button"
-                                id="drawingPadUndoBtn"
-                                class="drawing-pad-btn"
-                                onclick="app.undoDrawingPadStroke()"
-                                title="Undo Stroke"
-                            >
-                                <i class="fas fa-undo"></i> Undo
-                            </button>
-                            <button
-                                type="button"
-                                id="drawingPadClearBtn"
-                                class="drawing-pad-btn danger-action"
-                                onclick="app.clearDrawingPadStrokes()"
-                                title="Clear Canvas"
-                            >
-                                <i class="fas fa-trash"></i> Clear
-                            </button>
-                        </div>
-                        <div class="drawing-pad-width-row">
-                            <span class="drawing-pad-width-label"
-                                ><i class="fas fa-pen-nib"></i> Thickness</span
-                            >
-                            <div class="drawing-pad-slider-wrap">
-                                <input
-                                    type="range"
-                                    id="drawingPadWidthSlider"
-                                    min="2"
-                                    max="8"
-                                    step="1"
-                                    value="4"
-                                    oninput="app.setDrawingPadStrokeWidth(this.value)"
-                                    class="drawing-pad-slider"
-                                    title="Adjust stroke thickness"
-                                />
-                            </div>
-                            <span id="drawingPadWidthVal" class="drawing-pad-width-val">4px</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Notification Toast -->
             <div id="toast" class="toast">
                 <span id="toastMessage"></span>
@@ -2020,14 +1942,14 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="ai-tutor-modal.js"></script>
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
-        <script src="drawing-pad.js"></script>
-        <script src="ui-feedback.js?v=feedback-v1"></script>
+        <script src="drawing-pad.js?v=practice-merge-v1"></script>
+        <script src="ui-feedback.js?v=practice-merge-v1"></script>
         <script src="backup-config.js"></script>
-        <script src="backup-manager.js?v=feedback-v1"></script>
-        <script src="profile-page.js?v=feedback-v1"></script>
-        <script src="firebase-config.js?v=feedback-v1"></script>
-        <script src="app-auth.js?v=feedback-v1"></script>
-        <script src="cloud-sync.js?v=feedback-v1"></script>
-        <script src="script.js"></script>
+        <script src="backup-manager.js?v=practice-merge-v1"></script>
+        <script src="profile-page.js?v=practice-merge-v1"></script>
+        <script src="firebase-config.js?v=practice-merge-v1"></script>
+        <script src="app-auth.js?v=practice-merge-v1"></script>
+        <script src="cloud-sync.js?v=practice-merge-v1"></script>
+        <script src="script.js?v=practice-merge-v1"></script>
     </body>
 </html>

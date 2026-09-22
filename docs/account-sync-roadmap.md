@@ -147,3 +147,16 @@ nicknames, imported data and generated third-party content are not rewritten.
 - [x] Photo validation and manual operation failures have persistent accessible alerts with a subtle card shake (disabled for reduced-motion users).
 - [x] Profile has a compact Remove DP control, available only for an uploaded photo. Confirmation removes only the local avatar and falls back to the Google photo/default icon; existing backups are unchanged.
 - [x] Owner reports Firestore sync working during initial testing. The detailed two-device/security-rule acceptance checklist remains separate and is not inferred from that report.
+
+## Live-main integration
+
+- [x] Merge GitHub `main` at `2d3c6ba` into this branch, preserving the new Firebase, Drive, profile and feedback work.
+- [x] Restore Snap, Guide, Redo, reference matching, animated correction, thickness easing and Japanese practice feedback.
+- [x] Restore single-owner event wiring, new-canvas listener binding, same-kanji stroke preservation, async reference guards and remembered Practice mode.
+- [x] Restore Recent-card styling across Midnight, Nami, Lumen, Obake and Ito.
+- [x] Restore drawing-pad precaching, CODEOWNERS, CNAME and practice regression tests. Copy CNAME into the deployment artifact as well.
+- [x] Run main's practice suite as part of `npm test` and CI, alongside the account/sync tests. CI uses Node 22 for main's JSDOM version.
+- [x] Add integration guards for both sets of controls, unique DOM IDs, theme styles, cache/deploy assets and CI coverage.
+- [ ] User browser acceptance of the combined Practice/account experience. Real Firebase/Drive acceptance and rule-emulator verification remain separate from these automated tests.
+
+No PR is opened by this integration. The live site is not deployed from this working branch.

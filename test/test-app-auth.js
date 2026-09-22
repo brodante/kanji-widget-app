@@ -224,8 +224,8 @@ test('Firebase session keys cannot enter backups; deploy and cache include auth 
         const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
         const deploy = fs.readFileSync(require.resolve('../.github/workflows/deploy.yml'), 'utf8');
         for (const asset of ['app-auth.js', 'firebase-config.js']) {
-            assert.ok(html.includes(`${asset}?v=feedback-v1`));
-            assert.ok(worker.includes(`${asset}?v=feedback-v1`));
+            assert.ok(html.includes(`${asset}?v=practice-merge-v1`));
+            assert.ok(worker.includes(`${asset}?v=practice-merge-v1`));
             assert.ok(deploy.includes(`cp ${asset} deploy/`));
         }
     } finally {

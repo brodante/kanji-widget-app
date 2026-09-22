@@ -171,10 +171,10 @@ test('app entry points and offline cache use the same versioned profile assets',
     const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
     const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
     for (const asset of [
-        'backup-manager.js?v=feedback-v1',
-        'profile-page.js?v=feedback-v1',
-        'styles.css?v=feedback-v1',
-        'ui-feedback.js?v=feedback-v1'
+        'backup-manager.js?v=practice-merge-v1',
+        'profile-page.js?v=practice-merge-v1',
+        'styles.css?v=practice-merge-v1',
+        'ui-feedback.js?v=practice-merge-v1'
     ]) {
         assert.ok(html.includes(asset), asset);
         assert.ok(worker.includes(asset), asset);

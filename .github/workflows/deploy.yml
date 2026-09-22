@@ -30,6 +30,7 @@ jobs:
                   mkdir -p deploy
                   # Copy only necessary files for static hosting
                   cp index.html deploy/
+                  cp CNAME deploy/
                   cp styles.css deploy/
                   cp script.js deploy/
                   cp drawing-pad.js deploy/

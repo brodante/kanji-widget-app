@@ -3,8 +3,14 @@
  *
  * Provides a <canvas>-based drawing surface for practising kanji strokes.
  * Features: grid overlay, reference-stroke tracing, stroke-order validation,
- * and snap-to-stroke scoring - all powered by KanjiVG path data that the
- * app already fetches via KanjiLearningApp.fetchStrokeOrderSvg().
+ * snap-to-stroke scoring with perfect-attachment snap rendering, redo, and a
+ * side-by-side reference guide panel - all powered by KanjiVG path data that
+ * the app already fetches via KanjiLearningApp.fetchStrokeOrderSvg().
+ *
+ * The pad owns ALL of its event wiring (canvas pointer events + toolbar
+ * clicks + slider input). The toolbar markup must NOT also carry inline
+ * onclick handlers for these controls: a tap would then fire both wirings
+ * and every toggle would run twice, cancelling itself out.
  *
  * Depends on: StorageManager (storage-manager.js)
  */
@@ -15,6 +21,11 @@ class DrawingPad {
     static CANVAS_SIZE = 300;
     static RESAMPLE_POINTS = 64;
     static SNAP_THRESHOLD = 0.25; // normalised; lower = stricter
+    // How strongly stroke position (not just shape) picks the snap target.
+    // Shape-only matching is ambiguous in kanji - many strokes are the same
+    // shape (horizontals, diagonals...), so without this the matcher happily
+    // targets an identical stroke on the far side of the character.
+    static SNAP_POSITION_WEIGHT = 0.8;
     static STROKE_WIDTH = 4;
     static REF_OPACITY = 0.18;
     static GRID_COLOR = 'rgba(150,150,150,0.25)';
@@ -31,29 +42,40 @@ class DrawingPad {
     constructor() {
         this.currentKanji = null;
         this.strokes = []; // completed strokes: [{points, color, correct}]
+        this.redoStack = []; // strokes removed by undoStroke(), restorable
         this.currentStroke = []; // in-progress points
         this.isDrawing = false;
         this.referencePaths = []; // parsed KanjiVG path 'd' strings
         this.referenceImg = null; // HTMLImageElement of the reference SVG
+        this.referenceSvgMarkup = null; // raw (sanitized) SVG markup, for the guide panel
+        this._refPointCache = null; // sampled reference points, per kanji
         this.gridVisible = false;
         this.referenceVisible = true;
-        this.feedbackMessage = '';
+        this.snapEnabled = false; // render completed strokes snapped to the reference shape
+        this.guideVisible = false; // side-by-side reference panel next to the canvas
         this.feedbackTimeout = null;
+        this._snapAnimFrame = null; // pending rAF id for snap glides
+        this._widthAnimFrame = null; // pending rAF id for stroke-width easing
         this.svgViewBox = { x: 0, y: 0, w: 109, h: 109 }; // KanjiVG default
 
         this._loadSettings();
 
         // DOM references (set in init)
-        this.modal = null;
+        this.root = null;
         this.canvas = null;
         this.ctx = null;
         this.gridBtn = null;
         this.refBtn = null;
+        this.snapBtn = null;
+        this.guideBtn = null;
         this.clearBtn = null;
         this.undoBtn = null;
+        this.redoBtn = null;
+        this.widthSlider = null;
+        this.widthValEl = null;
         this.feedbackEl = null;
-        this.titleEl = null;
         this.scoreEl = null;
+        this.guideEl = null;
     }
 
     // ==========================================
@@ -64,14 +86,22 @@ class DrawingPad {
         this.gridVisible = settings.drawingPadGrid !== undefined ? settings.drawingPadGrid : false;
         this.referenceVisible =
             settings.drawingPadRef !== undefined ? settings.drawingPadRef : true;
+        this.snapEnabled = settings.drawingPadSnap !== undefined ? settings.drawingPadSnap : false;
+        this.guideVisible =
+            settings.drawingPadGuide !== undefined ? settings.drawingPadGuide : false;
         this.strokeWidth =
             settings.drawingPadStrokeWidth !== undefined ? settings.drawingPadStrokeWidth : 4;
+        // Rendered width eases towards strokeWidth so slider drags feel smooth
+        // instead of snapping the ink to each new value.
+        this._displayStrokeWidth = this.strokeWidth;
     }
 
     _saveSettings() {
         const settings = StorageManager.getItem(StorageManager.keys.SETTINGS, {});
         settings.drawingPadGrid = this.gridVisible;
         settings.drawingPadRef = this.referenceVisible;
+        settings.drawingPadSnap = this.snapEnabled;
+        settings.drawingPadGuide = this.guideVisible;
         settings.drawingPadStrokeWidth = this.strokeWidth;
         StorageManager.setItem(StorageManager.keys.SETTINGS, settings);
     }
@@ -82,10 +112,12 @@ class DrawingPad {
     /**
      * Initialise the pad against a specific DOM scope.
      *
-     * The inline practice controls (rendered inside the widget card) and the
-     * standalone modal both contain a toolbar. Passing `root` lets us resolve
-     * the correct set of controls and avoids the duplicate-ID trap where
-     * getElementById() would always return the first match in the document.
+     * The practice canvas lives in the flip-card back of the widget's
+     * stroke-order section while the toolbar sits in the inline controls div,
+     * so `root` must be an element containing BOTH (the app passes the whole
+     * stroke-order section). This keeps every lookup scoped and avoids the
+     * duplicate-ID trap where document-level lookups match whichever element
+     * happens to come first in the document.
      *
      * @param {Element|Document} [root] Element to query controls within.
      */
@@ -106,47 +138,53 @@ class DrawingPad {
         }
 
         // Bind listeners to whatever controls this scope resolved. The pad
-        // tracks which nodes are already wired (_canvasBound / _boundControls),
-        // so repeated init() calls (e.g. every Animate <-> Practice switch, or
-        // re-rendered inline markup) bind only the new nodes and never stack
-        // duplicate handlers on the ones already listening.
+        // tracks which NODES are already wired (_boundCanvas /
+        // _boundControls), so repeated init() calls (e.g. every Animate <->
+        // Practice switch, or re-rendered widget markup) bind only the new
+        // nodes and never stack duplicate handlers on the ones already
+        // listening.
         this._bindEvents();
         this._syncButtons();
+        this._applyGuide();
         this._repaint();
+        // Self-heal any snap glide interrupted by a re-render (e.g. a stroke
+        // caught mid-transition when the widget markup was rebuilt).
+        this._scheduleSnapAnimation();
     }
 
     /**
      * Resolve every element the pad interacts with inside the current scope.
-     * Both the inline and modal control sets are supported: inline controls
-     * use an "Inline" infix while the modal keeps the original ids.
      */
     _queryElements() {
-        this.modal = this._resolveInScope('drawingPadModal');
         this.canvas = this._resolveInScope('drawingPadCanvas');
         this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
-        this.gridBtn = this._resolveControl('drawingPadGridBtn', 'drawingPadInlineGridBtn');
-        this.refBtn = this._resolveControl('drawingPadRefBtn', 'drawingPadInlineRefBtn');
-        this.clearBtn = this._resolveControl('drawingPadClearBtn', 'drawingPadInlineClearBtn');
-        this.undoBtn = this._resolveControl('drawingPadUndoBtn', 'drawingPadInlineUndoBtn');
-        this.widthSlider = this._resolveControl(
-            'drawingPadWidthSlider',
-            'drawingPadInlineWidthSlider'
-        );
-        this.widthValEl = this._resolveControl('drawingPadWidthVal', 'drawingPadInlineWidthVal');
-        this.feedbackEl = this._resolveControl('drawingPadFeedback', 'drawingPadInlineFeedback');
-        this.titleEl = this._resolveInScope('drawingPadTitle');
-        this.scoreEl = this._resolveControl('drawingPadScore', 'drawingPadInlineScore');
+        this._queryControls();
     }
 
     /**
-     * Resolve a control id inside the current scope, preferring the
-     * scope-local match.
-     *
-     * The inline practice panel and the modal both render toolbars, and the
-     * inline ids carry an "Inline" infix. Blindly trying the modal id first
-     * (via document.getElementById) returned the hidden modal element even
-     * when the visible inline control was in scope - which silently sent
-     * feedback text and `.active` toggles to the wrong element.
+     * Resolve the toolbar controls inside the current scope. Called both from
+     * init() and from _syncButtons(): the widget markup is rebuilt whenever
+     * the widget re-renders (kanji change, size change, mode switch), so
+     * cached nodes can become detached.
+     */
+    _queryControls() {
+        this.gridBtn = this._resolveInScope('drawingPadInlineGridBtn');
+        this.refBtn = this._resolveInScope('drawingPadInlineRefBtn');
+        this.snapBtn = this._resolveInScope('drawingPadInlineSnapBtn');
+        this.guideBtn = this._resolveInScope('drawingPadInlineGuideBtn');
+        this.clearBtn = this._resolveInScope('drawingPadInlineClearBtn');
+        this.undoBtn = this._resolveInScope('drawingPadInlineUndoBtn');
+        this.redoBtn = this._resolveInScope('drawingPadInlineRedoBtn');
+        this.widthSlider = this._resolveInScope('drawingPadInlineWidthSlider');
+        this.widthValEl = this._resolveInScope('drawingPadInlineWidthVal');
+        this.feedbackEl = this._resolveInScope('drawingPadInlineFeedback');
+        this.scoreEl = this._resolveInScope('drawingPadInlineScore');
+        this.guideEl = this._resolveInScope('drawingPadInlineGuide');
+    }
+
+    /**
+     * Resolve an id inside the current scope, preferring the scope-local
+     * match and falling back to the document.
      *
      * @param {string} id Element id to look up.
      * @returns {Element|null}
@@ -162,36 +200,17 @@ class DrawingPad {
         return document.getElementById(id);
     }
 
-    /**
-     * Resolve one of two id variants (modal id vs inline id), always
-     * preferring whichever variant actually exists inside the current scope.
-     *
-     * Both variants must be checked against the scope *before* falling back
-     * to the document, otherwise the `||` chain short-circuits on the hidden
-     * modal element and the visible inline control never gets resolved.
-     *
-     * @param {string} modalId Id used by the standalone modal markup.
-     * @param {string} inlineId Id used by the inline practice markup.
-     * @returns {Element|null}
-     */
-    _resolveControl(modalId, inlineId) {
-        const scope = this.root || document;
-        if (scope && scope !== document && scope.querySelector) {
-            const local = scope.querySelector(`#${modalId}`) || scope.querySelector(`#${inlineId}`);
-            if (local) {
-                return local;
-            }
-        }
-        return document.getElementById(modalId) || document.getElementById(inlineId);
-    }
-
     // ==========================================
     // EVENT BINDING
     // ==========================================
     _bindEvents() {
         // Pointer events for unified mouse / touch / pen input.
-        // Guard against re-binding the same canvas (e.g. across init calls).
-        if (this.canvas && !this._canvasBound) {
+        // Track the bound NODE, not a boolean: the widget re-renders its
+        // markup wholesale (new kanji, size change, ...), which replaces the
+        // canvas element. A boolean flag would leave the fresh canvas without
+        // any pointer listeners; comparing nodes re-binds it on the next
+        // init() while still never double-binding the same canvas.
+        if (this.canvas && this._boundCanvas !== this.canvas) {
             this.canvas.addEventListener('pointerdown', (e) => this._onPointerDown(e));
             this.canvas.addEventListener('pointermove', (e) => this._onPointerMove(e));
             this.canvas.addEventListener('pointerup', (e) => this._onPointerUp(e));
@@ -200,77 +219,62 @@ class DrawingPad {
             this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), {
                 passive: false
             });
-            this._canvasBound = true;
+            this._boundCanvas = this.canvas;
         }
 
-        // Toolbar. Each control is bound at most once (tracked in _boundControls)
-        // so repeated init() calls - which re-resolve controls against a new
-        // scope - pick up newly rendered inline buttons without stacking
-        // duplicate listeners on the ones that are already wired.
+        // Toolbar. Each control is bound at most once (tracked in
+        // _boundControls) so repeated init() calls - which re-resolve controls
+        // against a new scope - pick up newly rendered inline buttons without
+        // stacking duplicate listeners on the ones that are already wired.
+        //
+        // NOTE: these bindings are the ONLY wiring for the toolbar. The
+        // toolbar markup must not carry inline onclick/oninput attributes for
+        // the same actions, or every tap would fire twice and toggles would
+        // cancel out.
         this._boundControls = this._boundControls || new WeakSet();
-        const bind = (el, handler) => {
+        const bind = (el, handler, type = 'click') => {
             if (!el || this._boundControls.has(el)) {
                 return;
             }
-            el.addEventListener('click', handler);
+            el.addEventListener(type, handler);
             this._boundControls.add(el);
         };
 
         bind(this.clearBtn, () => this.clearStrokes());
         bind(this.undoBtn, () => this.undoStroke());
+        bind(this.redoBtn, () => this.redoStroke());
         bind(this.gridBtn, () => this.toggleGrid());
         bind(this.refBtn, () => this.toggleReference());
-
-        const closeBtn = document.getElementById('closeDrawingPad');
-        bind(closeBtn, () => this.close());
-
-        if (this.modal && !this._modalBound) {
-            this.modal.addEventListener('click', (e) => {
-                if (e.target === this.modal) {
-                    this.close();
-                }
-            });
-            this._modalBound = true;
-        }
-    }
-
-    // ==========================================
-    // OPEN / CLOSE MODAL
-    // ==========================================
-    open(kanji) {
-        if (!this.modal) {
-            return;
-        }
-        this.modal.classList.add('show');
-
-        if (kanji) {
-            this.setKanji(kanji);
-        } else {
-            this._repaint();
-        }
-    }
-
-    close() {
-        if (!this.modal) {
-            return;
-        }
-        this.modal.classList.remove('show');
+        bind(this.snapBtn, () => this.toggleSnap());
+        bind(this.guideBtn, () => this.toggleGuide());
+        bind(this.widthSlider, (e) => this.setStrokeWidth(e.target.value), 'input');
     }
 
     // ==========================================
     // SET KANJI  (loads reference from KanjiVG)
     // ==========================================
     async setKanji(character) {
+        // Re-entering practice mode with the same kanji (Animate <-> Practice
+        // flips) must not wipe the user's strokes or re-fetch the reference
+        // SVG over the network. Only a genuine kanji change (or a previously
+        // failed fetch) resets the pad.
+        if (this.currentKanji === character && (this.referenceImg || this.referencePaths.length)) {
+            // The widget markup may have been re-rendered since (fresh, empty
+            // guide panel), so re-apply the guide state before repainting.
+            this._applyGuide();
+            this._repaint();
+            return;
+        }
+
         this.currentKanji = character;
         this.strokes = [];
+        this.redoStack = [];
         this.currentStroke = [];
-        this.feedbackMessage = '';
         this.referencePaths = [];
         this.referenceImg = null;
+        this.referenceSvgMarkup = null;
+        this._refPointCache = null;
 
-        if (this.titleEl) {
-            this.titleEl.textContent = character;
-        }
         if (this.scoreEl) {
             this.scoreEl.textContent = '';
         }
@@ -279,17 +283,29 @@ class DrawingPad {
             this.feedbackEl.className = 'drawing-pad-feedback';
         }
 
-        // Fetch SVG via the existing app method
+        // Fetch SVG via the existing app method. Token-guard the async work:
+        // setKanji is fire-and-forget from the app side, so a slow response
+        // for one kanji must never overwrite the reference of a kanji the
+        // user has since switched to.
+        const requestToken = (this._setKanjiToken = (this._setKanjiToken || 0) + 1);
         let svgMarkup = null;
         if (window.app && typeof window.app.fetchStrokeOrderSvg === 'function') {
             svgMarkup = await window.app.fetchStrokeOrderSvg(character);
+        }
+        if (requestToken !== this._setKanjiToken) {
+            return; // superseded by a newer setKanji() call
         }
 
         if (svgMarkup) {
             this._parseReferenceSvg(svgMarkup);
             this.referenceImg = await this._svgToImage(svgMarkup);
         }
+        if (requestToken !== this._setKanjiToken) {
+            return; // superseded while decoding the image
+        }
+        this.referenceSvgMarkup = svgMarkup || null;
 
+        this._renderGuide();
         this._repaint();
     }
 
@@ -389,18 +405,40 @@ class DrawingPad {
             color: result.color,
             correct: result.orderCorrect,
             score: result.score,
-            snappedPoints: result.snappedPoints
+            snapRefIndex: result.snapRefIndex
         });
+        // A freshly drawn stroke invalidates the redo history.
+        this.redoStack = [];
 
         this.currentStroke = [];
         this._showFeedback(idx, result);
         this._updateScore();
+        this._updateGuideHighlight();
+        this._syncButtons();
         this._repaint();
+        if (this.snapEnabled) {
+            this._scheduleSnapAnimation();
+        }
     }
 
     // ==========================================
     // STROKE EVALUATION  (Phase 4 + Phase 5)
     // ==========================================
+    /**
+     * Sampled points for reference path `index`, computed lazily once per
+     * kanji. Sampling uses off-screen SVG DOM measurement, so caching matters:
+     * evaluating a single drawn stroke used to re-measure every reference
+     * path from scratch (getTotalLength/getPointAtLength per path).
+     */
+    _getRefPoints(index) {
+        if (!this._refPointCache) {
+            this._refPointCache = this.referencePaths.map((d) =>
+                this._sampleSvgPath(d, DrawingPad.RESAMPLE_POINTS)
+            );
+        }
+        return this._refPointCache[index];
+    }
+
     _evaluateStroke(strokeIndex, userPoints) {
         const result = {
             orderCorrect: true,
@@ -410,7 +448,9 @@ class DrawingPad {
             // raw `var(--token)` strings on a stroke.
             ink: true,
             color: null,
-            snappedPoints: null
+            // Reference path index to snap this stroke to at render time
+            // (only set when the shape actually matched well enough).
+            snapRefIndex: null
         };
 
         if (this.referencePaths.length === 0) {
@@ -437,8 +477,7 @@ class DrawingPad {
         }
 
         // --- Phase 5: Snap-to-stroke scoring ---
-        const refD = this.referencePaths[strokeIndex];
-        const refPoints = this._sampleSvgPath(refD, DrawingPad.RESAMPLE_POINTS);
+        const refPoints = this._getRefPoints(strokeIndex);
         const drawnNorm = this._normalisePoints(userPoints);
         const refNorm = this._normalisePoints(refPoints);
         const dist = this._averagePointDistance(drawnNorm, refNorm);
@@ -462,31 +501,79 @@ class DrawingPad {
             result.color = DrawingPad.COLOR_POOR; // poor match
         }
 
-        // Build snapped (interpolated) points for visual feedback
-        if (result.score > 0.2) {
-            const t = Math.min(result.score, 1.0);
-            result.snappedPoints = this._interpolatePoints(userPoints, refPoints, t);
+        // A stroke is eligible for the snap-to-stroke render effect when it
+        // resembles the stroke it snapped to (the one the user plausibly
+        // intended - closest + most similar), NOT the order-expected one:
+        // an out-of-order stroke scores poorly against the expected stroke
+        // but should still snap neatly onto the stroke actually drawn.
+        const matchScore = Math.max(0, 1 - bestMatch.shapeDist / DrawingPad.SNAP_THRESHOLD);
+        if (matchScore > 0.2) {
+            result.snapRefIndex = bestMatch.index;
         }
 
         return result;
     }
 
     /**
-     * Find which reference path index best matches the user's drawn stroke.
+     * Find which reference stroke the user most plausibly intended to draw.
+     *
+     * Shape similarity alone is ambiguous in kanji: after normalisation many
+     * strokes look alike (every horizontal looks like every other
+     * horizontal), so a shape-only match happily targets an identical stroke
+     * on the opposite side of the character - and snap flies across the
+     * canvas. The combined metric adds the distance between the drawn
+     * stroke's centre and each reference stroke's centre (both in 0..1
+     * canvas units), so between equally-shaped candidates the NEAREST stroke
+     * wins.
+     *
+     * @param {Array<{x:number,y:number}>} userPoints Drawn stroke (canvas px).
+     * @returns {{index:number, shapeDist:number, posDist:number, dist:number}}
      */
     _findBestMatchingPath(userPoints) {
-        let best = { index: 0, dist: Infinity };
         const drawnNorm = this._normalisePoints(userPoints);
+        const drawnCentre = this._userCentreUnit(userPoints);
+        let best = { index: 0, shapeDist: Infinity, posDist: Infinity, dist: Infinity };
 
         for (let i = 0; i < this.referencePaths.length; i++) {
-            const refPts = this._sampleSvgPath(this.referencePaths[i], DrawingPad.RESAMPLE_POINTS);
-            const refNorm = this._normalisePoints(refPts);
-            const d = this._averagePointDistance(drawnNorm, refNorm);
-            if (d < best.dist) {
-                best = { index: i, dist: d };
+            const refPoints = this._getRefPoints(i);
+            const refNorm = this._normalisePoints(refPoints);
+            const shapeDist = this._averagePointDistance(drawnNorm, refNorm);
+            const posDist = this._centreDistance(drawnCentre, this._refCentreUnit(refPoints));
+            const dist = shapeDist + DrawingPad.SNAP_POSITION_WEIGHT * posDist;
+            if (dist < best.dist) {
+                best = { index: i, shapeDist, posDist, dist };
             }
         }
         return best;
+    }
+
+    /** Arithmetic mean point of a polyline. */
+    _centroidOf(points) {
+        let x = 0;
+        let y = 0;
+        for (const p of points) {
+            x += p.x;
+            y += p.y;
+        }
+        return { x: x / points.length, y: y / points.length };
+    }
+
+    /** Drawn stroke centre in 0..1 units of the canvas. */
+    _userCentreUnit(userPoints) {
+        const c = this._centroidOf(userPoints);
+        return { x: c.x / this.canvas.width, y: c.y / this.canvas.height };
+    }
+
+    /** Reference stroke centre in 0..1 units, mapped from the SVG viewBox. */
+    _refCentreUnit(refPoints) {
+        const c = this._centroidOf(refPoints);
+        const vb = this.svgViewBox;
+        return { x: (c.x - vb.x) / vb.w, y: (c.y - vb.y) / vb.h };
+    }
+
+    /** Distance between two 0..1-unit canvas points. */
+    _centreDistance(a, b) {
+        return Math.hypot(a.x - b.x, a.y - b.y);
     }
 
     // ==========================================
@@ -601,7 +688,9 @@ class DrawingPad {
 
     /**
      * Linearly interpolate two point arrays by factor t (0=user, 1=reference).
-     * Used for the snap-to-stroke visual correction effect.
+     * Used for the snap-to-stroke effect: t=1 lands EXACTLY on the reference
+     * stroke (mapped from SVG viewBox space into canvas space), t=0 is the
+     * raw ink, and values in between are the transient glide.
      */
     _interpolatePoints(userPts, refPts, t) {
         const userResampled = this._resampleToN(userPts, DrawingPad.RESAMPLE_POINTS);
@@ -615,8 +704,8 @@ class DrawingPad {
             y: ((p.y - vb.y) / vb.h) * ch
         }));
         return userResampled.map((p, i) => ({
-            x: p.x + (mapped[i].x - p.x) * t * 0.5,
-            y: p.y + (mapped[i].y - p.y) * t * 0.5
+            x: p.x + (mapped[i].x - p.x) * t,
+            y: p.y + (mapped[i].y - p.y) * t
         }));
     }
 
@@ -705,15 +794,17 @@ class DrawingPad {
         }
         const avg = scored.reduce((sum, s) => sum + s.score, 0) / scored.length;
         const orderOk = scored.every((s) => s.correct);
-        this.scoreEl.textContent = `Accuracy: ${Math.round(avg * 100)}%${
-            orderOk ? '' : '  ⚠ order'
-        }`;
+        const pct = Math.round(avg * 100);
+        this.scoreEl.textContent = `Accuracy: ${pct}%${orderOk ? '' : '  · 順番 (order)'}`;
 
+        // All strokes drawn: show a Japanese congratulation (or
+        // encouragement). No emoji - text only keeps it classy.
         if (scored.length === this.referencePaths.length) {
             if (avg >= 0.7 && orderOk) {
-                this.scoreEl.textContent += '  ✅ Well done!';
+                this.scoreEl.textContent +=
+                    pct >= 100 ? '  - パーフェクト！おめでとう！' : '  - すごい！おめでとう！';
             } else {
-                this.scoreEl.textContent += ' · Try again for a better score.';
+                this.scoreEl.textContent += '  - もう一度！ (once more)';
             }
         }
     }
@@ -723,6 +814,7 @@ class DrawingPad {
     // ==========================================
     clearStrokes() {
         this.strokes = [];
+        this.redoStack = [];
         this.currentStroke = [];
         this.isDrawing = false;
         if (this.feedbackEl) {
@@ -732,14 +824,31 @@ class DrawingPad {
         if (this.scoreEl) {
             this.scoreEl.textContent = '';
         }
+        this._updateGuideHighlight();
+        this._syncButtons();
         this._repaint();
     }
 
     undoStroke() {
         if (this.strokes.length > 0) {
-            this.strokes.pop();
+            this.redoStack.push(this.strokes.pop());
             this._updateScore();
+            this._updateGuideHighlight();
+            this._syncButtons();
             this._repaint();
+        }
+    }
+
+    redoStroke() {
+        if (this.redoStack.length > 0) {
+            this.strokes.push(this.redoStack.pop());
+            this._updateScore();
+            this._updateGuideHighlight();
+            this._syncButtons();
+            this._repaint();
+            if (this.snapEnabled) {
+                this._scheduleSnapAnimation();
+            }
         }
     }
 
@@ -757,26 +866,178 @@ class DrawingPad {
         this._repaint();
     }
 
-    setStrokeWidth(width) {
-        this.strokeWidth = Math.min(10, Math.max(2, parseInt(width, 10) || 4));
+    toggleSnap() {
+        this.snapEnabled = !this.snapEnabled;
         this._saveSettings();
         this._syncButtons();
         this._repaint();
+        // Glide every matched stroke onto (or off) the reference strokes.
+        this._scheduleSnapAnimation();
+    }
+
+    toggleGuide() {
+        this.guideVisible = !this.guideVisible;
+        this._saveSettings();
+        this._syncButtons();
+        this._applyGuide();
+        this._repaint();
+    }
+
+    setStrokeWidth(width) {
+        const target = Math.min(10, Math.max(2, parseInt(width, 10) || 4));
+        const changed = target !== this.strokeWidth;
+        this.strokeWidth = target;
+        this._saveSettings();
+        this._syncButtons();
+        if (changed) {
+            // Ease the rendered ink to the new thickness.
+            this._animateStrokeWidth();
+        } else {
+            this._repaint();
+        }
+    }
+
+    // ==========================================
+    // STROKE WIDTH EASING (smooth slider response)
+    // ==========================================
+    /**
+     * Advance the rendered stroke width one frame towards the target with an
+     * exponential ease. Split from the rAF driver so tests can step it
+     * deterministically.
+     *
+     * @returns {boolean} True if the width is still easing.
+     */
+    _strokeWidthStep() {
+        const target = this.strokeWidth;
+        const current = this._displayStrokeWidth ?? target;
+        if (current === target) {
+            return false;
+        }
+        const delta = target - current;
+        this._displayStrokeWidth = Math.abs(delta) < 0.05 ? target : current + delta * 0.3;
+        return this._displayStrokeWidth !== target;
+    }
+
+    /**
+     * Run the width easing on requestAnimationFrame until it settles. The
+     * loop only exists while an easing is in progress.
+     */
+    _animateStrokeWidth() {
+        if (this._widthAnimFrame) {
+            return;
+        }
+        if (typeof requestAnimationFrame !== 'function') {
+            this._displayStrokeWidth = this.strokeWidth;
+            this._repaint();
+            return;
+        }
+        const tick = () => {
+            this._widthAnimFrame = null;
+            const animating = this._strokeWidthStep();
+            this._repaint();
+            if (animating) {
+                this._widthAnimFrame = requestAnimationFrame(tick);
+            }
+        };
+        this._widthAnimFrame = requestAnimationFrame(tick);
+    }
+
+    // ==========================================
+    // GUIDE PANEL (side-by-side reference)
+    // ==========================================
+    /**
+     * Apply the guide visibility state to the DOM: toggles the layout class
+     * on the flip-card back (which shifts the canvas aside) and (re)builds
+     * the panel content when visible. Safe to call on every init().
+     */
+    _applyGuide() {
+        const back = this.canvas ? this.canvas.closest('.stroke-order-flip-back') : null;
+        if (!back || !this.guideEl) {
+            return;
+        }
+        back.classList.toggle('guide-on', this.guideVisible);
+        if (this.guideVisible) {
+            this._renderGuide();
+        }
+    }
+
+    /**
+     * Build the guide panel content from the current reference SVG. Falls
+     * back to a plain character rendering when no KanjiVG data is available.
+     */
+    _renderGuide() {
+        if (!this.guideVisible || !this.guideEl) {
+            return;
+        }
+        if (this.referenceSvgMarkup) {
+            this.guideEl.innerHTML = this.referenceSvgMarkup;
+            this._containGuideSvg();
+        } else {
+            this.guideEl.innerHTML = this.currentKanji
+                ? `<div class="drawing-pad-guide-fallback japanese-text">${this.currentKanji}</div>`
+                : '';
+        }
+        this._updateGuideHighlight();
+    }
+
+    /**
+     * Keep the guide glyph and its stroke numbers fully inside the panel.
+     *
+     * KanjiVG marks the stroke order with a faint number placed at each
+     * stroke's start point. When a stroke begins near the edge of the
+     * viewBox the number renders partly outside the 109x109 box, and the
+     * root <svg> clips it there - panel padding cannot help because the cut
+     * happens inside the SVG itself. Expanding this copy's viewBox adds a
+     * small margin around the glyph so every number stays visible.
+     *
+     * Only the guide's DOM copy is touched: the trace image and the snap
+     * coordinate mapping keep using the original viewBox, so snapping stays
+     * perfectly aligned with the reference strokes.
+     */
+    _containGuideSvg() {
+        const svg = this.guideEl ? this.guideEl.querySelector('svg') : null;
+        if (!svg) {
+            return;
+        }
+        const vb = svg.getAttribute('viewBox');
+        if (!vb) {
+            return;
+        }
+        const parts = vb.split(/[\s,]+/).map(Number);
+        if (parts.length !== 4 || parts.some((n) => Number.isNaN(n))) {
+            return;
+        }
+        const margin = 8; // viewBox units, roughly 7% of the 109-unit grid
+        svg.setAttribute(
+            'viewBox',
+            `${parts[0] - margin} ${parts[1] - margin} ${parts[2] + margin * 2} ${
+                parts[3] + margin * 2
+            }`
+        );
+    }
+
+    /**
+     * Highlight the guide's strokes to mirror the user's progress: strokes
+     * already drawn are accented, the upcoming stroke is emphasised, and the
+     * rest stay faint. Pure class toggling - cheap even per stroke.
+     */
+    _updateGuideHighlight() {
+        if (!this.guideVisible || !this.guideEl) {
+            return;
+        }
+        const paths = this.guideEl.querySelectorAll('path');
+        const done = this.strokes.length;
+        paths.forEach((path, i) => {
+            path.classList.toggle('guide-stroke-done', i < done);
+            path.classList.toggle('guide-stroke-next', i === done);
+        });
     }
 
     _syncButtons() {
-        // Re-resolve controls each sync: the inline card markup is rebuilt
+        // Re-resolve controls each sync: the widget markup is rebuilt
         // whenever the widget re-renders (kanji change, size change, mode
         // switch), so cached nodes can become detached.
-        this.gridBtn = this._resolveControl('drawingPadGridBtn', 'drawingPadInlineGridBtn');
-        this.refBtn = this._resolveControl('drawingPadRefBtn', 'drawingPadInlineRefBtn');
-        this.clearBtn = this._resolveControl('drawingPadClearBtn', 'drawingPadInlineClearBtn');
-        this.undoBtn = this._resolveControl('drawingPadUndoBtn', 'drawingPadInlineUndoBtn');
-        this.widthSlider = this._resolveControl(
-            'drawingPadWidthSlider',
-            'drawingPadInlineWidthSlider'
-        );
-        this.widthValEl = this._resolveControl('drawingPadWidthVal', 'drawingPadInlineWidthVal');
+        this._queryControls();
 
         if (this.gridBtn) {
             this.gridBtn.classList.toggle('active', this.gridVisible);
@@ -785,6 +1046,24 @@ class DrawingPad {
         if (this.refBtn) {
             this.refBtn.classList.toggle('active', this.referenceVisible);
             this.refBtn.title = this.referenceVisible ? 'Hide reference' : 'Show reference';
+        }
+        if (this.snapBtn) {
+            this.snapBtn.classList.toggle('active', this.snapEnabled);
+            this.snapBtn.title = this.snapEnabled
+                ? 'Disable snap to reference strokes'
+                : 'Snap strokes perfectly onto the reference';
+        }
+        if (this.guideBtn) {
+            this.guideBtn.classList.toggle('active', this.guideVisible);
+            this.guideBtn.title = this.guideVisible
+                ? 'Hide reference panel'
+                : 'Show reference beside the pad';
+        }
+        if (this.undoBtn) {
+            this.undoBtn.disabled = this.strokes.length === 0;
+        }
+        if (this.redoBtn) {
+            this.redoBtn.disabled = this.redoStack.length === 0;
         }
         if (this.widthSlider) {
             this.widthSlider.value = this.strokeWidth;
@@ -827,6 +1106,92 @@ class DrawingPad {
     // ==========================================
     // RENDERING
     // ==========================================
+    /**
+     * The points a completed stroke should be painted with.
+     *
+     * A stroke that matched a reference stroke carries `snapRefIndex`; its
+     * render position is interpolated between the raw ink (t = 0) and the
+     * reference stroke itself in canvas coordinates (t = 1). `t` comes from
+     * the per-stroke snap glide (`_snapDisplayT`): when Snap is enabled the
+     * glide settles at exactly 1, i.e. the stroke is rendered PERFECTLY
+     * attached to the reference stroke's position and shape. When Snap is
+     * disabled (or the stroke never matched a reference), the raw ink is
+     * shown as drawn.
+     *
+     * @param {object} stroke Completed stroke record.
+     * @returns {Array<{x:number,y:number}>} Points to paint.
+     */
+    _getRenderPoints(stroke) {
+        if (typeof stroke.snapRefIndex !== 'number') {
+            return stroke.points; // never matched a reference stroke
+        }
+        const t = Math.min(stroke._snapDisplayT ?? 0, 1);
+        if (t <= 0) {
+            return stroke.points;
+        }
+        return this._interpolatePoints(stroke.points, this._getRefPoints(stroke.snapRefIndex), t);
+    }
+
+    // ==========================================
+    // SNAP ANIMATION
+    // ==========================================
+    /**
+     * Advance every snappable stroke's snap glide one frame towards its
+     * target (1 = attached to the reference stroke, 0 = raw ink) with an
+     * exponential ease. Returns whether any stroke is still in transit.
+     *
+     * Split from the rAF driver so tests can step it deterministically.
+     *
+     * @returns {boolean} True if any stroke is still animating.
+     */
+    _snapAnimationStep() {
+        let animating = false;
+        this.strokes.forEach((stroke) => {
+            if (typeof stroke.snapRefIndex !== 'number') {
+                return; // not snappable; always rendered as raw ink
+            }
+            const target = this.snapEnabled ? 1 : 0;
+            const current = stroke._snapDisplayT ?? 0;
+            if (current !== target) {
+                animating = true;
+                const next = current + (target - current) * 0.22;
+                stroke._snapDisplayT = Math.abs(target - next) < 0.005 ? target : next;
+            }
+        });
+        return animating;
+    }
+
+    /**
+     * Run the snap glides on requestAnimationFrame until they settle (~250ms
+     * after a stroke commit or a Snap toggle, so the user SEES the stroke
+     * land on the reference). The loop only exists while a glide is in
+     * progress - the steady state costs nothing.
+     */
+    _scheduleSnapAnimation() {
+        if (this._snapAnimFrame) {
+            return;
+        }
+        if (typeof requestAnimationFrame !== 'function') {
+            // No rAF available (exotic embeds): jump straight to the end state.
+            this.strokes.forEach((stroke) => {
+                if (typeof stroke.snapRefIndex === 'number') {
+                    stroke._snapDisplayT = this.snapEnabled ? 1 : 0;
+                }
+            });
+            this._repaint();
+            return;
+        }
+        const tick = () => {
+            this._snapAnimFrame = null;
+            const animating = this._snapAnimationStep();
+            this._repaint();
+            if (animating) {
+                this._snapAnimFrame = requestAnimationFrame(tick);
+            }
+        };
+        this._snapAnimFrame = requestAnimationFrame(tick);
+    }
+
     _repaint() {
         if (!this.ctx) {
             return;
@@ -850,23 +1215,19 @@ class DrawingPad {
             this._drawGrid(ctx, w, h);
         }
 
-        // 3. Completed strokes (use snapped points for visual correction if available)
+        // 3. Completed strokes (snapped to the reference shape when enabled)
         const ink = this._inkColor();
+        const width = this._displayStrokeWidth ?? this.strokeWidth ?? DrawingPad.STROKE_WIDTH;
         this.strokes.forEach((stroke) => {
-            const pts = stroke.snappedPoints || stroke.points;
+            const pts = this._getRenderPoints(stroke);
             // Accent ink for good strokes; keep semantic colours for feedback.
             const color = stroke.ink ? ink : stroke.color || ink;
-            this._drawStroke(ctx, pts, color, this.strokeWidth || DrawingPad.STROKE_WIDTH);
+            this._drawStroke(ctx, pts, color, width);
         });
 
         // 4. Current (in-progress) stroke - accent at reduced opacity
         if (this.currentStroke.length > 1) {
-            this._drawStroke(
-                ctx,
-                this.currentStroke,
-                this._withAlpha(ink, 0.55),
-                this.strokeWidth || DrawingPad.STROKE_WIDTH
-            );
+            this._drawStroke(ctx, this.currentStroke, this._withAlpha(ink, 0.55), width);
         }
     }
 
