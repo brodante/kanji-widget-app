@@ -135,8 +135,9 @@ test('profile saves reuse existing cloud operations and expose conflicts', async
         manager.pendingCloud = { id: 'new-cloud-copy' };
         page.refresh();
         assert.equal(window.document.getElementById('profilePageReview').hidden, false);
+        window.document.getElementById('driveBackup').scrollIntoView = () => {};
         window.document.getElementById('profilePageReview').click();
-        assert.equal(window.document.getElementById('accountPanel').hidden, false);
+        assert.equal(window.document.getElementById('driveBackup').open, true);
     } finally {
         dom.window.close();
     }
@@ -169,9 +170,9 @@ test('app entry points and offline cache use the same versioned profile assets',
     const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
     const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
     for (const asset of [
-        'backup-manager.js?v=auth-v1',
-        'profile-page.js?v=auth-v1',
-        'styles.css?v=auth-v1'
+        'backup-manager.js?v=cloud-v1',
+        'profile-page.js?v=cloud-v1',
+        'styles.css?v=cloud-v1'
     ]) {
         assert.ok(html.includes(asset), asset);
         assert.ok(worker.includes(asset), asset);

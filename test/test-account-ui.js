@@ -438,7 +438,12 @@ test('compact account menu keeps secondary sections collapsed and primary contro
         doc.getElementById('accountBtn').click();
         assert.equal(doc.getElementById('accountProfileDetails').open, false);
         assert.equal(doc.getElementById('accountSaveDetails').open, false);
-        assert.equal(doc.getElementById('accountSync').closest('details'), null);
+        assert.equal(doc.getElementById('accountSync').closest('details').id, 'driveBackup');
+        assert.equal(
+            doc.getElementById('accountPanel').contains(doc.getElementById('accountConnect')),
+            false
+        );
+        assert.ok(doc.getElementById('accountPanel').querySelector('[data-cloud-action=save]'));
         assert.equal(doc.getElementById('accountSettings').closest('details'), null);
         assert.equal(
             doc.getElementById('avatarUpload').closest('details').id,

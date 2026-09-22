@@ -86,6 +86,7 @@ class AppAuth {
                     this.auth,
                     (user) => {
                         this.user = user;
+                        window.dispatchEvent(new Event('kanji-auth-changed'));
                         this.message = '';
                         this.render();
                         resolve();
@@ -149,8 +150,8 @@ class AppAuth {
         const status =
             this.message ||
             (this.user
-                ? `App signed in: ${this.user.email || this.user.displayName || 'Google account'}. Progress is still local; use Drive for backups.`
-                : 'Sign in to stay connected to the app across reloads. Progress stays on this device.');
+                ? `App signed in: ${this.user.email || this.user.displayName || 'Google account'}. See Cloud progress below for save status.`
+                : 'Sign in to stay connected to the app across reloads. Cloud saving starts only after you review your progress.');
         document.querySelectorAll('[data-app-auth-status]').forEach((element) => {
             element.textContent = status;
         });

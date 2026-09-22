@@ -2,11 +2,11 @@
 
 ## What is ready
 
-KanjiWidgets now has a separate app sign-in using Firebase Authentication. The owner has supplied the public Web configuration for `kanji-widgets`, and it is now wired into the app. Provider/domain setup and real-browser verification are still pending.
+KanjiWidgets now has a separate app sign-in using Firebase Authentication. The owner has supplied the public Web configuration for `kanji-widgets`, and it is now wired into the app. The owner has confirmed Google sign-in works. Firestore has now been created in Singapore; continue with [the Firestore setup guide](firestore-sync-setup.md).
 
 - Firebase restores the app session after reloads and browser restarts on the same origin.
 - The account menu and Profile page show the app identity and Google photo. An uploaded custom photo still takes priority.
-- No learning data is uploaded, downloaded, reassigned or cleared by signing in.
+- Signing in alone does not associate a new account with this device’s learning data. Previously approved cloud sync can resume; first sync asks which data to keep.
 - Drive still has its own Connect and Disconnect controls and short-lived permission.
 - Signing out of the app keeps local data and does not disconnect Drive. On a shared device, disconnect Drive too. Local progress is shared by everyone using that browser profile, not isolated by Firebase account.
 - Local learning and existing backups still work when Firebase is unconfigured or unavailable.
@@ -24,12 +24,12 @@ This is ongoing free-plan setup, not a promise that a vendor's pricing will neve
 - [x] Preserve local learning, uploaded avatars and the existing Drive workflow.
 - [x] Add automated tests and static-deployment/cache entries.
 - [x] Owner supplied public Web config; added to `firebase-config.js`.
-- [ ] Owner confirms Spark without billing and completes Google-provider/domain setup.
+- [x] Owner completed Google sign-in setup and reported working login. Keep Spark without billing.
 - [ ] Verify real Google sign-in, reload/restart persistence and sign-out on localhost and production.
 
-### Phase 2: cloud progress, after phase 1 is verified
+### Phase 2: cloud progress
 
-Not implemented in this change. Authentication alone is not cloud progress sync.
+Implemented for controlled testing. The default database is in Singapore. Publishing security rules, emulator execution and live acceptance are still pending. Follow [the Firestore setup guide](firestore-sync-setup.md). Authentication alone is not cloud progress sync.
 
 1. Design per-user Firestore documents for progress, SRS and ordinary preferences, with explicit consent before associating existing guest data with an account.
 2. Add owner-only security rules based on `request.auth.uid`, validate document shape and size, and test rules with the emulator before publishing.
@@ -37,7 +37,7 @@ Not implemented in this change. Authentication alone is not cloud progress sync.
 4. Keep media and full backups in the current local/Drive system. Never store API keys, Drive tokens or Firebase sessions in Firestore.
 5. Verify two-device changes and offline/reconnect behavior before enabling automatic saves.
 
-Other TODO features remain paused. Do not create a database or enable storage yet.
+Other TODO features remain paused. Do not enable Firebase Storage or billing.
 
 ## Your setup steps
 
@@ -125,7 +125,7 @@ Automated tests mock the Firebase SDK. Real Google OAuth and browser-restart per
 - **Connection unavailable:** check internet/content blockers and use Retry connection. The SDK loads from `www.gstatic.com`; local learning does not depend on it loading successfully.
 - **Storage unavailable:** allow site storage or use a normal browser profile. The app deliberately does not fall back to a short-lived session while claiming persistent login.
 - **Signed in, but Drive asks to reconnect:** expected. These are different permissions.
-- **Another device has no progress:** expected in phase 1. Use the existing Drive backup/restore workflow until secure Firestore sync is implemented.
+- **Another device has no progress:** use Cloud progress → Check cloud → Use cloud progress after the first device has saved. First-sync consent and published rules are required; see the Firestore guide.
 
 ## Cost boundaries
 

@@ -8,8 +8,9 @@
         "lint:fix": "eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/ --fix",
         "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
         "format:check": "prettier --check . --ignore-path .gitignore --ignore-path .prettierignore",
-        "test": "node test/test-srs-ai.js && node --test test/test-backup.js test/test-account-ui.js test/test-profile-page.js test/test-app-auth.js",
-        "prepare": "husky install"
+        "test": "node test/test-srs-ai.js && node --test test/test-backup.js test/test-account-ui.js test/test-profile-page.js test/test-app-auth.js test/test-cloud-sync.js",
+        "prepare": "husky install",
+        "test:rules": "npx --yes firebase-tools@15 emulators:exec --only firestore --project demo-kanji-widget \"node --test test/test-firestore-rules.js\""
     },
     "lint-staged": {
         "*.{js,html,css,json,md}": "prettier --write",
@@ -28,9 +29,11 @@
         "express": "^5.1.0"
     },
     "devDependencies": {
+        "@firebase/rules-unit-testing": "^5.0.2",
         "eslint": "^8.53.0",
         "eslint-config-prettier": "^10.1.8",
         "fake-indexeddb": "^6.2.5",
+        "firebase": "^12.3.0",
         "husky": "^8.0.3",
         "jsdom": "^26.1.0",
         "lint-staged": "^15.5.2",

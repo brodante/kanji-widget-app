@@ -77,6 +77,12 @@ the same validated, recovery-protected restore path as current backups.
 
 ### Persistent Google app sign-in (Firebase Spark)
 
-Persistent app sign-in is implemented separately from Google Drive permissions. The owner's public `kanji-widgets` project configuration is now in `firebase-config.js`. Google-provider/domain setup and real-browser verification remain pending. See [Firebase setup and phased plan](docs/firebase-auth-setup.md) for the exact free-plan setup steps and verification checklist.
+Persistent app sign-in is implemented separately from Google Drive permissions. The owner's public `kanji-widgets` project configuration is now in `firebase-config.js`. Google sign-in has been confirmed working by the owner. See [Firebase setup and phased plan](docs/firebase-auth-setup.md) for the exact free-plan setup steps and verification checklist.
 
-Keep the project on **Spark with no billing account linked**. Google login does not require moving the site off GitHub Pages. App sign-in preserves local data but does not yet sync progress through Firestore or renew Drive access. Signing out of the app does not disconnect Drive; both controls are explicitly labeled. Firebase session credentials are excluded from learning backups. Real OAuth verification is pending owner setup.
+Keep the project on **Spark with no billing account linked**. Google login does not require moving the site off GitHub Pages. The new Firestore progress-sync layer requires published rules and first-sync consent. It does not renew Drive access. Signing out of the app does not disconnect Drive; both controls are explicitly labeled. Firebase session credentials are excluded from learning backups. Real Firestore and two-device verification remain pending.
+
+### Firestore progress sync
+
+The default progress-saving flow now uses Google app sign-in plus Firestore, not Drive. Follow [Firestore setup and verification](docs/firestore-sync-setup.md) and publish the owner-only `firestore.rules` before testing. The database is in Singapore. First sync asks which progress to keep; approved changes save at 30-second intervals while the app is visible and online. New remote revisions pause for review instead of silently replacing local progress. Uploaded media and AI credentials stay local. Drive full backups remain under Settings → Advanced: optional Google Drive backups.
+
+`npm test` covers application behavior with a mock adapter. `npm run test:rules` separately exercises security rules in a demo-project emulator and needs Java 21+. That emulator could not run in the sandbox, so security-rule execution and real two-device acceptance are still pending. Keep Firebase on Spark without billing.

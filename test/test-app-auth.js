@@ -109,7 +109,7 @@ test('restores SDK identity after selecting LOCAL persistence; no popup or progr
         }
         assert.match(
             window.document.querySelector('[data-app-auth-status]').textContent,
-            /Progress is still local/
+            /See Cloud progress/
         );
     } finally {
         dom.window.close();
@@ -224,8 +224,8 @@ test('Firebase session keys cannot enter backups; deploy and cache include auth 
         const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
         const deploy = fs.readFileSync(require.resolve('../.github/workflows/deploy.yml'), 'utf8');
         for (const asset of ['app-auth.js', 'firebase-config.js']) {
-            assert.ok(html.includes(`${asset}?v=auth-v1`));
-            assert.ok(worker.includes(`${asset}?v=auth-v1`));
+            assert.ok(html.includes(`${asset}?v=cloud-v1`));
+            assert.ok(worker.includes(`${asset}?v=cloud-v1`));
             assert.ok(deploy.includes(`cp ${asset} deploy/`));
         }
     } finally {

@@ -1,16 +1,17 @@
-const CACHE_NAME = 'kanji-widgets-v14';
+const CACHE_NAME = 'kanji-widgets-v15';
 const urlsToCache = [
     '/',
     '/index.html',
     '/styles.css',
-    '/styles.css?v=auth-v1',
+    '/styles.css?v=cloud-v1',
     '/script.js',
     '/backup-config.js',
-    '/firebase-config.js?v=auth-v1',
-    '/app-auth.js?v=auth-v1',
+    '/firebase-config.js?v=cloud-v1',
+    '/app-auth.js?v=cloud-v1',
+    '/cloud-sync.js?v=cloud-v1',
     '/backup-manager.js',
-    '/backup-manager.js?v=auth-v1',
-    '/profile-page.js?v=auth-v1',
+    '/backup-manager.js?v=cloud-v1',
+    '/profile-page.js?v=cloud-v1',
     '/kanji-data.js',
     '/audio-manager.js',
     '/storage-manager.js',

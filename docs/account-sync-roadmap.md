@@ -1,6 +1,6 @@
 # Account, sign-in and cloud-save roadmap
 
-This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app connects to Drive using browser OAuth. Persistent Firebase Google app sign-in is now implemented but has the owner’s public project configuration; provider/domain setup and real-browser verification remain pending. App login does not renew Drive permissions. Firestore progress sync and password sign-up are not implemented.
+This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app connects to Drive using browser OAuth. Persistent Firebase Google app sign-in is now implemented but has the owner’s public project configuration; Google sign-in has been confirmed working by the owner; Firestore verification is pending. App login does not renew Drive permissions. Firestore progress sync is implemented for controlled testing; password sign-up is not implemented.
 
 ## Current focus: Firebase Spark app sign-in
 
@@ -9,9 +9,14 @@ Other feature work is paused. See [the setup guide and phased plan](firebase-aut
 - [x] Implement persistent Google app identity separately from Drive, with setup/error states and no learning-data writes on login.
 - [x] Add account-menu/Profile controls, Google-photo fallback and mocked SDK regression coverage.
 - [x] Owner supplied public Web config for `kanji-widgets`; added to the app.
-- [ ] Owner confirms Spark without billing, enables Google and authorizes domains.
+- [x] Owner enabled Google sign-in and confirmed it works.
+- [x] Owner created Firestore in Singapore. Keep the project on Spark without billing.
 - [ ] Verify real sign-in, reload/browser-restart persistence, cross-tab sign-out and production/mobile behavior.
-- [ ] Next phase only after verification: secure, quota-aware Firestore progress sync with ownership and conflict safeguards. No database is enabled yet.
+- [x] Implement bounded per-UID Firestore progress sync with first-sync consent, revision-checked transactions, paused conflicts and mandatory recovery before restore.
+- [x] Move Drive controls into advanced optional backup settings. Add cloud status/actions to account, Profile and Settings.
+- [x] Add owner-only rules and emulator test suite, plus mocked application tests.
+- [ ] Run rule emulator tests: blocked in this sandbox by missing Java and network restrictions. Do not count these as passed.
+- [ ] Owner publishes `firestore.rules`; verify real first save, two-device conflict, offline recovery and account switching using [the Firestore guide](firestore-sync-setup.md).
 
 ## Must add: reliability and trust
 

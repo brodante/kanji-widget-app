@@ -176,6 +176,25 @@ class BackupManager {
     }
     // Legacy exports only contain selected sections. Preserve data they never included.
     static async normalizeImport(data) {
+        if (data?.app === 'kanji-cloud-progress') {
+            if (data.version !== 1 || !window.CloudSync) {
+                throw new Error('Update the app before importing this cloud progress file.');
+            }
+            const entries = JSON.parse(window.CloudSync.validatePayload(data.payload));
+            const snapshot = await this.snapshot();
+            for (const [key, value] of Object.entries(entries)) {
+                if (value === null) {
+                    if (['kanji_settings', 'kanjiSettings'].includes(key)) {
+                        snapshot.storage[key] = '{}';
+                    } else {
+                        delete snapshot.storage[key];
+                    }
+                } else {
+                    snapshot.storage[key] = value;
+                }
+            }
+            return this.validate(snapshot);
+        }
         if (data?.app === 'kanji-widgets' || data?.version === 3) {
             return this.validate(data);
         }
@@ -226,8 +245,13 @@ class BackupManager {
         return this.validate(migrated);
     }
 
-    static async restore(data, { recovery = true } = {}) {
+    static async restore(data, { recovery = true, cloudSync = false } = {}) {
         this.validate(data);
+        // Restores/imports must be reviewed before being automatically uploaded.
+        localStorage.removeItem('kanji_cloud_sync_v1');
+        if (!cloudSync) {
+            window.kanjiCloud?.invalidate();
+        }
         if (recovery) {
             await this.createRecovery();
         }
@@ -494,7 +518,12 @@ class BackupManager {
             if (
                 BackupManager.allowed(key) ||
                 key.startsWith('autoBackup_') ||
-                ['kanji_drive_backup', 'lastLocalBackup', 'kanji_cache'].includes(key)
+                [
+                    'kanji_drive_backup',
+                    'kanji_cloud_sync_v1',
+                    'lastLocalBackup',
+                    'kanji_cache'
+                ].includes(key)
             ) {
                 localStorage.removeItem(key);
             }
@@ -1373,6 +1402,11 @@ class BackupManager {
         if (window.KANJI_BACKUP_CONFIG?.googleClientId) {
             document.getElementById('driveClientSetup').hidden = true;
         }
+        root.addEventListener('toggle', () => {
+            if (root.open) {
+                this.loadIdentity().catch((error) => this.status(error.message));
+            }
+        });
         root.querySelector('#driveConnect').onclick = () => this.connect();
         root.querySelector('#driveDisconnect').onclick = () => {
             if (this.token) {
@@ -1507,8 +1541,6 @@ class BackupManager {
             if (!panel.hidden) {
                 fitPanel();
                 document.getElementById('accountClose').focus();
-                // Preload on opening the panel, so the Connect click remains a user gesture.
-                this.loadIdentity().catch((e) => this.status(e.message));
             }
         };
         document.getElementById('accountClose').onclick = () => {
@@ -1534,6 +1566,7 @@ class BackupManager {
         document.getElementById('accountSettings').onclick = () => {
             close();
             document.getElementById('settingsBtn').click();
+            document.getElementById('driveBackup').open = true;
             document.getElementById('driveBackup').scrollIntoView({ block: 'start' });
         };
         const auto = document.getElementById('accountAutoSync');

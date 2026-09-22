@@ -38,6 +38,8 @@ jobs:
                   cp backup-config.js deploy/
                   cp firebase-config.js deploy/
                   cp app-auth.js deploy/
+                  cp cloud-sync.js deploy/
+                  cp firestore.rules deploy/
                   cp backup-manager.js deploy/
                   cp profile-page.js deploy/
                   cp kanji-data.js deploy/

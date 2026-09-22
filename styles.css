@@ -6190,3 +6190,22 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     overflow-wrap: anywhere;
     margin: 0.4rem 0 0.65rem;
 }
+
+.cloud-progress {
+    padding: 0.8rem 0;
+}
+.cloud-progress p,
+.cloud-progress small {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.cloud-progress .backup-buttons {
+    flex-wrap: wrap;
+    margin: 0.6rem 0;
+}
+#driveBackup > summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.8rem 0;
+}

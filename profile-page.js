@@ -57,9 +57,6 @@ class ProfilePage {
         document.body.classList.add('profile-page-open');
         this.refresh();
         document.getElementById('profilePageBack').focus();
-        this.manager.loadIdentity().catch(() => {
-            /* Connect surfaces any network failure. */
-        });
     }
 
     close() {
@@ -164,6 +161,7 @@ class ProfilePage {
                 if (!section) {
                     return;
                 }
+                section.closest('details')?.setAttribute('open', '');
                 if (section.tagName === 'DETAILS') {
                     section.open = true;
                 }
@@ -199,7 +197,8 @@ class ProfilePage {
                     document.getElementById('profilePageNickname').value,
                     document.getElementById('profilePageDevice').value
                 );
-                feedback.textContent = 'Profile saved here. Quick save to update your cloud copy.';
+                feedback.textContent =
+                    'Profile saved here. Cloud sync saves the nickname when enabled.';
             } catch (error) {
                 feedback.textContent = error.message;
             }
@@ -241,7 +240,7 @@ class ProfilePage {
         document.getElementById('profilePageReview').onclick = (event) => {
             event.stopPropagation();
             this.close();
-            document.getElementById('accountBtn').click();
+            document.getElementById('accountSettings').click();
         };
         if (location.hash === '#profile') {
             this.open();

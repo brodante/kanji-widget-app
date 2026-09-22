@@ -1,6 +1,6 @@
 // Public Firebase Web app configuration, NOT a service-account key or client secret.
 // See docs/firebase-auth-setup.md. Keep this project on Spark with no billing attached.
-// Authentication only: Analytics, Storage and Firestore are not initialized.
+// Authentication and Firestore progress sync only. No Analytics or Firebase Storage.
 window.KANJI_FIREBASE_CONFIG = {
     apiKey: 'AIzaSyBcw65nsJHslu5h-pgrZVpMHudosYgIsc4',
     authDomain: 'kanji-widgets.firebaseapp.com',
