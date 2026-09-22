@@ -6209,3 +6209,140 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     font-weight: 600;
     padding: 0.8rem 0;
 }
+
+/* Vermilion actions with a quiet seigaiha-inspired wave pattern. */
+button.danger-action {
+    color: #fff;
+    background-color: #a62639;
+    background-image: repeating-radial-gradient(
+        ellipse at 50% 100%,
+        transparent 0 5px,
+        rgba(255, 255, 255, 0.08) 6px 7px,
+        transparent 8px 12px
+    );
+    background-size: 28px 18px;
+    border: 1px solid #8f2031;
+}
+button.danger-action:hover:not(:disabled) {
+    color: #fff;
+    background-color: #871d2d;
+    border-color: #871d2d;
+}
+button.danger-action:focus-visible {
+    outline: 3px solid var(--error);
+    outline-offset: 3px;
+}
+button.danger-action:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.profile-photo-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+}
+.remove-photo-button {
+    position: relative;
+    min-width: 44px;
+    min-height: 44px;
+}
+.remove-photo-button::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 9px;
+    border-radius: 6px;
+    background: #871d2d;
+    color: white;
+    white-space: nowrap;
+    font:
+        500 0.75rem/1.5 system-ui,
+        sans-serif;
+    pointer-events: none;
+    opacity: 0;
+}
+.remove-photo-button:hover::after,
+.remove-photo-button:focus-visible::after {
+    opacity: 1;
+}
+.attention-notice {
+    position: fixed;
+    z-index: 100000;
+    top: max(20px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: min(460px, calc(100vw - 32px));
+    max-height: min(50vh, 320px);
+    overflow: auto;
+    padding: 16px;
+    border: 2px solid var(--primary-color);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--on-surface);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    text-align: left;
+}
+.attention-notice--error {
+    border-color: var(--error);
+    animation: attention-nudge 280ms ease-out;
+}
+.attention-notice p {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+.attention-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: var(--on-primary);
+    font-weight: 800;
+}
+.attention-notice--error .attention-icon {
+    background: #a62639;
+    color: #fff;
+}
+.attention-close {
+    flex: 0 0 40px;
+    min-height: 40px;
+    margin: -8px -8px 0 auto;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.attention-close:hover {
+    background: var(--shadow);
+}
+.attention-close:focus-visible {
+    outline: 2px solid var(--primary-color);
+}
+@keyframes attention-nudge {
+    0%,
+    100% {
+        transform: translateX(-50%);
+    }
+    25% {
+        transform: translateX(calc(-50% - 6px));
+    }
+    75% {
+        transform: translateX(calc(-50% + 6px));
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .attention-notice--error {
+        animation: none;
+    }
+}

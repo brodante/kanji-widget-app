@@ -139,6 +139,7 @@ class AppAuth {
             return true;
         } catch (error) {
             this.message = AppAuth.errorMessage(error);
+            window.KanjiFeedback?.show(this.message, { title: 'Could not sign out' });
             return false;
         } finally {
             this.busy = false;

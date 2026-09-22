@@ -749,11 +749,11 @@ class KanjiLearningApp {
             if (isVideo) {
                 const sizeMB = file.size / (1024 * 1024);
                 if (sizeMB > 20) {
-                    this.showToast(
+                    this.showWarning(
                         `That clip is ${sizeMB.toFixed(1)}MB, which is quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`
                     );
                 } else if (sizeMB > 8) {
-                    this.showToast(
+                    this.showWarning(
                         `This clip is ${sizeMB.toFixed(1)}MB. For best performance, aim for 720p-1080p and 8-15 seconds.`
                     );
                 }
@@ -2413,11 +2413,11 @@ class KanjiLearningApp {
                     setTimeout(() => this.playPronunciation(), 800);
                 }
             } else {
-                this.showToast(`Could not find details for "${character}"`);
+                this.showWarning(`Could not find details for "${character}"`);
             }
         } catch (error) {
             console.error('Error showing kanji from recent:', error);
-            this.showToast(`Error loading "${character}"`);
+            this.showWarning(`Error loading "${character}"`);
         }
     }
 
@@ -3008,7 +3008,7 @@ class KanjiLearningApp {
             this.showToast('Local backup created successfully!');
         } catch (error) {
             console.error('Error creating backup:', error);
-            this.showToast('Error creating backup. Please try again.');
+            this.showWarning('Error creating backup. Please try again.');
         }
     }
 
@@ -3039,7 +3039,7 @@ class KanjiLearningApp {
                 }, 2000);
             } catch (error) {
                 console.error('Error restoring backup:', error);
-                this.showToast(error.message || 'Error restoring backup. Please check the file.');
+                this.showWarning(error.message || 'Error restoring backup. Please check the file.');
             }
         };
         reader.readAsText(file);
@@ -3117,6 +3117,14 @@ class KanjiLearningApp {
             console.log('Auto backup created');
         } catch (error) {
             console.error('Error creating auto backup:', error);
+        }
+    }
+
+    showWarning(message) {
+        if (window.KanjiFeedback) {
+            window.KanjiFeedback.show(message);
+        } else {
+            this.showToast(message);
         }
     }
 

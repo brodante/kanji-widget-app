@@ -73,7 +73,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css?v=cloud-v1" />
+        <link rel="stylesheet" href="styles.css?v=feedback-v1" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -234,7 +234,12 @@
                             <button type="button" class="backup-btn" data-app-sign-in disabled>
                                 Sign in with Google
                             </button>
-                            <button type="button" class="backup-btn" data-app-sign-out hidden>
+                            <button
+                                type="button"
+                                class="backup-btn danger-action"
+                                data-app-sign-out
+                                hidden
+                            >
                                 Sign out of app
                             </button>
                             <button type="button" class="backup-btn" data-app-auth-retry hidden>
@@ -859,7 +864,7 @@
                                 <button
                                     id="accountDisconnect"
                                     type="button"
-                                    class="backup-btn"
+                                    class="backup-btn danger-action"
                                     hidden
                                 >
                                     Disconnect
@@ -882,10 +887,18 @@
                                     A cloud copy needs your review. Choose which version to use.
                                     Nothing has been overwritten.
                                 </p>
-                                <button id="syncUseCloud" type="button" class="backup-btn">
+                                <button
+                                    id="syncUseCloud"
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                >
                                     Use cloud copy
                                 </button>
-                                <button id="syncUseLocal" type="button" class="backup-btn">
+                                <button
+                                    id="syncUseLocal"
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                >
                                     Save this device’s copy
                                 </button>
                             </div>
@@ -1018,7 +1031,11 @@
                                 <button id="driveConnect" class="backup-btn" type="button">
                                     Connect with Google
                                 </button>
-                                <button id="driveDisconnect" class="backup-btn" type="button">
+                                <button
+                                    id="driveDisconnect"
+                                    class="backup-btn danger-action"
+                                    type="button"
+                                >
                                     Disconnect Google
                                 </button>
                             </div>
@@ -1086,7 +1103,11 @@
                                     Recovery copies are not uploaded and exclude API keys.
                                 </p>
                                 <div class="backup-buttons">
-                                    <button id="undoRestore" class="backup-btn" type="button">
+                                    <button
+                                        id="undoRestore"
+                                        class="backup-btn danger-action"
+                                        type="button"
+                                    >
                                         Undo last restore
                                     </button>
                                     <button id="downloadRecovery" class="backup-btn" type="button">
@@ -1104,12 +1125,16 @@
                                     copies, without clearing local progress.
                                 </p>
                                 <div class="backup-buttons">
-                                    <button id="clearLocalAccount" class="backup-btn" type="button">
+                                    <button
+                                        id="clearLocalAccount"
+                                        class="backup-btn danger-action"
+                                        type="button"
+                                    >
                                         Disconnect &amp; clear this device
                                     </button>
                                     <button
                                         id="deleteCloudBackups"
-                                        class="backup-btn"
+                                        class="backup-btn danger-action"
                                         type="button"
                                     >
                                         Delete all cloud backups
@@ -1169,7 +1194,9 @@
                                 <button id="createBackup" class="backup-btn">
                                     Create Local Backup
                                 </button>
-                                <button id="restoreBackup" class="backup-btn">Import Backup</button>
+                                <button id="restoreBackup" class="backup-btn danger-action">
+                                    Import Backup
+                                </button>
                             </div>
                         </div>
 
@@ -1178,7 +1205,9 @@
                             <span>Danger Zone</span>
                         </div>
                         <div class="setting-group">
-                            <button id="resetProgress" class="reset-btn">Reset All Progress</button>
+                            <button id="resetProgress" class="reset-btn danger-action">
+                                Reset All Progress
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1702,7 +1731,7 @@ filter: blur(10px) brightness(1) saturate(1);
                             <button
                                 type="button"
                                 id="drawingPadClearBtn"
-                                class="drawing-pad-btn"
+                                class="drawing-pad-btn danger-action"
                                 onclick="app.clearDrawingPadStrokes()"
                                 title="Clear Canvas"
                             >
@@ -1892,9 +1921,22 @@ filter: blur(10px) brightness(1) saturate(1);
                             />
                             <button class="backup-btn" type="submit">Save changes</button>
                         </form>
-                        <button id="profilePagePhoto" type="button" class="profile-subtle-btn">
-                            Change photo
-                        </button>
+                        <div class="profile-photo-actions">
+                            <button id="profilePagePhoto" type="button" class="profile-subtle-btn">
+                                Change photo
+                            </button>
+                            <button
+                                id="profilePageRemovePhoto"
+                                type="button"
+                                class="profile-subtle-btn danger-action remove-photo-button"
+                                title="Remove DP"
+                                aria-label="Remove uploaded profile photo"
+                                data-tooltip="Remove DP"
+                                hidden
+                            >
+                                <i class="fas fa-trash-can" aria-hidden="true"></i>
+                            </button>
+                        </div>
                         <input
                             id="profilePagePhotoFile"
                             type="file"
@@ -1918,7 +1960,12 @@ filter: blur(10px) brightness(1) saturate(1);
                                 <button type="button" class="backup-btn" data-app-sign-in disabled>
                                     Sign in with Google
                                 </button>
-                                <button type="button" class="backup-btn" data-app-sign-out hidden>
+                                <button
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                    data-app-sign-out
+                                    hidden
+                                >
                                     Sign out of app
                                 </button>
                                 <button type="button" class="backup-btn" data-app-auth-retry hidden>
@@ -1974,12 +2021,13 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
         <script src="drawing-pad.js"></script>
+        <script src="ui-feedback.js?v=feedback-v1"></script>
         <script src="backup-config.js"></script>
-        <script src="backup-manager.js?v=cloud-v1"></script>
-        <script src="profile-page.js?v=cloud-v1"></script>
-        <script src="firebase-config.js?v=cloud-v1"></script>
-        <script src="app-auth.js?v=cloud-v1"></script>
-        <script src="cloud-sync.js?v=cloud-v1"></script>
+        <script src="backup-manager.js?v=feedback-v1"></script>
+        <script src="profile-page.js?v=feedback-v1"></script>
+        <script src="firebase-config.js?v=feedback-v1"></script>
+        <script src="app-auth.js?v=feedback-v1"></script>
+        <script src="cloud-sync.js?v=feedback-v1"></script>
         <script src="script.js"></script>
     </body>
 </html>

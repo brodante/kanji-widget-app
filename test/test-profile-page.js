@@ -10,6 +10,7 @@ async function setup() {
     });
     const { window } = dom;
     await new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
+    window.eval(fs.readFileSync(require.resolve('../ui-feedback.js'), 'utf8'));
     window.eval(fs.readFileSync(require.resolve('../backup-manager.js'), 'utf8'));
     window.eval(fs.readFileSync(require.resolve('../profile-page.js'), 'utf8'));
     const manager = new window.BackupManager();
@@ -170,9 +171,10 @@ test('app entry points and offline cache use the same versioned profile assets',
     const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
     const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
     for (const asset of [
-        'backup-manager.js?v=cloud-v1',
-        'profile-page.js?v=cloud-v1',
-        'styles.css?v=cloud-v1'
+        'backup-manager.js?v=feedback-v1',
+        'profile-page.js?v=feedback-v1',
+        'styles.css?v=feedback-v1',
+        'ui-feedback.js?v=feedback-v1'
     ]) {
         assert.ok(html.includes(asset), asset);
         assert.ok(worker.includes(asset), asset);
@@ -207,6 +209,105 @@ test('settings shortcuts open profile and navigate to all existing sections', as
             assert.equal(doc.activeElement, target);
         }
         assert.equal(doc.getElementById('backupSafety').open, true);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('oversized profile photo raises a persistent alert inside the open profile dialog', async () => {
+    const { dom, window, page, dialog, manager } = await setup();
+    try {
+        page.open();
+        const input = window.document.getElementById('profilePagePhotoFile');
+        Object.defineProperty(input, 'files', {
+            value: [{ type: 'image/png', size: 2 * 1024 * 1024 }]
+        });
+        await input.onchange();
+        const notice = dialog.querySelector('.attention-notice');
+        assert.equal(notice.getAttribute('role'), 'alert');
+        assert.match(notice.textContent, /smaller than 2 MB/);
+        assert.equal(manager.avatarBusy, false);
+        assert.equal(window.document.getElementById('profilePagePhoto').disabled, false);
+        assert.match(window.document.getElementById('profilePageFeedback').textContent, /2 MB/);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('remove DP confirms removal, updates fallback and deletes only the avatar slot', async () => {
+    const { dom, window, manager } = await setup();
+    try {
+        manager.avatarURL = 'blob:custom';
+        window.kanjiAuth = { user: { photoURL: 'https://example.com/google.png' } };
+        manager.renderAvatar();
+        const button = window.document.getElementById('profilePageRemovePhoto');
+        assert.equal(button.hidden, false);
+        assert.equal(button.title, 'Remove DP');
+        let writes = 0;
+        window.BackupManager.media = async (data, slots) => {
+            writes++;
+            assert.equal(Object.keys(data).length, 0);
+            assert.equal(slots.join(','), 'avatar');
+        };
+        window.URL.revokeObjectURL = () => {};
+        window.confirm = () => false;
+        await button.onclick();
+        assert.equal(writes, 0);
+        assert.equal(manager.avatarURL, 'blob:custom');
+        window.confirm = () => true;
+        await button.onclick();
+        assert.equal(writes, 1);
+        assert.equal(manager.avatarURL, '');
+        assert.equal(button.hidden, true);
+        assert.equal(
+            window.document.getElementById('accountAvatar').dataset.source,
+            'https://example.com/google.png'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('failed photo removal retains custom photo and shows an actionable alert', async () => {
+    const { dom, window, manager, page, dialog } = await setup();
+    try {
+        page.open();
+        manager.avatarURL = 'blob:custom';
+        manager.renderAvatar();
+        window.confirm = () => true;
+        window.BackupManager.media = async () => {
+            throw new Error('Photo storage unavailable');
+        };
+        await window.document.getElementById('profilePageRemovePhoto').onclick();
+        assert.equal(manager.avatarURL, 'blob:custom');
+        assert.match(
+            dialog.querySelector('.attention-notice').textContent,
+            /Photo storage unavailable/
+        );
+        assert.equal(window.document.getElementById('profilePageRemovePhoto').disabled, false);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('danger actions are red-themed while sign-in is unchanged; alerts use text not HTML', async () => {
+    const { dom, window } = await setup();
+    try {
+        const doc = window.document;
+        for (const button of doc.querySelectorAll(
+            '[data-app-sign-out], #resetProgress, #clearLocalAccount, #deleteCloudBackups, #profilePageRemovePhoto'
+        )) {
+            assert.equal(button.classList.contains('danger-action'), true);
+        }
+        for (const button of doc.querySelectorAll('[data-app-sign-in]')) {
+            assert.equal(button.classList.contains('danger-action'), false);
+        }
+        const notice = window.KanjiFeedback.show('<img src=x onerror=alert(1)>');
+        assert.equal(notice.querySelector('img'), null);
+        assert.ok(notice.textContent.includes('<img'));
+        const css = fs.readFileSync(require.resolve('../styles.css'), 'utf8');
+        assert.ok(css.includes('prefers-reduced-motion: reduce'));
+        assert.ok(css.includes('.attention-notice--error'));
     } finally {
         dom.window.close();
     }

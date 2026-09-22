@@ -11,6 +11,7 @@ async function setup() {
     const { window } = dom;
     await new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
     window.TextEncoder = TextEncoder;
+    window.eval(fs.readFileSync(require.resolve('../ui-feedback.js'), 'utf8'));
     window.eval(fs.readFileSync(require.resolve('../backup-manager.js'), 'utf8'));
     window.eval(fs.readFileSync(require.resolve('../cloud-sync.js'), 'utf8'));
     window.confirm = () => true;
@@ -300,7 +301,9 @@ test('Drive is confined to advanced Settings while cloud controls appear in acco
         assert.equal(doc.querySelectorAll('#accountConnect').length, 1);
         for (const file of ['../index.html', '../sw.js']) {
             assert.ok(
-                fs.readFileSync(require.resolve(file), 'utf8').includes('cloud-sync.js?v=cloud-v1')
+                fs
+                    .readFileSync(require.resolve(file), 'utf8')
+                    .includes('cloud-sync.js?v=feedback-v1')
             );
         }
     } finally {
@@ -377,6 +380,73 @@ test('manual unchanged saves do not create needless cloud revisions', async () =
         await cloud.save(true);
         assert.equal(calls.writes, 1);
         assert.equal(cloud.metadata().revision, 1);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('manual cloud check shows pending feedback, a timestamped result and never writes', async () => {
+    const { dom, window, cloud, calls } = await setup();
+    try {
+        let finish;
+        cloud.sdk.getDocFromServer = () =>
+            new Promise((resolve) => {
+                finish = resolve;
+            });
+        const pending = cloud.check(true);
+        await new Promise((resolve) => setImmediate(resolve));
+        assert.match(cloud.message, /Checking cloud/);
+        assert.equal(window.document.querySelector('[data-cloud-action=check]').disabled, true);
+        assert.equal(
+            window.document.querySelector('[data-cloud-status]').getAttribute('aria-busy'),
+            'true'
+        );
+        finish({ exists: () => false });
+        await pending;
+        assert.match(cloud.message, /No cloud save yet/);
+        assert.match(cloud.message, /Checked at/);
+        assert.equal(calls.writes, 0);
+        const notice = window.document.querySelector('.attention-notice');
+        assert.match(notice.textContent, /Cloud check complete/);
+        assert.equal(notice.getAttribute('role'), 'status');
+        assert.equal(
+            window.document.querySelector('[data-cloud-action=check]').textContent,
+            'Check cloud'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('cloud check distinguishes matching data from unsaved device changes', async () => {
+    const { dom, window, cloud, calls } = await setup();
+    try {
+        await cloud.save(true);
+        await cloud.check(true);
+        assert.match(cloud.message, /Up to date/);
+        window.localStorage.setItem('kanji_profile', '{"nickname":"Not saved yet"}');
+        await cloud.check(true);
+        assert.match(cloud.message, /changes waiting to save/);
+        assert.equal(calls.writes, 1);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('manual failed check raises an alert while automatic checks do not spawn notices', async () => {
+    const { dom, window, cloud } = await setup();
+    try {
+        cloud.sdk.getDocFromServer = async () => {
+            throw { code: 'permission-denied' };
+        };
+        await cloud.check();
+        assert.equal(window.document.querySelector('.attention-notice'), null);
+        await cloud.check(true);
+        const alert = window.document.querySelector('.attention-notice');
+        assert.equal(alert.getAttribute('role'), 'alert');
+        assert.match(alert.textContent, /security rules/);
+        alert.querySelector('button').click();
+        assert.equal(window.document.querySelector('.attention-notice'), null);
     } finally {
         dom.window.close();
     }

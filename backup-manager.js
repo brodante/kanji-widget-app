@@ -822,6 +822,7 @@ class BackupManager {
         } catch (e) {
             this.lastError = e.message;
             this.status(e.message);
+            window.KanjiFeedback?.show(e.message, { title: 'Backup action needs attention' });
             this.retryFailures = (this.retryFailures || 0) + 1;
             this.retryAfter =
                 Date.now() +
@@ -1109,6 +1110,9 @@ class BackupManager {
                 const button = document.createElement('button');
                 button.className = 'backup-btn';
                 button.textContent = action;
+                if (['Delete', 'Restore'].includes(action)) {
+                    button.classList.add('danger-action');
+                }
                 button.onclick = () =>
                     this.run(async () => {
                         if (action === 'Label') {
@@ -1731,6 +1735,15 @@ class BackupManager {
     }
 
     renderAvatar() {
+        for (const id of ['avatarUpload', 'profilePagePhoto', 'profilePageRemovePhoto']) {
+            const control = document.getElementById(id);
+            if (control) {
+                control.disabled = Boolean(this.avatarBusy);
+                if (id === 'profilePageRemovePhoto') {
+                    control.hidden = !this.avatarURL;
+                }
+            }
+        }
         const appPhoto = window.kanjiAuth?.user?.photoURL;
         const photo = appPhoto || this.user?.photoLink;
         // App session or authorized Drive photo is a fallback only; custom uploads win.
@@ -1771,6 +1784,20 @@ class BackupManager {
     }
 
     async setAvatar(file) {
+        if (this.avatarBusy) {
+            throw new Error('Please wait for the current photo change to finish.');
+        }
+        this.avatarBusy = true;
+        this.renderAvatar();
+        try {
+            return await this.writeAvatar(file);
+        } finally {
+            this.avatarBusy = false;
+            this.renderAvatar();
+        }
+    }
+
+    async writeAvatar(file) {
         let url;
         if (file) {
             BackupManager.validateAvatar(file);
@@ -1817,7 +1844,7 @@ class BackupManager {
         this.renderAvatar();
         window.kanjiProfilePage?.refresh();
         document.getElementById('avatarStatus').textContent = file
-            ? 'Profile photo saved. Included in your next backup or sync.'
+            ? 'Profile photo saved on this device. Included in full backups, not Firestore progress sync.'
             : 'Custom photo removed. Using your Google photo when connected.';
     }
 
@@ -1849,6 +1876,7 @@ class BackupManager {
                 await this.setAvatar(file);
             } catch (error) {
                 feedback.textContent = error.message;
+                window.KanjiFeedback?.show(error.message, { title: 'Photo not uploaded' });
             } finally {
                 input.value = '';
                 upload.disabled = false;

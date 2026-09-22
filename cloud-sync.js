@@ -120,12 +120,15 @@ class CloudSync {
         return this.sdk.doc(this.db, 'users', this.uid, 'sync', 'progress');
     }
 
-    async task(action) {
+    async task(action, { notify = false, warn = false, pending = '' } = {}) {
         if (this.busy || !this.uid) {
             return;
         }
         const generation = this.generation;
         this.busy = true;
+        if (pending) {
+            this.message = pending;
+        }
         this.render();
         try {
             if (!navigator.onLine) {
@@ -136,6 +139,9 @@ class CloudSync {
                 return;
             }
             await action(ref, generation);
+            if (notify && this.valid(generation)) {
+                window.KanjiFeedback?.show(this.message, { kind: 'info' });
+            }
         } catch (error) {
             if (this.valid(generation)) {
                 this.enabled = false;
@@ -146,6 +152,9 @@ class CloudSync {
                           ? 'Cloud quota reached. Local learning is safe. Wait for the quota to reset, then choose Check cloud.'
                           : error.message ||
                             'Cloud sync unavailable. Local progress is safe. Choose Check cloud to retry.';
+                if (notify || warn) {
+                    window.KanjiFeedback?.show(this.message);
+                }
             }
         } finally {
             this.busy = false;
@@ -156,32 +165,42 @@ class CloudSync {
         }
     }
 
-    async check() {
-        return this.task(async (ref, generation) => {
-            const remote = CloudSync.record(await this.sdk.getDocFromServer(ref));
-            if (!this.valid(generation)) {
-                return;
+    async check(manual = false) {
+        return this.task(
+            async (ref, generation) => {
+                const remote = CloudSync.record(await this.sdk.getDocFromServer(ref));
+                if (!this.valid(generation)) {
+                    return;
+                }
+                this.remote = remote;
+                this.lastCheck = Date.now();
+                const meta = this.metadata();
+                this.enabled = Boolean(
+                    remote &&
+                    meta?.uid === this.uid &&
+                    meta.revision === remote.revision &&
+                    meta.payload === remote.payload
+                );
+                this.message = this.enabled
+                    ? CloudSync.payload() === remote.payload
+                        ? `Up to date. This device matches cloud revision ${remote.revision}.`
+                        : `Cloud revision ${remote.revision} checked. This device has changes waiting to save; nothing was uploaded by this check.`
+                    : remote
+                      ? 'Review needed: this account has a cloud copy. Choose which progress to keep. Nothing has been replaced.'
+                      : 'No cloud save yet. Choose Save this device to create your first save for this Google account.';
+                if (meta?.uid && meta.uid !== this.uid) {
+                    this.enabled = false;
+                    this.message =
+                        'Different account. This browser still contains the previous learner’s data. Review it before saving to this account.';
+                }
+                this.message += ` Checked at ${new Date(this.lastCheck).toLocaleTimeString()}.`;
+            },
+            {
+                notify: manual,
+                pending:
+                    'Checking cloud… Reading the latest server copy. No progress is being changed.'
             }
-            this.remote = remote;
-            this.lastCheck = Date.now();
-            const meta = this.metadata();
-            this.enabled = Boolean(
-                remote &&
-                meta?.uid === this.uid &&
-                meta.revision === remote.revision &&
-                meta.payload === remote.payload
-            );
-            this.message = this.enabled
-                ? 'Cloud sync is on. Changes save while this app is open. Uploaded media stays local.'
-                : remote
-                  ? 'Review needed: this account has a cloud copy. Choose which progress to keep. Nothing has been replaced.'
-                  : 'First cloud save: choose Save this device to associate its progress with this Google account.';
-            if (meta?.uid && meta.uid !== this.uid) {
-                this.enabled = false;
-                this.message =
-                    'Different account. This browser still contains the previous learner’s data. Review it before saving to this account.';
-            }
-        });
+        );
     }
 
     remember(remote) {
@@ -214,53 +233,56 @@ class CloudSync {
         ) {
             return;
         }
-        return this.task(async (ref, generation) => {
-            const payload = CloudSync.payload();
-            const meta = this.metadata();
-            if (
-                !explicit &&
-                (meta?.uid !== this.uid ||
-                    meta.revision !== this.remote?.revision ||
-                    meta.payload !== this.remote?.payload)
-            ) {
-                throw new Error(
-                    'Local data was restored or changed in another tab. Choose Check cloud and review before saving.'
-                );
-            }
-            if (!explicit && payload === meta.payload) {
-                return;
-            }
-            const expected = this.remote?.revision || 0;
-            // A recovery copy is required before explicitly replacing an existing cloud copy.
-            if (explicit) {
-                await BackupManager.createRecovery();
-            }
-            if (!this.valid(generation)) {
-                return;
-            }
-            const next = { version: 1, revision: expected + 1, payload };
-            const committed = await this.sdk.runTransaction(this.db, async (tx) => {
-                const current = CloudSync.record(await tx.get(ref));
-                if (!this.valid(generation)) {
-                    throw new Error('Account changed. Save cancelled.');
-                }
-                if ((current?.revision || 0) !== expected) {
+        return this.task(
+            async (ref, generation) => {
+                const payload = CloudSync.payload();
+                const meta = this.metadata();
+                if (
+                    !explicit &&
+                    (meta?.uid !== this.uid ||
+                        meta.revision !== this.remote?.revision ||
+                        meta.payload !== this.remote?.payload)
+                ) {
                     throw new Error(
-                        'Another device saved newer progress. Choose Check cloud and review both copies.'
+                        'Local data was restored or changed in another tab. Choose Check cloud and review before saving.'
                     );
                 }
-                if (current?.payload === payload) {
-                    return current;
+                if (!explicit && payload === meta.payload) {
+                    return;
                 }
-                tx.set(ref, { ...next, updatedAt: this.sdk.serverTimestamp() });
-                return next;
-            });
-            if (!this.valid(generation)) {
-                return;
-            }
-            this.remember(committed);
-            this.message = `Progress saved at ${new Date().toLocaleTimeString()}. Media is not included.`;
-        });
+                const expected = this.remote?.revision || 0;
+                // A recovery copy is required before explicitly replacing an existing cloud copy.
+                if (explicit) {
+                    await BackupManager.createRecovery();
+                }
+                if (!this.valid(generation)) {
+                    return;
+                }
+                const next = { version: 1, revision: expected + 1, payload };
+                const committed = await this.sdk.runTransaction(this.db, async (tx) => {
+                    const current = CloudSync.record(await tx.get(ref));
+                    if (!this.valid(generation)) {
+                        throw new Error('Account changed. Save cancelled.');
+                    }
+                    if ((current?.revision || 0) !== expected) {
+                        throw new Error(
+                            'Another device saved newer progress. Choose Check cloud and review both copies.'
+                        );
+                    }
+                    if (current?.payload === payload) {
+                        return current;
+                    }
+                    tx.set(ref, { ...next, updatedAt: this.sdk.serverTimestamp() });
+                    return next;
+                });
+                if (!this.valid(generation)) {
+                    return;
+                }
+                this.remember(committed);
+                this.message = `Progress saved at ${new Date().toLocaleTimeString()}. Media is not included.`;
+            },
+            { warn: explicit }
+        );
     }
 
     async restore() {
@@ -273,45 +295,48 @@ class CloudSync {
             return;
         }
         const selected = this.remote;
-        return this.task(async (ref, generation) => {
-            const current = CloudSync.record(await this.sdk.getDocFromServer(ref));
-            if (!this.valid(generation)) {
-                return;
-            }
-            if (current?.revision !== selected.revision) {
-                throw new Error('Cloud progress changed. Choose Check cloud before restoring.');
-            }
-            const before = CloudSync.payload();
-            const snapshot = await BackupManager.snapshot();
-            if (!this.valid(generation) || before !== CloudSync.payload()) {
-                throw new Error('Local progress changed. Review again before restoring.');
-            }
-            const entries = JSON.parse(current.payload);
-            for (const key of CloudSync.keys) {
-                if (entries[key] === null) {
-                    if (['kanji_settings', 'kanjiSettings'].includes(key)) {
-                        snapshot.storage[key] = '{}';
-                    } else {
-                        delete snapshot.storage[key];
-                    }
-                } else {
-                    snapshot.storage[key] = entries[key];
-                }
-            }
-            document.body.inert = true;
-            try {
-                await BackupManager.restore(snapshot, { cloudSync: true });
+        return this.task(
+            async (ref, generation) => {
+                const current = CloudSync.record(await this.sdk.getDocFromServer(ref));
                 if (!this.valid(generation)) {
-                    throw new Error(
-                        'Account changed. Restored data is local; review before enabling sync again.'
-                    );
+                    return;
                 }
-                this.remember(current);
-                this.reload();
-            } finally {
-                document.body.inert = false;
-            }
-        });
+                if (current?.revision !== selected.revision) {
+                    throw new Error('Cloud progress changed. Choose Check cloud before restoring.');
+                }
+                const before = CloudSync.payload();
+                const snapshot = await BackupManager.snapshot();
+                if (!this.valid(generation) || before !== CloudSync.payload()) {
+                    throw new Error('Local progress changed. Review again before restoring.');
+                }
+                const entries = JSON.parse(current.payload);
+                for (const key of CloudSync.keys) {
+                    if (entries[key] === null) {
+                        if (['kanji_settings', 'kanjiSettings'].includes(key)) {
+                            snapshot.storage[key] = '{}';
+                        } else {
+                            delete snapshot.storage[key];
+                        }
+                    } else {
+                        snapshot.storage[key] = entries[key];
+                    }
+                }
+                document.body.inert = true;
+                try {
+                    await BackupManager.restore(snapshot, { cloudSync: true });
+                    if (!this.valid(generation)) {
+                        throw new Error(
+                            'Account changed. Restored data is local; review before enabling sync again.'
+                        );
+                    }
+                    this.remember(current);
+                    this.reload();
+                } finally {
+                    document.body.inert = false;
+                }
+            },
+            { warn: true }
+        );
     }
 
     invalidate() {
@@ -346,9 +371,17 @@ class CloudSync {
     render() {
         document.querySelectorAll('[data-cloud-status]').forEach((node) => {
             node.textContent = this.message;
+            node.setAttribute('aria-busy', String(this.busy));
         });
         document.querySelectorAll('[data-cloud-action]').forEach((button) => {
             const action = button.dataset.cloudAction;
+            if (action === 'check') {
+                button.textContent = this.busy ? 'Working…' : 'Check cloud';
+            }
+            button.classList.toggle(
+                'danger-action',
+                action === 'restore' || (action === 'save' && Boolean(this.remote) && !this.enabled)
+            );
             button.disabled =
                 this.busy ||
                 !this.uid ||
@@ -379,7 +412,7 @@ class CloudSync {
         document.querySelectorAll('[data-cloud-action]').forEach((button) => {
             button.onclick = () => {
                 const actions = {
-                    check: () => this.check(),
+                    check: () => this.check(true),
                     save: () => this.save(true),
                     restore: () => this.restore(),
                     download: () => this.download(),

@@ -139,3 +139,11 @@ Record live results here (date, browser/device, pass/fail and relevant error tex
 
 Em dashes were removed from the authored site text and maintained source/docs. User
 nicknames, imported data and generated third-party content are not rewritten.
+
+## Feedback and action clarity
+
+- [x] Check cloud shows a checking state, explicit up-to-date/unsaved/no-save/review result and a check timestamp. Manual checks show a dismissible notice; background checks stay quiet.
+- [x] Sign-out, delete/reset and replacement actions use a vermilion wave pattern without changing sign-in styling.
+- [x] Photo validation and manual operation failures have persistent accessible alerts with a subtle card shake (disabled for reduced-motion users).
+- [x] Profile has a compact Remove DP control, available only for an uploaded photo. Confirmation removes only the local avatar and falls back to the Google photo/default icon; existing backups are unchanged.
+- [x] Owner reports Firestore sync working during initial testing. The detailed two-device/security-rule acceptance checklist remains separate and is not inferred from that report.

@@ -201,6 +201,7 @@ class ProfilePage {
                     'Profile saved here. Cloud sync saves the nickname when enabled.';
             } catch (error) {
                 feedback.textContent = error.message;
+                window.KanjiFeedback?.show(error.message, { title: 'Profile not saved' });
             }
         };
         const upload = document.getElementById('profilePagePhoto');
@@ -218,10 +219,31 @@ class ProfilePage {
                     'Photo saved. It will be included in your next backup.';
             } catch (error) {
                 document.getElementById('profilePageFeedback').textContent = error.message;
+                window.KanjiFeedback?.show(error.message, { title: 'Photo not uploaded' });
             } finally {
                 input.value = '';
                 upload.disabled = false;
                 this.refresh();
+            }
+        };
+        document.getElementById('profilePageRemovePhoto').onclick = async () => {
+            if (
+                !this.manager.avatarURL ||
+                this.manager.avatarBusy ||
+                !confirm(
+                    'Remove your uploaded profile photo from this device? Your Google photo (or the default icon) will appear instead. Existing backups keep their copy.'
+                )
+            ) {
+                return;
+            }
+            const feedback = document.getElementById('profilePageFeedback');
+            try {
+                await this.manager.setAvatar(null);
+                feedback.textContent =
+                    'Uploaded photo removed. Your Google photo or default icon is now shown.';
+            } catch (error) {
+                feedback.textContent = error.message;
+                window.KanjiFeedback?.show(error.message, { title: 'Photo could not be removed' });
             }
         };
         document.getElementById('profilePageConnect').onclick = () => this.manager.connect();

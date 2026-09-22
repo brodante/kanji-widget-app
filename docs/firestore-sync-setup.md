@@ -16,7 +16,7 @@ Implemented in this change:
 - Pause autosave stops automatic saving on this browser. Local imports/restores invalidate sync approval. A cloud-copy download is a partial progress export and can be imported using the existing Import Backup control.
 - Drive is under **Settings → Advanced: optional Google Drive backups**. It remains useful for full media backups. Enabling Firestore sync disables existing automatic Drive schedules on this device; explicit Drive backups still work.
 
-This is ready for configuration and controlled testing, not a claim of verified production sync. Real Firestore writes, two-device conflicts, offline/reconnect and security-rule execution remain to be verified. App tests use a mock Firestore adapter. Emulator rule tests are included, but this sandbox could not run them because Java is unavailable and its Java download attempt was blocked.
+This is ready for configuration and controlled testing, not a claim of verified production sync. The owner reports initial Firestore sync testing works. The detailed two-device, offline/reconnect and security-rule acceptance checks remain to be verified. App tests use a mock Firestore adapter. Emulator rule tests are included, but this sandbox could not run them because Java is unavailable and its Java download attempt was blocked.
 
 ## Next owner step: publish the rules
 
@@ -90,3 +90,7 @@ This code does not link billing or create paid services. On Spark, quotas can st
 An oversized payload blocks sync with an export instruction; it does not discard local progress. There is no automatic background saving when the app is closed and no guaranteed merge of simultaneous edits. Choose which copy to keep explicitly.
 
 Deleting an account's cloud document is currently an owner/admin action in Firebase Console; client deletion is intentionally denied. Clearing this device's data does not delete cloud data.
+
+### What Check cloud does
+
+Check cloud reads the current server copy, not an upload or restore. It shows a checking state and then a timestamped result: up to date, local changes waiting to save, no cloud save yet, or review needed. A manual check also shows a dismissible notice. It does not change local progress. Background checks use the inline status only, without interrupting learning.
