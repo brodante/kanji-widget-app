@@ -189,6 +189,13 @@
                         aria-expanded="false"
                         aria-controls="accountPanel"
                     >
+                        <img
+                            id="accountAvatar"
+                            class="account-avatar"
+                            alt=""
+                            referrerpolicy="no-referrer"
+                            hidden
+                        />
                         <i class="fas fa-circle-user" aria-hidden="true"></i>
                     </button>
                     <button id="settingsBtn" class="icon-btn" title="Settings">
@@ -205,6 +212,38 @@
                             ×
                         </button>
                     </div>
+                    <div class="account-photo-controls">
+                        <div class="account-avatar-large">
+                            <img
+                                id="accountAvatarPreview"
+                                class="account-avatar"
+                                alt="Profile photo"
+                                referrerpolicy="no-referrer"
+                                hidden
+                            />
+                            <i class="fas fa-circle-user" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <button id="avatarUpload" type="button" class="backup-btn">
+                                Upload photo
+                            </button>
+                            <button id="avatarReset" type="button" class="backup-btn" disabled>
+                                Use Google photo
+                            </button>
+                        </div>
+                    </div>
+                    <input
+                        id="avatarFile"
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        aria-label="Choose profile photo"
+                    />
+                    <small
+                        >Images and animated GIFs under 2 MB. Formats must be supported by your
+                        browser. Custom photos are included in backups and sync.</small
+                    >
+                    <p id="avatarStatus" role="status" aria-live="polite"></p>
                     <p id="accountIdentity">Your learning data is saved on this device.</p>
                     <div class="backup-buttons">
                         <button id="accountConnect" type="button" class="backup-btn">

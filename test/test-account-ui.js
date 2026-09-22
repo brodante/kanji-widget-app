@@ -138,3 +138,96 @@ test('theme media transaction reads and replaces the three slots', async () => {
         dom.window.close();
     }
 });
+
+test('avatar uses Google photo by default, custom photo takes priority, failure shows neutral icon', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        manager.token = 'test';
+        manager.expires = Date.now() + 60000;
+        manager.user = {
+            emailAddress: 'learner@example.com',
+            photoLink: 'https://lh3.googleusercontent.com/photo'
+        };
+        manager.renderAccount();
+        const image = window.document.getElementById('accountAvatar');
+        assert.equal(image.src, manager.user.photoLink);
+        image.onload();
+        assert.equal(image.hidden, false);
+        assert.equal(image.nextElementSibling.hidden, true);
+        manager.avatarURL = 'blob:custom-photo';
+        manager.renderAvatar();
+        assert.equal(image.src, 'blob:custom-photo');
+        image.onerror();
+        assert.equal(image.hidden, true);
+        assert.equal(image.nextElementSibling.hidden, false);
+        manager.avatarURL = '';
+        manager.token = null;
+        manager.renderAccount();
+        assert.equal(image.hasAttribute('src'), false);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('avatar rejects non-images, empty files and images at or above 2 MiB', async () => {
+    const { dom, window } = await setupUI();
+    try {
+        const validate = window.BackupManager.validateAvatar;
+        assert.throws(() => validate({ type: 'text/html', size: 30 }), /image/);
+        assert.throws(() => validate({ type: 'image/png', size: 0 }), /smaller/);
+        assert.throws(() => validate({ type: 'image/gif', size: 2 * 1024 * 1024 }), /smaller/);
+        validate({ type: 'image/gif', size: 2 * 1024 * 1024 - 1 });
+        validate({ type: 'image/svg+xml', size: 100 });
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('avatar saves original GIF bytes without modifying themes; reset clears custom photo', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        const writes = [];
+        window.BackupManager.media = async (data, slots) => {
+            writes.push({ data, slots });
+            return {};
+        };
+        window.URL.createObjectURL = () => 'blob:gif';
+        const revoked = [];
+        window.URL.revokeObjectURL = (url) => revoked.push(url);
+        window.Image = class {
+            set src(_value) {
+                this.onload();
+            }
+        };
+        const gif = new window.File(['GIF89a-original-frames'], 'photo.gif', { type: 'image/gif' });
+        await manager.setAvatar(gif);
+        assert.equal(writes[0].data.avatar, gif);
+        assert.equal(writes[0].slots.join(','), 'avatar');
+        assert.equal(manager.avatarURL, 'blob:gif');
+        await manager.setAvatar(null);
+        assert.equal(Object.keys(writes[1].data).length, 0);
+        assert.equal(manager.avatarURL, '');
+        assert.deepEqual(revoked, ['blob:gif']);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('backup format accepts image avatars but rejects video avatars and oversize data', async () => {
+    const { dom, window } = await setupUI();
+    try {
+        const data = {
+            app: 'kanji-widgets',
+            version: 3,
+            storage: {},
+            media: { avatar: 'data:image/gif;base64,R0lGODlh' }
+        };
+        window.BackupManager.validate(data);
+        data.media.avatar = 'data:video/mp4;base64,AAAA';
+        assert.throws(() => window.BackupManager.validate(data), /Profile photo/);
+        data.media.avatar = `data:image/png;base64,${'A'.repeat(2796204)}`;
+        assert.throws(() => window.BackupManager.validate(data), /under 2 MB/);
+    } finally {
+        dom.window.close();
+    }
+});

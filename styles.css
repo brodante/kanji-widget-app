@@ -5557,9 +5557,50 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     padding: 8px;
 }
 #accountBtn[data-connected='true'] {
-    background: var(--secondary-color, #467c68);
-    box-shadow: inset 0 0 0 2px currentColor;
+    background: none;
+    box-shadow: none;
 }
+#accountBtn {
+    display: grid;
+    place-items: center;
+}
+#accountBtn:hover {
+    background: rgba(127, 127, 127, 0.12);
+}
+#accountBtn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+.account-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+.account-avatar[hidden],
+#accountBtn i[hidden],
+.account-avatar-large i[hidden] {
+    display: none;
+}
+.account-avatar-large {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+    display: grid;
+    place-items: center;
+    font-size: 48px;
+}
+.account-photo-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-block: 16px;
+}
+.account-photo-controls .backup-btn {
+    margin: 3px 0;
+}
+
 #accountPanel {
     position: absolute;
     top: calc(100% + 8px);

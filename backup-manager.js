@@ -33,14 +33,14 @@ class BackupManager {
             ])
         );
     }
-    static async media(write) {
+    static async media(write, slots = ['slot1', 'slot2', 'slot3', 'avatar']) {
         const db = await openCustomThemeDB();
         try {
             return await new Promise((resolve, reject) => {
                 const tx = db.transaction('images', write ? 'readwrite' : 'readonly');
                 const store = tx.objectStore('images');
                 const result = {};
-                for (const slot of ['slot1', 'slot2', 'slot3']) {
+                for (const slot of slots) {
                     if (write) {
                         if (write[slot]) {
                             store.put(write[slot], slot);
@@ -128,13 +128,22 @@ class BackupManager {
         }
         for (const [slot, value] of Object.entries(data.media)) {
             if (
-                !/^slot[123]$/.test(slot) ||
+                !/^(slot[123]|avatar)$/.test(slot) ||
                 typeof value !== 'string' ||
                 !/^data:(image\/[a-zA-Z0-9.+-]+|video\/(mp4|webm|ogg));base64,[A-Za-z0-9+/=\s]+$/.test(
                     value
                 )
             ) {
                 throw new Error('Invalid theme media.');
+            }
+            if (slot === 'avatar') {
+                const encoded = value.split(',')[1].replace(/\s/g, '');
+                const size =
+                    (encoded.length * 3) / 4 -
+                    (encoded.endsWith('==') ? 2 : encoded.endsWith('=') ? 1 : 0);
+                if (!value.startsWith('data:image/') || size >= 2 * 1024 * 1024) {
+                    throw new Error('Profile photo must be an image under 2 MB.');
+                }
             }
         }
         return data;
@@ -317,7 +326,9 @@ class BackupManager {
                 this.user = null;
                 this.pendingCloud = null;
                 this.run(async () => {
-                    const about = await this.api('/about?fields=user(displayName,emailAddress)');
+                    const about = await this.api(
+                        '/about?fields=user(displayName,emailAddress,photoLink)'
+                    );
                     this.user = about.user;
                     this.status(
                         `Connected as ${about.user.emailAddress}. Access lasts about one hour; reconnect when requested.`
@@ -632,6 +643,7 @@ class BackupManager {
             : 'Connect with Google';
         document.getElementById('accountDisconnect').hidden = !connected;
         document.getElementById('syncConflict').hidden = !this.pendingCloud;
+        this.renderAvatar();
     }
 
     initAccount() {
@@ -717,6 +729,151 @@ class BackupManager {
                 await this.backup();
             });
         this.renderAccount();
+        this.initAvatar();
+    }
+
+    static validateAvatar(file) {
+        if (!file || !file.type.startsWith('image/')) {
+            throw new Error('Choose an image file or animated GIF.');
+        }
+        if (!file.size || file.size >= 2 * 1024 * 1024) {
+            throw new Error('Choose an image smaller than 2 MB.');
+        }
+    }
+
+    renderAvatar() {
+        const photo = this.user?.photoLink;
+        // Google photo links are used only while authorized; never persisted or backed up.
+        const googlePhoto =
+            this.authorized() && typeof photo === 'string' && photo.startsWith('https://')
+                ? photo
+                : '';
+        const source = this.avatarURL || googlePhoto;
+        for (const id of ['accountAvatar', 'accountAvatarPreview']) {
+            const image = document.getElementById(id);
+            if (!image) {
+                continue;
+            }
+            const fallback = image.nextElementSibling;
+            if (image.dataset.source === source) {
+                continue;
+            }
+            image.dataset.source = source;
+            image.hidden = true;
+            fallback.hidden = false;
+            image.onload = () => {
+                image.hidden = false;
+                fallback.hidden = true;
+            };
+            image.onerror = () => {
+                image.hidden = true;
+                fallback.hidden = false;
+            };
+            if (source) {
+                image.src = source;
+            } else {
+                image.removeAttribute('src');
+            }
+        }
+        document.getElementById('avatarReset').disabled = !this.avatarURL;
+    }
+
+    async setAvatar(file) {
+        let url;
+        if (file) {
+            BackupManager.validateAvatar(file);
+            url = URL.createObjectURL(file);
+            try {
+                // Decode without canvas conversion: animated GIFs retain every frame.
+                await new Promise((resolve, reject) => {
+                    const image = new Image();
+                    const timer = setTimeout(
+                        () => reject(new Error('Image could not be loaded. Try a different file.')),
+                        10000
+                    );
+                    image.onload = () => {
+                        clearTimeout(timer);
+                        resolve();
+                    };
+                    image.onerror = () => {
+                        clearTimeout(timer);
+                        reject(
+                            new Error(
+                                'This image format cannot be displayed in your browser. Try PNG, JPEG, WebP or GIF.'
+                            )
+                        );
+                    };
+                    image.src = url;
+                });
+            } catch (error) {
+                URL.revokeObjectURL(url);
+                throw error;
+            }
+        }
+        try {
+            await BackupManager.media(file ? { avatar: file } : {}, ['avatar']);
+        } catch (error) {
+            if (url) {
+                URL.revokeObjectURL(url);
+            }
+            throw error;
+        }
+        if (this.avatarURL) {
+            URL.revokeObjectURL(this.avatarURL);
+        }
+        this.avatarURL = url || '';
+        this.renderAvatar();
+        document.getElementById('avatarStatus').textContent = file
+            ? 'Profile photo saved. Included in your next backup or sync.'
+            : 'Custom photo removed. Using your Google photo when connected.';
+    }
+
+    async initAvatar() {
+        const input = document.getElementById('avatarFile');
+        const upload = document.getElementById('avatarUpload');
+        const reset = document.getElementById('avatarReset');
+        const feedback = document.getElementById('avatarStatus');
+        upload.disabled = true;
+        try {
+            const media = await BackupManager.media(undefined, ['avatar']);
+            if (media.avatar) {
+                this.avatarURL = URL.createObjectURL(media.avatar);
+            }
+        } catch {
+            feedback.textContent =
+                'Profile photo storage is unavailable. Your Google photo can still be displayed.';
+        } finally {
+            upload.disabled = false;
+            this.renderAvatar();
+        }
+        upload.onclick = () => input.click();
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) {
+                return;
+            }
+            upload.disabled = reset.disabled = true;
+            try {
+                await this.setAvatar(file);
+            } catch (error) {
+                feedback.textContent = error.message;
+            } finally {
+                input.value = '';
+                upload.disabled = false;
+                this.renderAvatar();
+            }
+        };
+        reset.onclick = async () => {
+            upload.disabled = reset.disabled = true;
+            try {
+                await this.setAvatar(null);
+            } catch (error) {
+                feedback.textContent = error.message;
+            } finally {
+                upload.disabled = false;
+                this.renderAvatar();
+            }
+        };
     }
 
     static async fingerprint(data) {

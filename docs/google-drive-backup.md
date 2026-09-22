@@ -65,3 +65,18 @@ A custom HTTPS subdomain can host this client-side code; buying hosting is not r
 6. Disconnect, deny consent, block popups, go offline and reload; confirm local learning still works and failures never claim success. Set a due schedule and verify reconnect catches it up, while token expiry asks for reconnection.
 
 GitHub OAuth was not added: its usual authorization-code exchange requires a protected backend/client secret. Google Drive supplies both account authorization and a user-owned backup destination without introducing a server.
+
+## Profile photos
+
+The account button uses a neutral circular photo, without a colored connection ring.
+Google's Drive account `photoLink` is requested with the existing permission and used
+by default while connected; no extra OAuth scope is needed. If the photo cannot load,
+the neutral user icon remains visible.
+
+In Account & sync, **Upload photo** accepts browser-decodable image formats, including
+animated GIFs, strictly smaller than 2 MiB (2,097,152 bytes). Original bytes are kept,
+so GIF animation is preserved. The custom photo is an app-profile preference (also
+visible in guest mode), not a change to the actual Google account photo. It is stored
+in IndexedDB and included in full backups and sync. **Use Google photo** removes the
+custom override; guests fall back to the neutral icon. Restoring an older backup with
+no avatar removes the custom override as part of replacing the app's saved state.
