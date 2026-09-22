@@ -63,3 +63,7 @@ privacy details and browser-only scheduling limits.
 Quick save reuses safe cloud checkpoints and skips unchanged data. Create new backup
 keeps an independent snapshot; connecting Google only checks the cloud state. Update
 all devices to the checkpoint-enabled version before using multi-device sync.
+
+See the [account and cloud-save roadmap](docs/account-sync-roadmap.md) for the full
+Must / Should / Could / Optional checklist, implemented safeguards, and remaining
+live Google Drive acceptance tests.

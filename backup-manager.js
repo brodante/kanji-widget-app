@@ -148,8 +148,11 @@ class BackupManager {
         }
         return data;
     }
-    static async restore(data) {
+    static async restore(data, { recovery = true } = {}) {
         this.validate(data);
+        if (recovery) {
+            await this.createRecovery();
+        }
         const media = {};
         for (const [slot, value] of Object.entries(data.media)) {
             media[slot] = await (await fetch(value)).blob();
@@ -199,6 +202,413 @@ class BackupManager {
         a.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
+    static isPinned(file) {
+        const props = file.appProperties || {};
+        return (
+            props.pinned === 'true' ||
+            (props.pinned !== 'false' && props.backupKind !== 'checkpoint')
+        );
+    }
+
+    static driveError(status, reason) {
+        if (reason === 'storageQuotaExceeded') {
+            return 'Your Google Drive is full. Free space in Drive, then retry. Local data is safe.';
+        }
+        if (status === 429 || /rateLimit|userRateLimit/i.test(reason)) {
+            return 'Google Drive is rate-limiting requests. Wait a few minutes and retry; local changes are kept.';
+        }
+        if (status === 403) {
+            return 'Google Drive access is denied. Enable Drive API in the OAuth project, check test-user access, then reconnect and grant Drive permission.';
+        }
+        if (status === 404) {
+            return 'This cloud file or folder no longer exists or is inaccessible. Reconnect and refresh history before retrying.';
+        }
+        if (status >= 500) {
+            return 'Google Drive is temporarily unavailable. Retry later; your local data has not been cleared.';
+        }
+        return `Drive request failed (${status}). Reconnect and retry; if it persists, check the Google OAuth/Drive setup guide.`;
+    }
+
+    // Isolated from theme storage and from exports to avoid recursive recovery snapshots.
+    static async recoveryStore(action, data) {
+        const db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open('KanjiWidgetsRecovery', 1);
+            request.onupgradeneeded = () => request.result.createObjectStore('recovery');
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+        try {
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction('recovery', action === 'get' ? 'readonly' : 'readwrite');
+                const store = tx.objectStore('recovery');
+                const req =
+                    action === 'get'
+                        ? store.get('before-restore')
+                        : action === 'put'
+                          ? store.put(data, 'before-restore')
+                          : store.delete('before-restore');
+                tx.oncomplete = () => resolve(req.result);
+                tx.onerror = tx.onabort = () =>
+                    reject(tx.error || new Error('Recovery storage failed.'));
+            });
+        } finally {
+            db.close();
+        }
+    }
+
+    static async createRecovery() {
+        try {
+            const data = await this.snapshot();
+            const config = JSON.parse(localStorage.getItem('kanji_drive_backup') || '{}');
+            data.recoveryOwner = config.dataOwner || '';
+            await this.recoveryStore('put', data);
+        } catch {
+            throw new Error(
+                'Restore stopped: a recovery copy could not be saved (storage may be full or unavailable). Export your data and free browser storage before retrying. Nothing was restored.'
+            );
+        }
+    }
+
+    static async undoRestore() {
+        const data = await this.recoveryStore('get');
+        if (!data) {
+            throw new Error('No recovery copy is available on this device.');
+        }
+        await this.restore(data, { recovery: false });
+        // Keep recovery until the user deletes it or starts another restore.
+        return data.recoveryOwner || '__recovered_local_data__';
+    }
+
+    needsAccountChoice() {
+        return Boolean(
+            this.user?.emailAddress &&
+            this.config.dataOwner &&
+            this.config.dataOwner !== this.user.emailAddress
+        );
+    }
+
+    static summary(data) {
+        const parse = (key) => {
+            try {
+                return JSON.parse(data.storage[key] || '{}');
+            } catch {
+                return {};
+            }
+        };
+        const progress = parse('kanji_progress');
+        const srs = parse('kanji_srs_data');
+        const cards = srs.cards || srs;
+        return `Studied: ${progress.studied?.length || 0} · Mastered: ${progress.mastered?.length || 0} · Review entries: ${Object.keys(cards).length} · Theme: ${data.storage.theme || 'default'} · Media: ${Object.keys(data.media).length}`;
+    }
+
+    showComparison(local, cloud, file) {
+        const panel = document.getElementById('saveComparison');
+        if (!panel) {
+            return;
+        }
+        panel.replaceChildren();
+        for (const [name, data, time] of [
+            ['This device', local, 'Current local state'],
+            ['Cloud', cloud, new Date(file.modifiedTime || file.createdTime).toLocaleString()]
+        ]) {
+            const section = document.createElement('div');
+            const heading = document.createElement('strong');
+            heading.textContent = name;
+            const detail = document.createElement('p');
+            detail.textContent = `${time} — ${BackupManager.summary(data)}`;
+            section.append(heading, detail);
+            panel.append(section);
+        }
+        const changed = Object.keys({ ...local.storage, ...cloud.storage }).filter(
+            (key) => local.storage[key] !== cloud.storage[key]
+        );
+        const detail = document.createElement('p');
+        detail.textContent = `Different saved sections: ${changed.join(', ') || 'none'}. Uploaded media differs: ${JSON.stringify(local.media) !== JSON.stringify(cloud.media) ? 'yes' : 'no'}. Restore replaces these sections; it does not merge them.`;
+        panel.append(detail);
+    }
+
+    renderSaveStatus() {
+        const element = document.getElementById('saveHealth');
+        if (!element) {
+            return;
+        }
+        const connected = this.authorized() && this.user;
+        const account = connected
+            ? 'Google connected'
+            : this.config.dataOwner
+              ? 'Reconnect required'
+              : 'Guest · data stored on this device';
+        const state = this.busy
+            ? 'Working…'
+            : this.lastError
+              ? 'Action failed — see details below'
+              : this.needsAccountChoice()
+                ? 'Account choice required; uploads blocked'
+                : this.pendingCloud
+                  ? 'Cloud changes need review'
+                  : this.localDirty === true
+                    ? 'Unsaved cloud changes'
+                    : this.localDirty === false
+                      ? 'Matches last checked cloud save'
+                      : 'Cloud state not checked';
+        const upload = this.config.lastBackup
+            ? new Date(this.config.lastBackup).toLocaleString()
+            : 'None from this device';
+        element.textContent = `${account} · ${state}${navigator.onLine === false ? ' · Offline' : ''}. Last successful upload from this device: ${upload}.`;
+    }
+
+    async refreshSaveStatus() {
+        this.renderSaveStatus();
+        if (this.inspecting || this.busy) {
+            return;
+        }
+        this.inspecting = true;
+        try {
+            const base = this.user && this.config.syncStates?.[this.user.emailAddress];
+            this.localDirty = base
+                ? (await BackupManager.fingerprint(await BackupManager.snapshot())) !== base.hash
+                : undefined;
+        } catch {
+            this.localDirty = undefined;
+        } finally {
+            this.inspecting = false;
+            this.renderSaveStatus();
+        }
+    }
+
+    async clearLocalData() {
+        if (
+            !confirm(
+                'Disconnect and erase learning progress, settings, uploaded themes, avatar, local backups, API keys and recovery copy ON THIS DEVICE? Google Drive files will NOT be deleted. Export first if needed.'
+            )
+        ) {
+            return;
+        }
+        this.config.autoSync = false;
+        this.config.frequency = 'never';
+        this.save();
+        if (window.app?.localBackupTimer) {
+            clearInterval(window.app.localBackupTimer);
+        }
+        document.getElementById('driveDisconnect').click();
+        // The button may be disabled by run(); always drop in-memory authorization here.
+        if (this.token) {
+            window.google?.accounts.oauth2.revoke(this.token, () => {});
+        }
+        this.token = null;
+        this.user = null;
+        await BackupManager.media({});
+        await BackupManager.recoveryStore('delete');
+        for (const key of Object.keys(localStorage)) {
+            if (
+                BackupManager.allowed(key) ||
+                key.startsWith('autoBackup_') ||
+                ['kanji_drive_backup', 'lastLocalBackup', 'kanji_cache'].includes(key)
+            ) {
+                localStorage.removeItem(key);
+            }
+        }
+        location.reload();
+    }
+
+    async deleteCloudBackups() {
+        await this.list();
+        const files = [...this.files];
+        if (
+            !confirm(
+                `Move ALL ${files.length} app backups in the connected Google account to Drive trash, INCLUDING PINNED backups? Local progress and Google access will remain. This does not touch unrelated Drive files.`
+            )
+        ) {
+            return;
+        }
+        // Pause before the first deletion, including when a later request fails.
+        this.config.autoSync = false;
+        this.config.frequency = 'never';
+        this.save();
+        document.getElementById('accountAutoSync').checked = false;
+        document.getElementById('driveFrequency').value = 'never';
+        let deleted = 0;
+        try {
+            for (const file of files) {
+                await this.api(`/files/${encodeURIComponent(file.id)}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: '{"trashed":true}'
+                });
+                deleted++;
+            }
+        } catch (error) {
+            throw new Error(
+                `${deleted} backups moved to trash before an error: ${error.message}. Refresh history before retrying.`
+            );
+        }
+        this.pendingCloud = null;
+        if (this.user) {
+            delete this.config.syncStates?.[this.user.emailAddress];
+        }
+        // Avoid recreating backups straight after an explicit deletion request.
+        this.config.autoSync = false;
+        this.config.frequency = 'never';
+        this.save();
+        document.getElementById('accountAutoSync').checked = false;
+        document.getElementById('driveFrequency').value = 'never';
+        await this.list();
+        this.status(
+            `${deleted} cloud backups moved to trash. Automatic saves are off; local data is unchanged.`
+        );
+    }
+
+    async diagnoseDrive() {
+        if (
+            !confirm(
+                'Test Drive checkpoint updates using a temporary file? No learning data will be uploaded. The test file will be moved to trash afterwards.'
+            )
+        ) {
+            return;
+        }
+        let id,
+            result = '';
+        try {
+            const folder = await this.ensureFolder();
+            const file = await this.api('/files?fields=id', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: 'Kanji checkpoint diagnostic (safe to delete)',
+                    parents: [folder],
+                    mimeType: 'application/json',
+                    appProperties: { kanjiDiagnostic: 'v1' }
+                })
+            });
+            id = file.id;
+            const write = (value, etag) =>
+                this.api(
+                    `/upload/drive/v3/files/${encodeURIComponent(id)}?uploadType=media&fields=id`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(etag ? { 'If-Match': etag } : {})
+                        },
+                        body: JSON.stringify({ diagnostic: value })
+                    }
+                );
+            const read = () => this.api(`/files/${encodeURIComponent(id)}?alt=media`, {}, true);
+            await write(1);
+            const first = await read();
+            if (!first.etag || first.data?.diagnostic !== 1) {
+                throw new Error(
+                    'Drive did not expose a usable revision token/readback. Safe in-place updates could not be verified; separate checkpoints will be used.'
+                );
+            }
+            await write(2, first.etag);
+            const second = await read();
+            if (second.data?.diagnostic !== 2) {
+                throw new Error('Checkpoint readback failed.');
+            }
+            let rejected = false;
+            try {
+                await write(3, first.etag);
+            } catch (error) {
+                if (error.status === 412) {
+                    rejected = true;
+                } else {
+                    throw error;
+                }
+            }
+            if (!rejected || (await read()).data?.diagnostic !== 2) {
+                throw new Error(
+                    'Drive did not protect the checkpoint from a stale revision. In-place saving has been disabled for safety.'
+                );
+            }
+            this.config.checkpointVerified = true;
+            result =
+                'PASS: create, read, update, and stale-revision rejection verified on this Google account. Still test real two-device conflicts before relying on sync.';
+        } catch (error) {
+            this.config.checkpointVerified = false;
+            result = `NOT VERIFIED: ${error.message}`;
+        } finally {
+            this.config.diagnosticAccount = this.user?.emailAddress || '';
+            this.config.checkpointDiagnostics = this.config.checkpointDiagnostics || {};
+            if (this.user?.emailAddress) {
+                this.config.checkpointDiagnostics[this.user.emailAddress] =
+                    this.config.checkpointVerified;
+            }
+            this.config.diagnosticResult = `${this.config.diagnosticAccount || 'Not connected'}: ${result}`;
+            this.save();
+            if (id) {
+                try {
+                    await this.api(`/files/${encodeURIComponent(id)}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: '{"trashed":true}'
+                    });
+                } catch {
+                    result += ` Cleanup failed. Delete temporary diagnostic file ${id} in Drive manually.`;
+                }
+            }
+            document.getElementById('driveDiagnosticResult').textContent = result;
+            this.status(result);
+        }
+    }
+
+    initSafety() {
+        document.getElementById('undoRestore').onclick = () =>
+            this.run(async () => {
+                if (
+                    !confirm(
+                        'Undo the last restore? This replaces current local data with its recovery copy, including any changes since that restore.'
+                    )
+                ) {
+                    return;
+                }
+                this.config.dataOwner = await BackupManager.undoRestore();
+                this.config.syncStates = {};
+                this.save();
+                location.reload();
+            });
+        document.getElementById('downloadRecovery').onclick = () =>
+            this.run(async () => {
+                const data = await BackupManager.recoveryStore('get');
+                if (!data) {
+                    throw new Error('No recovery copy is available on this device.');
+                }
+                BackupManager.download(data, 'kanji-before-restore.json');
+            });
+        document.getElementById('downloadBoth').onclick = () =>
+            this.run(async () =>
+                BackupManager.download(await BackupManager.snapshot(), 'kanji-this-device.json')
+            );
+        document.getElementById('downloadCloudConflict').onclick = () =>
+            this.run(async () => {
+                if (!this.pendingCloud) {
+                    throw new Error(
+                        'No cloud copy is selected. Quick save to check for conflicts.'
+                    );
+                }
+                const cloud = BackupManager.validate(
+                    await this.api(`/files/${encodeURIComponent(this.pendingCloud.id)}?alt=media`)
+                );
+                BackupManager.download(cloud, 'kanji-cloud-copy.json');
+            });
+        document.getElementById('privacyExport').onclick = () =>
+            this.run(async () =>
+                BackupManager.download(await BackupManager.snapshot(), 'kanji-full-export.json')
+            );
+        document.getElementById('deleteCloudBackups').onclick = () =>
+            this.run(() => this.deleteCloudBackups());
+        document.getElementById('clearLocalAccount').onclick = () =>
+            this.run(() => this.clearLocalData());
+        document.getElementById('driveDiagnostic').onclick = () =>
+            this.run(() => this.diagnoseDrive());
+        document.getElementById('driveDiagnosticResult').textContent =
+            this.config.diagnosticResult || 'Not yet tested with your Google account.';
+        setInterval(() => this.refreshSaveStatus(), 30000);
+        window.addEventListener('offline', () => this.refreshSaveStatus());
+        window.addEventListener('online', () => this.refreshSaveStatus());
+        this.refreshSaveStatus();
+    }
+
     constructor() {
         try {
             this.config = JSON.parse(localStorage.getItem('kanji_drive_backup') || '{}');
@@ -230,6 +640,8 @@ class BackupManager {
             return;
         }
         this.busy = true;
+        this.lastError = '';
+        this.status('Working… Local learning data stays on this device.');
         document
             .querySelectorAll(
                 '#driveBackup button, #accountConnect, #accountDisconnect, #accountSync, #accountBackup, #syncUseCloud, #syncUseLocal'
@@ -240,10 +652,12 @@ class BackupManager {
         try {
             await fn();
         } catch (e) {
+            this.lastError = e.message;
             this.status(e.message);
             this.retryAfter = Date.now() + 300000;
         } finally {
             this.busy = false;
+            this.refreshSaveStatus?.();
             document
                 .querySelectorAll(
                     '#driveBackup button, #accountConnect, #accountDisconnect, #accountSync, #accountBackup, #syncUseCloud, #syncUseLocal'
@@ -330,6 +744,11 @@ class BackupManager {
                         '/about?fields=user(displayName,emailAddress,photoLink)'
                     );
                     this.user = about.user;
+                    document.getElementById('saveComparison')?.replaceChildren();
+                    if (!this.config.dataOwner) {
+                        this.config.dataOwner = this.user.emailAddress;
+                        this.save();
+                    }
                     this.status(
                         `Connected as ${about.user.emailAddress}. Access lasts about one hour; reconnect when requested.`
                     );
@@ -356,26 +775,40 @@ class BackupManager {
                 'Connect with Google to authorize Drive backups (access expired or not connected).'
             );
         }
-        const response = await fetch(
-            `https://www.googleapis.com${path.startsWith('/upload/') ? path : `/drive/v3${path}`}`,
-            {
-                ...options,
-                headers: { ...options.headers, Authorization: `Bearer ${this.token}` }
-            }
-        );
+        let response;
+        try {
+            response = await fetch(
+                `https://www.googleapis.com${path.startsWith('/upload/') ? path : `/drive/v3${path}`}`,
+                {
+                    ...options,
+                    headers: { ...options.headers, Authorization: `Bearer ${this.token}` }
+                }
+            );
+        } catch {
+            throw new Error(
+                'Cannot reach Google Drive. Check your internet connection; local progress is unchanged. Retry when online.'
+            );
+        }
         if (response.status === 401) {
             this.token = null;
             throw new Error('Google access expired. Reconnect to continue.');
         }
         if (response.status === 412) {
-            throw new Error(
+            const error = new Error(
                 'Cloud checkpoint changed on another device. Nothing was overwritten. Quick save again to review it.'
             );
+            error.status = 412;
+            throw error;
         }
         if (!response.ok) {
-            throw new Error(
-                `Drive request failed (${response.status}). Check connectivity, Drive API setup, permissions and storage quota.`
-            );
+            let details = {};
+            try {
+                details = await response.json();
+            } catch {
+                /* Non-JSON service error */
+            }
+            const reason = details.error?.errors?.[0]?.reason || '';
+            throw new Error(BackupManager.driveError(response.status, reason));
         }
         if (response.status === 204) {
             return null;
@@ -447,16 +880,42 @@ class BackupManager {
         for (const file of this.files) {
             const row = document.createElement('li');
             const label = document.createElement('span');
-            label.textContent = `${file.appProperties?.backupKind === 'checkpoint' ? 'Quick-save checkpoint' : 'Saved backup'} · ${file.name} · ${new Date(file.modifiedTime || file.createdTime).toLocaleString()} · ${Math.ceil(Number(file.size || 0) / 1024)} KB`;
+            label.textContent = `${BackupManager.isPinned(file) ? '📌 Pinned · ' : ''}${file.appProperties?.backupKind === 'checkpoint' ? 'Quick-save checkpoint' : 'Saved backup'} · ${file.name} · ${new Date(file.modifiedTime || file.createdTime).toLocaleString()} · ${Math.ceil(Number(file.size || 0) / 1024)} KB`;
             row.append(label);
-            for (const action of ['Download', 'Restore', 'Delete']) {
+            for (const action of [
+                'Download',
+                'Restore',
+                BackupManager.isPinned(file) ? 'Unpin' : 'Pin',
+                'Delete'
+            ]) {
                 const button = document.createElement('button');
                 button.className = 'backup-btn';
                 button.textContent = action;
                 button.onclick = () =>
                     this.run(async () => {
+                        if (action === 'Pin' || action === 'Unpin') {
+                            if (
+                                action === 'Unpin' &&
+                                !confirm('Allow automatic retention to remove this backup?')
+                            ) {
+                                return;
+                            }
+                            await this.api(`/files/${encodeURIComponent(file.id)}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    appProperties: { pinned: action === 'Pin' ? 'true' : 'false' }
+                                })
+                            });
+                            await this.list();
+                            return;
+                        }
                         if (action === 'Delete') {
-                            if (!confirm(`Move ${file.name} to Drive trash?`)) {
+                            if (
+                                !confirm(
+                                    `Move ${BackupManager.isPinned(file) ? 'PINNED backup ' : ''}${file.name} to Drive trash? This is separate from disconnecting Google.`
+                                )
+                            ) {
                                 return;
                             }
                             await this.api(`/files/${encodeURIComponent(file.id)}`, {
@@ -483,6 +942,7 @@ class BackupManager {
                             BackupManager.download(data, file.name);
                         } else {
                             await BackupManager.restore(data);
+                            await this.remember(file.id, await BackupManager.snapshot());
                             location.reload();
                         }
                     });
@@ -491,7 +951,18 @@ class BackupManager {
             list.append(row);
         }
     }
-    async backup({ data = null, checkpoint = false, target = null, etag = null } = {}) {
+    async backup({
+        data = null,
+        checkpoint = false,
+        target = null,
+        etag = null,
+        allowAccountSwitch = false
+    } = {}) {
+        if (this.needsAccountChoice() && !allowAccountSwitch) {
+            throw new Error(
+                'Account changed. Choose cloud data or explicitly save this device’s copy before uploading.'
+            );
+        }
         const folder = await this.ensureFolder();
         data = data || (await BackupManager.snapshot());
         const prefix =
@@ -501,7 +972,11 @@ class BackupManager {
         const boundary = `kanji_${crypto.randomUUID()}`;
         const metadata = {
             name,
-            appProperties: { kanjiBackup: 'v3', backupKind: checkpoint ? 'checkpoint' : 'manual' }
+            appProperties: {
+                kanjiBackup: 'v3',
+                backupKind: checkpoint ? 'checkpoint' : 'manual',
+                pinned: checkpoint ? 'false' : 'true'
+            }
         };
         if (!target) {
             metadata.parents = [folder];
@@ -536,7 +1011,9 @@ class BackupManager {
         await this.list();
         const keep = Number(this.config.keep || 0);
         if ([5, 10, 20].includes(keep)) {
-            for (const file of this.files.slice(keep)) {
+            for (const file of this.files
+                .filter((file) => !BackupManager.isPinned(file))
+                .slice(keep)) {
                 await this.api(`/files/${encodeURIComponent(file.id)}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
@@ -555,9 +1032,9 @@ class BackupManager {
             return false;
         }
         const [hour, minute] = (config.time || '19:00').split(':').map(Number);
-        const next = new Date(config.lastBackup || now);
+        const next = new Date(Math.max(config.lastChecked || 0, config.lastBackup || 0) || now);
         next.setHours(hour, minute, 0, 0);
-        if (config.lastBackup) {
+        if (config.lastBackup || config.lastChecked) {
             next.setDate(next.getDate() + days);
         }
         return now >= next.getTime();
@@ -645,6 +1122,7 @@ class BackupManager {
         root.querySelector('#driveQuickSave').onclick = () => this.run(() => this.sync());
         root.querySelector('#driveNow').onclick = () => this.run(() => this.backup());
         root.querySelector('#driveRefresh').onclick = () => this.run(() => this.list());
+        this.initSafety();
         this.status(
             this.config.lastBackup
                 ? `Last upload from this device: ${new Date(this.config.lastBackup).toLocaleString()}. Connect to browse Drive.`
@@ -677,8 +1155,10 @@ class BackupManager {
             ? 'Switch Google account'
             : 'Connect with Google';
         document.getElementById('accountDisconnect').hidden = !connected;
-        document.getElementById('syncConflict').hidden = !this.pendingCloud;
+        document.getElementById('syncConflict').hidden =
+            !this.pendingCloud && !this.needsAccountChoice();
         this.renderAvatar();
+        this.renderSaveStatus();
     }
 
     initAccount() {
@@ -736,10 +1216,16 @@ class BackupManager {
         document.getElementById('syncUseCloud').onclick = () =>
             this.run(async () => {
                 const file = this.pendingCloud;
+                if (!file) {
+                    this.status(
+                        'No cloud copy exists in this account. Choose Save this device’s copy to explicitly upload here, or disconnect.'
+                    );
+                    return;
+                }
                 if (
                     !file ||
                     !confirm(
-                        'Replace local progress, settings and themes with the cloud copy? Download a local backup first if you want to keep both.'
+                        'Replace local progress, settings and themes with the cloud copy? A recovery copy will be saved on this device first. You can undo this restore in Settings.'
                     )
                 ) {
                     return;
@@ -761,7 +1247,7 @@ class BackupManager {
                 ) {
                     return;
                 }
-                await this.backup();
+                await this.backup({ allowAccountSwitch: true });
             });
         this.renderAccount();
         this.initAvatar();
@@ -915,6 +1401,7 @@ class BackupManager {
         }
         const states = this.config.syncStates || {};
         states[this.user.emailAddress] = { id, hash: await BackupManager.fingerprint(data) };
+        this.config.dataOwner = this.user.emailAddress;
         this.config.syncStates = states;
         this.save();
     }
@@ -955,6 +1442,19 @@ class BackupManager {
         const data = await BackupManager.snapshot();
         const hash = await BackupManager.fingerprint(data);
         const base = this.config.syncStates?.[this.user.emailAddress];
+        if (this.needsAccountChoice()) {
+            this.pendingCloud = newest || null;
+            if (newest) {
+                const cloudData = BackupManager.validate(
+                    await this.api(`/files/${encodeURIComponent(newest.id)}?alt=media`)
+                );
+                this.showComparison(data, cloudData, newest);
+            }
+            this.status(
+                'Different Google account connected. Automatic uploads are blocked. Choose its cloud copy, or explicitly save this device’s copy to this account.'
+            );
+            return;
+        }
         let cloud, etag;
         if (newest) {
             // Read content on every check: a checkpoint can change without its ID changing.
@@ -980,7 +1480,7 @@ class BackupManager {
             if (cloudHash === hash) {
                 await this.remember(newest.id, data);
                 this.pendingCloud = null;
-                this.config.lastBackup = Date.now();
+                this.config.lastChecked = Date.now();
                 this.save();
                 this.status(
                     'Already saved — no changes, so no upload or extra backup was created.'
@@ -989,6 +1489,7 @@ class BackupManager {
             }
             if (!base || newest.id !== base.id || cloudHash !== base.hash) {
                 this.pendingCloud = newest;
+                this.showComparison(data, cloud, newest);
                 this.status(
                     `Cloud copy from ${new Date(newest.modifiedTime || newest.createdTime).toLocaleString()} needs review. Choose cloud or this device; automatic saving is paused.`
                 );
@@ -1005,6 +1506,12 @@ class BackupManager {
         }
         const canUpdate =
             newest?.appProperties?.backupKind === 'checkpoint' &&
+            !BackupManager.isPinned(newest) &&
+            this.config.checkpointDiagnostics?.[this.user.emailAddress] !== false &&
+            !(
+                this.config.diagnosticAccount === this.user.emailAddress &&
+                this.config.checkpointVerified === false
+            ) &&
             etag &&
             cloud &&
             !BackupManager.losesData(cloud, data);

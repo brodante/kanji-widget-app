@@ -270,6 +270,13 @@
                         </button>
                     </div>
                     <div id="syncConflict" hidden>
+                        <div id="saveComparison"></div>
+                        <button id="downloadCloudConflict" class="backup-btn" type="button">
+                            Download cloud copy
+                        </button>
+                        <button id="downloadBoth" class="backup-btn" type="button">
+                            Download this device
+                        </button>
                         <p>
                             A cloud copy needs your review. Choose which version to use. Nothing has
                             been overwritten.
@@ -281,6 +288,7 @@
                             Save this device’s copy
                         </button>
                     </div>
+                    <p id="saveHealth" role="status" aria-live="polite"></p>
                     <p id="accountStatus" role="status" aria-live="polite"></p>
                     <small
                         >Google access expires and must be reconnected after a reload. Sync pauses
@@ -797,9 +805,10 @@
                                 </select>
                             </div>
                             <p>
-                                When a limit is selected, older backups created by this app in its
-                                folder are moved to Drive trash after a successful upload, including
-                                backups from other devices.
+                                When a limit is selected, only older unpinned backups are moved to
+                                Drive trash after a successful upload. Manual and legacy backups are
+                                pinned by default. Pin/unpin individual files in history. This
+                                includes unpinned checkpoints from other devices.
                             </p>
                             <div class="backup-buttons">
                                 <button id="driveQuickSave" class="backup-btn" type="button">
@@ -818,6 +827,77 @@
                                 (subject to your retention limit). Connecting Google only checks
                                 your saves.
                             </p>
+                            <details id="backupSafety">
+                                <summary>Recovery, privacy &amp; connection help</summary>
+                                <p>
+                                    Before every restore, a recovery copy is saved on this device.
+                                    Restore stops if that copy cannot be stored. Undo restores the
+                                    previous state, not a merge; later changes will be replaced.
+                                    Recovery copies are not uploaded and exclude API keys.
+                                </p>
+                                <div class="backup-buttons">
+                                    <button id="undoRestore" class="backup-btn" type="button">
+                                        Undo last restore
+                                    </button>
+                                    <button id="downloadRecovery" class="backup-btn" type="button">
+                                        Download recovery copy
+                                    </button>
+                                    <button id="privacyExport" class="backup-btn" type="button">
+                                        Export all learning data
+                                    </button>
+                                </div>
+                                <p>
+                                    Disconnecting keeps local progress and cloud files. Deleting
+                                    local data removes progress, settings, local API keys, media,
+                                    backups and recovery data only on this device. Deleting cloud
+                                    backups moves this app’s files to Drive trash, including pinned
+                                    copies, without clearing local progress.
+                                </p>
+                                <div class="backup-buttons">
+                                    <button id="clearLocalAccount" class="backup-btn" type="button">
+                                        Disconnect &amp; clear this device
+                                    </button>
+                                    <button
+                                        id="deleteCloudBackups"
+                                        class="backup-btn"
+                                        type="button"
+                                    >
+                                        Delete all cloud backups
+                                    </button>
+                                </div>
+                                <p>
+                                    Backups contain progress, review schedules, settings, themes,
+                                    avatar and AI cached responses. They are not app-encrypted. API
+                                    keys and Google tokens are excluded. Anyone with a downloaded
+                                    JSON copy can read its contents.
+                                </p>
+                                <p>
+                                    <a
+                                        href="https://myaccount.google.com/connections"
+                                        target="_blank"
+                                        rel="noopener"
+                                        >Manage/revoke Google access</a
+                                    >
+                                    ·
+                                    <a
+                                        href="docs/google-drive-backup.md"
+                                        target="_blank"
+                                        rel="noopener"
+                                        >Setup and privacy guide</a
+                                    >
+                                </p>
+                                <p>
+                                    For <strong>origin_mismatch</strong>, add this browser’s exact
+                                    origin to the Web OAuth client’s Authorized JavaScript origins.
+                                    For access_denied, check test users and grant Drive permission.
+                                    Reloading or expired access requires reconnecting; local
+                                    learning still works.
+                                </p>
+                                <button id="driveDiagnostic" class="backup-btn" type="button">
+                                    Test Drive checkpoint safety
+                                </button>
+                                <p id="driveDiagnosticResult" role="status"></p>
+                            </details>
                             <p id="driveStatus" role="status" aria-live="polite"></p>
                             <a id="driveFolder" hidden target="_blank" rel="noopener"
                                 >Open backup folder in Google Drive</a

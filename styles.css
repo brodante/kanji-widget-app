@@ -5687,3 +5687,35 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
         gap: 4px;
     }
 }
+
+#saveHealth {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    padding: 10px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 8px;
+}
+#saveComparison {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+#saveComparison > div {
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 8px;
+}
+#saveComparison > p {
+    grid-column: 1 / -1;
+}
+#backupSafety {
+    margin-block: 16px;
+    padding: 12px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 8px;
+}
+#backupSafety summary {
+    cursor: pointer;
+    font-weight: 600;
+}

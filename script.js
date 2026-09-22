@@ -3026,11 +3026,20 @@ class KanjiLearningApp {
                 ) {
                     return;
                 }
+                if (data.version !== 3) {
+                    await BackupManager.createRecovery();
+                }
                 const success =
                     data.version === 3
                         ? (await BackupManager.restore(data), true)
                         : StorageManager.importData(e.target.result);
                 if (success) {
+                    const backupConfig = JSON.parse(
+                        localStorage.getItem('kanji_drive_backup') || '{}'
+                    );
+                    backupConfig.dataOwner = '__imported_local_data__';
+                    backupConfig.syncStates = {};
+                    localStorage.setItem('kanji_drive_backup', JSON.stringify(backupConfig));
                     this.showToast('Backup restored successfully! Reloading...');
                     setTimeout(() => {
                         location.reload();
@@ -3040,7 +3049,7 @@ class KanjiLearningApp {
                 }
             } catch (error) {
                 console.error('Error restoring backup:', error);
-                this.showToast('Error restoring backup. Please check the file.');
+                this.showToast(error.message || 'Error restoring backup. Please check the file.');
             }
         };
         reader.readAsText(file);

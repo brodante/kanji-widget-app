@@ -235,3 +235,198 @@ test('backup format accepts image avatars but rejects video avatars and oversize
         dom.window.close();
     }
 });
+
+test('conflict comparison renders summaries safely and exposes restorable downloads', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        const local = {
+            storage: {
+                theme: '<script>unsafe</script>',
+                kanji_progress: '{"mastered":["日"],"studied":["日","月"]}'
+            },
+            media: {}
+        };
+        const cloud = { storage: { theme: 'nami' }, media: { avatar: 'image' } };
+        manager.showComparison(local, cloud, { modifiedTime: new Date().toISOString() });
+        const panel = window.document.getElementById('saveComparison');
+        assert.match(panel.textContent, /Studied: 2/);
+        assert.match(panel.textContent, /Mastered: 1/);
+        assert.match(panel.textContent, /Cloud/);
+        assert.equal(panel.querySelector('script'), null);
+        assert.ok(window.document.getElementById('downloadCloudConflict'));
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('recovery IndexedDB persists and deletes isolated snapshots', async () => {
+    const { dom, window } = await setupUI();
+    try {
+        window.indexedDB = indexedDB;
+        await window.BackupManager.recoveryStore('put', { version: 3, note: 'before restore' });
+        assert.equal((await window.BackupManager.recoveryStore('get')).note, 'before restore');
+        await window.BackupManager.recoveryStore('delete');
+        assert.equal(await window.BackupManager.recoveryStore('get'), undefined);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('save health distinguishes guest, reconnect, pending changes and real upload timestamp', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        const health = window.document.getElementById('saveHealth');
+        manager.renderSaveStatus();
+        assert.match(health.textContent, /Guest/);
+        manager.config.dataOwner = 'learner@example.com';
+        manager.renderSaveStatus();
+        assert.match(health.textContent, /Reconnect required/);
+        manager.token = 'test';
+        manager.expires = Date.now() + 60000;
+        manager.user = { emailAddress: 'learner@example.com' };
+        manager.localDirty = true;
+        manager.renderSaveStatus();
+        assert.match(health.textContent, /Unsaved cloud changes/);
+        assert.match(health.textContent, /None from this device/);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('Drive safety diagnostic verifies readback, stale revision rejection and cleanup using mock service', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        window.confirm = () => true;
+        manager.ensureFolder = async () => 'folder';
+        manager.user = { emailAddress: 'learner@example.com' };
+        let value = 0,
+            revision = 0,
+            cleaned = false;
+        manager.api = async (path, options = {}) => {
+            if (path.startsWith('/files?')) {
+                return { id: 'diagnostic' };
+            }
+            if (path.includes('alt=media')) {
+                return { data: { diagnostic: value }, etag: `revision${revision}` };
+            }
+            if (path.startsWith('/upload/')) {
+                if (
+                    options.headers['If-Match'] &&
+                    options.headers['If-Match'] !== `revision${revision}`
+                ) {
+                    const error = new Error('stale');
+                    error.status = 412;
+                    throw error;
+                }
+                value = JSON.parse(options.body).diagnostic;
+                revision++;
+                return { id: 'diagnostic' };
+            }
+            assert.equal(options.body, '{"trashed":true}');
+            cleaned = true;
+            return {};
+        };
+        await manager.diagnoseDrive();
+        assert.equal(manager.config.checkpointVerified, true);
+        assert.equal(value, 2);
+        assert.equal(cleaned, true);
+        assert.match(window.document.getElementById('driveDiagnosticResult').textContent, /PASS/);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('bulk cloud deletion confirms pinned files, pauses autosaves and never clears local data', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        manager.list = async () => {};
+        manager.files = [{ id: 'pinned', appProperties: { pinned: 'true' } }, { id: 'checkpoint' }];
+        manager.config.autoSync = true;
+        manager.config.frequency = 'daily';
+        window.localStorage.setItem('theme', 'keep-local');
+        window.confirm = (text) => {
+            assert.match(text, /INCLUDING PINNED/);
+            return true;
+        };
+        const deleted = [];
+        manager.api = async (path, options) => {
+            assert.equal(manager.config.autoSync, false);
+            assert.equal(options.body, '{"trashed":true}');
+            deleted.push(path);
+            return {};
+        };
+        await manager.deleteCloudBackups();
+        assert.deepEqual(deleted, ['/files/pinned', '/files/checkpoint']);
+        assert.equal(window.localStorage.getItem('theme'), 'keep-local');
+        assert.equal(manager.config.frequency, 'never');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('partial cloud deletion reports progress and keeps autosaves paused', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        window.confirm = () => true;
+        manager.list = async () => {};
+        manager.files = [{ id: 'one' }, { id: 'two' }];
+        manager.config.autoSync = true;
+        let calls = 0;
+        manager.api = async () => {
+            if (++calls === 2) {
+                throw new Error('offline');
+            }
+            return {};
+        };
+        await assert.rejects(() => manager.deleteCloudBackups(), /1 backups moved to trash/);
+        assert.equal(manager.config.autoSync, false);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('cancelling local data deletion leaves local data and authorization unchanged', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        window.confirm = () => false;
+        manager.token = 'memory-token';
+        window.localStorage.setItem('theme', 'keep-local');
+        await manager.clearLocalData();
+        assert.equal(window.localStorage.getItem('theme'), 'keep-local');
+        assert.equal(manager.token, 'memory-token');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('failed diagnostic preserves learning files and attempts temporary-file cleanup', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        window.confirm = () => true;
+        manager.ensureFolder = async () => 'folder';
+        manager.user = { emailAddress: 'learner@example.com' };
+        let cleanup = false;
+        manager.api = async (path, options = {}) => {
+            if (path.startsWith('/files?')) {
+                return { id: 'diagnostic-only' };
+            }
+            assert.match(path, /diagnostic-only/);
+            if (path.includes('alt=media')) {
+                return { data: { diagnostic: 1 }, etag: null };
+            }
+            if (options.body === '{"trashed":true}') {
+                cleanup = true;
+            }
+            return {};
+        };
+        await manager.diagnoseDrive();
+        assert.equal(cleanup, true);
+        assert.equal(manager.config.checkpointVerified, false);
+        assert.match(
+            window.document.getElementById('driveDiagnosticResult').textContent,
+            /NOT VERIFIED/
+        );
+    } finally {
+        dom.window.close();
+    }
+});

@@ -35,6 +35,7 @@ function setup() {
     vm.runInContext(fs.readFileSync(require.resolve('../backup-manager.js'), 'utf8'), context);
     const Manager = context.window.BackupManager;
     Manager.media = async () => ({});
+    Manager.recoveryStore = async () => {};
     return { Manager, storage, context };
 }
 
@@ -192,6 +193,7 @@ test('Drive history paginates all app-owned files', async () => {
 function syncSetup() {
     const env = setup();
     const manager = new env.Manager();
+    manager.showComparison = () => {};
     manager.token = 'in-memory';
     manager.expires = Date.now() + 60000;
     manager.user = { emailAddress: 'learner@example.com' };
@@ -394,4 +396,132 @@ test('Drive revision conflict stops write and explains how to retry', async () =
         () => manager.api('/files/test', { method: 'PATCH' }),
         /Nothing was overwritten/
     );
+});
+
+test('recovery failure stops a restore before mutating progress or media', async () => {
+    const { Manager, storage } = setup();
+    storage.theme = 'original';
+    Manager.recoveryStore = async () => {
+        throw new Error('QuotaExceeded');
+    };
+    await assert.rejects(
+        () =>
+            Manager.restore({
+                app: 'kanji-widgets',
+                version: 3,
+                storage: { theme: 'replacement' },
+                media: {}
+            }),
+        /Restore stopped/
+    );
+    assert.equal(storage.theme, 'original');
+});
+
+test('recovery captures old state, restores it on undo, and keeps its account owner', async () => {
+    const { Manager, storage } = setup();
+    storage.theme = 'original';
+    storage.kanji_drive_backup = JSON.stringify({ dataOwner: 'original@example.com' });
+    let recovery;
+    Manager.recoveryStore = async (action, value) => {
+        if (action === 'put') {
+            recovery = value;
+        }
+        return recovery;
+    };
+    await Manager.restore({
+        app: 'kanji-widgets',
+        version: 3,
+        storage: { theme: 'replacement' },
+        media: {}
+    });
+    assert.equal(storage.theme, 'replacement');
+    assert.equal(recovery.storage.theme, 'original');
+    assert.equal(await Manager.undoRestore(), 'original@example.com');
+    assert.equal(storage.theme, 'original');
+    assert.equal(recovery.storage.theme, 'original');
+});
+
+test('unchanged cloud checks do not falsify last successful upload time', async () => {
+    const { manager } = await checkpointSetup();
+    manager.config.lastBackup = 123456;
+    await manager.sync();
+    assert.equal(manager.config.lastBackup, 123456);
+    assert.ok(manager.config.lastChecked > 123456);
+});
+
+test('account switch blocks both automatic and direct uploads until an explicit choice', async () => {
+    const { manager } = await checkpointSetup();
+    manager.config.dataOwner = 'other@example.com';
+    manager.files = [];
+    manager.ensureFolder = async () => assert.fail('must not upload to a different account');
+    await assert.rejects(() => manager.backup(), /Account changed/);
+    await manager.sync();
+    assert.match(manager.message, /uploads are blocked/);
+});
+
+test('manual and legacy backups default to pinned, but explicit unpin enables cleanup', () => {
+    const { Manager } = setup();
+    assert.equal(Manager.isPinned({}), true);
+    assert.equal(Manager.isPinned({ appProperties: { backupKind: 'manual' } }), true);
+    assert.equal(Manager.isPinned({ appProperties: { backupKind: 'checkpoint' } }), false);
+    assert.equal(
+        Manager.isPinned({ appProperties: { backupKind: 'checkpoint', pinned: 'true' } }),
+        true
+    );
+    assert.equal(
+        Manager.isPinned({ appProperties: { backupKind: 'manual', pinned: 'false' } }),
+        false
+    );
+});
+
+test('retention excludes pinned backups, including legacy snapshots', async () => {
+    const { manager, cloud } = await checkpointSetup();
+    manager.config.keep = '5';
+    manager.ensureFolder = async () => 'folder';
+    manager.files = [
+        { id: 'manual', appProperties: { backupKind: 'manual' } },
+        { id: 'legacy' },
+        ...Array.from({ length: 7 }, (_, i) => ({
+            id: `checkpoint${i}`,
+            appProperties: { backupKind: 'checkpoint' }
+        }))
+    ];
+    const trashed = [];
+    manager.api = async (path, options) => {
+        if (options.body === '{"trashed":true}') {
+            trashed.push(path);
+        }
+        return { id: 'new' };
+    };
+    await manager.backup({ data: cloud });
+    assert.deepEqual(trashed, ['/files/checkpoint5', '/files/checkpoint6']);
+});
+
+test('a pinned checkpoint is never overwritten by quick save', async () => {
+    const { manager, storage } = await checkpointSetup();
+    manager.files[0].appProperties.pinned = 'true';
+    storage.theme = 'changed';
+    manager.backup = async (options) => {
+        assert.equal(options.target, null);
+    };
+    await manager.sync();
+});
+
+test('known failed Drive safety diagnostic disables in-place updates for that account', async () => {
+    const { manager, storage } = await checkpointSetup();
+    manager.config.diagnosticAccount = manager.user.emailAddress;
+    manager.config.checkpointVerified = false;
+    storage.theme = 'changed';
+    manager.backup = async (options) => {
+        assert.equal(options.target, null);
+    };
+    await manager.sync();
+});
+
+test('connection error guidance distinguishes full storage, quota limits and permission denial', () => {
+    const { Manager } = setup();
+    assert.match(Manager.driveError(403, 'storageQuotaExceeded'), /Drive is full/);
+    assert.match(Manager.driveError(429, ''), /rate-limiting/);
+    assert.match(Manager.driveError(403, ''), /test-user/);
+    assert.match(Manager.driveError(503, ''), /temporarily unavailable/);
 });

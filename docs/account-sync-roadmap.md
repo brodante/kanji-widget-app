@@ -1,0 +1,95 @@
+# Account, sign-in and cloud-save roadmap
+
+This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app currently connects to Drive using browser OAuth. It does not have a permanent app-account database, password sign-up, or backend sessions.
+
+## Must add — reliability and trust
+
+- [x] **Clear account and save status**
+    - Guest, connected, reconnect required, offline, working, unsaved changes and cloud-review states.
+    - Last successful upload from this device is distinct from the last unchanged-data check.
+    - Local fingerprint checks run about every 30 seconds; status is not instantaneous and does not promise background saving.
+- [ ] **Verify checkpoints against real Google Drive** — live acceptance still pending.
+    - [x] Add an opt-in diagnostic using a temporary non-learning-data file.
+    - [x] Verify create/read/update/readback and attempt a stale-revision write; clean up the test file.
+    - [x] Disable in-place updates for the tested account if the diagnostic fails.
+    - [x] Mock-service regression tests for conditional writes and same-ID cloud changes.
+    - [ ] Run the diagnostic on the deployed authorized origin with a real account.
+    - [ ] Complete the two-device simultaneous-save/conflict acceptance test below.
+- [x] **Recovery copy before restoring**
+    - Save a full recovery snapshot in a separate IndexedDB store before local/cloud restore.
+    - Fail closed if the recovery copy cannot be stored; do not restore anyway.
+    - Undo last restore or download the recovery JSON from Settings.
+    - Retain one recovery slot, exclude it from normal backups, preserve the local account-association marker on undo.
+- [x] **Better conflict comparison**
+    - This device vs cloud, cloud timestamp, studied/mastered totals, SRS entry count, theme, media count and differing saved sections.
+    - Separate directly importable downloads for each version.
+    - Explicit replace-not-merge confirmation and recovery copy before cloud restore.
+- [x] **Protect manual backups from automatic cleanup**
+    - Manual and legacy untyped backups are pinned by default.
+    - Pin/unpin individual entries; unpin requires confirmation.
+    - Retention counts only unpinned files. Pinned checkpoints are not overwritten by quick save.
+    - Individual and bulk deletion explicitly warn about pinned files.
+- [x] **Google account-switch protection**
+    - Associate device data with the connected account; block both automatic and ordinary manual upload to a different account until explicitly chosen.
+    - Offer that account's cloud copy or an explicit separate upload of the device copy.
+    - Preserve data on disconnect; provide separately confirmed disconnect-and-clear-device.
+    - Imported local files require an explicit account choice before subsequent upload.
+- [x] **Actionable connection errors**
+    - Offline/network, expired access, denied permission, quota/full storage, service failures and stale revisions have targeted instructions.
+    - Origin-mismatch guidance is shown in Settings; Google's separate popup error cannot always be intercepted by this app.
+    - Local learning remains available; failures never claim a successful upload.
+- [x] **Privacy and data controls**
+    - In-app explanation of local/cloud data, exclusions and lack of app encryption.
+    - Full learning-data export, cloud-backup deletion, local-data deletion and Google revocation link are separate actions.
+    - Bulk cloud deletion disables automatic saves, including on partial failure, and reports partial completion.
+
+## Should add — everyday usability
+
+- [ ] Editable display name/nickname, stored with the profile and included in backups (not globally unique).
+- [ ] Dedicated profile page: avatar, nickname, learning start date, stats and save controls.
+- [ ] Guided first-connection onboarding: local/cloud explanation and first checkpoint vs restore.
+- [ ] Debounced autosave after meaningful changes, grouped writes and exponential backoff.
+- [ ] Backup previews and editable labels such as “Before N4 reset”; app/backup version details.
+- [ ] Device labels such as Phone/Laptop on saves (not a secure session-management system).
+- [ ] Explicit migration framework, newer-version warnings and older-backup compatibility tests.
+
+## Could add — requires an account service
+
+The frontend can remain on GitHub Pages; these features require a managed authentication/database service or secure backend. Evaluate current Firebase/Supabase capabilities and pricing before selecting one. Do not build custom password storage as a shortcut.
+
+- [ ] Persistent app accounts across reloads; separate from expiring Google Drive authorization.
+- [ ] GitHub sign-in as an alternative provider, paired with app-managed storage or separately connected Drive.
+- [ ] Secure Google/GitHub account linking with explicit verified linking, never email-only automatic merging.
+- [ ] Unique usernames with reservation, rename rules, uniqueness checks and abuse protections.
+- [ ] Structured cross-device database sync with defined review/reset/deletion conflict rules.
+- [ ] Account recovery, session list/revocation and safe provider unlinking that preserves a login method.
+
+## Optional — nice extras
+
+- [ ] Named save slots for separate learning journeys.
+- [ ] Selective progress/settings/theme import and export.
+- [ ] Encrypted export files, including lost-password/recovery warnings.
+- [ ] Optional public profiles and shareable milestones.
+- [ ] Passkeys supported by the selected account service.
+- [ ] Email magic-link sign-in.
+- [ ] Backup health reminders and storage-usage estimates.
+
+## Live must-have acceptance checklist
+
+Use disposable/test progress and export your real data before testing. Update both devices first.
+
+1. Deploy this branch through the normal Pages process. Confirm your exact HTTPS origin is authorized in Google Console.
+2. Connect Google → Settings → Backup & Data → **Recovery, privacy & connection help** → **Test Drive checkpoint safety**. Expect PASS, then confirm the temporary diagnostic file is in Drive trash. A failed test should clearly report why; don't mark live verification done on a failure.
+3. Create a checkpoint from device A. Restore it on B, reconnect, and change progress on A. Quick save A; quick save B must identify the changed cloud contents even if the file ID stayed the same.
+4. Edit both devices. Confirm comparison totals and that local data is not silently replaced. Download both copies, then choose one. Repeat saving nearly simultaneously; verify conflicts or separate preserved copies, never a falsely reported safe overwrite.
+5. Restore an older backup, change some data, then **Undo last restore**. Confirm progress, settings and uploaded media return to the pre-restore state. Undo intentionally discards post-restore edits. Simulate full/unavailable browser storage and confirm restore stops before mutation.
+6. Pin a manual snapshot, set retention to five, create more than five unpinned checkpoints; verify the pinned file survives and only excess unpinned files are trashed.
+7. Switch from Google account A to B with autosync enabled. Confirm no local learning data is uploaded until explicitly choosing B's cloud data or saving this device's copy.
+8. On a disposable account/browser profile, test disconnect, export, cloud deletion (including a pinned file), and disconnect-and-clear-device separately. Confirm unrelated Drive files and browser storage are untouched. Revoke access in Google Account settings and verify reconnect instructions.
+9. Reconnect/check an unchanged save: **last successful upload** must not advance. Test offline and expired access: no false success, local learning still available.
+
+Record live results here (date, browser/device, pass/fail and relevant error text). Never record credentials or access tokens.
+
+- Live Drive diagnostic: **not run in this development session**.
+- Real two-device acceptance: **pending**.
+- Automated regression suite: run `npm test`; service responses and browser DOM are simulated, with fake IndexedDB transaction tests.
