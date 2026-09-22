@@ -1,6 +1,17 @@
 # Account, sign-in and cloud-save roadmap
 
-This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app currently connects to Drive using browser OAuth. It does not have a permanent app-account database, password sign-up, or backend sessions.
+This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app connects to Drive using browser OAuth. Persistent Firebase Google app sign-in is now implemented but has the owner’s public project configuration; provider/domain setup and real-browser verification remain pending. App login does not renew Drive permissions. Firestore progress sync and password sign-up are not implemented.
+
+## Current focus: Firebase Spark app sign-in
+
+Other feature work is paused. See [the setup guide and phased plan](firebase-auth-setup.md).
+
+- [x] Implement persistent Google app identity separately from Drive, with setup/error states and no learning-data writes on login.
+- [x] Add account-menu/Profile controls, Google-photo fallback and mocked SDK regression coverage.
+- [x] Owner supplied public Web config for `kanji-widgets`; added to the app.
+- [ ] Owner confirms Spark without billing, enables Google and authorizes domains.
+- [ ] Verify real sign-in, reload/browser-restart persistence, cross-tab sign-out and production/mobile behavior.
+- [ ] Next phase only after verification: secure, quota-aware Firestore progress sync with ownership and conflict safeguards. No database is enabled yet.
 
 ## Must add: reliability and trust
 

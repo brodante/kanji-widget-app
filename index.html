@@ -73,7 +73,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css?v=settings-v1" />
+        <link rel="stylesheet" href="styles.css?v=auth-v1" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -225,6 +225,24 @@
                             ×
                         </button>
                     </div>
+                    <div class="app-auth-section" aria-label="App sign-in">
+                        <p class="app-auth-label">KanjiWidgets account</p>
+                        <p data-app-auth-status role="status" aria-live="polite">
+                            Checking app sign-in…
+                        </p>
+                        <div class="backup-buttons">
+                            <button type="button" class="backup-btn" data-app-sign-in disabled>
+                                Sign in with Google
+                            </button>
+                            <button type="button" class="backup-btn" data-app-sign-out hidden>
+                                Sign out of app
+                            </button>
+                            <button type="button" class="backup-btn" data-app-auth-retry hidden>
+                                Retry connection
+                            </button>
+                        </div>
+                    </div>
+                    <p class="app-auth-label">Google Drive backups (separate connection)</p>
                     <div class="backup-buttons account-primary-actions">
                         <button id="accountConnect" type="button" class="backup-btn">
                             Connect with Google
@@ -1736,6 +1754,29 @@ filter: blur(10px) brightness(1) saturate(1);
                         </p>
                         <p id="profilePageFeedback" role="status" aria-live="polite"></p>
                     </section>
+                    <section class="profile-card" aria-label="Account sign-in">
+                        <div class="app-auth-section" aria-label="App sign-in">
+                            <p class="app-auth-label">KanjiWidgets account</p>
+                            <p data-app-auth-status role="status" aria-live="polite">
+                                Checking app sign-in…
+                            </p>
+                            <div class="backup-buttons">
+                                <button type="button" class="backup-btn" data-app-sign-in disabled>
+                                    Sign in with Google
+                                </button>
+                                <button type="button" class="backup-btn" data-app-sign-out hidden>
+                                    Sign out of app
+                                </button>
+                                <button type="button" class="backup-btn" data-app-auth-retry hidden>
+                                    Retry connection
+                                </button>
+                            </div>
+                        </div>
+                        <p class="profile-hint">
+                            Sign-in does not upload, restore or separate this browser’s learning
+                            data. Only sign in on a trusted device. Drive authorization is separate.
+                        </p>
+                    </section>
                     <section class="profile-card" aria-labelledby="profileSavesTitle">
                         <h2 id="profileSavesTitle">Your saves</h2>
                         <p id="profilePageSaveHealth" role="status" aria-live="polite"></p>
@@ -1786,8 +1827,8 @@ filter: blur(10px) brightness(1) saturate(1);
                         </div>
                         <p id="profilePageCloudStatus" role="status" aria-live="polite"></p>
                         <p class="profile-hint">
-                            You can learn without connecting an account. Google access expires;
-                            local data stays on this device.
+                            You can learn without signing in. Drive access expires separately; local
+                            data stays on this device.
                         </p>
                     </section>
                 </div>
@@ -1805,8 +1846,10 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="kanji-data.js"></script>
         <script src="drawing-pad.js"></script>
         <script src="backup-config.js"></script>
-        <script src="backup-manager.js?v=settings-v1"></script>
-        <script src="profile-page.js?v=settings-v1"></script>
+        <script src="backup-manager.js?v=auth-v1"></script>
+        <script src="profile-page.js?v=auth-v1"></script>
+        <script src="firebase-config.js?v=auth-v1"></script>
+        <script src="app-auth.js?v=auth-v1"></script>
         <script src="script.js"></script>
     </body>
 </html>

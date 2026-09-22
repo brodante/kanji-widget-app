@@ -169,9 +169,9 @@ test('app entry points and offline cache use the same versioned profile assets',
     const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
     const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
     for (const asset of [
-        'backup-manager.js?v=settings-v1',
-        'profile-page.js?v=settings-v1',
-        'styles.css?v=settings-v1'
+        'backup-manager.js?v=auth-v1',
+        'profile-page.js?v=auth-v1',
+        'styles.css?v=auth-v1'
     ]) {
         assert.ok(html.includes(asset), asset);
         assert.ok(worker.includes(asset), asset);

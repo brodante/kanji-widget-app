@@ -563,3 +563,36 @@ test('backup preview does not restore data and labels are a separate metadata up
         dom.window.close();
     }
 });
+
+test('persistent app identity and photo survive Drive disconnect without replacing a custom avatar', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        window.kanjiAuth = {
+            user: {
+                displayName: 'App learner',
+                email: 'app@example.com',
+                photoURL: 'https://example.com/app.png'
+            }
+        };
+        manager.renderAccount();
+        assert.equal(window.document.getElementById('accountHeading').textContent, 'App learner');
+        assert.equal(
+            window.document.getElementById('accountIdentity').textContent,
+            'app@example.com'
+        );
+        assert.equal(
+            window.document.getElementById('accountAvatar').dataset.source,
+            'https://example.com/app.png'
+        );
+        window.document.getElementById('driveDisconnect').click();
+        assert.equal(window.document.getElementById('accountHeading').textContent, 'App learner');
+        manager.avatarURL = 'blob:custom-avatar';
+        manager.renderAvatar();
+        assert.equal(
+            window.document.getElementById('accountAvatar').dataset.source,
+            'blob:custom-avatar'
+        );
+    } finally {
+        dom.window.close();
+    }
+});

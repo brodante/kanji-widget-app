@@ -6172,3 +6172,21 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     scrollbar-width: thin;
     scrollbar-color: #8887 transparent;
 }
+
+/* App identity and Drive permissions have separate lifecycles. */
+.app-auth-section {
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+}
+.app-auth-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0.4rem 0;
+}
+[data-app-auth-status] {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    margin: 0.4rem 0 0.65rem;
+}

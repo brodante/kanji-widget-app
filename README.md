@@ -74,3 +74,9 @@ time; verify `profile-v1` before reporting a new diagnostic result.
 
 Settings now includes profile and section shortcuts. Imports of known v1/v2 exports use
 the same validated, recovery-protected restore path as current backups.
+
+### Persistent Google app sign-in (Firebase Spark)
+
+Persistent app sign-in is implemented separately from Google Drive permissions. The owner's public `kanji-widgets` project configuration is now in `firebase-config.js`. Google-provider/domain setup and real-browser verification remain pending. See [Firebase setup and phased plan](docs/firebase-auth-setup.md) for the exact free-plan setup steps and verification checklist.
+
+Keep the project on **Spark with no billing account linked**. Google login does not require moving the site off GitHub Pages. App sign-in preserves local data but does not yet sync progress through Firestore or renew Drive access. Signing out of the app does not disconnect Drive; both controls are explicitly labeled. Firebase session credentials are excluded from learning backups. Real OAuth verification is pending owner setup.

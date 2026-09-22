@@ -1,5 +1,5 @@
 /* global openCustomThemeDB */
-// Static-site OAuth: access tokens stay in memory, never in a backup or storage.
+// Drive OAuth: access tokens stay in memory, never in a backup or storage.
 class BackupManager {
     static BUILD = 'profile-v1';
     static DIAGNOSTIC = 'metadata-etag-v1';
@@ -471,6 +471,9 @@ class BackupManager {
             )
         ) {
             return;
+        }
+        if (window.kanjiAuth?.user && !(await window.kanjiAuth.signOut())) {
+            throw new Error('Could not sign out of the app. Retry before clearing local data.');
         }
         this.config.autoSync = false;
         this.config.frequency = 'never';
@@ -1411,14 +1414,17 @@ class BackupManager {
             return;
         }
         const connected = Boolean(this.authorized() && this.user);
+        const appUser = window.kanjiAuth?.user;
         button.dataset.connected = String(connected);
         button.setAttribute(
             'aria-label',
             this.pendingCloud ? 'Account & sync: cloud copy needs review' : 'Account & sync'
         );
-        document.getElementById('accountHeading').textContent = connected
-            ? this.user.displayName || 'Google account'
-            : 'Guest user';
+        document.getElementById('accountHeading').textContent = appUser
+            ? appUser.displayName || 'Google account'
+            : connected
+              ? this.user.displayName || 'Google account'
+              : 'Guest user';
         try {
             const nickname = JSON.parse(localStorage.getItem('kanji_profile') || '{}').nickname;
             if (typeof nickname === 'string' && nickname.trim()) {
@@ -1427,12 +1433,14 @@ class BackupManager {
         } catch {
             /* A malformed local profile must not prevent connecting. */
         }
-        document.getElementById('accountIdentity').textContent = connected
-            ? this.user.emailAddress
-            : 'Local profile · connect to save to Drive.';
+        document.getElementById('accountIdentity').textContent = appUser
+            ? appUser.email || 'Signed in to KanjiWidgets'
+            : connected
+              ? this.user.emailAddress
+              : 'Local profile · connect to save to Drive.';
         document.getElementById('accountConnect').textContent = connected
-            ? 'Switch Google account'
-            : 'Connect with Google';
+            ? 'Switch Drive account'
+            : 'Connect with Google Drive';
         document.getElementById('accountDisconnect').hidden = !connected;
         document.getElementById('accountOnboarding').hidden = !connected || !this.onboardingPending;
         document.getElementById('syncConflict').hidden =
@@ -1690,10 +1698,13 @@ class BackupManager {
     }
 
     renderAvatar() {
-        const photo = this.user?.photoLink;
-        // Google photo links are used only while authorized; never persisted or backed up.
+        const appPhoto = window.kanjiAuth?.user?.photoURL;
+        const photo = appPhoto || this.user?.photoLink;
+        // App session or authorized Drive photo is a fallback only; custom uploads win.
         const googlePhoto =
-            this.authorized() && typeof photo === 'string' && photo.startsWith('https://')
+            (appPhoto || this.authorized()) &&
+            typeof photo === 'string' &&
+            photo.startsWith('https://')
                 ? photo
                 : '';
         const source = this.avatarURL || googlePhoto;

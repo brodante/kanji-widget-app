@@ -79,16 +79,21 @@ class ProfilePage {
         }
         const manager = this.manager;
         const connected = manager.authorized() && manager.user;
+        const appUser = window.kanjiAuth?.user;
         const nickname = ProfilePage.read('kanji_profile').nickname;
         document.getElementById('profilePageTitle').textContent =
             typeof nickname === 'string' && nickname.trim()
                 ? nickname
-                : connected
-                  ? manager.user.displayName || 'Google account'
-                  : 'Guest user';
-        document.getElementById('profilePageIdentity').textContent = connected
-            ? manager.user.emailAddress
-            : 'Local profile. Connect whenever you want a cloud copy.';
+                : appUser
+                  ? appUser.displayName || 'Google account'
+                  : connected
+                    ? manager.user.displayName || 'Google account'
+                    : 'Guest user';
+        document.getElementById('profilePageIdentity').textContent = appUser
+            ? appUser.email || 'Signed in to KanjiWidgets'
+            : connected
+              ? manager.user.emailAddress
+              : 'Local profile. Connect whenever you want a cloud copy.';
         const stats = ProfilePage.stats();
         const date = (value) =>
             new Date(value).toLocaleDateString(undefined, {
@@ -115,8 +120,8 @@ class ProfilePage {
         document.getElementById('profilePageCloudStatus').textContent =
             document.getElementById('accountStatus').textContent;
         document.getElementById('profilePageConnect').textContent = connected
-            ? 'Switch Google account'
-            : 'Connect with Google';
+            ? 'Switch Drive account'
+            : 'Connect with Google Drive';
         document.getElementById('profilePageReview').hidden =
             !manager.pendingCloud && !manager.needsAccountChoice() && !manager.onboardingPending;
         document.getElementById('profilePageReview').textContent = manager.onboardingPending
