@@ -8,7 +8,7 @@
         "lint:fix": "eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/ --fix",
         "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
         "format:check": "prettier --check . --ignore-path .gitignore --ignore-path .prettierignore",
-        "test": "node test/test-srs-ai.js",
+        "test": "node test/test-srs-ai.js && node --test test/test-backup.js test/test-account-ui.js",
         "prepare": "husky install"
     },
     "lint-staged": {
@@ -30,7 +30,9 @@
     "devDependencies": {
         "eslint": "^8.53.0",
         "eslint-config-prettier": "^10.1.8",
+        "fake-indexeddb": "^6.2.5",
         "husky": "^8.0.3",
+        "jsdom": "^26.1.0",
         "lint-staged": "^15.5.2",
         "prettier": "^3.1.0"
     }

@@ -5486,3 +5486,163 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
 .ai-provider-key-link i {
     font-size: 0.7rem;
 }
+
+/* Cloud backups use existing Settings controls and theme colors. */
+#driveBackup {
+    padding: 16px 0;
+    border-top: 1px solid var(--border-color, #8885);
+    border-bottom: 1px solid var(--border-color, #8885);
+    margin-bottom: 20px;
+}
+#driveBackup p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 12px 0;
+}
+#driveBackup input {
+    max-width: 100%;
+    min-width: 0;
+}
+#driveBackup .backup-buttons {
+    flex-wrap: wrap;
+}
+#driveFiles {
+    padding: 0;
+    list-style: none;
+    max-height: 360px;
+    overflow: auto;
+}
+#driveFiles li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color, #8885);
+}
+#driveFiles span {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+#driveFiles button {
+    margin: 3px;
+    padding: 7px 10px;
+}
+#driveStatus {
+    overflow-wrap: anywhere;
+}
+#driveBackup button:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+/* Keep all header actions inside the phone viewport, including safe areas. */
+.app-header {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+}
+.app-header h1 {
+    min-width: 0;
+}
+.header-controls {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    margin-left: auto;
+}
+.header-controls > .icon-btn {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+}
+#accountBtn[data-connected='true'] {
+    background: var(--secondary-color, #467c68);
+    box-shadow: inset 0 0 0 2px currentColor;
+}
+#accountPanel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 12px;
+    width: min(390px, calc(100% - 24px));
+    box-sizing: border-box;
+    max-height: min(75vh, 680px);
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px;
+    background: var(--surface, #fff);
+    color: var(--on-surface, #222);
+    border: 1px solid var(--border-color, #8885);
+    box-shadow: 0 12px 40px #0004;
+    z-index: 110;
+}
+#accountPanel[hidden],
+#syncConflict[hidden],
+#accountDisconnect[hidden] {
+    display: none;
+}
+.account-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.account-panel-heading h2 {
+    font-size: 1.15rem;
+    margin: 0;
+}
+#accountClose {
+    background: none;
+    color: inherit;
+    border: 0;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+#accountPanel p {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin: 12px 0;
+    overflow-wrap: anywhere;
+}
+#accountPanel small {
+    display: block;
+    line-height: 1.5;
+    opacity: 0.8;
+}
+#accountPanel .backup-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-block: 12px;
+}
+#accountPanel .backup-btn {
+    flex: 1 1 auto;
+}
+.account-sync-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+.account-sync-toggle input {
+    margin-top: 5px;
+}
+#syncConflict {
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    padding: 12px;
+}
+@media (max-width: 520px) {
+    .app-header h1 {
+        flex-basis: 100%;
+        font-size: 1.3rem;
+    }
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+        gap: 4px;
+    }
+}

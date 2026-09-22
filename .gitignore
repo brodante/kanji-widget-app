@@ -70,3 +70,6 @@ docs/planning/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Downloaded OAuth credentials must never be published
+client_secret_*.json

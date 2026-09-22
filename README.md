@@ -49,3 +49,13 @@ GPLv3. See `LICENSE`.
 ---
 
 Made with 愛 by [d4nte](https://github.com/brodante).
+
+### Google Drive backup
+
+The header Account & sync menu shows guest/Google account status and supports safe
+foreground multi-device sync with cloud-change review.
+Settings → Backup & Data supports Google account authorization, full Drive backups,
+scheduled uploads while the app is open and authorized, history, download and restore.
+The site owner must configure a public Google OAuth client ID first.
+See [GitHub Pages / Google Drive setup](docs/google-drive-backup.md) for domain setup,
+privacy details and browser-only scheduling limits.

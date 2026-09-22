@@ -180,6 +180,17 @@
                         </div>
                     </div>
 
+                    <button
+                        id="accountBtn"
+                        class="icon-btn"
+                        type="button"
+                        title="Account & sync"
+                        aria-label="Account & sync"
+                        aria-expanded="false"
+                        aria-controls="accountPanel"
+                    >
+                        <i class="fas fa-circle-user" aria-hidden="true"></i>
+                    </button>
                     <button id="settingsBtn" class="icon-btn" title="Settings">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -187,6 +198,58 @@
                         <i class="fas fa-moon"></i>
                     </button>
                 </div>
+                <section id="accountPanel" hidden aria-labelledby="accountHeading">
+                    <div class="account-panel-heading">
+                        <h2 id="accountHeading">Guest user</h2>
+                        <button id="accountClose" type="button" aria-label="Close account panel">
+                            ×
+                        </button>
+                    </div>
+                    <p id="accountIdentity">Your learning data is saved on this device.</p>
+                    <div class="backup-buttons">
+                        <button id="accountConnect" type="button" class="backup-btn">
+                            Connect with Google
+                        </button>
+                        <button id="accountDisconnect" type="button" class="backup-btn" hidden>
+                            Disconnect
+                        </button>
+                    </div>
+                    <p>
+                        Use the same Google account on your devices to share progress, settings and
+                        themes through Drive.
+                    </p>
+                    <label class="account-sync-toggle"
+                        ><input id="accountAutoSync" type="checkbox" /> Sync automatically while
+                        this app is open</label
+                    >
+                    <div class="backup-buttons">
+                        <button id="accountSync" type="button" class="backup-btn">Sync now</button>
+                        <button id="accountBackup" type="button" class="backup-btn">
+                            Back up now
+                        </button>
+                        <button id="accountSettings" type="button" class="backup-btn">
+                            Backup settings & history
+                        </button>
+                    </div>
+                    <div id="syncConflict" hidden>
+                        <p>
+                            A cloud copy needs your review. Choose which version to use. Nothing has
+                            been overwritten.
+                        </p>
+                        <button id="syncUseCloud" type="button" class="backup-btn">
+                            Use cloud copy
+                        </button>
+                        <button id="syncUseLocal" type="button" class="backup-btn">
+                            Save this device’s copy
+                        </button>
+                    </div>
+                    <p id="accountStatus" role="status" aria-live="polite"></p>
+                    <small
+                        >Google access expires and must be reconnected after a reload. Sync pauses
+                        when closed or offline. GitHub connection is not available on this static
+                        site.</small
+                    >
+                </section>
                 <!-- SEARCH PANEL -->
                 <div id="searchPanel" class="search-panel">
                     <div class="search-input-wrapper">
@@ -609,15 +672,110 @@
                                 <option value="monthly">Monthly</option>
                             </select>
                         </div>
-                        <div class="setting-group">
-                            <label for="onlineBackupFreq">Online Backup Frequency:</label>
-                            <select id="onlineBackupFreq">
-                                <option value="never" selected>Never</option>
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
-                        </div>
+                        <!-- Kept for compatibility with existing device settings. Cloud scheduling is separate. -->
+                        <select id="onlineBackupFreq" hidden aria-hidden="true">
+                            <option value="never">Never</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                        <section id="driveBackup" aria-labelledby="driveHeading">
+                            <h3 id="driveHeading">Google Drive backups</h3>
+                            <p>
+                                Connect your Google account to save progress, review schedules,
+                                settings, themes and uploaded backgrounds in a dedicated Drive
+                                folder. API keys are excluded. Backups are private to your Drive,
+                                but not encrypted by this app.
+                            </p>
+                            <p>
+                                <strong
+                                    >Automatic backups require this app to be open and Google access
+                                    to be valid.</strong
+                                >
+                                Google access expires (usually in about an hour); reconnect when
+                                prompted. Missed backups run when you return and reconnect.
+                                Restoring replaces this device’s data — this is not live
+                                multi-device sync.
+                            </p>
+                            <details id="driveClientSetup">
+                                <summary>Google connection setup</summary>
+                                <div class="setting-group">
+                                    <label for="driveClientId">Public Google OAuth client ID</label
+                                    ><input
+                                        id="driveClientId"
+                                        type="text"
+                                        autocomplete="off"
+                                        placeholder="…apps.googleusercontent.com"
+                                    />
+                                </div>
+                                <p>
+                                    The site owner can configure this once for everyone. Never enter
+                                    a client secret.
+                                </p>
+                            </details>
+                            <p>
+                                <a href="docs/google-drive-backup.md" target="_blank" rel="noopener"
+                                    >Setup guide for GitHub Pages</a
+                                >
+                            </p>
+                            <div class="backup-buttons">
+                                <button id="driveConnect" class="backup-btn" type="button">
+                                    Connect with Google
+                                </button>
+                                <button id="driveDisconnect" class="backup-btn" type="button">
+                                    Disconnect Google
+                                </button>
+                            </div>
+                            <div class="setting-group">
+                                <label for="driveFrequency">Automatic cloud backup</label
+                                ><select id="driveFrequency">
+                                    <option value="never">Off (manual only)</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Every 7 days</option>
+                                    <option value="monthly">Every 30 days</option>
+                                </select>
+                            </div>
+                            <div class="setting-group">
+                                <label for="driveTime">Backup time (this device’s local time)</label
+                                ><input id="driveTime" type="time" value="19:00" required />
+                            </div>
+                            <div class="setting-group">
+                                <label for="drivePrefix">Backup filename prefix</label
+                                ><input
+                                    id="drivePrefix"
+                                    type="text"
+                                    maxlength="50"
+                                    pattern="[a-zA-Z0-9_-]+"
+                                    value="kanji-backup"
+                                />
+                            </div>
+                            <div class="setting-group">
+                                <label for="driveKeep">Keep cloud backups</label
+                                ><select id="driveKeep">
+                                    <option value="0">All (no automatic deletion)</option>
+                                    <option value="5">Newest 5</option>
+                                    <option value="10">Newest 10</option>
+                                    <option value="20">Newest 20</option>
+                                </select>
+                            </div>
+                            <p>
+                                When a limit is selected, older backups created by this app in its
+                                folder are moved to Drive trash after a successful upload, including
+                                backups from other devices.
+                            </p>
+                            <div class="backup-buttons">
+                                <button id="driveNow" class="backup-btn" type="button">
+                                    Back up now</button
+                                ><button id="driveRefresh" class="backup-btn" type="button">
+                                    Refresh backup history
+                                </button>
+                            </div>
+                            <p id="driveStatus" role="status" aria-live="polite"></p>
+                            <a id="driveFolder" hidden target="_blank" rel="noopener"
+                                >Open backup folder in Google Drive</a
+                            >
+                            <ul id="driveFiles" aria-label="Google Drive backup files"></ul>
+                        </section>
                         <div class="setting-group">
                             <div class="backup-buttons">
                                 <button id="createBackup" class="backup-btn">
@@ -1300,6 +1458,8 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
         <script src="drawing-pad.js"></script>
+        <script src="backup-config.js"></script>
+        <script src="backup-manager.js"></script>
         <script src="script.js"></script>
     </body>
 </html>

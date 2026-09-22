@@ -1,3 +1,4 @@
+/* global BackupManager */
 // ==========================================
 // GLOBAL ANIMATION TRACKERS
 // ==========================================
@@ -2988,9 +2989,9 @@ class KanjiLearningApp {
         }
     }
 
-    createLocalBackup() {
+    async createLocalBackup() {
         try {
-            const backupData = StorageManager.exportData();
+            const backupData = JSON.stringify(await BackupManager.snapshot(), null, 2);
             const blob = new Blob([backupData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
@@ -3017,9 +3018,18 @@ class KanjiLearningApp {
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
-                const success = StorageManager.importData(e.target.result);
+                const data = JSON.parse(e.target.result);
+                if (
+                    !confirm('Replace this device’s saved progress and settings with this backup?')
+                ) {
+                    return;
+                }
+                const success =
+                    data.version === 3
+                        ? (await BackupManager.restore(data), true)
+                        : StorageManager.importData(e.target.result);
                 if (success) {
                     this.showToast('Backup restored successfully! Reloading...');
                     setTimeout(() => {
@@ -3064,10 +3074,7 @@ class KanjiLearningApp {
             }
         }
 
-        // Online backup would be implemented here with cloud storage API
-        if (this.settings.onlineBackupFreq !== 'never') {
-            this.showToast('Online backup feature coming soon!');
-        }
+        // Google Drive scheduling is managed independently by BackupManager.
     }
 
     checkBackupDue() {
@@ -3092,9 +3099,9 @@ class KanjiLearningApp {
         }
     }
 
-    autoCreateBackup() {
+    async autoCreateBackup() {
         try {
-            const backupData = StorageManager.exportData();
+            const backupData = JSON.stringify(await BackupManager.snapshot());
             localStorage.setItem(`autoBackup_${Date.now()}`, backupData);
             localStorage.setItem('lastLocalBackup', Date.now().toString());
 
