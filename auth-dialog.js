@@ -565,12 +565,14 @@ class AuthDialog {
         this.setBusy(false);
         this.tab = 'signin';
         this.render();
-        this.setFeedback(
-            'info',
-            done
-                ? 'Signed out. Local progress is kept. Drive has its own Disconnect button.'
-                : 'Sign-out did not complete.'
-        );
+        if (done) {
+            this.setFeedback('info', auth.message || 'Signed out. Local progress is kept.');
+        } else if (auth.message) {
+            this.setFeedback('error', auth.message);
+        } else {
+            // The sign-out confirmation was dismissed: nothing changed.
+            this.setFeedback('info', 'Sign-out cancelled. Nothing was removed from this device.');
+        }
     }
 
     // -------------------------------------------------------------- username

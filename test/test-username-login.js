@@ -24,6 +24,8 @@ async function setupDom() {
     await new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
     window.eval(read('username-policy.js'));
     window.eval(read('username-directory.js'));
+    // jsdom has no confirm(): the sign-out prompt is answered by each test.
+    window.confirm = () => true;
     return { dom, window };
 }
 
@@ -163,6 +165,8 @@ function fakeAuthSdk({ user = null, error = null, calls = [] } = {}) {
             notify(null);
         }
     };
+    // Stands in for the SDK announcing an auth change from another tab.
+    sdk.announce = (next) => notify(next);
     return sdk;
 }
 
@@ -604,6 +608,89 @@ test('sign-out clears the photo, nickname and username but keeps learning progre
     }
 });
 
+test('a sign-out announced by another tab still clears this tab', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('ui-feedback.js'));
+        window.eval(read('backup-manager.js'));
+        window.eval(read('avatar-crop.js'));
+        window.eval(read('app-auth.js'));
+        window.BackupManager.media = async () => ({});
+        window.URL.revokeObjectURL = () => {};
+        const manager = new window.BackupManager();
+        window.driveBackup = manager;
+        manager.avatarURL = 'blob:photo';
+        window.AvatarCrop.write({ x: 0.5, y: 0.5, zoom: 1, ratio: 1 });
+        window.localStorage.setItem('kanji_profile', JSON.stringify({ nickname: 'Dante' }));
+
+        const sdk = fakeAuthSdk({ user: passwordAccount });
+        const auth = new window.AppAuth(config, async () => sdk);
+        await auth.init();
+        auth.user = passwordAccount;
+        if (!window.kanjiUsernames) {
+            window.kanjiUsernames = new window.UsernameDirectory();
+        }
+        window.kanjiUsernames.handle = { uid: 'password-uid', username: 'dante_kanji' };
+
+        // Another tab signs out; the SDK announces it here.
+        sdk.announce(null);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        assert.equal(manager.avatarURL, '', 'the photo goes even without a local sign-out');
+        assert.equal(window.AvatarCrop.read(), null);
+        assert.deepEqual(JSON.parse(window.localStorage.getItem('kanji_profile')), {});
+        assert.equal(window.kanjiUsernames.handle, null);
+        assert.match(auth.message, /another tab/i);
+        assert.match(auth.message, /learning progress stays/i);
+        for (const note of window.document.querySelectorAll('[data-sign-out-note]')) {
+            assert.equal(note.hidden, true, 'the disclosure is hidden once nobody is signed in');
+        }
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('dismissing the sign-out confirmation removes nothing', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('ui-feedback.js'));
+        window.eval(read('backup-manager.js'));
+        window.eval(read('avatar-crop.js'));
+        window.eval(read('app-auth.js'));
+        const removed = [];
+        window.BackupManager.media = async (write, slots) => {
+            removed.push(['media', slots.join(',')]);
+            return {};
+        };
+        const manager = new window.BackupManager();
+        window.driveBackup = manager;
+        manager.avatarURL = 'blob:photo';
+        window.AvatarCrop.write({ x: 0.5, y: 0.5, zoom: 1, ratio: 1 });
+        window.localStorage.setItem('kanji_profile', JSON.stringify({ nickname: 'Dante' }));
+
+        let asked = '';
+        window.confirm = (text) => {
+            asked = text;
+            return false;
+        };
+        const sdk = fakeAuthSdk({ user: passwordAccount });
+        const auth = new window.AppAuth(config, async () => sdk);
+        await auth.init();
+        auth.user = passwordAccount;
+
+        assert.equal(await auth.signOut(), false, 'a dismissed prompt is not a sign-out');
+        assert.match(asked, /photo/i, 'the prompt names what is removed');
+        assert.match(asked, /progress.*kept|Kept: kanji progress/i, 'and what is kept');
+        assert.equal(auth.user, passwordAccount, 'the session is untouched');
+        assert.equal(manager.avatarURL, 'blob:photo');
+        assert.ok(window.AvatarCrop.read());
+        assert.equal(JSON.parse(window.localStorage.getItem('kanji_profile')).nickname, 'Dante');
+        assert.deepEqual(removed, [], 'nothing is deleted when the prompt is dismissed');
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('a cancelled or failed sign-out leaves the local identity alone', async () => {
     const { dom, window } = await setupDom();
     try {
@@ -688,6 +775,26 @@ test('availability checks normalise, cache and explain taken or reserved names',
         const released = await directory.available('lapsed');
         assert.equal(released.available, true);
         assert.equal(released.reason, 'released');
+        // A released name belongs to nobody, so re-reading the cached answer must not
+        // turn into "that is your current username".
+        const readsBefore = calls.reads;
+        const releasedAgain = await directory.available('lapsed');
+        assert.equal(releasedAgain.available, true);
+        assert.equal(releasedAgain.reason, 'cached');
+        assert.match(releasedAgain.message, /released by its previous owner/i);
+        assert.equal(calls.reads, readsBefore, 'a fresh release answer is served from cache');
+        const otherAccount = makeDirectory(window, {
+            sdk,
+            store,
+            calls,
+            uid: 'other-uid',
+            user: { uid: 'other-uid', email: 'other@example.com' }
+        });
+        const forOther = await otherAccount.available('lapsed');
+        assert.equal(forOther.available, true, 'a released name is free for anyone');
+        assert.equal(forOther.reason, 'cached');
+        assert.doesNotMatch(forOther.message, /current username/i);
+        assert.equal(calls.reads, readsBefore, 'and it is not re-fetched per account');
 
         const invalid = await directory.available('no');
         assert.equal(invalid.available, false);
@@ -1068,6 +1175,16 @@ test('the sign-in dialog exposes both paths and keeps one namespace of IDs', asy
         for (const button of doc.querySelectorAll('[data-app-sign-out]')) {
             assert.equal(button.classList.contains('danger-action'), true);
         }
+        // Every sign-out button is paired with a line naming what goes and what stays.
+        assert.equal(doc.querySelectorAll('[data-sign-out-note]').length, 2);
+        for (const note of doc.querySelectorAll('[data-sign-out-note]')) {
+            assert.match(note.textContent, /removes your photo, name and username/);
+            assert.match(note.textContent, /Progress stays/);
+        }
+        assert.match(
+            doc.querySelector('.auth-signout-note').textContent,
+            /Kanji progress, reviews and local backups stay/
+        );
         assert.ok(doc.querySelector('[data-username-control]'));
         assert.ok(doc.querySelector('[data-auth-verify]'));
     } finally {

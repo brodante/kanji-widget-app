@@ -29,6 +29,27 @@ class AppAuth {
         this.lastRefreshAt = 0;
     }
 
+    // Shown before the session ends, so nobody loses a photo they meant to keep.
+    static SIGN_OUT_CONFIRM =
+        'Sign out of the app?\n\nRemoved from this device: your uploaded photo and its crop, ' +
+        'your nickname and your username.\nKept: kanji progress, reviews, streaks, themes and ' +
+        'local backups.\n\nDrive keeps its own Disconnect button.';
+
+    static SIGNED_OUT_MESSAGE =
+        'Signed out of the app. Your photo, name and username were removed from this device; learning progress stays. On a shared device, Recovery & privacy → Disconnect & clear this device also removes local study data. Drive has its own Disconnect button.';
+
+    // The visible identity goes with the session: the uploaded photo and its crop, the
+    // nickname, the username mirror and the remembered availability answers. Learning
+    // progress, reviews, streaks, themes and local backups are deliberately kept.
+    async afterSignOut() {
+        try {
+            await window.driveBackup?.clearSignedOutIdentity?.();
+        } catch {
+            /* the session has already ended; identity cleanup is best effort */
+        }
+        window.kanjiUsernames?.forgetIdentity?.();
+    }
+
     static errorMessage(error) {
         const messages = {
             'auth/popup-blocked': 'Allow popups for this site, then try signing in again.',
@@ -218,9 +239,19 @@ class AppAuth {
                 this.unsubscribe = this.sdk.onAuthStateChanged(
                     this.auth,
                     (user) => {
+                        const hadUser = Boolean(this.user);
                         this.user = user;
+                        if (hadUser && !user) {
+                            // Signed out here or in another tab (the SDK syncs sessions
+                            // across tabs): the visible identity must go with it.
+                            void this.afterSignOut();
+                            this.message = this.signingOut
+                                ? AppAuth.SIGNED_OUT_MESSAGE
+                                : `${AppAuth.SIGNED_OUT_MESSAGE} (Signed out in another tab.)`;
+                        } else {
+                            this.message = '';
+                        }
                         window.dispatchEvent(new Event('kanji-auth-changed'));
-                        this.message = '';
                         this.render();
                         resolve();
                     },
@@ -233,6 +264,7 @@ class AppAuth {
             this.message = AppAuth.errorMessage(error);
         } finally {
             this.busy = false;
+            this.signingOut = false;
             this.render();
         }
     }
@@ -552,25 +584,24 @@ class AppAuth {
         return null;
     }
 
-    async signOut() {
+    async signOut(options = {}) {
         if (!this.ready || this.busy) {
             return false;
         }
+        this.message = '';
+        if (options.confirm !== false && !window.confirm(AppAuth.SIGN_OUT_CONFIRM)) {
+            // Cancelled: nothing was signed out and nothing was removed.
+            this.render();
+            return false;
+        }
         this.busy = true;
+        this.signingOut = true;
         this.render();
         try {
             await this.sdk.signOut(this.auth);
             this.user = null;
-            // Learning progress stays, but the previous account's photo, name and
-            // username must not greet the next person who opens the app.
-            try {
-                await window.driveBackup?.clearSignedOutIdentity?.();
-            } catch {
-                /* the session is already ended; identity cleanup is best effort */
-            }
-            window.kanjiUsernames?.forgetIdentity?.();
-            this.message =
-                'Signed out of the app. Your photo, name and username were removed from this device; learning progress stays. Drive has its own Disconnect button.';
+            await this.afterSignOut();
+            this.message = AppAuth.SIGNED_OUT_MESSAGE;
             return true;
         } catch (error) {
             this.message = AppAuth.errorMessage(error);
@@ -598,6 +629,10 @@ class AppAuth {
         document.querySelectorAll('[data-app-sign-out]').forEach((button) => {
             button.hidden = !this.user;
             button.disabled = !this.ready || this.busy;
+        });
+        // The disclosure is shown exactly while the sign-out button is.
+        document.querySelectorAll('[data-sign-out-note]').forEach((note) => {
+            note.hidden = !this.user;
         });
         document.querySelectorAll('[data-app-auth-retry]').forEach((button) => {
             button.hidden = this.ready || this.busy || !AppAuth.configured(this.config);

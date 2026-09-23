@@ -100,12 +100,28 @@ uploaded photo (blob and crop record), the nickname, the username mirror and the
 remembered availability answers. That matters on a shared device, where a leftover
 photo next to "local account" reads as someone else still being signed in.
 
+- The prompt names what goes and what stays before anything is removed; dismissing it
+  changes nothing. Each sign-out button also carries the same one-line disclosure.
+- The cleanup runs for every route out of the session, not just the button: a sign-out
+  announced by another open tab (Firebase syncs sessions per browser profile) clears
+  this tab too, and says so in the status line.
+- Deleting the stored photo is deliberate: it is the only way a reload can't resurrect
+  it, because the photo is loaded from browser storage without checking an account on
+  start-up. Export a full backup first if the photo matters, or upload it again after
+  signing back in.
+
 What signing out deliberately keeps: kanji progress, review history, streaks, themes
 and local backups. Removing an account must never look like it destroyed study data,
 and signing in never silently claims local data either. Drive keeps its own separate
 `Disconnect` action, so a sign-out does not revoke Drive access; remote (Google/Drive)
 photos stay hidden until the next sign-in so the panel can't show a face that does not
-belong to a signed-in account.
+belong to a signed-in account. On a shared device, `Recovery & privacy → Disconnect &
+clear this device` is the separate, explicitly confirmed action that also removes local
+study data.
+
+Signing out of every device at once is not possible on the Spark plan: revoking refresh
+tokens needs the Admin SDK or Cloud Functions, which require billing. The honest scope
+is ending this device's session.
 
 ## Email verification
 

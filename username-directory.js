@@ -157,10 +157,13 @@ class UsernameDirectory {
             Date.now() - cached.at <
                 (cached.available ? UsernameDirectory.AVAILABLE_TTL : UsernameDirectory.TAKEN_TTL)
         ) {
-            // A stored "it is mine" only holds for the account that owns it.
-            const owned = cached.reason === 'yours' || cached.reason === 'released';
-            const mine = owned && cached.uid && cached.uid === (this.uid || this.user?.uid);
-            if (owned && !mine) {
+            // Only a stored "it is mine" belongs to an identity. "free" and "released"
+            // describe the name itself, so they hold for anyone on this device.
+            const currentUid = this.uid || this.user?.uid || null;
+            const yours = cached.reason === 'yours';
+            const mine = yours && Boolean(currentUid) && cached.uid === currentUid;
+            if (yours && currentUid && !mine) {
+                // Claimed by a different account on this device: never report it free.
                 return {
                     username,
                     display: checked.display,
@@ -170,21 +173,27 @@ class UsernameDirectory {
                     suggestions: UsernamePolicy.suggestions(username, [username])
                 };
             }
-            const free = mine ? true : cached.available;
-            return {
-                username,
-                display: checked.display,
-                available: free,
-                reason: mine ? 'yours' : free ? 'cached' : cached.reason || 'taken',
-                message: mine
-                    ? 'That is your current username.'
-                    : free
-                      ? `“${checked.display}” looks free. It is confirmed when you create the account.`
-                      : cached.reason === 'reserved'
-                        ? `“${checked.display}” is reserved. Please choose another.`
-                        : `“${checked.display}” is already taken.`,
-                suggestions: free ? [] : UsernamePolicy.suggestions(username, [username])
-            };
+            if (!yours || mine) {
+                const free = mine || cached.available;
+                return {
+                    username,
+                    display: checked.display,
+                    available: free,
+                    reason: mine ? 'yours' : free ? 'cached' : cached.reason || 'taken',
+                    message: mine
+                        ? 'That is your current username.'
+                        : free
+                          ? cached.reason === 'released'
+                              ? `“${checked.display}” was released by its previous owner and can be claimed.`
+                              : `“${checked.display}” looks free. It is confirmed when you create the account.`
+                          : cached.reason === 'reserved'
+                            ? `“${checked.display}” is reserved. Please choose another.`
+                            : `“${checked.display}” is already taken.`,
+                    suggestions: free ? [] : UsernamePolicy.suggestions(username, [username])
+                };
+            }
+            // Signed out, with a stored answer from a session that is gone: verify it
+            // again rather than trust a claim nobody can make right now.
         }
         if (!navigator.onLine) {
             return {
@@ -225,7 +234,7 @@ class UsernameDirectory {
             }
             const released = data.kind === 'reserved' && UsernameDirectory.expired(data);
             if (released) {
-                this.remember(username, true, 'released');
+                this.remember(username, true, 'released', '');
                 return {
                     username,
                     display: checked.display,
@@ -302,8 +311,9 @@ class UsernameDirectory {
     purgeOwnedCache(uid = this.uid) {
         let changed = false;
         for (const [name, entry] of Object.entries(this.cache)) {
-            const owned = entry?.reason === 'yours' || entry?.reason === 'released';
-            if (owned && entry.uid && entry.uid !== uid) {
+            // "yours" is the only identity-bound answer: "free" and "released" stay
+            // true whoever asks, and "reserved"/"taken" are not tied to a person.
+            if (entry?.reason === 'yours' && entry.uid !== uid) {
                 delete this.cache[name];
                 changed = true;
             }
@@ -599,7 +609,7 @@ class UsernameDirectory {
     // Sign-out: nothing about the previous account should look available to the next one.
     forgetIdentity() {
         for (const [name, entry] of Object.entries(this.cache)) {
-            if (entry?.reason === 'yours' || entry?.reason === 'released') {
+            if (entry?.reason === 'yours') {
                 delete this.cache[name];
             }
         }

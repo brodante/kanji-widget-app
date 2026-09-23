@@ -2343,6 +2343,22 @@ body {
     flex-wrap: wrap;
 }
 
+/* Sign-out disclosure: a full-width line inside the button row. */
+.backup-signout-note {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    opacity: 0.75;
+}
+
+.auth-signout-note {
+    flex-basis: 100%;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.7;
+}
+
 .backup-btn {
     background-color: var(--primary-color);
     color: var(--on-primary);

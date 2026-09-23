@@ -497,7 +497,9 @@ class BackupManager {
         ) {
             return;
         }
-        if (window.kanjiAuth?.user && !(await window.kanjiAuth.signOut())) {
+        // The confirmation above already named everything being erased, including the
+        // photo, so the sign-out prompt is skipped here.
+        if (window.kanjiAuth?.user && !(await window.kanjiAuth.signOut({ confirm: false }))) {
             throw new Error('Could not sign out of the app. Retry before clearing local data.');
         }
         this.config.autoSync = false;
