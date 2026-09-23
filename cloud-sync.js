@@ -120,6 +120,26 @@ class CloudSync {
         return this.sdk.doc(this.db, 'users', this.uid, 'sync', 'progress');
     }
 
+    // Account deletion: the cloud copy of the progress goes with the account. The
+    // device's own learning data is untouched, so a deleted account never looks like
+    // lost study progress on the device that was used.
+    async deleteAccountData() {
+        if (!this.uid) {
+            return false;
+        }
+        const ref = await this.connect();
+        if (typeof this.sdk.deleteDoc !== 'function') {
+            throw new Error('Cloud deletion is unavailable in this build.');
+        }
+        await this.sdk.deleteDoc(ref);
+        this.generation++;
+        this.remote = undefined;
+        this.enabled = false;
+        this.message = 'Cloud progress deleted with the account. This device keeps its data.';
+        this.render();
+        return true;
+    }
+
     async task(action, { notify = false, warn = false, pending = '' } = {}) {
         if (this.busy || !this.uid) {
             return;

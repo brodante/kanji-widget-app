@@ -34,7 +34,11 @@ async function setup() {
                     db.set(key, value);
                 }
             }),
-        serverTimestamp: () => 'server-time'
+        serverTimestamp: () => 'server-time',
+        deleteDoc: async (key) => {
+            calls.deletes = (calls.deletes || 0) + 1;
+            db.delete(key);
+        }
     };
     window.BackupManager.createRecovery = async () => {
         calls.recovery++;
@@ -67,6 +71,33 @@ test('first login only reads; explicit consent is required before associating lo
         assert.equal(calls.recovery, 1);
         assert.equal(cloud.enabled, true);
         assert.equal(cloud.metadata().uid, 'alice');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('deleting the account removes the cloud copy and stops autosave, keeping device data', async () => {
+    const { dom, window, cloud, db, calls } = await setup();
+    try {
+        window.confirm = () => true;
+        await cloud.save(true);
+        db.set('alice', record(window));
+        await cloud.check();
+        assert.equal(cloud.enabled, true, 'the account was saving before deletion');
+
+        assert.equal(await cloud.deleteAccountData(), true);
+        assert.equal(calls.deletes, 1, 'exactly one document is deleted');
+        assert.equal(db.has('alice'), false);
+        assert.equal(cloud.enabled, false, 'autosave stops; nothing re-uploads after deletion');
+        assert.equal(cloud.uid, 'alice', 'the session is app-auth’s to end, not this module’s');
+        assert.match(cloud.message, /deleted with the account/i);
+        assert.equal(
+            JSON.parse(window.localStorage.getItem('kanji_progress')).studied[0],
+            '日',
+            'the device keeps its learning data'
+        );
+        await cloud.save();
+        assert.equal(db.has('alice'), false, 'a later save cannot recreate the deleted document');
     } finally {
         dom.window.close();
     }

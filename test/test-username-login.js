@@ -57,6 +57,10 @@ function fakeFirestore(seed = new Map()) {
             }
             store.set(key(ref), { ...(options.merge ? existing : {}), ...value });
         },
+        deleteDoc: async (ref) => {
+            calls.deletes = (calls.deletes || 0) + 1;
+            store.delete(key(ref));
+        },
         serverTimestamp: () => 'server-time',
         Timestamp: {
             fromMillis: (millis) => ({
@@ -68,7 +72,13 @@ function fakeFirestore(seed = new Map()) {
     return { sdk, store, calls, key };
 }
 
-function fakeAuthSdk({ user = null, error = null, calls = [] } = {}) {
+function fakeAuthSdk({
+    user = null,
+    error = null,
+    reauthError = null,
+    deleteError = null,
+    calls = []
+} = {}) {
     let notify = () => {};
     const sdk = {
         getApps: () => [],
@@ -130,6 +140,25 @@ function fakeAuthSdk({ user = null, error = null, calls = [] } = {}) {
         },
         EmailAuthProvider: {
             credential: (email, password) => ({ providerId: 'password', email, password })
+        },
+        reauthenticateWithCredential: async (_target, credential) => {
+            calls.push(['reauth-password', credential.email, credential.password]);
+            if (reauthError) {
+                throw reauthError;
+            }
+        },
+        reauthenticateWithPopup: async () => {
+            calls.push(['reauth-popup']);
+            if (reauthError) {
+                throw reauthError;
+            }
+        },
+        deleteUser: async () => {
+            calls.push(['delete-user']);
+            if (deleteError) {
+                throw deleteError;
+            }
+            notify(null);
         },
         linkWithCredential: async (_target, credential) => {
             calls.push(['link-credential', credential.email]);
@@ -720,6 +749,237 @@ test('a cancelled or failed sign-out leaves the local identity alone', async () 
     }
 });
 
+// ------------------------------------------------------- account deletion
+
+// A signed-in password account with an uploaded photo, a nickname and a handle, wired
+// to the fake Firestore the directory talks to.
+async function setupDeletion(window, options = {}) {
+    window.eval(read('ui-feedback.js'));
+    window.eval(read('backup-manager.js'));
+    window.eval(read('avatar-crop.js'));
+    window.eval(read('app-auth.js'));
+    window.BackupManager.media = async (write, slots) => {
+        window.mediaWrites = window.mediaWrites || [];
+        window.mediaWrites.push([Boolean(write), slots.join(',')]);
+        return {};
+    };
+    window.URL.createObjectURL = () => 'blob:photo';
+    window.URL.revokeObjectURL = () => {};
+    window.localStorage.setItem('kanji_progress', '{"studied":["日"]}');
+    window.localStorage.setItem('kanji_profile', JSON.stringify({ nickname: 'Dante' }));
+
+    const {
+        sdk: dbSdk,
+        store,
+        calls: dbCalls
+    } = fakeFirestore(
+        new Map([
+            ['users/password-uid', { uid: 'password-uid', username: 'dante_kanji', email: '' }],
+            ['users/password-uid/sync/progress', { revision: 3 }],
+            ['usernames/dante_kanji', { uid: 'password-uid', kind: 'user', display: 'dante_kanji' }]
+        ])
+    );
+    const authCalls = [];
+    const authSdk = fakeAuthSdk({
+        user: passwordAccount,
+        calls: authCalls,
+        reauthError: options.reauthError || null,
+        deleteError: options.deleteError || null
+    });
+    const auth = new window.AppAuth(config, async () => authSdk);
+    await auth.init();
+    window.kanjiAuth = auth;
+    auth.app = { name: 'kanji-auth' };
+
+    const directory = new window.UsernameDirectory({
+        loadSDK: async () => dbSdk,
+        getApp: () => auth.app,
+        auth: () => auth
+    });
+    directory.uid = 'password-uid';
+    directory.handle = { uid: 'password-uid', username: 'dante_kanji', display: 'dante_kanji' };
+    window.kanjiUsernames = directory;
+
+    const manager = new window.BackupManager();
+    window.driveBackup = manager;
+    manager.avatarURL = 'blob:photo';
+    window.AvatarCrop.write({ x: 0.5, y: 0.5, zoom: 1, ratio: 1 });
+
+    // Stands in for CloudSync, which deletes the same document the app would.
+    const cloud = {
+        deletes: 0,
+        deleteAccountData: async () => {
+            cloud.deletes += 1;
+            await dbSdk.deleteDoc(dbSdk.doc(null, 'users', 'password-uid', 'sync', 'progress'));
+        }
+    };
+    window.kanjiCloud = cloud;
+    return { auth, directory, manager, cloud, store, dbCalls, authCalls, authSdk, dbSdk };
+}
+
+test('deleting the account removes the sign-in, records and username but keeps the device data', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { auth, manager, cloud, store, dbCalls, authCalls } = await setupDeletion(window);
+        const result = await auth.deleteAccount({ password: 'correct horse' });
+        assert.equal(result.ok, true, result.message);
+        assert.deepEqual(
+            authCalls.find((call) => call[0] === 'reauth-password').slice(0, 3),
+            ['reauth-password', passwordAccount.email, 'correct horse'],
+            'the password is used only to prove the owner'
+        );
+        assert.ok(
+            authCalls.some((call) => call[0] === 'delete-user'),
+            'the sign-in is deleted'
+        );
+        // The username becomes a reservation, not a free name.
+        const released = store.get('usernames/dante_kanji');
+        assert.equal(released.kind, 'reserved');
+        assert.equal(released.uid, '', 'the released name belongs to nobody');
+        assert.ok(released.reservedUntil.toMillis() > Date.now(), 'and stays on hold');
+        assert.equal(store.has('users/password-uid'), false, 'the account record is gone');
+        assert.equal(store.has('users/password-uid/sync/progress'), false, 'so is the cloud copy');
+        assert.equal(cloud.deletes, 1);
+        assert.equal(dbCalls.deletes, 2, 'both account documents were deleted, nothing else');
+        assert.equal(auth.user, null);
+        // Nothing about the deleted account stays visible on the device.
+        assert.equal(manager.avatarURL, '');
+        assert.equal(window.AvatarCrop.read(), null);
+        assert.deepEqual(JSON.parse(window.localStorage.getItem('kanji_profile')), {});
+        assert.equal(window.kanjiUsernames.handle, null);
+        assert.equal(store.get('usernames/dante_kanji').kind === 'user', false);
+        assert.match(result.message, /Account deleted/);
+        assert.match(result.message, /learning data on this device is untouched/i);
+        assert.equal(
+            window.localStorage.getItem('kanji_progress'),
+            '{"studied":["日"]}',
+            'study data is never deleted with the account'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a wrong password stops the deletion before anything is removed', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { auth, manager, store, cloud, authCalls } = await setupDeletion(window, {
+            reauthError: { code: 'auth/wrong-password' }
+        });
+        const result = await auth.deleteAccount({ password: 'nope' });
+        assert.equal(result.ok, false);
+        assert.match(result.message, /did not match/i);
+        assert.equal(
+            authCalls.some((call) => call[0] === 'delete-user'),
+            false
+        );
+        assert.equal(store.get('usernames/dante_kanji').kind, 'user', 'the handle is untouched');
+        assert.equal(store.has('users/password-uid'), true);
+        assert.equal(cloud.deletes, 0);
+        assert.equal(manager.avatarURL, 'blob:photo', 'the device is untouched too');
+        assert.ok(window.AvatarCrop.read());
+        assert.equal(auth.user, passwordAccount, 'still signed in');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a partial deletion says exactly what happened instead of claiming success', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { auth, store } = await setupDeletion(window, {
+            deleteError: { code: 'auth/network-request-failed' }
+        });
+        const result = await auth.deleteAccount({ password: 'correct horse' });
+        assert.equal(result.ok, false);
+        assert.match(result.message, /was not deleted/i);
+        assert.match(
+            result.message,
+            /Already finished: username released/,
+            'partial state is named'
+        );
+        assert.match(result.message, /retry/i);
+        assert.equal(auth.user, passwordAccount, 'the session survives so the retry is possible');
+        assert.equal(store.get('usernames/dante_kanji').kind, 'reserved');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('deleting needs a password prompt answer and never asks a Google account for one', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { auth, authCalls } = await setupDeletion(window);
+        const noPassword = await auth.deleteAccount({ password: '' });
+        assert.equal(noPassword.ok, false);
+        assert.match(noPassword.message, /Enter your password/i);
+        assert.equal(
+            authCalls.some((call) => call[0] === 'reauth-password'),
+            false
+        );
+
+        // A Google-only account re-authenticates with the popup instead.
+        auth.user = googleAccount;
+        const google = await auth.deleteAccount();
+        assert.match(
+            authCalls.map((call) => call[0]).join(','),
+            /reauth-popup/,
+            'Google accounts confirm with the popup'
+        );
+        assert.equal(google.ok, true, google.message);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the dialog button runs the real deletion end to end', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { auth, store, authCalls } = await setupDeletion(window);
+        window.eval(read('auth-dialog.js'));
+        const dialogElement = window.document.getElementById('authDialog');
+        dialogElement.showModal = () => dialogElement.setAttribute('open', '');
+        dialogElement.close = () => dialogElement.removeAttribute('open');
+        const dialog = new window.AuthDialog({
+            auth: () => auth,
+            directory: () => window.kanjiUsernames
+        });
+        dialog.init();
+        dialog.open('account');
+        const doc = window.document;
+
+        let asked = '';
+        window.confirm = (text) => {
+            asked = text;
+            return true;
+        };
+        doc.getElementById('authDeletePassword').value = 'correct horse';
+        doc.getElementById('authDeleteAccount').click();
+        await settle();
+
+        assert.match(asked, /Delete this account permanently/i);
+        assert.ok(authCalls.some((call) => call[0] === 'reauth-password'));
+        assert.ok(authCalls.some((call) => call[0] === 'delete-user'));
+        assert.equal(store.get('usernames/dante_kanji').kind, 'reserved');
+        assert.equal(store.has('users/password-uid'), false);
+        assert.equal(store.has('users/password-uid/sync/progress'), false);
+        assert.equal(auth.user, null);
+        assert.match(doc.getElementById('authDeleteStatus').textContent, /Account deleted/i);
+        assert.equal(
+            doc.getElementById('authDeletePassword').value,
+            '',
+            'the password field is cleared after use'
+        );
+        assert.equal(
+            window.localStorage.getItem('kanji_progress'),
+            '{"studied":["日"]}',
+            'the device keeps learning data through the whole flow'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
 // -------------------------------------------------------- username registry
 
 test('availability checks normalise, cache and explain taken or reserved names', async () => {
@@ -1122,6 +1382,15 @@ async function setupDialog(overrides = {}) {
         signOut: async () => {
             calls.push(['sign-out']);
             return true;
+        },
+        deleteAccount: async (options) => {
+            calls.push(['delete-account', options]);
+            return (
+                overrides.deleteResult ?? {
+                    ok: true,
+                    message: 'Account deleted. Learning data on this device is untouched.'
+                }
+            );
         }
     };
     window.eval(read('app-auth.js'));
@@ -1136,6 +1405,103 @@ async function setupDialog(overrides = {}) {
     window.kanjiAuth.render = window.AppAuth.prototype.render.bind(auth);
     return { dom, window, auth, directory, calls, directoryCalls };
 }
+
+const settle = () => new Promise((resolve) => setTimeout(resolve, 5));
+
+test('account deletion is offered only while signed in, and only asks password accounts for a password', async () => {
+    const { dom, window } = await setupDialog({
+        user: {
+            uid: 'password-uid',
+            email: 'learner@example.com',
+            providerData: [{ providerId: 'password' }]
+        }
+    });
+    try {
+        const doc = window.document;
+        window.kanjiAuthDialog.open('account');
+        assert.equal(doc.getElementById('authDeleteSection').hidden, false);
+        assert.equal(doc.getElementById('authDeletePassword').hidden, false);
+        assert.match(
+            doc.querySelector('#authDeleteSection .auth-hint').textContent,
+            /claimable again after the usual 30 days/
+        );
+        assert.match(
+            doc.querySelector('#authDeleteSection .auth-hint').textContent,
+            /Learning data on this device is kept/
+        );
+        // Google-only accounts confirm with a popup, so no password box is shown.
+        window.kanjiAuth.user = { uid: 'google-uid', providerData: [{ providerId: 'google.com' }] };
+        window.kanjiAuthDialog.render();
+        assert.equal(doc.getElementById('authDeletePassword').hidden, true);
+        // Signed out, there is no account to delete.
+        window.kanjiAuth.user = null;
+        window.kanjiAuthDialog.render();
+        assert.equal(doc.getElementById('authDeleteSection').hidden, true);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the delete button confirms before acting and reports the result honestly', async () => {
+    const { dom, window, calls } = await setupDialog({
+        user: {
+            uid: 'password-uid',
+            email: 'learner@example.com',
+            providerData: [{ providerId: 'password' }]
+        }
+    });
+    try {
+        const doc = window.document;
+        const dialog = window.kanjiAuthDialog;
+        dialog.open('account');
+        const button = doc.getElementById('authDeleteAccount');
+
+        let asked = '';
+        window.confirm = (text) => {
+            asked = text;
+            return false;
+        };
+        button.click();
+        await settle();
+        assert.match(asked, /Delete this account permanently/i);
+        assert.match(asked, /cannot be undone/i);
+        assert.match(asked, /Kept: the kanji progress/);
+        assert.equal(
+            calls.some(([name]) => name === 'delete-account'),
+            false,
+            'a dismissed confirmation must not touch the account'
+        );
+        assert.match(doc.getElementById('authDeleteStatus').textContent, /cancelled/i);
+
+        window.confirm = () => true;
+        doc.getElementById('authDeletePassword').value = 'secret';
+        button.click();
+        await settle();
+        const called = calls.find(([name]) => name === 'delete-account');
+        assert.ok(called, 'confirming asks the app to delete');
+        assert.equal(called[1].password, 'secret', 'the password is passed through untouched');
+        assert.match(doc.getElementById('authDeleteStatus').textContent, /Account deleted/i);
+        assert.equal(
+            doc.getElementById('authDeletePassword').value,
+            '',
+            'the typed password is cleared from the form'
+        );
+
+        // A refusal is shown as an error, never as success.
+        window.kanjiAuth.deleteAccount = async () => ({
+            ok: false,
+            message: 'The account was not deleted: wrong password.'
+        });
+        button.click();
+        await settle();
+        const status = doc.getElementById('authDeleteStatus');
+        assert.equal(status.hidden, false);
+        assert.ok(status.classList.contains('auth-feedback--error'));
+        assert.match(status.textContent, /was not deleted/i);
+    } finally {
+        dom.window.close();
+    }
+});
 
 test('the sign-in dialog exposes both paths and keeps one namespace of IDs', async () => {
     const { dom, window } = await setupDialog();

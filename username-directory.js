@@ -623,6 +623,46 @@ class UsernameDirectory {
         }
     }
 
+    // Account deletion: the name becomes a reservation for the usual window, exactly
+    // like a rename, so nobody can grab it the moment the account disappears. The
+    // rules allow only the owner to do this, so it has to run while the session is
+    // still valid, before the sign-in itself is deleted. The reservation is not tied
+    // to anyone: after RESERVATION_DAYS the name is claimable by whoever asks first.
+    async releaseForDeletion() {
+        const user = this.user;
+        const username = this.handle?.username;
+        if (!user || !username) {
+            return false;
+        }
+        await this.connect();
+        await this.sdk.setDoc(
+            this.usernameRef(username),
+            {
+                uid: '',
+                display: this.handle.display || username,
+                kind: 'reserved',
+                email: '',
+                releasedAt: this.sdk.serverTimestamp(),
+                reservedUntil: this.sdk.Timestamp.fromMillis(
+                    Date.now() + window.UsernamePolicy.RESERVATION_DAYS * 24 * 60 * 60 * 1000
+                )
+            },
+            { merge: true }
+        );
+        this.remember(username, false, 'reserved', '');
+        return true;
+    }
+
+    // The account record is the account's own document; nothing else reads it.
+    async deleteAccountRecord() {
+        if (!this.user) {
+            return false;
+        }
+        await this.connect();
+        await this.sdk.deleteDoc(this.profileRef(this.user.uid));
+        return true;
+    }
+
     releaseReservation(username) {
         // Only used by tests and by the app when a reservation lapsed; the rules
         // refuse anything else, so there is no user-facing control for it.

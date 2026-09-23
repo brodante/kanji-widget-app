@@ -2313,6 +2313,37 @@ filter: blur(10px) brightness(1) saturate(1);
                             Kanji progress, reviews and local backups stay.
                         </small>
                     </div>
+                    <div id="authDeleteSection" class="auth-card" hidden>
+                        <h3>Delete this account</h3>
+                        <p class="auth-hint">
+                            Removes the sign-in, the account record, the cloud copy of your progress
+                            and the username, which becomes claimable again after the usual 30 days.
+                            Learning data on this device is kept, so nothing you studied is lost.
+                        </p>
+                        <label id="authDeletePasswordLabel" for="authDeletePassword" hidden
+                            >Confirm your password</label
+                        >
+                        <input
+                            id="authDeletePassword"
+                            type="password"
+                            autocomplete="current-password"
+                            hidden
+                        />
+                        <button
+                            id="authDeleteAccount"
+                            type="button"
+                            class="backup-btn danger-action"
+                        >
+                            Delete account
+                        </button>
+                        <p
+                            id="authDeleteStatus"
+                            class="auth-hint"
+                            role="status"
+                            aria-live="polite"
+                            hidden
+                        ></p>
+                    </div>
                 </section>
 
                 <footer class="auth-dialog-footer">

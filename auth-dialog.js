@@ -148,6 +148,7 @@ class AuthDialog {
             this.scheduleUsernameCheck(change?.value || '', 'change', 0)
         );
         this.el('authSignOut')?.addEventListener('click', () => this.signOut());
+        this.el('authDeleteAccount')?.addEventListener('click', () => this.deleteAccount());
         window.addEventListener('kanji-auth-changed', () => this.render());
         window.addEventListener('kanji-handle-changed', () => this.render());
     }
@@ -555,6 +556,40 @@ class AuthDialog {
         }
     }
 
+    setDeleteStatus(message, kind = '') {
+        const node = this.el('authDeleteStatus');
+        if (!node) {
+            return;
+        }
+        node.textContent = message || '';
+        node.hidden = !message;
+        node.classList.toggle('auth-feedback--error', kind === 'error');
+    }
+
+    // Deleting the account cannot be undone, so it asks twice: the confirm spells out
+    // what goes and what stays, then the password (or the Google popup) proves it is
+    // really the owner asking.
+    async deleteAccount() {
+        const auth = this.auth();
+        if (!auth?.user || this.busy) {
+            return;
+        }
+        if (!window.confirm(AppAuth.DELETE_CONFIRM)) {
+            this.setDeleteStatus('Deletion cancelled. Nothing was removed.');
+            return;
+        }
+        const password = this.el('authDeletePassword')?.value || '';
+        this.setBusy(true, 'Deleting the account…');
+        const result = await auth.deleteAccount({ password });
+        this.setBusy(false);
+        if (this.el('authDeletePassword')) {
+            this.el('authDeletePassword').value = '';
+        }
+        this.setDeleteStatus(result.message, result.ok ? '' : 'error');
+        this.setFeedback(result.ok ? 'info' : 'error', result.message);
+        this.render();
+    }
+
     async signOut() {
         const auth = this.auth();
         if (!auth?.ready) {
@@ -785,6 +820,24 @@ class AuthDialog {
             if (submit) {
                 submit.textContent = handle?.username ? 'Change username' : 'Claim username';
                 submit.disabled = this.busy;
+            }
+        }
+        const deleteSection = this.el('authDeleteSection');
+        if (deleteSection) {
+            const hasPassword = AppAuth.hasPassword(auth?.user);
+            deleteSection.hidden = !signedIn;
+            const passwordRow = this.el('authDeletePassword');
+            const passwordLabel = this.el('authDeletePasswordLabel');
+            const askPassword = signedIn && hasPassword;
+            if (passwordRow) {
+                passwordRow.hidden = !askPassword;
+            }
+            if (passwordLabel) {
+                passwordLabel.hidden = !askPassword;
+            }
+            const button = this.el('authDeleteAccount');
+            if (button) {
+                button.disabled = this.busy;
             }
         }
         const addPassword = this.el('authAddPasswordSection');

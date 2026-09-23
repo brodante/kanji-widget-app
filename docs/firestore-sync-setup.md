@@ -100,7 +100,12 @@ This code does not link billing or create paid services. On Spark, quotas can st
 
 An oversized payload blocks sync with an export instruction; it does not discard local progress. There is no automatic background saving when the app is closed and no guaranteed merge of simultaneous edits. Choose which copy to keep explicitly.
 
-Deleting an account's cloud document is currently an owner/admin action in Firebase Console; client deletion is intentionally denied. Clearing this device's data does not delete cloud data.
+The signed-in owner can delete their own progress document, but only through **Delete account** in
+the sign-in dialog, which removes the whole account (sign-in, `users/{uid}` record, cloud progress
+and the username) in one confirmed flow. There is no separate delete button for cloud progress, so
+a stray click cannot drop the cloud copy while the account still exists: deleting the device's data
+still leaves cloud data alone. The same rules change is what makes account deletion possible, so
+account deletion fails closed with an honest error until the updated `firestore.rules` is published.
 
 ### What Check cloud does
 

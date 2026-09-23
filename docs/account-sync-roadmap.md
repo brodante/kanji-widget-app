@@ -99,6 +99,23 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - [ ] Email magic-link sign-in.
 - [ ] Backup health reminders and storage-usage estimates.
 
+## Account deletion
+
+- [x] **Delete account** in the sign-in dialog: re-authentication first (password or
+      Google popup), then the username released as a reservation, the `users/{uid}`
+      record and the cloud progress deleted, then the sign-in deleted, then the same
+      identity cleanup as a sign-out. Local learning data and local backups are kept,
+      and the confirmation lists both sides before anything happens.
+- [x] Partial failures name the completed steps, keep the sign-in so a retry is
+      possible, and never report success. A wrong password or a dismissed confirmation
+      removes nothing.
+- [x] Rules: the owner may delete their own `users/{uid}` and their own progress
+      document. Usernames are still never deletable (a deleted account releases its
+      name to the reservation window instead), listing stays denied, and no new path
+      became writable. **The owner must publish the updated `firestore.rules`.**
+- [ ] Verify the live flow on a disposable account after publishing the rules, then
+      confirm the released username is claimable after the reservation window.
+
 ## Sign-out identity cleanup
 
 Signing out removes what identifies the previous account on this device: the uploaded

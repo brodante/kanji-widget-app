@@ -123,6 +123,33 @@ Signing out of every device at once is not possible on the Spark plan: revoking 
 tokens needs the Admin SDK or Cloud Functions, which require billing. The honest scope
 is ending this device's session.
 
+## Deleting an account
+
+**Delete account** in the sign-in dialog (signed in → account pane) removes the account
+itself, in this order, and says exactly what happened if a step fails:
+
+1. **Confirm it is you.** Password accounts re-enter the password; Google-only accounts
+   get the Google popup. Firebase requires a recent sign-in for deletion, and a failed
+   check deletes nothing.
+2. **Release the username** as a reservation, exactly like a rename, so it cannot be
+   sniped the moment the account disappears. It becomes claimable again after the usual
+   `RESERVATION_DAYS` window.
+3. **Delete the account record** (`users/{uid}`) and the **cloud copy of the progress**
+   (`users/{uid}/sync/progress`).
+4. **Delete the sign-in** itself, then run the same identity cleanup as a sign-out.
+
+Kept on purpose: kanji progress, reviews, streaks, themes and local backups on this
+device. Deleting an account must never look like study data was destroyed, and the
+confirmation says so before anything happens. Clearing the device's data remains a
+separate, separately confirmed action.
+
+A failure part way through reports the steps that already completed and states that the
+sign-in still exists and can be retried; partial success is never reported as success.
+Because step 3 needs permissions that older rules deny, publish the updated
+`firestore.rules` (owner-only `delete` on `users/{uid}` and on the owner's progress
+document) before testing this flow. Nothing else about the rules changed: usernames are
+still never deletable, listing is still denied, and no new path became writable.
+
 ## Email verification
 
 - The link is sent by Firebase Authentication from `noreply@<project>.firebaseapp.com`

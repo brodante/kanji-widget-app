@@ -35,11 +35,14 @@ service cloud.firestore {
       allow create: if owner() && valid() && request.resource.data.revision == 1;
       allow update: if owner() && valid()
         && request.resource.data.revision == resource.data.revision + 1;
-      // No collection listing, deletion, or access to any other path from clients.
+      // Deleting the account removes this document, so the owner may delete their own
+      // progress. No collection listing, and no access to any other path from clients.
+      allow delete: if owner();
     }
 
     // Account record: username mirror, published email and the rename timestamp.
-    // Owner-only, no listing, never deleted by a client.
+    // Owner-only, no listing. The owner may delete it only as part of deleting the
+    // account; there is no other client-side delete path.
     match /users/{uid} {
       function record() {
         return request.resource.data.keys().hasOnly([
@@ -59,7 +62,9 @@ service cloud.firestore {
       allow list: if false;
       allow create: if isOwner(uid) && record();
       allow update: if isOwner(uid) && record();
-      allow delete: if false;
+      // Account deletion removes the record; only its owner can, and nothing else
+      // in this file can write it afterwards.
+      allow delete: if isOwner(uid);
     }
 
     // Username ownership. One document per name, named by the lowercase username.

@@ -50,6 +50,101 @@ class AppAuth {
         window.kanjiUsernames?.forgetIdentity?.();
     }
 
+    // Deletion is the one action that cannot be undone, so it states everything it
+    // touches, including what it deliberately leaves alone.
+    static DELETE_CONFIRM =
+        'Delete this account permanently?\n\n' +
+        'Deleted: the sign-in itself, the account record, the cloud copy of your progress, ' +
+        'and your username (it becomes claimable again after the usual 30 days).\n' +
+        'Kept: the kanji progress, reviews, themes and backups stored on this device.\n\n' +
+        'This cannot be undone. Export a backup first if you want the cloud copy.';
+
+    static DELETE_LABEL = 'Delete account';
+
+    // Deleting a Firebase user needs a recent sign-in, so the password (or the Google
+    // popup) is collected right before the request. Nothing is stored or cached here.
+    async reauthenticate({ password = '' } = {}) {
+        const user = this.user;
+        if (!user) {
+            return { ok: false, message: 'Sign in first.' };
+        }
+        const hasPassword = AppAuth.hasPassword(user);
+        try {
+            if (hasPassword && typeof this.sdk.reauthenticateWithCredential === 'function') {
+                if (!password) {
+                    return { ok: false, message: 'Enter your password to confirm deletion.' };
+                }
+                const credential = this.sdk.EmailAuthProvider.credential(user.email, password);
+                await this.sdk.reauthenticateWithCredential(user, credential);
+                return { ok: true };
+            }
+            if (typeof this.sdk.reauthenticateWithPopup === 'function') {
+                await this.sdk.reauthenticateWithPopup(user, new this.sdk.GoogleAuthProvider());
+                return { ok: true };
+            }
+            return {
+                ok: false,
+                message: 'Sign out and back in, then try deleting the account again.'
+            };
+        } catch (error) {
+            const wrong =
+                error?.code === 'auth/wrong-password' || error?.code === 'auth/invalid-credential';
+            return {
+                ok: false,
+                message: wrong
+                    ? 'That password did not match, so nothing was deleted.'
+                    : `Could not confirm it was you: ${AppAuth.errorMessage(error)}`
+            };
+        }
+    }
+
+    // Order matters. The username release and the account records need the session that
+    // is about to disappear, and the sign-in itself is deleted last. A failure part way
+    // through says exactly what did and did not happen; nothing claims success early.
+    async deleteAccount({ password = '' } = {}) {
+        if (!this.ready || this.busy || !this.user) {
+            return { ok: false, message: 'Sign in first, then delete the account.' };
+        }
+        const identity = await this.reauthenticate({ password });
+        if (!identity.ok) {
+            return identity;
+        }
+        this.busy = true;
+        this.render();
+        const done = [];
+        try {
+            const directory = window.kanjiUsernames;
+            if (directory?.handle?.username) {
+                await directory.releaseForDeletion();
+                done.push('username released');
+            }
+            await directory?.deleteAccountRecord?.();
+            await window.kanjiCloud?.deleteAccountData?.();
+            await this.sdk.deleteUser(this.user);
+            done.push('sign-in deleted');
+            this.user = null;
+            // Same cleanup as a sign-out: the deleted account must not leave a face or a
+            // name on the device.
+            await this.afterSignOut();
+            this.message =
+                'Account deleted. The sign-in, account record, cloud progress and username are gone; learning data on this device is untouched.';
+            return { ok: true, message: this.message, steps: done };
+        } catch (error) {
+            const partial = done.length
+                ? ` Already finished: ${done.join(', ')}. The sign-in still exists, so you can retry.`
+                : '';
+            const message =
+                error?.code === 'auth/requires-recent-login'
+                    ? `The account was not deleted: confirm it is you by signing out and back in, then retry.${partial}`
+                    : `The account was not deleted: ${AppAuth.errorMessage(error)}${partial}`;
+            window.KanjiFeedback?.show(message, { title: 'Account not deleted' });
+            return { ok: false, message };
+        } finally {
+            this.busy = false;
+            this.render();
+        }
+    }
+
     static errorMessage(error) {
         const messages = {
             'auth/popup-blocked': 'Allow popups for this site, then try signing in again.',
