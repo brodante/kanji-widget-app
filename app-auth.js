@@ -561,8 +561,16 @@ class AppAuth {
         try {
             await this.sdk.signOut(this.auth);
             this.user = null;
+            // Learning progress stays, but the previous account's photo, name and
+            // username must not greet the next person who opens the app.
+            try {
+                await window.driveBackup?.clearSignedOutIdentity?.();
+            } catch {
+                /* the session is already ended; identity cleanup is best effort */
+            }
+            window.kanjiUsernames?.forgetIdentity?.();
             this.message =
-                'Signed out of the app. Local data is kept. Drive has its own Disconnect button.';
+                'Signed out of the app. Your photo, name and username were removed from this device; learning progress stays. Drive has its own Disconnect button.';
             return true;
         } catch (error) {
             this.message = AppAuth.errorMessage(error);

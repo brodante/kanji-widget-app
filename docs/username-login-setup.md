@@ -93,6 +93,20 @@ Uploading a photo opens a crop dialog before anything is saved:
 - Full backups carry the crop record so a restore looks identical. Firestore progress
   sync deliberately does not: it never carried media.
 
+## Signing out
+
+Signing out ends the Firebase session and takes the visible identity with it: the
+uploaded photo (blob and crop record), the nickname, the username mirror and the
+remembered availability answers. That matters on a shared device, where a leftover
+photo next to "local account" reads as someone else still being signed in.
+
+What signing out deliberately keeps: kanji progress, review history, streaks, themes
+and local backups. Removing an account must never look like it destroyed study data,
+and signing in never silently claims local data either. Drive keeps its own separate
+`Disconnect` action, so a sign-out does not revoke Drive access; remote (Google/Drive)
+photos stay hidden until the next sign-in so the panel can't show a face that does not
+belong to a signed-in account.
+
 ## Email verification
 
 - The link is sent by Firebase Authentication from `noreply@<project>.firebaseapp.com`

@@ -56,6 +56,8 @@ jobs:
                   cp srs-engine.js deploy/
                   cp storage-manager.js deploy/
                   cp manifest.json deploy/
+                  # Favicon is optional: skip the copy instead of failing the deploy
+                  if [ -f "favicon.gif" ]; then cp favicon.gif deploy/; fi
                   cp sw.js deploy/
                   cp README.md deploy/
                   # Copy docs if they exist

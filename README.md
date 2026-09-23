@@ -30,6 +30,10 @@ Or just open `index.html` directly in a browser. It'll work, though serving it l
 
 Heads up: the audio files aren't in this repo, they'd add well over 100MB. See `AUDIO-SETUP.md` for how the fallback audio works and how to plug in your own Kanji Alive API key if you want the higher quality pronunciations.
 
+## Customising it
+
+The browser tab icon is `favicon.gif` in the repository root, next to `index.html`, declared in the head as `<link rel="icon" type="image/gif" href="favicon.gif" />`. Drop your own file in with that exact name and it's picked up: nothing else to edit, and the deploy workflow copies it when it exists. An animated GIF animates in Chrome, Edge and Firefox; Safari shows the first frame only, so keep the first frame readable on its own. The installable-PWA icon is separate (`assets/icons/apple-touch-icon-180x180.png` and `manifest.json`).
+
 ## How it's put together
 
 Everything lives in a handful of files: `script.js` for the app logic, `styles.css` for every theme, `index.html` for the structure, plus small dedicated modules for storage (`storage-manager.js`) and audio (`audio-manager.js`). Kanji/kana data sits in `database/` as plain JSON, one file per level. It's a PWA, so it installs and works offline once you've loaded it.

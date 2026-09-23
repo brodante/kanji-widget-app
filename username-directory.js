@@ -138,7 +138,9 @@ class UsernameDirectory {
                 suggestions: []
             };
         }
-        const mine = this.handle?.username === username;
+        const mine =
+            this.handle?.username === username &&
+            (!this.uid || !this.handle?.uid || this.handle.uid === this.uid);
         if (mine) {
             return {
                 username,
@@ -155,19 +157,33 @@ class UsernameDirectory {
             Date.now() - cached.at <
                 (cached.available ? UsernameDirectory.AVAILABLE_TTL : UsernameDirectory.TAKEN_TTL)
         ) {
+            // A stored "it is mine" only holds for the account that owns it.
+            const owned = cached.reason === 'yours' || cached.reason === 'released';
+            const mine = owned && cached.uid && cached.uid === (this.uid || this.user?.uid);
+            if (owned && !mine) {
+                return {
+                    username,
+                    display: checked.display,
+                    available: false,
+                    reason: 'taken',
+                    message: `“${checked.display}” belongs to another account. Please choose another.`,
+                    suggestions: UsernamePolicy.suggestions(username, [username])
+                };
+            }
+            const free = mine ? true : cached.available;
             return {
                 username,
                 display: checked.display,
-                available: cached.available,
-                reason: cached.available ? 'cached' : cached.reason || 'taken',
-                message: cached.available
-                    ? `“${checked.display}” looks free. It is confirmed when you create the account.`
-                    : cached.reason === 'reserved'
-                      ? `“${checked.display}” is reserved. Please choose another.`
-                      : `“${checked.display}” is already taken.`,
-                suggestions: cached.available
-                    ? []
-                    : UsernamePolicy.suggestions(username, [username])
+                available: free,
+                reason: mine ? 'yours' : free ? 'cached' : cached.reason || 'taken',
+                message: mine
+                    ? 'That is your current username.'
+                    : free
+                      ? `“${checked.display}” looks free. It is confirmed when you create the account.`
+                      : cached.reason === 'reserved'
+                        ? `“${checked.display}” is reserved. Please choose another.`
+                        : `“${checked.display}” is already taken.`,
+                suggestions: free ? [] : UsernamePolicy.suggestions(username, [username])
             };
         }
         if (!navigator.onLine) {
@@ -196,8 +212,8 @@ class UsernameDirectory {
                 };
             }
             const data = snapshot.data() || {};
-            if (data.uid && this.uid && data.uid === this.uid) {
-                this.remember(username, true, 'yours');
+            if (data.uid && data.uid === (this.uid || this.user?.uid)) {
+                this.remember(username, true, 'yours', data.uid);
                 return {
                     username,
                     display: checked.display,
@@ -273,9 +289,29 @@ class UsernameDirectory {
         return Boolean(millis) && millis <= Date.now();
     }
 
-    remember(username, available, reason) {
-        this.cache[username] = { available, reason, at: Date.now() };
+    remember(username, available, reason, uid = this.uid) {
+        // The owner is stored with the answer: "available because it is mine" is not
+        // availability for a different account.
+        this.cache[username] = { available, reason, uid: uid || '', at: Date.now() };
         UsernameDirectory.writeCache(this.cache);
+    }
+
+    // Drops answers that belong to another identity. Called on sign-out and whenever
+    // the signed-in account changes, so a name claimed by one account can never look
+    // free to the next one on this device.
+    purgeOwnedCache(uid = this.uid) {
+        let changed = false;
+        for (const [name, entry] of Object.entries(this.cache)) {
+            const owned = entry?.reason === 'yours' || entry?.reason === 'released';
+            if (owned && entry.uid && entry.uid !== uid) {
+                delete this.cache[name];
+                changed = true;
+            }
+        }
+        if (changed) {
+            UsernameDirectory.writeCache(this.cache);
+        }
+        return changed;
     }
 
     writeHandle(value) {
@@ -320,7 +356,7 @@ class UsernameDirectory {
                         message:
                             reason === 'reserved'
                                 ? `“${checked.display}” was just reserved by someone else. Try another.`
-                                : `“${checked.display}” was taken a moment ago. Try another.`,
+                                : `“${checked.display}” is already taken by another account. Try another.`,
                         suggestions: window.UsernamePolicy.suggestions(checked.username, [
                             checked.username
                         ])
@@ -336,7 +372,7 @@ class UsernameDirectory {
                 updatedAt: this.sdk.serverTimestamp()
             });
             await this.publishProfile(checked);
-            this.remember(checked.username, true, 'yours');
+            this.remember(checked.username, true, 'yours', user.uid);
             this.writeHandle({
                 uid: user.uid,
                 username: checked.username,
@@ -403,9 +439,15 @@ class UsernameDirectory {
     // restored sessions, and never writes learning data.
     async sync() {
         const user = this.user;
+        const previous = this.uid;
         this.uid = user?.uid || null;
+        if (previous && previous !== this.uid) {
+            // A different account (or a sign-out) must not inherit this device's answers.
+            this.purgeOwnedCache(this.uid);
+        }
         if (!user) {
             this.profile = null;
+            this.purgeOwnedCache(null);
             this.writeHandle(null);
             return null;
         }
@@ -416,7 +458,12 @@ class UsernameDirectory {
             const data = snapshot.exists() ? snapshot.data() || {} : {};
             this.profile = data;
             if (typeof data.username === 'string' && data.username) {
-                this.cache[data.username] = { available: true, reason: 'yours', at: Date.now() };
+                this.cache[data.username] = {
+                    available: true,
+                    reason: 'yours',
+                    uid: user.uid,
+                    at: Date.now()
+                };
                 UsernameDirectory.writeCache(this.cache);
                 this.writeHandle({
                     uid: user.uid,
@@ -524,8 +571,8 @@ class UsernameDirectory {
                 },
                 { merge: true }
             );
-            this.remember(checked.username, true, 'yours');
-            this.remember(previous.username, false, 'reserved');
+            this.remember(checked.username, true, 'yours', user.uid);
+            this.remember(previous.username, false, 'reserved', user.uid);
             this.writeHandle({
                 uid: user.uid,
                 username: checked.username,
@@ -546,6 +593,23 @@ class UsernameDirectory {
                     ? `“${checked.display}” could not be claimed. Try another name.`
                     : 'The username change did not complete. Try again shortly.'
             };
+        }
+    }
+
+    // Sign-out: nothing about the previous account should look available to the next one.
+    forgetIdentity() {
+        for (const [name, entry] of Object.entries(this.cache)) {
+            if (entry?.reason === 'yours' || entry?.reason === 'released') {
+                delete this.cache[name];
+            }
+        }
+        UsernameDirectory.writeCache(this.cache);
+        this.handle = null;
+        this.profile = null;
+        try {
+            localStorage.removeItem(UsernameDirectory.HANDLE_KEY);
+        } catch {
+            /* nothing to remove */
         }
     }
 

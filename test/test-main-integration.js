@@ -98,6 +98,27 @@ test('offline precache and static deployment include both practice and account b
     assert.equal(read('CNAME').trim(), 'kanji.qd.je');
 });
 
+test('the favicon link points at a root favicon.gif and the deploy ships it if present', () => {
+    const html = read('index.html');
+    const deploy = read('.github/workflows/deploy.yml');
+    assert.match(
+        html,
+        /<link rel="icon" type="image\/gif" href="favicon\.gif" \/>/,
+        'the browser tab icon must be declared in the head'
+    );
+    // The icon sits next to index.html so the relative href resolves on every host.
+    assert.equal(read('CNAME').trim(), 'kanji.qd.je');
+    assert.ok(
+        deploy.includes('[ -f "favicon.gif" ]') && deploy.includes('cp favicon.gif deploy/'),
+        'deploy must copy favicon.gif without failing when the file is not committed yet'
+    );
+    // Precache only ships files that exist: cache.addAll fails the whole install on a 404.
+    assert.ok(
+        !read('sw.js').includes("'/favicon.gif'"),
+        'the optional favicon must not be precached'
+    );
+});
+
 test('username login assets are versioned, precached and deployed together', () => {
     const html = read('index.html');
     const worker = read('sw.js');

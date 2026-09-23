@@ -155,6 +155,11 @@ function fakeAuthSdk({ user = null, error = null, calls = [] } = {}) {
         },
         signOut: async () => {
             calls.push(['sign-out']);
+            // The real SDK rejects when the network call fails, and the local
+            // session stays as it was.
+            if (error) {
+                throw error;
+            }
             notify(null);
         }
     };
@@ -445,6 +450,184 @@ test('verification is refused for alias accounts and offered for real mailboxes'
         const alreadyVerified = await auth.sendVerificationEmail();
         assert.equal(alreadyVerified.ok, true);
         assert.ok(calls.some(([name]) => name === 'verify-email'));
+    } finally {
+        dom.window.close();
+    }
+});
+
+// --------------------------------------------------- sign-out and identity
+
+test('an availability answer that belongs to another account is never shown as free', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { sdk, store, calls } = fakeFirestore();
+        const first = makeDirectory(window, { sdk, store, calls, user: passwordAccount });
+        await first.reserve('dante_kanji', { email: 'learner@example.com' });
+        assert.equal(first.cache.dante_kanji.reason, 'yours');
+        assert.equal(first.cache.dante_kanji.uid, 'password-uid');
+
+        // A second account on the same device: the stored "mine" must not leak.
+        const second = makeDirectory(window, {
+            sdk,
+            store,
+            calls,
+            uid: 'second-uid',
+            user: { uid: 'second-uid', email: 'second@example.com' }
+        });
+        const check = await second.available('dante_kanji');
+        assert.equal(check.available, false, 'another account must not be told the name is free');
+        assert.equal(check.reason, 'taken');
+        assert.match(check.message, /another account/i);
+        assert.ok(check.suggestions.length > 0);
+
+        // The owner still sees their own name as usable.
+        const own = await first.available('dante_kanji');
+        assert.equal(own.available, true);
+        assert.equal(own.reason, 'yours');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('signing out forgets the previous identity so the next account starts clean', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { sdk, store, calls } = fakeFirestore();
+        const directory = makeDirectory(window, { sdk, store, calls });
+        await directory.reserve('dante_kanji', { email: 'learner@example.com' });
+        assert.equal(directory.handle.username, 'dante_kanji');
+        assert.ok(window.localStorage.getItem(window.UsernameDirectory.HANDLE_KEY));
+
+        directory.setUser(null);
+        await directory.sync();
+        assert.equal(directory.handle, null, 'no username mirror after sign-out');
+        assert.equal(window.localStorage.getItem(window.UsernameDirectory.HANDLE_KEY), null);
+        assert.equal(
+            directory.cache.dante_kanji,
+            undefined,
+            'the owned answer is dropped, so it cannot look free to the next account'
+        );
+
+        const stranger = makeDirectory(window, {
+            sdk,
+            store,
+            calls,
+            uid: 'other-uid',
+            user: { uid: 'other-uid', email: 'other@example.com' }
+        });
+        const check = await stranger.available('dante_kanji');
+        assert.equal(check.available, false, 'the name stays taken for everyone else');
+
+        // An unrelated account's free answer is left alone.
+        stranger.remember('some_other_name', true, 'free');
+        assert.ok(stranger.cache.some_other_name);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('sign-out clears the photo, nickname and username but keeps learning progress', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('ui-feedback.js'));
+        window.eval(read('backup-manager.js'));
+        window.eval(read('avatar-crop.js'));
+        window.eval(read('app-auth.js'));
+
+        const doc = window.document;
+        const removed = [];
+        window.URL.createObjectURL = () => 'blob:photo';
+        window.URL.revokeObjectURL = (url) => removed.push(url);
+        window.BackupManager.media = async (write, slots) => {
+            if (write) {
+                removed.push(`media:${slots.join(',')}:${Object.keys(write).length}`);
+            }
+            return {};
+        };
+        window.localStorage.setItem(
+            'kanji_progress',
+            JSON.stringify({ studied: ['日'], mastered: [], skipped: [] })
+        );
+        window.localStorage.setItem('kanji_profile', JSON.stringify({ nickname: 'Dante' }));
+        window.AvatarCrop.write({ x: 0.2, y: 0.5, zoom: 2, ratio: 1.5 });
+        const manager = new window.BackupManager();
+        window.driveBackup = manager;
+        manager.avatarURL = 'blob:photo';
+        doc.getElementById('profileNickname').value = 'Dante';
+
+        const calls = [];
+        const auth = new window.AppAuth(config, async () => fakeAuthSdk({ calls }));
+        await auth.init();
+        auth.user = passwordAccount;
+        if (!window.kanjiUsernames) {
+            window.kanjiUsernames = new window.UsernameDirectory();
+        }
+        window.kanjiUsernames.handle = { uid: 'password-uid', username: 'dante_kanji' };
+        window.localStorage.setItem(
+            window.UsernameDirectory.HANDLE_KEY,
+            JSON.stringify({ uid: 'password-uid', username: 'dante_kanji' })
+        );
+
+        assert.equal(await auth.signOut(), true);
+        assert.equal(manager.avatarURL, '', 'the uploaded photo is no longer shown');
+        assert.equal(window.AvatarCrop.read(), null, 'the crop record is gone');
+        assert.deepEqual(
+            JSON.parse(window.localStorage.getItem('kanji_profile')),
+            {},
+            'the nickname is gone'
+        );
+        assert.equal(doc.getElementById('profileNickname').value, '');
+        assert.equal(window.kanjiUsernames.handle, null);
+        assert.equal(window.localStorage.getItem(window.UsernameDirectory.HANDLE_KEY), null);
+        assert.equal(
+            window.localStorage.getItem('kanji_progress'),
+            '{"studied":["日"],"mastered":[],"skipped":[]}',
+            'learning progress must survive sign-out'
+        );
+        assert.ok(
+            removed.includes('media:avatar:0'),
+            'the stored photo blob is deleted, not just hidden'
+        );
+        const avatarImg = doc.getElementById('accountAvatar');
+        assert.ok(!avatarImg.getAttribute('src'), 'no photo is rendered after sign-out');
+        assert.equal(avatarImg.dataset.source, '', 'the rendered source is empty');
+        assert.ok(avatarImg.hidden, 'the placeholder, not a face, is shown');
+        assert.equal(doc.querySelector('#accountAvatar + *')?.hidden, false);
+        assert.match(
+            doc.getElementById('profileStatus').textContent,
+            /photo, name and username were removed/i
+        );
+        assert.match(auth.message, /photo, name and username were removed/i);
+        assert.match(auth.message, /Drive has its own Disconnect/, 'Drive guidance is kept');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a cancelled or failed sign-out leaves the local identity alone', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('ui-feedback.js'));
+        window.eval(read('backup-manager.js'));
+        window.eval(read('avatar-crop.js'));
+        window.eval(read('app-auth.js'));
+        window.BackupManager.media = async () => ({});
+        window.URL.revokeObjectURL = () => {};
+        const manager = new window.BackupManager();
+        window.driveBackup = manager;
+        manager.avatarURL = 'blob:photo';
+        window.AvatarCrop.write({ x: 0.5, y: 0.5, zoom: 1, ratio: 1 });
+        window.localStorage.setItem('kanji_profile', JSON.stringify({ nickname: 'Dante' }));
+
+        const auth = new window.AppAuth(config, async () =>
+            fakeAuthSdk({ error: { code: 'auth/network-request-failed' } })
+        );
+        await auth.init();
+        auth.user = passwordAccount;
+        assert.equal(await auth.signOut(), false);
+        assert.equal(manager.avatarURL, 'blob:photo');
+        assert.ok(window.AvatarCrop.read());
+        assert.equal(JSON.parse(window.localStorage.getItem('kanji_profile')).nickname, 'Dante');
     } finally {
         dom.window.close();
     }

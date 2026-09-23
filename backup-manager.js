@@ -791,6 +791,7 @@ class BackupManager {
         // the first upload (tests and the profile page both read it).
         this.avatarURL = '';
         this.avatarBusy = false;
+        this.avatarSignedOut = false;
     }
     save() {
         localStorage.setItem('kanji_drive_backup', JSON.stringify(this.config));
@@ -1740,6 +1741,9 @@ class BackupManager {
     }
 
     renderAvatar() {
+        if (window.kanjiAuth?.user) {
+            this.avatarSignedOut = false;
+        }
         for (const id of [
             'avatarUpload',
             'avatarAdjust',
@@ -1757,8 +1761,12 @@ class BackupManager {
         }
         const appPhoto = window.kanjiAuth?.user?.photoURL;
         const photo = appPhoto || this.user?.photoLink;
+        // A sign-out hides remote photos too, so the next person opening the app
+        // cannot mistake the previous account's picture for a local profile.
+        const remoteAllowed = Boolean(appPhoto) || !this.avatarSignedOut;
         // App session or authorized Drive photo is a fallback only; custom uploads win.
         const googlePhoto =
+            remoteAllowed &&
             (appPhoto || this.authorized()) &&
             typeof photo === 'string' &&
             photo.startsWith('https://')
@@ -1932,6 +1940,48 @@ class BackupManager {
         document.getElementById('avatarStatus').textContent = file
             ? 'Profile photo saved on this device with its square crop. Included in full backups, not Firestore progress sync.'
             : 'Custom photo and its crop removed. Using your Google photo when connected.';
+    }
+
+    // Signing out must not leave the previous account's face and name on the device.
+    // Learning progress, reviews, themes and backups are deliberately kept: only the
+    // visible identity (uploaded photo, its crop, nickname, username mirror and the
+    // remembered availability answers) is removed.
+    async clearSignedOutIdentity() {
+        try {
+            await BackupManager.media({}, ['avatar']);
+        } catch {
+            // A storage failure must not block sign-out; the UI still resets below.
+        }
+        window.AvatarCrop?.clear();
+        this.avatarSignedOut = true;
+        if (this.avatarURL) {
+            URL.revokeObjectURL(this.avatarURL);
+            this.avatarURL = '';
+        }
+        this.avatarBlob = null;
+        try {
+            localStorage.setItem('kanji_profile', JSON.stringify({}));
+        } catch {
+            /* a full store is not a reason to keep the name visible */
+        }
+        window.kanjiUsernames?.forgetIdentity?.();
+        const nickname = document.getElementById('profileNickname');
+        if (nickname) {
+            nickname.value = '';
+        }
+        const pageNickname = document.getElementById('profilePageNickname');
+        if (pageNickname) {
+            pageNickname.value = '';
+        }
+        const feedback = document.getElementById('profileStatus');
+        if (feedback) {
+            feedback.textContent =
+                'Signed out: your photo, name and username were removed from this device. Learning progress stays.';
+        }
+        this.renderAccount();
+        this.renderAvatar();
+        window.kanjiProfilePage?.refresh();
+        return true;
     }
 
     async initAvatar() {
