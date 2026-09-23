@@ -1419,7 +1419,7 @@ test('credentials stay out of backups, cloud sync and the service worker cache',
     }
     assert.match(
         worker,
-        /kanji-widgets-v19/,
+        /kanji-widgets-v\d+/,
         'the offline cache must be versioned for this release'
     );
     assert.match(read('backup-manager.js'), /static BUILD = 'login-v1';/);

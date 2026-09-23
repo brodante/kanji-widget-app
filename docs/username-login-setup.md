@@ -75,6 +75,24 @@ Adding `localhost` to Google Cloud **Authorized JavaScript origins** only covers
 Google popup. Password sign-in additionally needs the provider enabled and the origin
 authorised in Firebase, and both flows need the browser API key to allow the origin.
 
+## Profile photos
+
+Uploading a photo opens a crop dialog before anything is saved:
+
+- The preview is a real square frame, so what you see is what appears in the header,
+  the account panel and the profile hero.
+- Drag to move, wheel or pinch to zoom, arrow keys to nudge, `+`/`-` or the slider for
+  zoom, `r` to reset. Panning is clamped to the photo, so a crop can never show empty
+  space.
+- The crop is stored as a small record (`kanji_avatar_crop` in localStorage: centre
+  point, zoom and aspect ratio) and applied with CSS transforms. The image bytes are
+  never re-encoded, which keeps animated GIFs animating and keeps the original file in
+  full backups.
+- `Adjust crop` (account panel and profile page) re-opens the dialog on the stored
+  photo without re-uploading it. Removing the photo removes the crop with it.
+- Full backups carry the crop record so a restore looks identical. Firestore progress
+  sync deliberately does not: it never carried media.
+
 ## Email verification
 
 - The link is sent by Firebase Authentication from `noreply@<project>.firebaseapp.com`
@@ -155,6 +173,9 @@ These cannot be verified in a sandbox and must be checked on a real project:
       `email confirmed` once the link is opened and the window is focused again.
 - [ ] Reload and restart the browser: the session must persist on the same hostname.
 - [ ] Sign in with a username and its password on a second device or browser profile.
+- [ ] Upload a very tall photo and a very wide photo: both must appear as filled
+      squares, an animated GIF must keep animating after cropping, and `Adjust crop`
+      must reopen with the previous crop.
 - [ ] Try a username that is already taken; the dialog must say so before submission
       and again if it is taken at the last moment.
 - [ ] Rename a username, then confirm the previous name is reserved and cannot be

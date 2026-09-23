@@ -6820,3 +6820,223 @@ body.auth-dialog-open {
 .auth-verify-row .auth-hint {
     flex: 1 1 100%;
 }
+
+/* ---------------------------------------------------------------------------
+   Avatar frames: every avatar is a square that crops its photo, so a tall or wide
+   upload can never be stretched into an oval. The crop itself is CSS only, which
+   keeps animated GIFs animating.
+--------------------------------------------------------------------------- */
+.avatar-frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+}
+.avatar-frame > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transform: translate(var(--avatar-tx, 0%), var(--avatar-ty, 0%)) scale(var(--avatar-zoom, 1));
+    transform-origin: center;
+    will-change: transform;
+}
+
+/* Crop dialog */
+body.avatar-crop-open {
+    overflow: hidden;
+}
+.avatar-crop {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--on-surface);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+}
+.avatar-crop:not([open]) {
+    display: none;
+}
+.avatar-crop::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+}
+.avatar-crop-shell {
+    width: min(520px, calc(100vw - 24px));
+    margin: max(20px, env(safe-area-inset-top)) auto 40px;
+    padding: 22px;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.4);
+}
+.avatar-crop-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+.avatar-crop-eyebrow {
+    margin: 0 0 4px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+.avatar-crop-header h2 {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+}
+.avatar-crop-intro {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.75;
+    word-break: break-word;
+}
+.avatar-crop-close {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.avatar-crop-close:hover {
+    background: var(--shadow);
+}
+.avatar-crop-body {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 18px 0 14px;
+    flex-wrap: wrap;
+}
+.avatar-crop-stage {
+    position: relative;
+    flex: 0 0 auto;
+    width: 224px;
+    height: 224px;
+    box-sizing: content-box;
+    border-radius: 50%;
+    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 70%, var(--primary-color) 30%);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+.avatar-crop-stage:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 4px;
+}
+.avatar-crop-stage.is-dragging {
+    cursor: grabbing;
+}
+.avatar-crop-frame {
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary-color);
+}
+.avatar-crop-frame > img {
+    background: color-mix(in srgb, var(--surface) 80%, #000 20%);
+}
+.avatar-crop-frame[data-zoomed='true'] > img {
+    /* A hairline helps see the crop boundary once the photo is magnified. */
+    outline: 1px solid rgba(127, 127, 127, 0.35);
+    outline-offset: -1px;
+}
+.avatar-crop-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 9999px rgba(0, 0, 0, 0.08);
+}
+.avatar-crop-original {
+    margin: 0;
+    flex: 1 1 140px;
+    min-width: 120px;
+    text-align: center;
+}
+.avatar-crop-original img {
+    width: 100%;
+    max-height: 140px;
+    object-fit: contain;
+    border: 1px dashed var(--border-color, #8886);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface) 88%, #000 12%);
+}
+.avatar-crop-original figcaption {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+.avatar-crop-zoomrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.avatar-crop-zoomrow input {
+    flex: 1;
+    accent-color: var(--primary-color);
+    min-height: 32px;
+}
+.avatar-crop-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+.avatar-crop-actions .backup-btn {
+    flex: 0 1 auto;
+    margin-left: auto;
+}
+.avatar-crop :is(button, input, [tabindex]):focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+@media (max-width: 620px) {
+    .avatar-crop-shell {
+        width: 100%;
+        margin: 0;
+        min-height: 100%;
+        border: 0;
+        border-radius: 0;
+        padding: max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+    }
+    .avatar-crop-stage {
+        width: min(72vw, 240px);
+        height: min(72vw, 240px);
+        margin: 0 auto;
+    }
+    .avatar-crop-body {
+        justify-content: center;
+    }
+    .avatar-crop-actions .backup-btn {
+        flex: 1 1 100%;
+        margin-left: 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .avatar-frame > img {
+        will-change: auto;
+    }
+}

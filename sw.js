@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanji-widgets-v19';
+const CACHE_NAME = 'kanji-widgets-v20';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -20,6 +20,7 @@ const urlsToCache = [
     '/backup-manager.js',
     '/backup-manager.js?v=practice-merge-v1',
     '/profile-page.js?v=practice-merge-v1',
+    '/avatar-crop.js?v=avatar-v1',
     '/kanji-data.js',
     '/audio-manager.js',
     '/storage-manager.js',

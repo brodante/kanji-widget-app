@@ -98,6 +98,14 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - [ ] Email magic-link sign-in.
 - [ ] Backup health reminders and storage-usage estimates.
 
+## Profile photo cropping
+
+Uploaded photos are cropped into a square before they are stored (`avatar-crop.js`,
+`kanji_avatar_crop`). The crop is metadata applied with CSS, so GIFs keep animating and
+original bytes stay in full backups. Add it to the manual list: upload a tall photo, a
+wide photo and an animated GIF, adjust each crop, and confirm the header, account panel
+and profile hero all match.
+
 ## Current implementation notes
 
 - The reported missing-header diagnostic was addressed without removing the overwrite guard. Most operations still use Drive v3; guarded checkpoint reads/updates use the v2 metadata `etag` and v2 conditional update endpoint. Same OAuth client, project and `drive.file` scope; no client secret or additional setup.

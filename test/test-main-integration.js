@@ -108,7 +108,7 @@ test('username login assets are versioned, precached and deployed together', () 
         assert.ok(worker.includes(`'/${versioned}'`), `precache: ${versioned}`);
         assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
     }
-    assert.match(worker, /kanji-widgets-v19/, 'the offline cache version must be bumped');
+    assert.match(worker, /kanji-widgets-v20/, 'the offline cache version must be bumped');
     assert.ok(html.indexOf('username-policy.js') < html.indexOf('app-auth.js'));
     assert.ok(html.indexOf('app-auth.js') < html.indexOf('username-directory.js'));
     assert.ok(html.indexOf('username-directory.js') < html.indexOf('auth-dialog.js'));

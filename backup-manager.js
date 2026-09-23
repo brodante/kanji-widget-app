@@ -17,7 +17,8 @@ class BackupManager {
         'lastLightTheme',
         'dailyStreak',
         'lastStudyDate',
-        'aiSenseiFabPos'
+        'aiSenseiFabPos',
+        'kanji_avatar_crop'
     ];
     static allowed(key) {
         return this.keys.includes(key) || /^customTheme:slot[123]:settings$/.test(key);
@@ -786,6 +787,10 @@ class BackupManager {
         this.busy = false;
         this.retryAfter = 0;
         this.files = [];
+        // Avatar state lives here so every caller sees a defined value, even before
+        // the first upload (tests and the profile page both read it).
+        this.avatarURL = '';
+        this.avatarBusy = false;
     }
     save() {
         localStorage.setItem('kanji_drive_backup', JSON.stringify(this.config));
@@ -1735,11 +1740,17 @@ class BackupManager {
     }
 
     renderAvatar() {
-        for (const id of ['avatarUpload', 'profilePagePhoto', 'profilePageRemovePhoto']) {
+        for (const id of [
+            'avatarUpload',
+            'avatarAdjust',
+            'profilePagePhoto',
+            'profilePageAdjustPhoto',
+            'profilePageRemovePhoto'
+        ]) {
             const control = document.getElementById(id);
             if (control) {
                 control.disabled = Boolean(this.avatarBusy);
-                if (id === 'profilePageRemovePhoto') {
+                if (id !== 'avatarUpload' && id !== 'profilePagePhoto') {
                     control.hidden = !this.avatarURL;
                 }
             }
@@ -1780,50 +1791,118 @@ class BackupManager {
                 image.removeAttribute('src');
             }
         }
+        // A Google or default photo is never cropped; an uploaded one uses its record.
+        window.AvatarCrop?.apply(document, this.avatarURL ? window.AvatarCrop.read() : null);
         window.kanjiProfilePage?.refresh();
     }
 
-    async setAvatar(file) {
+    async setAvatar(file, crop) {
         if (this.avatarBusy) {
             throw new Error('Please wait for the current photo change to finish.');
         }
         this.avatarBusy = true;
         this.renderAvatar();
         try {
-            return await this.writeAvatar(file);
+            return await this.writeAvatar(file, crop);
         } finally {
             this.avatarBusy = false;
             this.renderAvatar();
         }
     }
 
-    async writeAvatar(file) {
+    // Upload path: validate, decode, let the user place the square, then store the
+    // original bytes plus the crop record. The bytes are never re-encoded, so an
+    // animated GIF keeps every frame.
+    async uploadAvatar(file, options = {}) {
+        BackupManager.validateAvatar(file);
+        if (this.avatarBusy) {
+            throw new Error('Please wait for the current photo change to finish.');
+        }
+        const url = URL.createObjectURL(file);
+        let crop = null;
+        try {
+            const decoded = await BackupManager.decodeAvatar(url);
+            const chooser = options.chooser || window.avatarCrop;
+            const stored = window.AvatarCrop?.read();
+            const ratio = window.AvatarCrop.ratioOf(decoded?.naturalWidth, decoded?.naturalHeight);
+            const suggested = { ...(stored || window.AvatarCrop.DEFAULTS), ratio };
+            crop =
+                (typeof chooser?.open === 'function'
+                    ? await chooser.open({
+                          src: url,
+                          crop: suggested,
+                          name: options.name || file.name || 'your photo'
+                      })
+                    : null) || null;
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+        if (!crop) {
+            throw Object.assign(new Error('cancelled'), { code: 'app/cancelled' });
+        }
+        return this.setAvatar(file, crop);
+    }
+
+    // Re-crops the photo already stored on this device, without re-writing the bytes.
+    async adjustAvatar() {
+        if (!this.avatarURL || this.avatarBusy) {
+            return null;
+        }
+        const chooser = window.avatarCrop;
+        if (typeof chooser?.open !== 'function') {
+            return null;
+        }
+        this.avatarBusy = true;
+        this.renderAvatar();
+        try {
+            const result = await chooser.open({
+                src: this.avatarURL,
+                crop: window.AvatarCrop?.read(),
+                name: 'your photo'
+            });
+            if (!result) {
+                return null;
+            }
+            window.AvatarCrop.write(result);
+            return result;
+        } finally {
+            this.avatarBusy = false;
+            this.renderAvatar();
+        }
+    }
+
+    // Decodes without canvas conversion: animated GIFs retain every frame. Resolves
+    // with the image so callers can read its natural size from the same decode.
+    static async decodeAvatar(url) {
+        return new Promise((resolve, reject) => {
+            const image = new Image();
+            const timer = setTimeout(
+                () => reject(new Error('Image could not be loaded. Try a different file.')),
+                10000
+            );
+            image.onload = () => {
+                clearTimeout(timer);
+                resolve(image);
+            };
+            image.onerror = () => {
+                clearTimeout(timer);
+                reject(
+                    new Error(
+                        'This image format cannot be displayed in your browser. Try PNG, JPEG, WebP or GIF.'
+                    )
+                );
+            };
+            image.src = url;
+        });
+    }
+
+    async writeAvatar(file, crop) {
         let url;
         if (file) {
             BackupManager.validateAvatar(file);
             url = URL.createObjectURL(file);
             try {
-                // Decode without canvas conversion: animated GIFs retain every frame.
-                await new Promise((resolve, reject) => {
-                    const image = new Image();
-                    const timer = setTimeout(
-                        () => reject(new Error('Image could not be loaded. Try a different file.')),
-                        10000
-                    );
-                    image.onload = () => {
-                        clearTimeout(timer);
-                        resolve();
-                    };
-                    image.onerror = () => {
-                        clearTimeout(timer);
-                        reject(
-                            new Error(
-                                'This image format cannot be displayed in your browser. Try PNG, JPEG, WebP or GIF.'
-                            )
-                        );
-                    };
-                    image.src = url;
-                });
+                await BackupManager.decodeAvatar(url);
             } catch (error) {
                 URL.revokeObjectURL(url);
                 throw error;
@@ -1831,6 +1910,13 @@ class BackupManager {
         }
         try {
             await BackupManager.media(file ? { avatar: file } : {}, ['avatar']);
+            if (file) {
+                this.avatarBlob = file;
+                window.AvatarCrop?.write(crop || window.AvatarCrop.DEFAULTS);
+            } else {
+                this.avatarBlob = null;
+                window.AvatarCrop?.clear();
+            }
         } catch (error) {
             if (url) {
                 URL.revokeObjectURL(url);
@@ -1844,8 +1930,8 @@ class BackupManager {
         this.renderAvatar();
         window.kanjiProfilePage?.refresh();
         document.getElementById('avatarStatus').textContent = file
-            ? 'Profile photo saved on this device. Included in full backups, not Firestore progress sync.'
-            : 'Custom photo removed. Using your Google photo when connected.';
+            ? 'Profile photo saved on this device with its square crop. Included in full backups, not Firestore progress sync.'
+            : 'Custom photo and its crop removed. Using your Google photo when connected.';
     }
 
     async initAvatar() {
@@ -1866,6 +1952,13 @@ class BackupManager {
             this.renderAvatar();
         }
         upload.onclick = () => input.click();
+        document.getElementById('avatarAdjust').onclick = () =>
+            this.run(async () => {
+                const applied = await this.adjustAvatar();
+                if (applied) {
+                    feedback.textContent = 'Crop updated for every place your photo appears.';
+                }
+            });
         input.onchange = async () => {
             const file = input.files[0];
             if (!file) {
@@ -1873,10 +1966,12 @@ class BackupManager {
             }
             upload.disabled = true;
             try {
-                await this.setAvatar(file);
+                await this.uploadAvatar(file);
             } catch (error) {
-                feedback.textContent = error.message;
-                window.KanjiFeedback?.show(error.message, { title: 'Photo not uploaded' });
+                if (error?.code !== 'app/cancelled') {
+                    feedback.textContent = error.message;
+                    window.KanjiFeedback?.show(error.message, { title: 'Photo not uploaded' });
+                }
             } finally {
                 input.value = '';
                 upload.disabled = false;

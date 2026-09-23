@@ -48,6 +48,7 @@ jobs:
                   cp firestore.rules deploy/
                   cp backup-manager.js deploy/
                   cp profile-page.js deploy/
+                  cp avatar-crop.js deploy/
                   cp kanji-data.js deploy/
                   cp audio-manager.js deploy/
                   cp ai-manager.js deploy/

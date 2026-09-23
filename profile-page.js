@@ -214,16 +214,30 @@ class ProfilePage {
             }
             upload.disabled = true;
             try {
-                await this.manager.setAvatar(file);
+                await this.manager.uploadAvatar(file);
                 document.getElementById('profilePageFeedback').textContent =
-                    'Photo saved. It will be included in your next backup.';
+                    'Photo saved with its square crop. It will be included in your next backup.';
             } catch (error) {
-                document.getElementById('profilePageFeedback').textContent = error.message;
-                window.KanjiFeedback?.show(error.message, { title: 'Photo not uploaded' });
+                if (error?.code !== 'app/cancelled') {
+                    document.getElementById('profilePageFeedback').textContent = error.message;
+                    window.KanjiFeedback?.show(error.message, { title: 'Photo not uploaded' });
+                }
             } finally {
                 input.value = '';
                 upload.disabled = false;
                 this.refresh();
+            }
+        };
+        document.getElementById('profilePageAdjustPhoto').onclick = async () => {
+            const feedback = document.getElementById('profilePageFeedback');
+            try {
+                const applied = await this.manager.adjustAvatar();
+                if (applied) {
+                    feedback.textContent = 'Crop updated. It is saved with your next backup.';
+                }
+            } catch (error) {
+                feedback.textContent = error.message;
+                window.KanjiFeedback?.show(error.message, { title: 'Crop not saved' });
             }
         };
         document.getElementById('profilePageRemovePhoto').onclick = async () => {
@@ -240,7 +254,7 @@ class ProfilePage {
             try {
                 await this.manager.setAvatar(null);
                 feedback.textContent =
-                    'Uploaded photo removed. Your Google photo or default icon is now shown.';
+                    'Uploaded photo and its crop removed. Your Google photo or default icon is now shown.';
             } catch (error) {
                 feedback.textContent = error.message;
                 window.KanjiFeedback?.show(error.message, { title: 'Photo could not be removed' });

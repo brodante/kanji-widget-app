@@ -174,7 +174,7 @@
 
                     <button
                         id="accountBtn"
-                        class="icon-btn"
+                        class="icon-btn avatar-frame"
                         type="button"
                         title="Account & sync"
                         aria-label="Account & sync"
@@ -186,6 +186,7 @@
                             class="account-avatar"
                             alt=""
                             referrerpolicy="no-referrer"
+                            data-avatar-crop
                             hidden
                         />
                         <i class="fas fa-circle-user" aria-hidden="true"></i>
@@ -199,12 +200,13 @@
                 </div>
                 <section id="accountPanel" hidden aria-labelledby="accountHeading">
                     <div class="account-panel-heading">
-                        <div class="account-avatar-large">
+                        <div class="account-avatar-large avatar-frame">
                             <img
                                 id="accountAvatarPreview"
                                 class="account-avatar"
                                 alt="Profile photo"
                                 referrerpolicy="no-referrer"
+                                data-avatar-crop
                                 hidden
                             />
                             <i class="fas fa-circle-user" aria-hidden="true"></i>
@@ -332,7 +334,16 @@
                             <button id="avatarUpload" type="button" class="backup-btn">
                                 Upload photo
                             </button>
-                            <small>Image or GIF · under 2 MB</small>
+                            <button
+                                id="avatarAdjust"
+                                type="button"
+                                class="backup-btn"
+                                hidden
+                                title="Crop the uploaded photo into a square"
+                            >
+                                Adjust crop
+                            </button>
+                            <small>Image or GIF · under 2 MB · square crop with adjust</small>
                         </div>
                         <input
                             id="avatarFile"
@@ -1814,11 +1825,12 @@ filter: blur(10px) brightness(1) saturate(1);
                     <span>YOUR LEARNING SPACE</span>
                 </header>
                 <section class="profile-hero">
-                    <div class="profile-page-avatar">
+                    <div class="profile-page-avatar avatar-frame">
                         <img
                             id="profilePageAvatar"
                             alt="Your profile photo"
                             referrerpolicy="no-referrer"
+                            data-avatar-crop
                             hidden
                         /><i class="fas fa-circle-user" aria-hidden="true"></i>
                     </div>
@@ -1863,6 +1875,15 @@ filter: blur(10px) brightness(1) saturate(1);
                                 Change photo
                             </button>
                             <button
+                                id="profilePageAdjustPhoto"
+                                type="button"
+                                class="profile-subtle-btn"
+                                title="Crop the uploaded photo into a square"
+                                hidden
+                            >
+                                Adjust crop
+                            </button>
+                            <button
                                 id="profilePageRemovePhoto"
                                 type="button"
                                 class="profile-subtle-btn danger-action remove-photo-button"
@@ -1883,7 +1904,8 @@ filter: blur(10px) brightness(1) saturate(1);
                         />
                         <p class="profile-hint">
                             Images and GIFs under 2 MB. Your uploaded photo takes priority over your
-                            Google photo.
+                            Google photo. Every photo is cropped to a square, so what you see here
+                            is what appears in the header.
                         </p>
                         <p id="profilePageFeedback" role="status" aria-live="polite"></p>
                     </section>
@@ -2292,6 +2314,76 @@ filter: blur(10px) brightness(1) saturate(1);
             </div>
         </dialog>
 
+        <dialog id="avatarCropDialog" class="avatar-crop" aria-labelledby="avatarCropTitle">
+            <div class="avatar-crop-shell">
+                <header class="avatar-crop-header">
+                    <div>
+                        <p class="avatar-crop-eyebrow">Profile photo</p>
+                        <h2 id="avatarCropTitle">Adjust your photo</h2>
+                        <p class="avatar-crop-intro" id="avatarCropCaption"></p>
+                    </div>
+                    <button
+                        id="avatarCropClose"
+                        type="button"
+                        class="avatar-crop-close"
+                        aria-label="Cancel photo adjustment"
+                    >
+                        ×
+                    </button>
+                </header>
+                <div class="avatar-crop-body">
+                    <div
+                        id="avatarCropStage"
+                        class="avatar-crop-stage"
+                        tabindex="0"
+                        role="application"
+                        aria-label="Photo crop area. Drag to move, arrow keys to nudge, plus and minus to zoom."
+                    >
+                        <div id="avatarCropFrame" class="avatar-frame avatar-crop-frame">
+                            <img id="avatarCropImage" alt="Cropped preview" />
+                        </div>
+                        <div class="avatar-crop-ring" aria-hidden="true"></div>
+                    </div>
+                    <figure class="avatar-crop-original">
+                        <img id="avatarCropSource" alt="The whole uploaded photo" />
+                        <figcaption>Whole photo</figcaption>
+                    </figure>
+                </div>
+                <label class="avatar-crop-zoomrow" for="avatarCropZoom">
+                    <span>Zoom</span>
+                    <input id="avatarCropZoom" type="range" min="1" max="3" step="0.01" value="1" />
+                </label>
+                <p id="avatarCropStatus" class="profile-hint" role="status" aria-live="polite"></p>
+                <div class="avatar-crop-actions">
+                    <button
+                        id="avatarCropZoomOut"
+                        type="button"
+                        class="profile-subtle-btn"
+                        aria-label="Zoom out"
+                    >
+                        −
+                    </button>
+                    <button
+                        id="avatarCropZoomIn"
+                        type="button"
+                        class="profile-subtle-btn"
+                        aria-label="Zoom in"
+                    >
+                        +
+                    </button>
+                    <button id="avatarCropReset" type="button" class="profile-subtle-btn">
+                        Reset
+                    </button>
+                    <button id="avatarCropCancel" type="button" class="profile-subtle-btn">
+                        Cancel
+                    </button>
+                    <button id="avatarCropSave" type="button" class="backup-btn">
+                        Use this crop
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
         <script src="storage-manager.js"></script>
         <script src="srs-engine.js"></script>
         <script src="ai-manager.js"></script>
@@ -2303,6 +2395,7 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="backup-config.js"></script>
         <script src="backup-manager.js?v=practice-merge-v1"></script>
         <script src="profile-page.js?v=practice-merge-v1"></script>
+        <script src="avatar-crop.js?v=avatar-v1"></script>
         <script src="firebase-config.js?v=practice-merge-v1"></script>
         <script src="username-policy.js?v=login-v1"></script>
         <script src="app-auth.js?v=practice-merge-v1"></script>
