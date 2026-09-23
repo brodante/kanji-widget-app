@@ -26,6 +26,7 @@ class AppAuth {
         this.busy = false;
         this.message = '';
         this.app = null;
+        this.lastRefreshAt = 0;
     }
 
     static errorMessage(error) {
@@ -87,6 +88,14 @@ class AppAuth {
         const code = error?.code || '';
         if (messages[code]) {
             return messages[code];
+        }
+        // These codes embed the origin or method, so they need a pattern, not a key.
+        if (/^auth\/requests-from-referer/.test(code)) {
+            const origin = window.location?.origin || 'this website';
+            return `This website is blocked for sign-in. Add ${origin}/* to Google Cloud → APIs & Services → Credentials → the browser API key → Website restrictions (HTTP referrers). Changes can take a few minutes to apply.`;
+        }
+        if (/^auth\/requests-to-this-api/.test(code)) {
+            return 'The browser API key blocks the sign-in API. In Google Cloud → Credentials → the browser API key → API restrictions, allow Identity Toolkit API, Token Service API and Cloud Firestore API, or choose “Don’t restrict key”.';
         }
         if (error) {
             // Keep the raw code visible: it is the fastest way to identify a
@@ -170,6 +179,12 @@ class AppAuth {
         });
         document.querySelectorAll('[data-app-auth-retry]').forEach((button) => {
             button.onclick = () => this.start();
+        });
+        // Returning from the inbox is the usual moment a confirmation lands.
+        window.addEventListener('focus', () => {
+            if (this.user && !this.user.emailVerified && !AppAuth.isAliasAccount(this.user)) {
+                this.refreshUser();
+            }
         });
         return this.start();
     }
@@ -317,8 +332,21 @@ class AppAuth {
                     // A display-name failure must not fail account creation.
                 }
             }
+            let verificationSent = false;
+            if (this.sdk.sendEmailVerification) {
+                try {
+                    await this.sdk.sendEmailVerification(credential.user);
+                    verificationSent = true;
+                } catch (error) {
+                    // The account exists either way; the confirmation can be resent.
+                    console.warn(
+                        'KanjiWidgets verification email:',
+                        error?.code || error?.message || ''
+                    );
+                }
+            }
             this.message = '';
-            return { ok: true, user: credential.user, email: address };
+            return { ok: true, user: credential.user, email: address, verificationSent };
         } catch (error) {
             const message = AppAuth.errorMessage(error);
             this.message = message;
@@ -477,6 +505,37 @@ class AppAuth {
         } finally {
             this.busy = false;
             this.render();
+        }
+    }
+
+    // The confirmation happens in the user's mailbox, so the app has to re-read the
+    // account to notice it. Called on focus while unconfirmed, and on demand.
+    async refreshUser({ notify = false } = {}) {
+        if (!this.ready || !this.user || this.busy || !this.sdk?.reload) {
+            return { ok: false };
+        }
+        if (Date.now() - this.lastRefreshAt < 5000) {
+            return { ok: false, throttled: true };
+        }
+        this.lastRefreshAt = Date.now();
+        try {
+            await this.sdk.reload(this.user);
+            this.render();
+            window.dispatchEvent(new Event('kanji-auth-changed'));
+            const verified = Boolean(this.user.emailVerified) || AppAuth.isAliasAccount(this.user);
+            if (notify) {
+                window.KanjiFeedback?.show(
+                    verified
+                        ? 'Email confirmed. Password recovery can now use that address.'
+                        : 'Not confirmed yet. Open the link in your inbox, then check again.'
+                );
+            }
+            return { ok: true, verified };
+        } catch (error) {
+            const message = AppAuth.errorMessage(error);
+            this.message = message;
+            this.render();
+            return { ok: false, message, code: error?.code };
         }
     }
 

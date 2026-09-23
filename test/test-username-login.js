@@ -147,6 +147,12 @@ function fakeAuthSdk({ user = null, error = null, calls = [] } = {}) {
                 throw error;
             }
         },
+        reload: async (target) => {
+            calls.push(['reload']);
+            // The real SDK refreshes the same user object, so a confirmed address
+            // becomes visible without a new sign-in.
+            target.emailVerified = true;
+        },
         signOut: async () => {
             calls.push(['sign-out']);
             notify(null);
@@ -803,6 +809,10 @@ async function setupDialog(overrides = {}) {
             calls.push(['verify-email']);
             return { ok: true, message: 'sent' };
         },
+        refreshUser: async () => {
+            calls.push(['refresh-user']);
+            return overrides.refreshResult ?? { ok: true, verified: true };
+        },
         addRecoveryEmail: async (value) => {
             calls.push(['recovery', value]);
             return { ok: true, message: 'sent' };
@@ -1076,6 +1086,90 @@ test('a failed startup is explained in the dialog instead of "still starting"', 
         assert.match(doc.getElementById('authFeedback').textContent, /not authorized/i);
         window.kanjiAuth.message = 'Checking your saved sign-in…';
         assert.match(dialog.startupMessage(window.kanjiAuth), /still starting/i);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('creating an account sends the confirmation link automatically', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('app-auth.js'));
+        const calls = [];
+        const auth = new window.AppAuth(config, async () => fakeAuthSdk({ calls }));
+        await auth.init();
+        const created = await auth.createAccount({
+            email: 'learner@example.com',
+            password: 'long enough password'
+        });
+        assert.equal(created.ok, true);
+        assert.equal(created.verificationSent, true);
+        assert.deepEqual(
+            calls.find(([name]) => name === 'verify-email'),
+            ['verify-email', 'learner@example.com']
+        );
+
+        // A failing mail step must not undo a created account.
+        const failing = new window.AppAuth(config, async () => {
+            const sdk = fakeAuthSdk({ calls: [] });
+            sdk.sendEmailVerification = async () => {
+                throw Object.assign(new Error('quota'), { code: 'auth/too-many-requests' });
+            };
+            return sdk;
+        });
+        await failing.init();
+        const partial = await failing.createAccount({
+            email: 'second@example.com',
+            password: 'long enough password'
+        });
+        assert.equal(partial.ok, true);
+        assert.equal(partial.verificationSent, false);
+        assert.equal(failing.user.email, 'second@example.com');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the app notices a confirmed address without a new sign-in', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('app-auth.js'));
+        const calls = [];
+        const auth = new window.AppAuth(config, async () => fakeAuthSdk({ calls }));
+        await auth.init();
+        auth.user = { ...passwordAccount };
+        assert.equal(auth.user.emailVerified, false);
+        auth.render();
+        const identities = window.document.querySelector('[data-app-auth-identities]');
+        assert.match(identities.textContent, /email not confirmed/);
+        const refreshed = await auth.refreshUser();
+        assert.equal(refreshed.ok, true);
+        assert.equal(refreshed.verified, true);
+        assert.equal(auth.user.emailVerified, true);
+        assert.ok(calls.some(([name]) => name === 'reload'));
+        assert.match(identities.textContent, /email confirmed/);
+        const immediate = await auth.refreshUser();
+        assert.equal(immediate.throttled, true, 'focus events must not hammer the service');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the blocked-origin and restricted-key codes explain the exact setting', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('app-auth.js'));
+        const referrer = window.AppAuth.errorMessage({
+            code: 'auth/requests-from-referer-http://localhost:5000-are-blocked.'
+        });
+        assert.match(referrer, /HTTP referrers/i);
+        assert.match(referrer, /https:\/\/kanji\.qd\.je\/\*/);
+        assert.match(referrer, /few minutes/i);
+        const api = window.AppAuth.errorMessage({
+            code: 'auth/requests-to-this-api-identitytoolkit-method-are-blocked.'
+        });
+        assert.match(api, /Identity Toolkit API/);
+        assert.match(api, /API restrictions/i);
     } finally {
         dom.window.close();
     }

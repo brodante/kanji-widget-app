@@ -133,6 +133,9 @@ class AuthDialog {
             change.oninput = () => this.scheduleUsernameCheck(change.value, 'change');
         }
         this.el('authVerifyEmail')?.addEventListener('click', () => this.verifyEmail());
+        this.el('authRefreshVerification')?.addEventListener('click', () =>
+            this.refreshVerification()
+        );
         this.el('authAddRecoveryEmail')?.addEventListener('click', () => this.addRecoveryEmail());
         this.el('authLinkGoogle')?.addEventListener('click', () => this.linkGoogle());
         this.el('authAddPasswordForm')?.addEventListener('submit', (event) =>
@@ -444,10 +447,12 @@ class AuthDialog {
         this.render();
         this.setFeedback(
             'success',
-            `Account created. You are @${policy.username}. Check ${email} to confirm the address, then sign in from any device.`
+            created.verificationSent
+                ? `Account created. You are @${policy.username}. We sent a confirmation link to ${email}; open it when convenient. Learning works before you confirm.`
+                : `Account created. You are @${policy.username}. The confirmation email could not be sent just now; use Send confirmation link below.`
         );
         window.KanjiFeedback?.show(
-            `Welcome, @${policy.username}. Your progress stays local until you approve sync.`,
+            `Welcome, @${policy.username}. Confirm ${email} when you can. Your progress stays local until you approve sync.`,
             {
                 kind: 'info'
             }
@@ -457,12 +462,43 @@ class AuthDialog {
     async verifyEmail() {
         const auth = this.auth();
         if (!auth?.ready) {
+            this.setFeedback('error', this.startupMessage(auth));
             return;
         }
-        this.setBusy(true, 'Sending a verification link…');
+        this.setBusy(true, 'Sending a confirmation link…');
         const result = await auth.sendVerificationEmail();
         this.setBusy(false);
         this.setFeedback(result.ok ? 'success' : 'error', result.message);
+    }
+
+    // The confirmation happens in the user's mailbox, so the app re-reads the account.
+    async refreshVerification() {
+        const auth = this.auth();
+        if (!auth?.ready) {
+            this.setFeedback('error', this.startupMessage(auth));
+            return;
+        }
+        this.setBusy(true, 'Checking whether the link was opened…');
+        const result = await auth.refreshUser();
+        this.setBusy(false);
+        if (result.throttled) {
+            this.setFeedback('info', 'Checked a few seconds ago. Try again shortly.');
+            return;
+        }
+        if (!result.ok) {
+            this.setFeedback(
+                'error',
+                result.message || 'The confirmation status could not be checked right now.'
+            );
+            return;
+        }
+        this.setFeedback(
+            result.verified ? 'success' : 'info',
+            result.verified
+                ? 'Email confirmed. That address can now reset a lost password.'
+                : 'Still unconfirmed. Open the link in your inbox, then check again.'
+        );
+        this.render();
     }
 
     async addRecoveryEmail() {

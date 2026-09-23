@@ -2164,15 +2164,31 @@ filter: blur(10px) brightness(1) saturate(1);
 
                 <section data-auth-pane="account" class="auth-pane" aria-label="Account" hidden>
                     <p id="authAccountIdentity" class="auth-identity"></p>
-                    <button
-                        id="authVerifyEmail"
-                        type="button"
-                        class="backup-btn"
-                        data-auth-verify
-                        hidden
-                    >
-                        Send confirmation link
-                    </button>
+                    <div class="auth-verify-row">
+                        <button
+                            id="authVerifyEmail"
+                            type="button"
+                            class="backup-btn"
+                            data-auth-verify
+                            hidden
+                        >
+                            Send confirmation link
+                        </button>
+                        <button
+                            id="authRefreshVerification"
+                            type="button"
+                            class="backup-btn"
+                            data-auth-verify
+                            hidden
+                        >
+                            I confirmed it, refresh
+                        </button>
+                        <p class="auth-hint" data-auth-verify hidden>
+                            The link is sent automatically when you create the account. It is only
+                            needed for password recovery, so learning and cloud saves keep working
+                            before you confirm.
+                        </p>
+                    </div>
                     <form id="authUsernameForm" class="auth-form">
                         <label id="authUsernameLabel" for="authUsernameChange"
                             >Choose your username</label

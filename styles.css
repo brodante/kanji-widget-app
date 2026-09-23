@@ -6809,3 +6809,14 @@ body.auth-dialog-open {
         transition: none;
     }
 }
+
+.auth-verify-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 8px;
+}
+.auth-verify-row .auth-hint {
+    flex: 1 1 100%;
+}
