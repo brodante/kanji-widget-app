@@ -1,8 +1,8 @@
 # Manual test plan: accounts, sign-out, deletion and first sign-in
 
-Only what a browser can verify is in here. The automated suite (`npm test`, 209 tests)
-already covers the logic, the edge cases and the exact strings; this plan checks the real
-thing in a real browser, which no test in this repo can do.
+Only what a browser can verify is in here. The automated suite (`npm test`) already covers
+the logic, the edge cases and the exact strings; this plan checks the real thing in a real
+browser, which no test in this repo can do.
 
 ## Start here — the ten-minute pass
 
@@ -206,26 +206,30 @@ mastered, <n> reviews · last studied <date>". The widget should show the cloud 
 **other** account, or restore a local backup so the device has different progress from the
 cloud copy. Expect, right after sign-in:
 
-- The **comparison card** in the account panel (and the profile page): "This device: …" and
-  "Cloud copy: …", each with kanji studied, mastered, reviews, due now, and the last session
-  date. The cloud side also shows when it was saved.
-- The message: "This device already has progress, and so does the account. Compare the two
-  below, then choose which copy to keep. Nothing is replaced until you choose."
-- Three buttons: **Load cloud progress**, **Keep this device's progress**, **Decide later**.
+- The account panel says: "Both this device and the account have progress. Nothing is
+  replaced until you choose: load the account's copy, or keep this device's progress." —
+  with **Save this device** (keep this device) and **Use cloud progress** (load the cloud
+  copy) directly under it.
+- The full **comparison card** is on the profile page (**My profile**): "This device: …"
+  and "Cloud copy: …", each with kanji studied, mastered, reviews, due now, and the last
+  session date. The cloud side also shows when it was saved. The card is deliberately not
+  in the popup any more, and **Check cloud** under **Save options & help** re-reads it.
+- Nothing has been uploaded and nothing replaced yet.
 
-**5.3 — nothing moves until you choose.** Click **Decide later** → the card hides, the local
-progress is unchanged, and no cloud write happened (check the revision in Firestore is
-unchanged).
+**5.3 — nothing moves until you choose.** On the profile page's card click **Decide later** →
+the card hides, the local progress is unchanged, and no cloud write happened (check the
+revision in Firestore is unchanged).
 
-**5.4 — load the cloud copy.** Re-open the comparison (open **Save options & help** under
-Cloud progress, then **Check cloud**), then press **Load
-cloud progress** → confirm the prompt, which repeats both gists. Expect the local progress
-to match the cloud numbers, the message about what was loaded, and a recovery copy in
-Settings → Recovery & privacy (**Download recovery copy** should return the pre-load state).
+**5.4 — load the cloud copy.** From the account panel press **Use cloud progress** (or press
+**Load cloud progress** on the profile page's card) → confirm the prompt, which repeats both
+gists. Expect the local progress to match the cloud numbers, the message about what was
+loaded, and a recovery copy in Settings → Recovery & privacy (**Download recovery copy**
+should return the pre-load state).
 
-**5.5 — keep this device.** Repeat 5.2, then press **Keep this device's progress** → confirm
-the prompt. Expect the cloud revision to increase by one, the upload to include this
-device's numbers, and the card to disappear.
+**5.5 — keep this device.** Repeat 5.2, then press **Keep this device's progress** on the
+card (or **Save this device** in the account panel) → confirm the prompt. Expect the cloud
+revision to increase by one, the upload to include this device's numbers, and the card to
+disappear.
 
 **5.6 — settings-only device.** A profile with a theme but no learning progress counts as
 clean: it should auto-load without asking. If you disagree with that, say so — it is a
