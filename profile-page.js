@@ -207,6 +207,11 @@ class ProfilePage {
         const upload = document.getElementById('profilePagePhoto');
         const input = document.getElementById('profilePagePhotoFile');
         upload.onclick = () => input.click();
+        // The photo itself is the button people reach for, so it opens the picker too.
+        const avatarEdit = document.getElementById('profilePageAvatarEdit');
+        if (avatarEdit) {
+            avatarEdit.onclick = () => input.click();
+        }
         input.onchange = async () => {
             const file = input.files[0];
             if (!file) {

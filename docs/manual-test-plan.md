@@ -1,6 +1,6 @@
 # Manual test plan: accounts, sign-out, deletion and first sign-in
 
-Only what a browser can verify is in here. The automated suite (`npm test`, 198 tests)
+Only what a browser can verify is in here. The automated suite (`npm test`, 199 tests)
 already covers the logic, the edge cases and the exact strings; this plan checks the real
 thing in a real browser, which no test in this repo can do.
 
@@ -202,15 +202,27 @@ released by its previous owner and can be claimed", and claiming it as B succeed
 
 ## Step 7 — profile photo and crop (human only)
 
+Every photo action lives on the profile page. Reach it from the account panel (**My
+profile**) or by clicking an avatar: the popup's large avatar is a button, and the pencil
+badge on it opens the profile page. The popup itself no longer carries upload, crop or
+display-name controls, so it stays short.
+
+- **The pencil appears on hover.** Hover the header user icon, the popup avatar and the
+  profile hero avatar: each shows a small pencil badge. On a touch screen (no hover) the
+  badge is always visible.
+- Clicking the **profile hero avatar** (or its pencil) opens the file picker directly;
+  clicking the **popup avatar** opens the profile page with **Change photo** focused.
 - Upload a **tall** photo, a **wide** photo and an **animated GIF**. Each opens the crop
   dialog.
 - Drag, wheel, pinch, arrow keys, slider, reset. You cannot drag the photo away from the
   frame; no empty space ever appears inside it.
 - Save → the header, the account panel and the profile hero all show the same square crop.
 - The **GIF still animates** after saving (the bytes are never re-encoded).
-- **Adjust crop** re-opens the dialog on the stored photo without re-uploading.
-- **Remove photo** returns to the Google photo / default icon, and the crop record goes
-  with it.
+- **Adjust crop** and **Remove photo** (profile page, under _Make it yours_) work on the
+  stored photo: no re-upload, and removing it takes the crop record with it.
+- **Display name** is on the profile page only. The popup shows the saved name but has no
+  field for it, and **Create account** asks for email, username and password only — no
+  display-name box and no consent tick-box.
 - Check one dark theme and one light theme for contrast, and a phone-width window for the
   bottom-sheet layout.
 

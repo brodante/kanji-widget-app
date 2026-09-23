@@ -89,7 +89,7 @@ test('profile statistics use stored progress and review records, not invented da
     }
 });
 
-test('profile editing shares validation and persistence with the compact menu', async () => {
+test('profile editing validates and persists the fields the page owns', async () => {
     const { dom, window, page } = await setup();
     try {
         page.open();
@@ -104,12 +104,43 @@ test('profile editing shares validation and persistence with the compact menu', 
             'Mizu <b>hello</b>'
         );
         assert.equal(doc.getElementById('profilePageTitle').querySelector('b'), null);
-        assert.equal(doc.getElementById('profileNickname').value, 'Mizu <b>hello</b>');
+        assert.equal(
+            doc.getElementById('profileNickname'),
+            null,
+            'the compact menu keeps no second display-name field'
+        );
         doc.getElementById('profilePageNickname').value = 'x'.repeat(41);
         doc.getElementById('profilePageForm').dispatchEvent(
             new window.Event('submit', { cancelable: true })
         );
         assert.match(doc.getElementById('profilePageFeedback').textContent, /40 characters/);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the avatar pencils open the photo picker from the hero and from the popup', async () => {
+    const { dom, window, dialog } = await setup();
+    try {
+        const doc = window.document;
+        let opened = 0;
+        doc.getElementById('profilePagePhotoFile').click = () => opened++;
+        doc.getElementById('openProfilePage').click();
+        assert.equal(dialog.open, true);
+        doc.getElementById('profilePageAvatarEdit').click();
+        assert.equal(opened, 1, 'the hero avatar is the picker');
+
+        doc.getElementById('profilePageBack').click();
+        assert.equal(dialog.open, false);
+        doc.getElementById('accountBtn').click();
+        doc.getElementById('accountAvatarEdit').click();
+        assert.equal(dialog.open, true, 'the popup avatar opens the profile page');
+        assert.equal(doc.activeElement.id, 'profilePagePhoto');
+        assert.equal(
+            window.location.hash,
+            '#profile',
+            'the profile page stays addressable after hopping from the popup'
+        );
     } finally {
         dom.window.close();
     }

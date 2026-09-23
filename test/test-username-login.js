@@ -586,7 +586,7 @@ test('sign-out clears the photo, nickname and username but keeps learning progre
         const manager = new window.BackupManager();
         window.driveBackup = manager;
         manager.avatarURL = 'blob:photo';
-        doc.getElementById('profileNickname').value = 'Dante';
+        doc.getElementById('profilePageNickname').value = 'Dante';
 
         const calls = [];
         const auth = new window.AppAuth(config, async () => fakeAuthSdk({ calls }));
@@ -609,7 +609,7 @@ test('sign-out clears the photo, nickname and username but keeps learning progre
             {},
             'the nickname is gone'
         );
-        assert.equal(doc.getElementById('profileNickname').value, '');
+        assert.equal(doc.getElementById('profilePageNickname').value, '');
         assert.equal(window.kanjiUsernames.handle, null);
         assert.equal(window.localStorage.getItem(window.UsernameDirectory.HANDLE_KEY), null);
         assert.equal(
@@ -627,7 +627,7 @@ test('sign-out clears the photo, nickname and username but keeps learning progre
         assert.ok(avatarImg.hidden, 'the placeholder, not a face, is shown');
         assert.equal(doc.querySelector('#accountAvatar + *')?.hidden, false);
         assert.match(
-            doc.getElementById('profileStatus').textContent,
+            doc.getElementById('profilePageFeedback').textContent,
             /photo, name and username were removed/i
         );
         assert.match(auth.message, /photo, name and username were removed/i);
@@ -1730,7 +1730,6 @@ test('the sign-in dialog exposes both paths and keeps one namespace of IDs', asy
             'authUsernameStatus',
             'authCreatePassword',
             'authCreatePasswordConfirm',
-            'authCreateConsent',
             'authUsernameChange',
             'authAddRecoveryEmail'
         ]) {
@@ -2084,21 +2083,15 @@ test('creating an account validates the form, then claims the username', async (
         assert.equal(calls.length, 0);
 
         doc.getElementById('authCreatePasswordConfirm').value = 'long enough password';
-        doc.getElementById('authCreateConsent').checked = false;
-        doc.getElementById('authCreateForm').dispatchEvent(
-            new window.Event('submit', { cancelable: true })
-        );
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        assert.match(doc.getElementById('authFeedback').textContent, /not uploaded/i);
-        assert.equal(calls.length, 0);
-
-        doc.getElementById('authCreateConsent').checked = true;
+        // No consent tick-box gates sign-up; the display name comes from the profile.
+        window.localStorage.setItem('kanji_profile', JSON.stringify({ nickname: 'Mizu' }));
         doc.getElementById('authCreateForm').dispatchEvent(
             new window.Event('submit', { cancelable: true })
         );
         await new Promise((resolve) => setTimeout(resolve, 0));
         assert.equal(calls[0][0], 'create');
         assert.equal(calls[0][1].email, 'learner@example.com');
+        assert.equal(calls[0][1].displayName, 'Mizu');
         assert.deepEqual(directoryCalls[0], ['reserve', 'dante_kanji']);
         assert.match(doc.getElementById('authFeedback').textContent, /@dante_kanji/);
     } finally {
@@ -2123,7 +2116,6 @@ test('a username taken at the last moment keeps the account and asks for another
         doc.getElementById('authCreateUsername').value = 'dante_kanji';
         doc.getElementById('authCreatePassword').value = 'long enough password';
         doc.getElementById('authCreatePasswordConfirm').value = 'long enough password';
-        doc.getElementById('authCreateConsent').checked = true;
         doc.getElementById('authCreateForm').dispatchEvent(
             new window.Event('submit', { cancelable: true })
         );

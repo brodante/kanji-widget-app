@@ -155,6 +155,12 @@ original bytes stay in full backups. Add it to the manual list: upload a tall ph
 wide photo and an animated GIF, adjust each crop, and confirm the header, account panel
 and profile hero all match.
 
+Every avatar that can change the photo carries a pencil badge that appears on hover (and
+stays visible where hover does not exist): the profile hero avatar opens the file picker,
+and the account panel's avatar opens the profile page with the photo control focused. The
+account popup itself keeps no upload, crop or display-name controls, so it does not scroll
+for a few lines of form at phone widths.
+
 ## Current implementation notes
 
 - The reported missing-header diagnostic was addressed without removing the overwrite guard. Most operations still use Drive v3; guarded checkpoint reads/updates use the v2 metadata `etag` and v2 conditional update endpoint. Same OAuth client, project and `drive.file` scope; no client secret or additional setup.
@@ -163,6 +169,7 @@ and profile hero all match.
 - Save order uses the content-save timestamp; label and pin edits preserve it. Legacy files are given a saved timestamp when their metadata is first edited.
 - Autosave batches observed app data/media changes, never opens consent popups, and still pauses offline, while hidden, during conflicts, and during account switching. Changed data is saved after 15 seconds without another observed change; cloud checks remain roughly once per minute when idle. Normal failure retries back off; explicit user actions can retry immediately.
 - Dedicated profile page is implemented as an in-app `#profile` view, keeping Google access in memory. It includes avatar, nickname/device editing, recorded learning start date, progress/review stats, save controls and conflict/recovery navigation.
+- The profile page owns the display name and every photo action; the account popup only shows them. Account creation therefore asks for email, username and password, takes the display name from the stored profile, and needs no consent tick-box: an auth change never writes progress, and the first save still shows both copies and asks which to keep.
 - All listed Should items are implemented for the existing app and its known backup formats. No new backend or optional account features are being added in this pass. Future backup schema changes will need their own migration step and tests.
 - Settings now has an always-visible My profile entry and shortcuts for Learning, Appearance, Audio, AI Sensei, Backups & sync, and Recovery & privacy. Shortcuts scroll/focus existing sections rather than duplicating their controls.
 

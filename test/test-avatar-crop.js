@@ -508,7 +508,13 @@ test('the crop assets are versioned, precached, deployed and wired to both surfa
         const doc = dom.window.document;
         const ids = [...doc.querySelectorAll('[id]')].map((node) => node.id);
         assert.equal(new Set(ids).size, ids.length, 'duplicate IDs break avatar controls');
-        assert.ok(doc.getElementById('avatarAdjust'));
+        // Both avatars that can change the photo carry the pencil badge.
+        for (const id of ['accountAvatarEdit', 'profilePageAvatarEdit']) {
+            const control = doc.getElementById(id);
+            assert.ok(control, `${id} must offer the photo`);
+            assert.ok(control.querySelector('.avatar-edit-badge'), `${id} needs its pencil`);
+            assert.ok(control.querySelector('[data-avatar-crop]'), `${id} shows the cropped image`);
+        }
         assert.ok(doc.getElementById('profilePageAdjustPhoto'));
         assert.equal(doc.querySelectorAll('[data-avatar-crop]').length, 3);
         assert.equal(

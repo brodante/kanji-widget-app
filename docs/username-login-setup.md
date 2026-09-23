@@ -88,8 +88,16 @@ Uploading a photo opens a crop dialog before anything is saved:
   point, zoom and aspect ratio) and applied with CSS transforms. The image bytes are
   never re-encoded, which keeps animated GIFs animating and keeps the original file in
   full backups.
-- `Adjust crop` (account panel and profile page) re-opens the dialog on the stored
-  photo without re-uploading it. Removing the photo removes the crop with it.
+- Every photo action is on the profile page: `Change photo`, `Adjust crop` (re-opens the
+  dialog on the stored photo without re-uploading it) and `Remove photo` (takes the crop
+  with it). The avatars themselves are shortcuts — the profile hero avatar and the pencil
+  badge on it open the picker, and the account panel's avatar opens the profile page with
+  `Change photo` focused. Hovering any avatar reveals the pencil badge; without hover
+  support the badge stays visible.
+- Display name lives on the profile page too. The account popup shows the saved name but
+  carries no field for it, and account creation asks for email, username and password
+  only: no second display-name box and no consent tick-box (the no-silent-upload promise
+  is enforced in code and by the first-save choice, not by a promise the learner ticks).
 - Full backups carry the crop record so a restore looks identical. Firestore progress
   sync deliberately does not: it never carried media.
 

@@ -431,12 +431,25 @@ test('failed diagnostic preserves learning files and attempts temporary-file cle
     }
 });
 
-test('compact account menu keeps secondary sections collapsed and primary controls reachable', async () => {
+test('compact account menu leaves the profile form and photo controls to the profile page', async () => {
     const { dom, window } = await setupUI();
     try {
         const doc = window.document;
         doc.getElementById('accountBtn').click();
-        assert.equal(doc.getElementById('accountProfileDetails').open, false);
+        // The popup used to scroll because it carried a second copy of the display-name
+        // form and the photo controls. Both surfaces now live on the profile page.
+        for (const id of [
+            'accountProfileDetails',
+            'accountProfileForm',
+            'profileNickname',
+            'profileDeviceLabel',
+            'profileStatus',
+            'avatarUpload',
+            'avatarAdjust',
+            'avatarFile'
+        ]) {
+            assert.equal(doc.getElementById(id), null, `${id} belongs to the profile page`);
+        }
         assert.equal(doc.getElementById('accountSaveDetails').open, false);
         assert.equal(doc.getElementById('accountSync').closest('details').id, 'driveBackup');
         assert.equal(
@@ -445,10 +458,6 @@ test('compact account menu keeps secondary sections collapsed and primary contro
         );
         assert.ok(doc.getElementById('accountPanel').querySelector('[data-cloud-action=save]'));
         assert.equal(doc.getElementById('accountSettings').closest('details'), null);
-        assert.equal(
-            doc.getElementById('avatarUpload').closest('details').id,
-            'accountProfileDetails'
-        );
         assert.ok(
             doc.getElementById('accountPanel').style.getPropertyValue('--account-panel-room')
         );
@@ -457,45 +466,39 @@ test('compact account menu keeps secondary sections collapsed and primary contro
     }
 });
 
-test('nickname saves safely and clearing it returns to the Google name', async () => {
-    const { dom, window, manager } = await setupUI();
+test('the popup avatar is a pencil that reaches the profile photo without a profile page', async () => {
+    const { dom, window } = await setupUI();
     try {
-        manager.token = 'test';
-        manager.expires = Date.now() + 60000;
-        manager.user = { displayName: 'Google Name', emailAddress: 'learner@example.com' };
         const doc = window.document;
-        doc.getElementById('profileNickname').value = 'Mizu <b>name</b>';
-        doc.getElementById('profileDeviceLabel').value = 'My phone';
-        doc.getElementById('accountProfileForm').dispatchEvent(
-            new window.Event('submit', { cancelable: true })
-        );
-        assert.equal(doc.getElementById('accountHeading').textContent, 'Mizu <b>name</b>');
-        assert.equal(doc.getElementById('accountHeading').querySelector('b'), null);
-        assert.equal(
-            JSON.parse(window.localStorage.getItem('kanji_profile')).nickname,
-            'Mizu <b>name</b>'
-        );
-        assert.equal(manager.config.deviceLabel, 'My phone');
-        doc.getElementById('profileNickname').value = '';
-        doc.getElementById('accountProfileForm').dispatchEvent(
-            new window.Event('submit', { cancelable: true })
-        );
-        assert.equal(doc.getElementById('accountHeading').textContent, 'Google Name');
+        const edit = doc.getElementById('accountAvatarEdit');
+        assert.ok(edit, 'the large popup avatar is the edit control');
+        assert.equal(edit.classList.contains('avatar-editable'), true);
+        assert.equal(edit.getAttribute('aria-label'), 'Change your profile photo');
+        assert.ok(edit.querySelector('.avatar-edit-badge'), 'hovering reveals the pencil');
+        assert.ok(doc.getElementById('accountAvatarPreview'), 'the avatar image is unchanged');
+        // Without the profile page loaded the control must stay inert instead of throwing.
+        assert.equal(window.kanjiProfilePage, undefined);
+        edit.click();
     } finally {
         dom.window.close();
     }
 });
 
-test('profile form rejects oversized values without changing saved data', async () => {
-    const { dom, window } = await setupUI();
+test('the compact menu shows the stored nickname without offering a second form', async () => {
+    const { dom, window, manager } = await setupUI();
     try {
-        const doc = window.document;
-        doc.getElementById('profileNickname').value = 'x'.repeat(41);
-        doc.getElementById('accountProfileForm').dispatchEvent(
-            new window.Event('submit', { cancelable: true })
+        manager.token = 'test';
+        manager.expires = Date.now() + 60000;
+        manager.user = { displayName: 'Google Name', emailAddress: 'learner@example.com' };
+        window.localStorage.setItem(
+            'kanji_profile',
+            JSON.stringify({ nickname: 'Mizu <b>name</b>' })
         );
-        assert.equal(window.localStorage.getItem('kanji_profile'), null);
-        assert.match(doc.getElementById('profileStatus').textContent, /40 characters/);
+        manager.renderAccount();
+        const doc = window.document;
+        assert.equal(doc.getElementById('accountHeading').textContent, 'Mizu <b>name</b>');
+        assert.equal(doc.getElementById('accountHeading').querySelector('b'), null);
+        assert.equal(doc.querySelector('#accountPanel input'), null, 'no form means no scrolling');
     } finally {
         dom.window.close();
     }

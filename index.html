@@ -183,15 +183,23 @@
                         aria-expanded="false"
                         aria-controls="accountPanel"
                     >
-                        <img
-                            id="accountAvatar"
-                            class="account-avatar"
-                            alt=""
-                            referrerpolicy="no-referrer"
-                            data-avatar-crop
-                            hidden
-                        />
-                        <i class="fas fa-circle-user" aria-hidden="true"></i>
+                        <span class="account-avatar-frame">
+                            <img
+                                id="accountAvatar"
+                                class="account-avatar"
+                                alt=""
+                                referrerpolicy="no-referrer"
+                                data-avatar-crop
+                                hidden
+                            />
+                            <i class="fas fa-circle-user" aria-hidden="true"></i>
+                            <span
+                                class="avatar-edit-badge avatar-edit-badge--small"
+                                aria-hidden="true"
+                            >
+                                <i class="fas fa-pencil"></i>
+                            </span>
+                        </span>
                     </button>
                     <button id="settingsBtn" class="icon-btn" title="Settings">
                         <i class="fas fa-cog"></i>
@@ -202,17 +210,26 @@
                 </div>
                 <section id="accountPanel" hidden aria-labelledby="accountHeading">
                     <div class="account-panel-heading">
-                        <div class="account-avatar-large avatar-frame">
+                        <button
+                            id="accountAvatarEdit"
+                            type="button"
+                            class="account-avatar-large avatar-frame avatar-editable"
+                            title="Change your profile photo"
+                            aria-label="Change your profile photo"
+                        >
                             <img
                                 id="accountAvatarPreview"
                                 class="account-avatar"
-                                alt="Profile photo"
+                                alt=""
                                 referrerpolicy="no-referrer"
                                 data-avatar-crop
                                 hidden
                             />
                             <i class="fas fa-circle-user" aria-hidden="true"></i>
-                        </div>
+                            <span class="avatar-edit-badge" aria-hidden="true">
+                                <i class="fas fa-pencil"></i>
+                            </span>
+                        </button>
                         <div class="account-heading-copy">
                             <h2 id="accountHeading">Guest user</h2>
                             <p id="accountIdentity">Learning data stays on this device.</p>
@@ -345,60 +362,6 @@
                     >
                         My profile <span aria-hidden="true">↗</span>
                     </button>
-                    <details id="accountProfileDetails" class="account-details">
-                        <summary>Profile &amp; device</summary>
-                        <form id="accountProfileForm">
-                            <label for="profileNickname"
-                                >Display name <span>(optional)</span></label
-                            >
-                            <input
-                                id="profileNickname"
-                                type="text"
-                                maxlength="40"
-                                autocomplete="nickname"
-                                placeholder="Google name or Guest user"
-                            />
-                            <label for="profileDeviceLabel"
-                                >This device’s label <span>(optional)</span></label
-                            >
-                            <input
-                                id="profileDeviceLabel"
-                                type="text"
-                                maxlength="24"
-                                autocomplete="off"
-                                placeholder="e.g. My phone"
-                            />
-                            <button type="submit" class="backup-btn">Save profile</button>
-                        </form>
-                        <div class="account-photo-controls">
-                            <button id="avatarUpload" type="button" class="backup-btn">
-                                Upload photo
-                            </button>
-                            <button
-                                id="avatarAdjust"
-                                type="button"
-                                class="backup-btn"
-                                hidden
-                                title="Crop the uploaded photo into a square"
-                            >
-                                Adjust crop
-                            </button>
-                            <small>Image or GIF · under 2 MB · square crop with adjust</small>
-                        </div>
-                        <input
-                            id="avatarFile"
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            aria-label="Choose profile photo"
-                        />
-                        <p id="avatarStatus" role="status" aria-live="polite"></p>
-                        <p id="profileStatus" role="status" aria-live="polite"></p>
-                        <small
-                            >Your name and photo sync with backups. The device label stays here and
-                            identifies new cloud saves; it is not a login session.</small
-                        >
-                    </details>
                     <button
                         id="accountSettings"
                         type="button"
@@ -1887,15 +1850,24 @@ filter: blur(10px) brightness(1) saturate(1);
                     <span>YOUR LEARNING SPACE</span>
                 </header>
                 <section class="profile-hero">
-                    <div class="profile-page-avatar avatar-frame">
+                    <button
+                        id="profilePageAvatarEdit"
+                        type="button"
+                        class="profile-page-avatar avatar-frame avatar-editable"
+                        title="Change your profile photo"
+                        aria-label="Change your profile photo"
+                    >
                         <img
                             id="profilePageAvatar"
-                            alt="Your profile photo"
+                            alt=""
                             referrerpolicy="no-referrer"
                             data-avatar-crop
                             hidden
                         /><i class="fas fa-circle-user" aria-hidden="true"></i>
-                    </div>
+                        <span class="avatar-edit-badge" aria-hidden="true">
+                            <i class="fas fa-pencil"></i>
+                        </span>
+                    </button>
                     <div>
                         <p class="profile-eyebrow">My profile</p>
                         <h1 id="profilePageTitle">Guest user</h1>
@@ -2289,20 +2261,10 @@ filter: blur(10px) brightness(1) saturate(1);
                             autocomplete="new-password"
                             minlength="8"
                         />
-                        <label for="authCreateName">Display name <span>(optional)</span></label>
-                        <input
-                            id="authCreateName"
-                            type="text"
-                            maxlength="40"
-                            autocomplete="nickname"
-                        />
-                        <label class="auth-check">
-                            <input id="authCreateConsent" type="checkbox" />
-                            <span
-                                >I understand that signing in does not upload my progress. Cloud
-                                saving still asks before it saves.</span
-                            >
-                        </label>
+                        <p class="auth-hint">
+                            Your display name and photo are set on your profile, and signing in
+                            never uploads progress on its own.
+                        </p>
                         <div class="auth-form-actions">
                             <button id="authCreateSubmit" type="submit" class="backup-btn">
                                 Create account

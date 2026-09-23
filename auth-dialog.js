@@ -380,6 +380,15 @@ class AuthDialog {
 
     // ---------------------------------------------------------------- create
 
+    profileDisplayName() {
+        try {
+            const nickname = JSON.parse(localStorage.getItem('kanji_profile') || '{}').nickname;
+            return typeof nickname === 'string' ? nickname.trim().slice(0, 40) : '';
+        } catch {
+            return '';
+        }
+    }
+
     async submitCreate(event) {
         event.preventDefault();
         const auth = this.auth();
@@ -391,7 +400,8 @@ class AuthDialog {
         const username = this.el('authCreateUsername').value.trim();
         const password = this.el('authCreatePassword').value;
         const confirm = this.el('authCreatePasswordConfirm').value;
-        const displayName = this.el('authCreateName').value.trim();
+        // The display name lives on the profile now; reuse it instead of asking twice.
+        const displayName = this.profileDisplayName();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
             this.setFeedback('error', 'Enter a valid email address.');
             this.el('authCreateEmail').focus();
@@ -418,13 +428,9 @@ class AuthDialog {
             this.el('authCreatePasswordConfirm').focus();
             return;
         }
-        if (this.el('authCreateConsent') && !this.el('authCreateConsent').checked) {
-            this.setFeedback(
-                'error',
-                'Confirm that you understand local progress is not uploaded by signing in.'
-            );
-            return;
-        }
+        // No consent tick-box: the guarantee is kept in code (an auth change never writes
+        // progress, and the first save still asks which copy to keep), so it is not a
+        // promise the learner has to take on trust before signing up.
         this.setBusy(true, 'Creating your account…');
         const created = await auth.createAccount({ email, password, displayName });
         if (!created.ok) {

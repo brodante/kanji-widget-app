@@ -2343,6 +2343,63 @@ body {
     flex-wrap: wrap;
 }
 
+/* Avatars are editable: the pencil shows on hover or keyboard focus. */
+.avatar-editable {
+    position: relative;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+}
+
+.avatar-edit-badge {
+    position: absolute;
+    inset-inline-end: -2px;
+    inset-block-end: -2px;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: var(--on-primary);
+    font-size: 0.7rem;
+    border: 2px solid var(--background, #fff);
+    opacity: 0;
+    transform: scale(0.85);
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+    pointer-events: none;
+}
+
+/* The header icon clips to a circle, so its badge sits inside rather than overhanging. */
+.avatar-edit-badge--small {
+    width: 14px;
+    height: 14px;
+    font-size: 0.45rem;
+    inset-inline-end: 0;
+    inset-block-end: 0;
+}
+
+#accountBtn:hover .avatar-edit-badge,
+#accountBtn:focus-visible .avatar-edit-badge,
+.avatar-editable:hover .avatar-edit-badge,
+.avatar-editable:focus-visible .avatar-edit-badge {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* A touch screen has no hover, so the badge stays visible there. */
+@media (hover: none) {
+    .avatar-edit-badge {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 /* First-contact comparison: this device's progress beside the cloud copy. */
 .cloud-choice {
     display: flex;
@@ -5699,15 +5756,6 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     place-items: center;
     font-size: 48px;
 }
-.account-photo-controls {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-block: 16px;
-}
-.account-photo-controls .backup-btn {
-    margin: 3px 0;
-}
 
 #accountPanel {
     position: absolute;
@@ -5895,42 +5943,6 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
 .account-details small {
     font-size: 0.75rem;
     margin-block: 8px;
-}
-#accountProfileForm {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 8px 12px;
-}
-#accountProfileForm label {
-    font-size: 0.8rem;
-    grid-column: 1 / -1;
-}
-#accountProfileForm label span {
-    opacity: 0.65;
-}
-#accountProfileForm input {
-    grid-column: 1 / -1;
-    width: 100%;
-    min-width: 0;
-    border: 1px solid var(--border-color, #8886);
-    border-radius: 8px;
-    background: var(--background);
-    color: inherit;
-    padding: 10px 12px;
-    font: inherit;
-    font-size: 0.85rem;
-}
-#accountProfileForm input:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
-#accountProfileForm button {
-    grid-column: 1 / -1;
-}
-#accountPanel .account-photo-controls {
-    margin: 12px 0 0;
-    gap: 10px;
-    flex-wrap: wrap;
 }
 #accountPanel .account-sync-toggle {
     margin-bottom: 12px;
@@ -6887,11 +6899,23 @@ body.auth-dialog-open {
    upload can never be stretched into an oval. The crop itself is CSS only, which
    keeps animated GIFs animating.
 --------------------------------------------------------------------------- */
+/* Hovering the header icon or the profile avatar shows the pencil that opens the photo. */
+.account-avatar-frame {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+}
 .avatar-frame {
     position: relative;
     overflow: hidden;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
+}
+/* An editable avatar keeps its pencil badge visible in the corner, so it cannot clip. */
+.avatar-frame.avatar-editable {
+    overflow: visible;
 }
 .avatar-frame > img {
     position: absolute;

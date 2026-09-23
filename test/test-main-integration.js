@@ -156,7 +156,6 @@ test('one sign-in dialog carries password, username and Google entry points', ()
             'authUsernameSuggestions',
             'authCreatePassword',
             'authCreatePasswordConfirm',
-            'authCreateConsent',
             'authUsernameChange',
             'authUsernameChangeStatus',
             'authSaveUsername',
@@ -166,6 +165,21 @@ test('one sign-in dialog carries password, username and Google entry points', ()
         ]) {
             assert.ok(dialog.querySelector(`#${id}`), id);
         }
+        // No display-name field and no consent tick-box: the profile owns the name, and
+        // the no-silent-upload promise is enforced in code rather than promised in a form.
+        assert.equal(dialog.querySelector('#authCreateName'), null);
+        assert.equal(dialog.querySelector('#authCreateConsent'), null);
+        const createHints = [...dialog.querySelectorAll('[data-auth-pane=create] .auth-hint')].map(
+            (node) => node.textContent
+        );
+        assert.ok(
+            createHints.some((text) => /set on your profile/.test(text)),
+            'the create pane names where the display name lives'
+        );
+        assert.ok(
+            createHints.some((text) => /never uploads progress/.test(text)),
+            'the create pane keeps the no-silent-upload promise in words'
+        );
         const ids = [...doc.querySelectorAll('[id]')].map((node) => node.id);
         assert.equal(new Set(ids).size, ids.length, 'duplicate IDs break dialog controls');
         const buttons = [...doc.querySelectorAll('[data-app-sign-in]')];

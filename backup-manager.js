@@ -1506,7 +1506,6 @@ class BackupManager {
             );
         };
         window.addEventListener('resize', fitPanel);
-        this.initProfile();
         document.getElementById('onboardingStart').onclick = () =>
             this.run(async () => {
                 if (this.files.length) {
@@ -1542,6 +1541,18 @@ class BackupManager {
                 'Local-only learning selected. You can Quick save or enable sync whenever you are ready.'
             );
         };
+        // The popup's big avatar is the obvious place to change a photo, so it opens the
+        // profile page (where the picker, the crop and the removal live).
+        const avatarEdit = document.getElementById('accountAvatarEdit');
+        if (avatarEdit) {
+            avatarEdit.onclick = () => {
+                close();
+                if (window.kanjiProfilePage?.open) {
+                    window.kanjiProfilePage.open();
+                }
+                document.getElementById('profilePagePhoto')?.focus();
+            };
+        }
         const close = () => {
             panel.hidden = true;
             button.setAttribute('aria-expanded', 'false');
@@ -1629,7 +1640,7 @@ class BackupManager {
                 await this.backup({ allowAccountSwitch: true });
             });
         this.renderAccount();
-        this.initAvatar();
+        this.loadStoredAvatar();
     }
 
     showOnboarding() {
@@ -1679,31 +1690,7 @@ class BackupManager {
         this.observedLocalSignature = signature;
     }
 
-    initProfile() {
-        const nickname = document.getElementById('profileNickname');
-        const device = document.getElementById('profileDeviceLabel');
-        const feedback = document.getElementById('profileStatus');
-        try {
-            nickname.value =
-                JSON.parse(localStorage.getItem('kanji_profile') || '{}').nickname || '';
-        } catch {
-            nickname.value = '';
-        }
-        device.value = this.config.deviceLabel || '';
-        document.getElementById('accountProfileForm').onsubmit = (event) => {
-            event.preventDefault();
-            const name = nickname.value.trim();
-            const label = device.value.trim();
-            try {
-                this.saveProfilePreferences(name, label);
-                feedback.textContent =
-                    'Profile saved on this device. Quick save to include your name in the cloud copy. Device labels appear on future saves.';
-            } catch (error) {
-                feedback.textContent = error.message;
-            }
-        };
-    }
-
+    // Display name and photo live on the profile page only; the manager just stores them.
     saveProfilePreferences(name, label) {
         name = name.trim();
         label = label.trim();
@@ -1727,8 +1714,18 @@ class BackupManager {
                 'Could not save the complete profile. Browser storage may be full or unavailable. Free space and retry.'
             );
         }
-        document.getElementById('profileNickname').value = name;
-        document.getElementById('profileDeviceLabel').value = label;
+        for (const id of ['profileNickname', 'profilePageNickname']) {
+            const field = document.getElementById(id);
+            if (field) {
+                field.value = name;
+            }
+        }
+        for (const id of ['profileDeviceLabel', 'profilePageDevice']) {
+            const field = document.getElementById(id);
+            if (field) {
+                field.value = label;
+            }
+        }
         this.renderAccount();
         this.refreshSaveStatus();
     }
@@ -1747,16 +1744,15 @@ class BackupManager {
             this.avatarSignedOut = false;
         }
         for (const id of [
-            'avatarUpload',
-            'avatarAdjust',
             'profilePagePhoto',
+            'profilePageAvatarEdit',
             'profilePageAdjustPhoto',
             'profilePageRemovePhoto'
         ]) {
             const control = document.getElementById(id);
             if (control) {
                 control.disabled = Boolean(this.avatarBusy);
-                if (id !== 'avatarUpload' && id !== 'profilePagePhoto') {
+                if (id !== 'profilePagePhoto' && id !== 'profilePageAvatarEdit') {
                     control.hidden = !this.avatarURL;
                 }
             }
@@ -1939,9 +1935,6 @@ class BackupManager {
         this.avatarURL = url || '';
         this.renderAvatar();
         window.kanjiProfilePage?.refresh();
-        document.getElementById('avatarStatus').textContent = file
-            ? 'Profile photo saved on this device with its square crop. Included in full backups, not Firestore progress sync.'
-            : 'Custom photo and its crop removed. Using your Google photo when connected.';
     }
 
     // Signing out must not leave the previous account's face and name on the device.
@@ -1967,15 +1960,11 @@ class BackupManager {
             /* a full store is not a reason to keep the name visible */
         }
         window.kanjiUsernames?.forgetIdentity?.();
-        const nickname = document.getElementById('profileNickname');
+        const nickname = document.getElementById('profilePageNickname');
         if (nickname) {
             nickname.value = '';
         }
-        const pageNickname = document.getElementById('profilePageNickname');
-        if (pageNickname) {
-            pageNickname.value = '';
-        }
-        const feedback = document.getElementById('profileStatus');
+        const feedback = document.getElementById('profilePageFeedback');
         if (feedback) {
             feedback.textContent =
                 'Signed out: your photo, name and username were removed from this device. Learning progress stays.';
@@ -1986,50 +1975,18 @@ class BackupManager {
         return true;
     }
 
-    async initAvatar() {
-        const input = document.getElementById('avatarFile');
-        const upload = document.getElementById('avatarUpload');
-        const feedback = document.getElementById('avatarStatus');
-        upload.disabled = true;
+    // Uploading, cropping and removing a photo are profile-page actions; the manager only
+    // brings the stored photo back on screen when the app starts.
+    async loadStoredAvatar() {
         try {
             const media = await BackupManager.media(undefined, ['avatar']);
             if (media.avatar) {
                 this.avatarURL = URL.createObjectURL(media.avatar);
             }
         } catch {
-            feedback.textContent =
-                'Profile photo storage is unavailable. Your Google photo can still be displayed.';
-        } finally {
-            upload.disabled = false;
-            this.renderAvatar();
+            // Without photo storage the custom picture is simply absent; nothing else breaks.
         }
-        upload.onclick = () => input.click();
-        document.getElementById('avatarAdjust').onclick = () =>
-            this.run(async () => {
-                const applied = await this.adjustAvatar();
-                if (applied) {
-                    feedback.textContent = 'Crop updated for every place your photo appears.';
-                }
-            });
-        input.onchange = async () => {
-            const file = input.files[0];
-            if (!file) {
-                return;
-            }
-            upload.disabled = true;
-            try {
-                await this.uploadAvatar(file);
-            } catch (error) {
-                if (error?.code !== 'app/cancelled') {
-                    feedback.textContent = error.message;
-                    window.KanjiFeedback?.show(error.message, { title: 'Photo not uploaded' });
-                }
-            } finally {
-                input.value = '';
-                upload.disabled = false;
-                this.renderAvatar();
-            }
-        };
+        this.renderAvatar();
     }
 
     static async fingerprint(data) {
