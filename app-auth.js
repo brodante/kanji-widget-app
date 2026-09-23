@@ -35,6 +35,10 @@ class AppAuth {
         'your nickname and your username.\nKept: kanji progress, reviews, streaks, themes and ' +
         'local backups.\n\nDrive keeps its own Disconnect button.';
 
+    // An event the user did not start, so it explains itself instead of just happening.
+    static SIGNED_OUT_ELSEWHERE_MESSAGE =
+        'Signed out in another tab. This tab ended its session too, and removed your photo, name and username from this device; learning progress stays.';
+
     static SIGNED_OUT_MESSAGE =
         'Signed out of the app. Your photo, name and username were removed from this device; learning progress stays. On a shared device, Recovery & privacy → Disconnect & clear this device also removes local study data. Drive has its own Disconnect button.';
 
@@ -342,7 +346,13 @@ class AppAuth {
                             void this.afterSignOut();
                             this.message = this.signingOut
                                 ? AppAuth.SIGNED_OUT_MESSAGE
-                                : `${AppAuth.SIGNED_OUT_MESSAGE} (Signed out in another tab.)`;
+                                : AppAuth.SIGNED_OUT_ELSEWHERE_MESSAGE;
+                            if (!this.signingOut) {
+                                window.KanjiFeedback?.show(this.message, {
+                                    kind: 'info',
+                                    title: 'Signed out'
+                                });
+                            }
                         } else {
                             this.message = '';
                         }

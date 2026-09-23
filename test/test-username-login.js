@@ -671,6 +671,9 @@ test('a sign-out announced by another tab still clears this tab', async () => {
         assert.equal(window.kanjiUsernames.handle, null);
         assert.match(auth.message, /another tab/i);
         assert.match(auth.message, /learning progress stays/i);
+        const notice = window.document.querySelector('.attention-notice');
+        assert.ok(notice, 'a sign-out the user did not start explains itself on screen');
+        assert.match(notice.textContent, /another tab/i);
         for (const note of window.document.querySelectorAll('[data-sign-out-note]')) {
             assert.equal(note.hidden, true, 'the disclosure is hidden once nobody is signed in');
         }

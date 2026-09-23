@@ -99,6 +99,12 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - [ ] Email magic-link sign-in.
 - [ ] Backup health reminders and storage-usage estimates.
 
+## Manual verification
+
+[The manual test plan](manual-test-plan.md) lists the browser checks step by step,
+starting with publishing the updated rules, and says what is already covered by the
+automated suite. Keep it in step with the features it describes.
+
 ## Account deletion
 
 - [x] **Delete account** in the sign-in dialog: re-authentication first (password or
