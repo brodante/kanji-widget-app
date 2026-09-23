@@ -117,9 +117,10 @@ class ProfilePage {
             document.getElementById('saveHealth').textContent;
         document.getElementById('profilePageCloudStatus').textContent =
             document.getElementById('accountStatus').textContent;
-        document.getElementById('profilePageConnect').textContent = connected
-            ? 'Switch Drive account'
-            : 'Connect with Google Drive';
+        BackupManager.setGoogleAction(
+            document.getElementById('profilePageConnect'),
+            connected ? 'Switch Drive account' : 'Connect with Google Drive'
+        );
         document.getElementById('profilePageReview').hidden =
             !manager.pendingCloud && !manager.needsAccountChoice() && !manager.onboardingPending;
         document.getElementById('profilePageReview').textContent = manager.onboardingPending

@@ -170,9 +170,14 @@ wide photo and an animated GIF, adjust each crop, and confirm the header, accoun
 and profile hero all match.
 
 The two avatars that can change the photo — the profile hero avatar and the account
-popup's avatar — cover themselves with a translucent white layer and a pencil on hover or
-keyboard focus (a small corner pencil when there is no hover, so the photo is never
-permanently washed out). The profile hero opens the file picker; the popup avatar opens the
+popup's avatar — cover themselves with a translucent white layer and a grey pencil on hover
+or keyboard focus, with no label text (a small corner pencil when there is no hover, so the
+photo is never permanently washed out).
+
+Google actions carry Google's own mark in its brand colours, never recoloured: `Continue
+with Google`, `Link Google` and the three `Connect with Google` buttons, because the mark is
+both what people scan for and a trust signal. Buttons that end a connection (`Unlink
+Google`, `Disconnect`, `Disconnect Google`) deliberately do not. The profile hero opens the file picker; the popup avatar opens the
 profile page with the photo control focused. The small header icon carries no photo
 affordance: it only opens the popup. The account popup itself keeps no upload, crop or
 display-name controls, so it does not scroll for a few lines of form at phone widths.

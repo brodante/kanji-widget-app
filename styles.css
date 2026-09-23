@@ -2354,8 +2354,9 @@ body {
     font: inherit;
 }
 
-/* Translucent white over the whole photo: covers the old corner badge, and reads as
-   "click me to change this picture" without hiding whose face it is. */
+/* The whole photo washes out to a translucent white with a pencil over it: it reads as
+   "click me to change this picture" without hiding whose face it is. The pencil is a quiet
+   grey, because it sits on the white wash in every theme, and it is sized per surface. */
 .avatar-edit-cover {
     position: absolute;
     inset: 0;
@@ -2363,23 +2364,21 @@ body {
     display: grid;
     place-items: center;
     border-radius: inherit;
-    background: rgba(255, 255, 255, 0.62);
-    color: #1c1c1c;
-    font-size: 1rem;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.68);
+    color: #5f6368;
+    font-size: 1.5rem;
     opacity: 0;
     transition: opacity 0.15s ease;
     pointer-events: none;
 }
 
-.avatar-edit-cover-text {
-    position: absolute;
-    inset-inline: 0;
-    inset-block-end: 8%;
-    text-align: center;
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+/* The profile hero is the biggest avatar, so its pencil leads; the popup avatar is small. */
+.profile-page-avatar .avatar-edit-cover {
+    font-size: 2.1rem;
+}
+
+.account-avatar-large .avatar-edit-cover {
+    font-size: 1.35rem;
 }
 
 .avatar-editable:hover .avatar-edit-cover,
@@ -2387,24 +2386,34 @@ body {
     opacity: 1;
 }
 
-/* No hover means no way to uncover the photo, so touch gets a small corner pencil
-   instead of a permanent white wash over the picture. */
+/* No hover means no way to uncover the photo, so touch gets a small corner pencil in the
+   theme's own surface colours instead of a permanent white wash over the picture. */
 @media (hover: none) {
     .avatar-edit-cover {
         inset: auto 0 0 auto;
-        width: 22px;
-        height: 22px;
-        font-size: 0.6rem;
+        width: 24px;
+        height: 24px;
+        font-size: 0.72rem;
         border-radius: 50%;
-        background: var(--primary-color);
-        color: var(--on-primary);
-        text-shadow: none;
+        background: var(--surface, #fff);
+        color: var(--on-surface, #202124);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
         opacity: 1;
     }
+}
 
-    .avatar-edit-cover-text {
-        display: none;
-    }
+/* Google's mark keeps its own colours on purpose: never recolour or theme it. */
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.google-icon {
+    flex: none;
+    width: 1.15em;
+    height: 1.15em;
 }
 
 /* The shared-device erase is a full-width line under its sign-out button. */

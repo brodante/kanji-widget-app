@@ -217,6 +217,39 @@ test('app entry points and offline cache use the same versioned profile assets',
     );
 });
 
+test('the profile save buttons keep Google’s mark and re-render their labels', async () => {
+    const { dom, window, manager, page } = await setup();
+    try {
+        page.open();
+        const doc = window.document;
+        for (const id of ['profilePageConnect', 'profilePageQuickSave']) {
+            assert.ok(doc.getElementById(id), id);
+        }
+        const button = doc.getElementById('profilePageConnect');
+        assert.ok(
+            button.querySelector('svg.google-icon'),
+            'the Google mark is on the connect button'
+        );
+        assert.equal(button.classList.contains('google-btn'), true);
+        assert.match(button.textContent, /Connect with Google Drive/);
+        assert.equal(
+            doc.getElementById('profilePageQuickSave').querySelector('svg.google-icon'),
+            null,
+            'Quick save is not a Google action and stays plain'
+        );
+
+        // Connecting swaps the label without losing the mark.
+        manager.token = 'token';
+        manager.expires = Date.now() + 60000;
+        manager.user = { displayName: 'Learner', emailAddress: 'learner@example.com' };
+        page.refresh();
+        assert.match(button.textContent, /Switch Drive account/);
+        assert.ok(button.querySelector('svg.google-icon'));
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('settings shortcuts open profile and navigate to all existing sections', async () => {
     const { dom, window, dialog } = await setup();
     try {

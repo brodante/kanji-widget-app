@@ -385,6 +385,120 @@ test('partial cloud deletion reports progress and keeps autosaves paused', async
     }
 });
 
+test('every Google action carries Google’s mark, and the removal paths do not', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        const doc = window.document;
+        manager.token = 'token';
+        manager.expires = Date.now() + 60000;
+        manager.user = { displayName: 'Learner', emailAddress: 'learner@example.com' };
+        manager.renderAccount();
+
+        // The mark is what people scan for, so it is on every action that talks to Google.
+        for (const id of [
+            'authGoogleBtn',
+            'accountConnect',
+            'profilePageConnect',
+            'driveConnect',
+            'authLinkGoogle'
+        ]) {
+            const button = doc.getElementById(id);
+            assert.ok(button, id);
+            const icon = button.querySelector('svg.google-icon');
+            assert.ok(icon, `${id} shows the Google mark`);
+            assert.equal(button.classList.contains('google-btn'), true, `${id} lays the mark out`);
+            assert.equal(
+                icon.querySelectorAll('path').length,
+                4,
+                `${id} uses the four-part Google G`
+            );
+            assert.equal(
+                icon.getAttribute('aria-hidden'),
+                'true',
+                'the mark is decoration; the label carries the meaning'
+            );
+        }
+
+        // Removing or disconnecting a connection is not a Google invitation.
+        for (const id of ['authUnlinkGoogle', 'driveDisconnect', 'accountDisconnect']) {
+            const button = doc.getElementById(id);
+            assert.ok(button, id);
+            assert.equal(
+                button.querySelector('svg.google-icon'),
+                null,
+                `${id} must not carry the Google mark`
+            );
+        }
+
+        // The mark keeps Google's own colours: brand rules, and the trust signal depends on it.
+        const sources = [
+            fs.readFileSync(require.resolve('../index.html'), 'utf8'),
+            fs.readFileSync(require.resolve('../backup-manager.js'), 'utf8')
+        ].join('\n');
+        for (const colour of ['#4285F4', '#EA4335', '#FBBC05', '#34A853']) {
+            assert.ok(sources.includes(colour), `${colour} is part of the mark`);
+        }
+        const css = fs.readFileSync(require.resolve('../styles.css'), 'utf8');
+        const rules = css.slice(css.indexOf('.google-icon'), css.indexOf('.google-icon') + 200);
+        assert.doesNotMatch(
+            rules,
+            /fill\s*:|filter\s*:/,
+            'the mark must never be recoloured or greyed out by theme CSS'
+        );
+
+        // The label is still plain text for tests, screen readers and translations, and it
+        // survives a re-render in both states without losing the mark.
+        assert.match(doc.getElementById('accountConnect').textContent, /Switch Drive account/);
+        manager.token = null;
+        manager.user = null;
+        manager.renderAccount();
+        const account = doc.getElementById('accountConnect');
+        assert.match(account.textContent, /Connect with Google Drive/);
+        assert.ok(account.querySelector('svg.google-icon'), 'the label change keeps the mark');
+        // The profile page owns its own copy of that button; test-profile-page.js checks it
+        // with profile-page.js really loaded.
+        assert.match(doc.getElementById('profilePageConnect').textContent, /Connect with Google/);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the photo hover is a grey pencil over a washed-out picture, with no label', async () => {
+    const { dom, window } = await setupUI();
+    try {
+        const doc = window.document;
+        for (const id of ['accountAvatarEdit', 'profilePageAvatarEdit']) {
+            const cover = doc.getElementById(id).querySelector('.avatar-edit-cover');
+            assert.ok(cover, `${id} keeps a hover cover`);
+            assert.ok(cover.querySelector('i.fa-pen'), `${id} shows a pencil`);
+            assert.equal(
+                cover.textContent.trim(),
+                '',
+                'the cover is the pencil alone: no cramped label in a bad font'
+            );
+        }
+        assert.equal(
+            doc.querySelector('.avatar-edit-cover-text'),
+            null,
+            'the old cover label is gone from the markup'
+        );
+        const css = fs.readFileSync(require.resolve('../styles.css'), 'utf8');
+        assert.equal(
+            css.includes('.avatar-edit-cover-text'),
+            false,
+            'and gone from the stylesheet'
+        );
+        const heroSize = Number(
+            css.match(/\.profile-page-avatar \.avatar-edit-cover \{\s*font-size: ([\d.]+)rem/)[1]
+        );
+        assert.ok(heroSize >= 2, `the hero pencil is big enough (got ${heroSize}rem)`);
+        const coverColour = css.match(/\.avatar-edit-cover \{[\s\S]*?color: ([^;]+);/)[1].trim();
+        assert.match(coverColour, /#5f6368|grey|gray/, `a quiet themed pencil, got ${coverColour}`);
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('the local-data wipe skips its own prompt when the sign-out already asked', async () => {
     const { dom, window, manager } = await setupUI();
     try {
