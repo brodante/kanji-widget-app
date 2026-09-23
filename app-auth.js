@@ -367,6 +367,11 @@ class AppAuth {
                 'This account needs a second sign-in step, which this build does not support yet.',
             'auth/requires-recent-login':
                 'For your safety, sign in again before changing sign-in details.',
+            'auth/no-more-sign-in-methods':
+                'That is the only way to sign in to this account, so it was kept. Add another method first.',
+            'auth/no-such-provider': 'That sign-in method is not on this account.',
+            'auth/unverified-email':
+                'Confirm this email address first, then change how you sign in.',
             'auth/credential-already-in-use':
                 'That sign-in method already belongs to another account.',
             'auth/provider-already-linked': 'That sign-in method is already on this account.',
@@ -514,6 +519,82 @@ class AppAuth {
 
     static hasPassword(user) {
         return user?.providerData?.some((entry) => entry.providerId === 'password') || false;
+    }
+
+    // A sign-in method can only be removed while another one stays, so nobody can lock
+    // themselves out. Returns the reason, so the dialog can explain instead of offering
+    // a button that would be refused.
+    static removalCheck(user, providerId) {
+        const providers = AppAuth.providers(user);
+        if (!providerId || !providers.includes(providerId)) {
+            return {
+                ok: false,
+                reason: 'not-linked',
+                message: 'That sign-in method is not on this account.'
+            };
+        }
+        if (providers.length <= 1) {
+            return {
+                ok: false,
+                reason: 'last-method',
+                message:
+                    providerId === 'password'
+                        ? 'Your password is the only way into this account, so it cannot be removed. Link Google first.'
+                        : 'Google is the only way into this account, so it cannot be unlinked. Add a password first.'
+            };
+        }
+        return { ok: true, reason: '', message: '' };
+    }
+
+    // Removing a method touches the sign-in only: learning data, local backups, cloud
+    // progress and Drive access are all untouched, and the directory republishes the
+    // identity on the auth event.
+    async unlinkProvider(providerId, { password = '' } = {}) {
+        if (!this.ready || this.busy || !this.user) {
+            return { ok: false, message: 'Sign in first.' };
+        }
+        const check = AppAuth.removalCheck(this.user, providerId);
+        if (!check.ok) {
+            this.message = check.message;
+            this.render();
+            return { ok: false, message: check.message, code: `app/${check.reason}` };
+        }
+        const google = providerId === 'google.com';
+        if (!google && !String(password ?? '')) {
+            return {
+                ok: false,
+                message: 'Enter your current password to remove it.',
+                code: 'app/missing-fields'
+            };
+        }
+        this.busy = true;
+        this.message = google ? 'Unlinking Google from this account…' : 'Removing the password…';
+        this.render();
+        try {
+            if (!google) {
+                // Prove ownership first: an unattended session must not be enough to
+                // strip the password off the account.
+                const credential = this.sdk.EmailAuthProvider.credential(this.user.email, password);
+                await this.sdk.reauthenticateWithCredential(this.user, credential);
+            }
+            await this.sdk.unlink(this.user, providerId);
+            this.message = google
+                ? 'Google is no longer linked. Sign in with your email or username and your password. Drive backups keep their own connection.'
+                : 'Password removed. Sign in with Google from now on; you can add a password again at any time.';
+            window.dispatchEvent(new Event('kanji-auth-changed'));
+            return { ok: true, providerId, message: this.message };
+        } catch (error) {
+            const wrong =
+                error?.code === 'auth/wrong-password' || error?.code === 'auth/invalid-credential';
+            const message = wrong
+                ? 'That password did not match, so nothing was removed.'
+                : AppAuth.errorMessage(error);
+            this.message = message;
+            return { ok: false, message, code: error?.code };
+        } finally {
+            this.busy = false;
+            this.render();
+        }
     }
 
     init() {

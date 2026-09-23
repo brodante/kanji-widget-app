@@ -148,6 +148,8 @@ class AuthDialog {
             this.scheduleUsernameCheck(change?.value || '', 'change', 0)
         );
         this.el('authSignOut')?.addEventListener('click', () => this.signOut());
+        this.el('authUnlinkGoogle')?.addEventListener('click', () => this.unlinkGoogle());
+        this.el('authRemovePasswordBtn')?.addEventListener('click', () => this.removePassword());
         this.el('authDeleteAccount')?.addEventListener('click', () => this.deleteAccount());
         this.el('authDeleteNow')?.addEventListener('click', () =>
             this.deleteAccount({ now: true })
@@ -761,6 +763,97 @@ class AuthDialog {
         }
     }
 
+    // Which methods are on the account, and which of them can still be removed.
+    renderMethods(auth = this.auth()) {
+        const section = this.el('authMethodsSection');
+        if (!section) {
+            return;
+        }
+        const signedIn = Boolean(auth?.user);
+        section.hidden = !signedIn;
+        const providers = AppAuth.providers(auth?.user);
+        const google = providers.includes('google.com');
+        const password = AppAuth.hasPassword(auth?.user);
+        const removable = google && password;
+        const status = this.el('authMethodsStatus');
+        if (status) {
+            status.textContent = signedIn
+                ? `On this account: ${[password ? 'password' : '', google ? 'Google' : '']
+                      .filter(Boolean)
+                      .join(' · ')}`
+                : '';
+        }
+        const unlink = this.el('authUnlinkGoogle');
+        if (unlink) {
+            unlink.hidden = !removable;
+            unlink.disabled = Boolean(this.busy);
+        }
+        const remove = this.el('authRemovePasswordSection');
+        if (remove) {
+            remove.hidden = !removable;
+            const field = this.el('authRemovePasswordValue');
+            if (field) {
+                field.disabled = Boolean(this.busy);
+            }
+        }
+        const hint = this.el('authMethodsHint');
+        if (hint) {
+            hint.textContent = !signedIn
+                ? ''
+                : removable
+                  ? 'Either method can sign you in, so one of them can be removed. Google Drive backups have their own connection.'
+                  : google
+                    ? 'Google is the only way into this account. Add a password first; then Google can be unlinked.'
+                    : 'Your password is the only way into this account. Link Google first; then the password can be removed.';
+            hint.hidden = !hint.textContent;
+        }
+    }
+
+    // Removing a way in is destructive, so it says what changes and what does not.
+    static UNLINK_GOOGLE_CONFIRM =
+        'Unlink Google from this account?\n\nYou will sign in with your email or username and ' +
+        'your password. Google Drive backups keep their own connection and are not affected.';
+
+    static REMOVE_PASSWORD_CONFIRM =
+        'Remove the password from this account?\n\nYou will sign in with Google from now on. ' +
+        'You can add a password again at any time.';
+
+    async unlinkGoogle() {
+        const auth = this.auth();
+        if (!auth?.user || !window.confirm(AuthDialog.UNLINK_GOOGLE_CONFIRM)) {
+            return;
+        }
+        this.setBusy(true, 'Unlinking Google…');
+        const result = await auth.unlinkProvider('google.com');
+        this.setBusy(false);
+        this.setFeedback(result.ok ? 'success' : 'error', result.message);
+        this.render();
+    }
+
+    async removePassword() {
+        const auth = this.auth();
+        const field = this.el('authRemovePasswordValue');
+        if (!auth?.user) {
+            return;
+        }
+        if (!field?.value) {
+            this.setFeedback('error', 'Enter your current password first.');
+            field?.focus();
+            return;
+        }
+        if (!window.confirm(AuthDialog.REMOVE_PASSWORD_CONFIRM)) {
+            return;
+        }
+        this.setBusy(true, 'Removing the password…');
+        const result = await auth.unlinkProvider('password', { password: field.value });
+        this.setBusy(false);
+        if (result.ok) {
+            field.value = '';
+        }
+        this.setFeedback(result.ok ? 'success' : 'error', result.message);
+        this.render();
+    }
+
     renderStrength() {
         const node = this.el('authCreatePasswordStrength');
         const meter = this.el('authCreateStrengthMeter');
@@ -895,6 +988,7 @@ class AuthDialog {
         if (recovery) {
             recovery.hidden = !signedIn || !AppAuth.isAliasAccount(auth?.user);
         }
+        this.renderMethods(auth);
         this.renderStrength();
     }
 }

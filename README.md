@@ -90,7 +90,10 @@ The account menu and Profile page open one sign-in dialog with **Sign in** and
 username; the username can also be used to sign in. Availability is checked while
 typing, and the reservation document in Firestore, not the browser, decides who owns
 a name. Google accounts can add a password, and password accounts can link Google,
-without ever merging two accounts by email.
+without ever merging two accounts by email. **Sign-in methods** in the account pane
+undoes either one while the other still works: unlinking Google needs a password to
+fall back on, removing the password needs Google linked and the current password
+typed, and the last method is never removable.
 
 Username-only accounts keep no mailbox: their identifier resolves to a private alias
 address, so password recovery for them is honestly refused until a recovery email is

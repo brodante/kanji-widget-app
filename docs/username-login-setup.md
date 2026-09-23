@@ -13,6 +13,10 @@ opened from the account menu and the Profile page.
   the account heading and status lines show `@username`, and an account with no Google
   provider is never labelled as a Google account.
 - Google linking on an existing account, and `Add a password` for Google accounts.
+  **Sign-in methods** in the account pane undoes either one while another method stays:
+  `Unlink Google` needs a password to fall back on, `Remove password` needs Google
+  linked and the current password typed, and the last method is never removable. The
+  card explains which method is missing instead of showing a button that fails.
   Emails are never merged automatically: linking writes to the one account the user
   is already signed into.
 - Email confirmation: creating an account sends a Firebase verification link
@@ -304,6 +308,9 @@ These cannot be verified in a sandbox and must be checked on a real project:
       claimed by another account until the reservation lapses.
 - [ ] Confirm a Google account can add a password and then sign in with it, and that
       an email account can link Google.
+- [ ] In **Sign-in methods**, unlink Google and remove the password again: each removal
+      must leave the other method working, keep progress, backups and Drive access
+      untouched, and the card must explain itself while only one method remains.
 - [ ] Reset a password for an email account; confirm a username-only account is told
       there is no mailbox.
 - [ ] Confirm local progress is untouched by every one of these actions, and that

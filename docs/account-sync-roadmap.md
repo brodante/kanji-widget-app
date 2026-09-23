@@ -86,7 +86,8 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - [x] Secure account linking with explicit verified linking, never email-only automatic merging (Google ↔ password on one account).
 - [x] Unique usernames with reservation, rename rules, uniqueness checks and abuse protections (30-day rename cooldown, 30-day reservation of the previous name, reserved-word list, live availability checks).
 - [ ] Structured cross-device database sync with defined review/reset/deletion conflict rules.
-- [x] Account recovery for real mailboxes (password reset + verification). Username-only accounts are told there is no mailbox and can add a recovery email; provider unlinking that preserves a login method remains open.
+- [x] Account recovery for real mailboxes (password reset + verification). Username-only accounts are told there is no mailbox and can add a recovery email.
+- [x] Provider unlinking that preserves a login method: **Sign-in methods** in the account pane. Google goes only while a password remains, the password goes only while Google remains and after the current password is typed, and the last method is never removable. No rules change; the account record is re-published on the auth event, and Drive access is untouched.
 - [ ] **Out of scope on Spark: session list, "sign out everywhere" and per-device revocation.** Revoking refresh tokens needs the Admin SDK or Cloud Functions, which need billing, so the app's honest scope is ending this device's session (including a sign-out announced by another tab). Revisit only if the project ever moves off Spark.
 
 ## Optional: nice extras

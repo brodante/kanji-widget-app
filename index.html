@@ -2379,6 +2379,36 @@ filter: blur(10px) brightness(1) saturate(1);
                             </button>
                         </div>
                     </div>
+                    <div id="authMethodsSection" class="auth-card" hidden>
+                        <h3>Sign-in methods</h3>
+                        <p
+                            id="authMethodsStatus"
+                            class="auth-username-status"
+                            role="status"
+                            aria-live="polite"
+                        ></p>
+                        <p id="authMethodsHint" class="auth-hint"></p>
+                        <div class="backup-buttons">
+                            <button id="authUnlinkGoogle" type="button" class="backup-btn" hidden>
+                                Unlink Google
+                            </button>
+                        </div>
+                        <div id="authRemovePasswordSection" class="auth-form" hidden>
+                            <label for="authRemovePasswordValue">Current password</label>
+                            <input
+                                id="authRemovePasswordValue"
+                                type="password"
+                                autocomplete="current-password"
+                            />
+                            <button
+                                id="authRemovePasswordBtn"
+                                type="button"
+                                class="backup-btn danger-action"
+                            >
+                                Remove password
+                            </button>
+                        </div>
+                    </div>
                     <div class="backup-buttons auth-account-actions">
                         <button id="authLinkGoogle" type="button" class="backup-btn">
                             Link Google

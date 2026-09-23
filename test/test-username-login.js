@@ -77,6 +77,7 @@ function fakeAuthSdk({
     error = null,
     reauthError = null,
     deleteError = null,
+    unlinkError = null,
     calls = []
 } = {}) {
     let notify = () => {};
@@ -160,6 +161,16 @@ function fakeAuthSdk({
             }
             notify(null);
         },
+        unlink: async (target, providerId) => {
+            calls.push(['unlink', providerId]);
+            if (unlinkError) {
+                throw unlinkError;
+            }
+            // The real SDK refreshes the same user object, so render() sees the change.
+            target.providerData = (target.providerData || []).filter(
+                (entry) => entry.providerId !== providerId
+            );
+        },
         linkWithCredential: async (_target, credential) => {
             calls.push(['link-credential', credential.email]);
             if (error) {
@@ -210,6 +221,12 @@ const googleAccount = {
     email: 'learner@googlemail.com',
     emailVerified: true,
     providerData: [{ providerId: 'google.com' }]
+};
+const linkedAccount = {
+    uid: 'linked-uid',
+    email: 'learner@example.com',
+    emailVerified: true,
+    providerData: [{ providerId: 'google.com' }, { providerId: 'password' }]
 };
 const aliasAccount = {
     uid: 'alias-uid',
@@ -1507,6 +1524,10 @@ async function setupDialog(overrides = {}) {
             calls.push(['link-password', email, password]);
             return { ok: true, email, message: 'added' };
         },
+        unlinkProvider: async (providerId, options = {}) => {
+            calls.push(['unlink-provider', providerId, options.password ?? '']);
+            return overrides.unlinkResult ?? { ok: true, message: 'unlinked' };
+        },
         signIn: async () => {
             calls.push(['google']);
             return { ok: true };
@@ -2091,6 +2112,198 @@ test('the app notices a confirmed address without a new sign-in', async () => {
         assert.match(identities.textContent, /email confirmed/);
         const immediate = await auth.refreshUser();
         assert.equal(immediate.throttled, true, 'focus events must not hammer the service');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a sign-in method can only be removed while another one keeps working', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('app-auth.js'));
+        const calls = [];
+        const auth = new window.AppAuth(config, async () => fakeAuthSdk({ calls }));
+        await auth.init();
+
+        // Google is the only way in.
+        auth.user = { ...googleAccount };
+        const onlyGoogle = await auth.unlinkProvider('google.com');
+        assert.equal(onlyGoogle.ok, false);
+        assert.match(onlyGoogle.message, /only way into this account/);
+        assert.match(onlyGoogle.message, /Add a password first/);
+        assert.equal(
+            calls.some(([name]) => name === 'unlink'),
+            false,
+            'nothing was removed'
+        );
+
+        // A method this account does not have.
+        auth.user = { ...aliasAccount };
+        const missing = await auth.unlinkProvider('google.com');
+        assert.equal(missing.ok, false);
+        assert.match(missing.message, /not on this account/);
+
+        // A password without Google cannot go either.
+        const onlyPassword = await auth.unlinkProvider('password', {
+            password: 'long enough password'
+        });
+        assert.equal(onlyPassword.ok, false);
+        assert.match(onlyPassword.message, /Link Google first/);
+        assert.equal(
+            calls.some(([name]) => name === 'unlink'),
+            false
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('removing the password needs the current password, and unlinking Google keeps Drive', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('app-auth.js'));
+        const calls = [];
+        const auth = new window.AppAuth(config, async () => fakeAuthSdk({ calls }));
+        await auth.init();
+        auth.user = { ...linkedAccount };
+
+        const empty = await auth.unlinkProvider('password');
+        assert.equal(empty.ok, false);
+        assert.match(empty.message, /current password/);
+        assert.equal(
+            calls.some(([name]) => name === 'unlink'),
+            false
+        );
+
+        // A wrong password fails at the reauthentication, so the method stays.
+        const wrong = new window.AppAuth(config, async () =>
+            fakeAuthSdk({ calls: [], reauthError: { code: 'auth/wrong-password' } })
+        );
+        await wrong.init();
+        wrong.user = { ...linkedAccount };
+        const refused = await wrong.unlinkProvider('password', { password: 'nope' });
+        assert.equal(refused.ok, false);
+        assert.match(refused.message, /did not match/);
+        assert.equal(
+            calls.some(([name]) => name === 'unlink'),
+            false
+        );
+
+        const events = [];
+        window.addEventListener('kanji-auth-changed', () => events.push('changed'));
+        const removed = await auth.unlinkProvider('password', {
+            password: 'long enough password'
+        });
+        assert.equal(removed.ok, true);
+        assert.match(removed.message, /Sign in with Google/);
+        assert.deepEqual(
+            calls.find(([name]) => name === 'unlink'),
+            ['unlink', 'password']
+        );
+        assert.deepEqual(
+            calls.find(([name]) => name === 'reauth-password'),
+            ['reauth-password', 'learner@example.com', 'long enough password']
+        );
+        assert.equal(
+            auth.user.providerData.some((entry) => entry.providerId === 'password'),
+            false
+        );
+
+        // Google can go while the password stays, and Drive access is not touched.
+        auth.user = { ...linkedAccount };
+        window.driveBackup = { token: 'drive-only' };
+        const unlinked = await auth.unlinkProvider('google.com');
+        assert.equal(unlinked.ok, true);
+        assert.match(unlinked.message, /Drive backups keep their own connection/);
+        assert.equal(window.driveBackup.token, 'drive-only');
+        assert.ok(events.length >= 2, 'the directory is asked to republish the identity');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the dialog offers method removal only while another way in remains', async () => {
+    const { dom, window, calls } = await setupDialog({ user: { ...linkedAccount } });
+    try {
+        const doc = window.document;
+        const dialog = window.kanjiAuthDialog;
+        dialog.open('account');
+        assert.equal(doc.getElementById('authMethodsSection').hidden, false);
+        assert.match(doc.getElementById('authMethodsStatus').textContent, /password · Google/);
+        assert.equal(doc.getElementById('authUnlinkGoogle').hidden, false);
+        assert.equal(doc.getElementById('authRemovePasswordSection').hidden, false);
+        assert.match(
+            doc.getElementById('authMethodsHint').textContent,
+            /one of them can be removed/
+        );
+
+        // Cancelling the prompt changes nothing.
+        window.confirm = () => false;
+        doc.getElementById('authUnlinkGoogle').click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.equal(
+            calls.some(([name]) => name === 'unlink-provider'),
+            false
+        );
+
+        window.confirm = () => true;
+        doc.getElementById('authUnlinkGoogle').click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.deepEqual(
+            calls.find(([name]) => name === 'unlink-provider'),
+            ['unlink-provider', 'google.com', '']
+        );
+        assert.match(doc.getElementById('authFeedback').textContent, /unlinked/i);
+
+        // The password field must be filled before anything is attempted.
+        doc.getElementById('authRemovePasswordBtn').click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.equal(calls.filter(([name]) => name === 'unlink-provider').length, 1);
+        assert.match(doc.getElementById('authFeedback').textContent, /current password/i);
+
+        doc.getElementById('authRemovePasswordValue').value = 'long enough password';
+        doc.getElementById('authRemovePasswordBtn').click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.deepEqual(calls.filter(([name]) => name === 'unlink-provider')[1], [
+            'unlink-provider',
+            'password',
+            'long enough password'
+        ]);
+        assert.equal(
+            doc.getElementById('authRemovePasswordValue').value,
+            '',
+            'the typed password is cleared after a successful removal'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the methods card explains the lock-out guard instead of offering a dead button', async () => {
+    const { dom, window } = await setupDialog({ user: { ...googleAccount } });
+    try {
+        const doc = window.document;
+        const dialog = window.kanjiAuthDialog;
+        dialog.open('account');
+        assert.equal(
+            doc.getElementById('authMethodsStatus').textContent,
+            'On this account: Google'
+        );
+        assert.equal(doc.getElementById('authUnlinkGoogle').hidden, true);
+        assert.equal(doc.getElementById('authRemovePasswordSection').hidden, true);
+        assert.match(doc.getElementById('authMethodsHint').textContent, /Add a password first/);
+
+        // A signed-out dialog keeps the whole card out of the way.
+        const signedOut = await setupDialog({ user: null });
+        try {
+            signedOut.window.kanjiAuthDialog.open('signin');
+            assert.equal(
+                signedOut.window.document.getElementById('authMethodsSection').hidden,
+                true
+            );
+        } finally {
+            signedOut.dom.window.close();
+        }
     } finally {
         dom.window.close();
     }
