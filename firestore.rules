@@ -116,11 +116,23 @@ service cloud.firestore {
           && resource.data.reservedUntil <= request.time
           && claim();
       }
+      // Names that would let an account look official, or that collide with routes. Kept in
+      // step with USERNAME_POLICY.reserved in username-policy.js; test-username-login.js
+      // fails if the two lists ever drift apart.
+      function reservedName() {
+        return name in ['admin', 'administrator', 'root', 'support', 'help', 'moderator',
+          'mod', 'staff', 'official', 'system', 'security', 'api', 'www', 'mail', 'email',
+          'guest', 'user', 'users', 'me', 'you', 'null', 'undefined', 'anonymous', 'kanji',
+          'kanjiwidgets', 'kanjiwidget', 'qd', 'd4nte', 'brodante'];
+      }
       allow get: if true;
       allow list: if false;
-      allow create: if isSignedIn() && usernameShape(name) && record() && claim();
+      // Reserved names cannot be taken, but a name that is already reserved to an account
+      // stays releasable, so nobody is trapped in a name they cannot keep.
+      allow create: if isSignedIn() && usernameShape(name) && !reservedName() && record()
+        && claim();
       allow update: if isSignedIn() && usernameShape(name) && record()
-        && (release() || claimReleased());
+        && (release() || (!reservedName() && claimReleased()));
       allow delete: if false;
     }
   }

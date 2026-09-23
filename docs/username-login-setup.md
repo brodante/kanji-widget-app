@@ -338,6 +338,12 @@ These cannot be verified in a sandbox and must be checked on a real project:
   duplicate name.
 - The reservation length is declared by the client. Rules require a future
   `reservedUntil` but cannot compute "exactly 30 days"; the app always writes 30 days.
+- Reserved names (officially-looking words such as `admin`, and the owner's own handles) are
+  refused by the rules as well as by the client: a hand-crafted API call cannot claim one
+  whose shape happens to be valid. The list exists twice on purpose — once in
+  `username-policy.js` for the message the learner sees, once in `firestore.rules` because
+  rules are the authority — and `test/test-username-login.js` fails if the two ever drift
+  apart. Renaming _away_ from a reserved name is still allowed, so nobody is trapped in one.
 - Anonymous directory reads mean a username's existence is discoverable by anyone who
   guesses it. `list` is denied, so it cannot be enumerated in bulk.
   Owners who do not want their email discoverable simply keep a username-only

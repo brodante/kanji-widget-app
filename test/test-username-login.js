@@ -776,6 +776,36 @@ test('a sign-out announced by another tab still clears this tab', async () => {
     }
 });
 
+test('the reserved-name list lives in the rules as well as the client', async () => {
+    // The rules are the authority on who owns a name, so a reserved name must not be
+    // claimable by a hand-crafted API call just because the shape is valid. The list is
+    // duplicated in firestore.rules on purpose; this keeps the two copies honest.
+    const policy = { window: {} };
+    new Function('window', read('username-policy.js'))(policy.window);
+    const rules = read('firestore.rules');
+    const block = rules.slice(rules.indexOf('function reservedName('));
+    const literal = block.slice(block.indexOf('[') + 1, block.indexOf(']'));
+    const inRules = literal
+        .split(',')
+        .map((entry) => entry.trim().replace(/^'|'$/g, ''))
+        .filter(Boolean);
+    assert.deepEqual(
+        inRules,
+        policy.window.UsernamePolicy.reserved,
+        'firestore.rules and username-policy.js must list the same reserved names'
+    );
+    assert.match(
+        rules,
+        /allow create: if isSignedIn\(\) && usernameShape\(name\) && !reservedName\(\)/,
+        'claiming a reserved name is denied by the rules'
+    );
+    assert.match(
+        rules,
+        /release\(\) \|\| \(!reservedName\(\) && claimReleased\(\)\)/,
+        'renaming away from a reserved name stays possible'
+    );
+});
+
 test('dismissing the sign-out confirmation removes nothing', async () => {
     const { dom, window } = await setupDom();
     try {

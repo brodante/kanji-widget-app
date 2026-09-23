@@ -86,7 +86,7 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - [x] Persistent app accounts across reloads; separate from expiring Google Drive authorization.
 - [ ] GitHub sign-in as an alternative provider, paired with app-managed storage or separately connected Drive.
 - [x] Secure account linking with explicit verified linking, never email-only automatic merging (Google ↔ password on one account).
-- [x] Unique usernames with reservation, rename rules, uniqueness checks and abuse protections (30-day rename cooldown, 30-day reservation of the previous name, reserved-word list, live availability checks).
+- [x] Unique usernames with reservation, rename rules, uniqueness checks and abuse protections (30-day rename cooldown, 30-day reservation of the previous name, reserved-word list enforced by the rules as well as the client, live availability checks).
 - [ ] Structured cross-device database sync with defined review/reset/deletion conflict rules.
 - [x] Account recovery for real mailboxes (password reset + verification). Username-only accounts are told there is no mailbox and can add a recovery email.
 - [x] Provider unlinking that preserves a login method: **Sign-in methods** in the account pane. Google goes only while a password remains, the password goes only while Google remains and after the current password is typed, and the last method is never removable. No rules change; the account record is re-published on the auth event, and Drive access is untouched.

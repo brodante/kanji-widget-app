@@ -143,6 +143,29 @@ test('only the accepted username shape can be registered', async () => {
     );
 });
 
+test('a reserved name cannot be claimed through the API either', async () => {
+    // The client refuses reserved names, but the rules are the authority: without the
+    // reserved-name check here, a hand-crafted call could claim @admin.
+    await assertFails(setDoc(usernameRef('alice', 'admin'), nameEntry('alice')));
+    await assertFails(setDoc(usernameRef('alice', 'brodante'), nameEntry('alice')));
+    // A name that was claimed before it joined the reserved list stays releasable, so a
+    // legitimate owner is never trapped in it (the doc can only exist from before).
+    await env.withSecurityRulesDisabled(async (context) => {
+        await setDoc(doc(context.firestore(), 'usernames', 'brodante'), nameEntry('alice'));
+    });
+    await assertSucceeds(
+        setDoc(usernameRef('alice', 'brodante'), {
+            uid: '',
+            display: 'brodante',
+            kind: 'reserved',
+            email: '',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            reservedUntil: Timestamp.fromDate(new Date(Date.now() + 86400000))
+        })
+    );
+});
+
 test('renaming reserves the previous username instead of freeing it', async () => {
     await assertSucceeds(setDoc(usernameRef('alice', 'dante_kanji'), nameEntry('alice')));
     await assertFails(

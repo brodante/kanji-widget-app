@@ -30,8 +30,14 @@ the short version, do these five things and ignore the rest:
 
 ## State of play
 
-- **Step 0 (publish `firestore.rules`)** — done by the owner on 23 September 2026; the
-  published file matches the repo's `firestore.rules`.
+- **Step 0 (publish `firestore.rules`)** — published by the owner on 23 September 2026, and
+  verified to match the repo. The rules then gained the reserved-name check (a reserved name
+  could be claimed through the API even though the app refuses it), so **publish the current
+  file once more**; nothing else in it changed.
+- **Security-rule tests** — the 12 rule tests now run in CI on every push and pull request
+  (`.github/workflows/lint.yml`, job `rules`, Java 21), so no local JDK is needed. They found
+  the reserved-name gap on their first run: the job was red until the rules were fixed. The
+  run for a passed check is on the PR that brought it in.
 - **Step 2 (favicon)** — the updated `favicon.gif` works locally; it still has to be
   committed at the repo root to reach the deployed site, and the deploy step copies it only
   if the file is there.
