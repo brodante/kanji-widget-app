@@ -665,12 +665,19 @@ test('the account record publishes only verified addresses and never alias addre
             username: 'dante_kanji',
             email: ''
         });
-        verified.writeHandle({ uid: 'password-uid', username: 'dante_kanji' });
-        const published = await verified.publishEmail();
-        assert.equal(published.ok, true);
+        await verified.sync();
+        assert.equal(verified.handle.username, 'dante_kanji');
         assert.equal(store.get('usernames/dante_kanji'), undefined, 'no reservation was invented');
         assert.equal(store.get('users/password-uid').email, 'learner@example.com');
-        assert.equal(calls.writes, 1);
+
+        // A restored local mirror without a server-side record must not attempt a
+        // half-written account document that the rules would reject anyway.
+        const stranded = makeDirectory(window, { sdk, store, calls });
+        stranded.writeHandle({ uid: 'password-uid', username: 'dante_kanji' });
+        stranded.profile = null;
+        const skipped = await stranded.publishEmail();
+        assert.equal(skipped.ok, false);
+        assert.equal(skipped.skipped, true);
 
         const google = makeDirectory(window, { sdk, store, calls, user: googleAccount });
         assert.equal(google.publicEmail(), 'learner@googlemail.com');

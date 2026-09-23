@@ -375,8 +375,10 @@ class UsernameDirectory {
     // Keeps the public directory in step when a real address becomes verified.
     async publishEmail() {
         const user = this.user;
-        if (!user || !this.handle?.username) {
-            return { ok: false };
+        // Only publish when this account already has a server-side record, so a
+        // restored local mirror cannot create a half-written account document.
+        if (!user || !this.handle?.username || this.profile?.username !== this.handle.username) {
+            return { ok: false, skipped: true };
         }
         const email = this.publicEmail(user);
         if (!email || this.profile?.email === email) {
