@@ -91,6 +91,34 @@ authorised in Firebase, and both flows need the browser API key to allow the ori
   `verifyBeforeUpdateEmail` before it becomes usable, and only a confirmed address is
   written to the public `usernames` directory document.
 
+### When the key page warns about "active usage"
+
+Google shows _Warning: Potential breakage due to active usage_ when the key being
+restricted is also used by **other** products. In this project that warning can list
+Google Maps backends (`geocoding-backend`, `places-backend`, `directions-backend`, …).
+
+KanjiWidgets uses no Maps services: its Google traffic is Firebase Authentication
+(`identitytoolkit.googleapis.com`, `securetoken.googleapis.com`), Cloud Firestore and
+Firebase Installations, all of which send a browser `Referer` and therefore keep working
+under a website restriction. So the warning describes a different consumer of the key,
+which is either:
+
+- another app of the owner that copied this public key, or
+- a third party that scraped the key from the public site, which is exactly the abuse
+  application restrictions exist to stop.
+
+Guidance:
+
+1. Continue with the restriction. Type `UPDATE` in the confirmation field and save.
+2. On the same page, also set **API restrictions → Restrict key** to Identity Toolkit
+   API, Token Service API, Cloud Firestore API and Firebase Installations API. That is
+   what actually removes unrelated API traffic; a website restriction alone does not.
+3. Any app that needs Maps should get its own key (Create credentials → API key,
+   restricted to the Maps APIs and its own referrers), because server-side Maps calls
+   have no referrer and would fail under a website restriction.
+4. Confirm the Firebase project still has no billing account linked, so an abused public
+   key cannot incur charges.
+
 ## Owner setup steps
 
 1. **Firebase Console → Authentication → Sign-in method**.
