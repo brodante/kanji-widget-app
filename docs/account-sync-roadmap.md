@@ -1,6 +1,6 @@
 # Account, sign-in and cloud-save roadmap
 
-This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app connects to Drive using browser OAuth. Persistent Firebase Google app sign-in is now implemented but has the owner’s public project configuration; Google sign-in has been confirmed working by the owner; Firestore verification is pending. App login does not renew Drive permissions. Firestore progress sync is implemented for controlled testing; password sign-up is not implemented.
+This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app connects to Drive using browser OAuth. Persistent Firebase app sign-in is implemented with the owner’s public project configuration; Google sign-in has been confirmed working by the owner; Firestore verification is pending. App login does not renew Drive permissions. Firestore progress sync is implemented for controlled testing. Email/username + password sign-in with unique usernames is now implemented and needs the owner to enable the Email/Password provider and publish the updated rules; see [Email, username and password sign-in](username-login-setup.md).
 
 ## Current focus: Firebase Spark app sign-in
 
@@ -62,12 +62,14 @@ Other feature work is paused. See [the setup guide and phased plan](firebase-aut
 
 ## Should add: everyday usability
 
-The account popover now shows essential controls first, with collapsed Profile & device
-and Save options & help sections. It is wider on desktop and a compact bottom sheet on
+The account popover now shows essential controls first, with a collapsed Save options &
+help section, and it keeps only the two progress decisions (**Save this device**, **Use
+cloud progress**) in the open. The device-versus-cloud comparison card and the counts line
+are the profile page's job, so the popup does not lead with two progress summaries. It is wider on desktop and a compact bottom sheet on
 phones. Scrollbars remain available when needed (expanded controls, conflicts, or small
 screens), using a thin theme-matched treatment rather than hiding accessible scrolling.
 
-- [x] Editable display name/nickname, stored with the profile and included in backups (not globally unique).
+- [x] Editable display name/nickname, stored with the profile and included in backups (not globally unique). Usernames are the unique, claimable identifier; nicknames stay free-form and local to the profile.
 - [x] Dedicated profile page: avatar, nickname, learning start date, stats and save controls.
 - [x] Guided first-connection onboarding: local/cloud explanation and first checkpoint vs restore.
 - [x] Debounced autosave after meaningful changes, grouped writes and exponential backoff (15-second quiet window, 5-second observation, retries from 15 seconds up to 5 minutes; respects server Retry-After).
@@ -81,12 +83,14 @@ screens), using a thin theme-matched treatment rather than hiding accessible scr
 
 The frontend can remain on GitHub Pages; these features require a managed authentication/database service or secure backend. Evaluate current Firebase/Supabase capabilities and pricing before selecting one. Do not build custom password storage as a shortcut.
 
-- [ ] Persistent app accounts across reloads; separate from expiring Google Drive authorization.
+- [x] Persistent app accounts across reloads; separate from expiring Google Drive authorization.
 - [ ] GitHub sign-in as an alternative provider, paired with app-managed storage or separately connected Drive.
-- [ ] Secure Google/GitHub account linking with explicit verified linking, never email-only automatic merging.
-- [ ] Unique usernames with reservation, rename rules, uniqueness checks and abuse protections.
+- [x] Secure account linking with explicit verified linking, never email-only automatic merging (Google ↔ password on one account).
+- [x] Unique usernames with reservation, rename rules, uniqueness checks and abuse protections (30-day rename cooldown, 30-day reservation of the previous name, reserved-word list enforced by the rules as well as the client, live availability checks).
 - [ ] Structured cross-device database sync with defined review/reset/deletion conflict rules.
-- [ ] Account recovery, session list/revocation and safe provider unlinking that preserves a login method.
+- [x] Account recovery for real mailboxes (password reset + verification). Username-only accounts are told there is no mailbox and can add a recovery email.
+- [x] Provider unlinking that preserves a login method: **Sign-in methods** in the account pane. Google goes only while a password remains, the password goes only while Google remains and after the current password is typed, and the last method is never removable. No rules change; the account record is re-published on the auth event, and Drive access is untouched.
+- [ ] **Out of scope on Spark: session list, "sign out everywhere" and per-device revocation.** Revoking refresh tokens needs the Admin SDK or Cloud Functions, which need billing, so the app's honest scope is ending this device's session (including a sign-out announced by another tab). Revisit only if the project ever moves off Spark.
 
 ## Optional: nice extras
 
@@ -98,6 +102,101 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - [ ] Email magic-link sign-in.
 - [ ] Backup health reminders and storage-usage estimates.
 
+## Manual verification
+
+[The manual test plan](manual-test-plan.md) lists the browser checks step by step,
+starting with publishing the updated rules, and says what is already covered by the
+automated suite. Keep it in step with the features it describes.
+
+## Account deletion
+
+- [x] Offered in the sign-in dialog, the profile page and Settings → Danger Zone, all
+      leading to the same flow.
+- [x] **Scheduled, not instant**: a re-authenticated request writes a 7-day deadline to the
+      account record, every device shows the same date, and **Cancel deletion** is one click
+      away until then. **Delete now instead** keeps the immediate path.
+- [x] Completion: username released as a reservation, account record and cloud progress
+      deleted, sign-in deleted, then the sign-out identity cleanup. Local learning data and
+      local backups are kept in both paths.
+- [x] Confirmation email where Firebase can send one (real, unconfirmed address); accounts
+      that cannot be emailed are told exactly why instead of being promised a message.
+      A custom "deleted on <date>" email needs an owner-controlled mail service.
+- [x] Deadline enforcement is client-side on the next use of the account, because Spark has
+      no server timer. Documented rather than hidden.
+- [x] Partial failures name the completed steps, keep the sign-in so a retry is possible,
+      and never report success.
+- [x] Rules: the owner may delete their own `users/{uid}` and their own progress document,
+      and the account record accepts the two nullable deletion fields. Usernames stay
+      non-deletable. **The owner must publish the updated `firestore.rules`.**
+- [ ] Verify the live flow on a disposable account after publishing the rules, including a
+      real confirmation email, a cancel, and a deadline that has passed.
+
+## First sign-in on a new device
+
+- [x] A device with no learning progress loads the cloud copy automatically and reports the
+      gist it loaded.
+- [x] A device with progress gets both copies side by side (kanji studied, mastered,
+      reviews, due now, last session, cloud save date) and an explicit choice; nothing is
+      replaced before that, and a recovery copy is saved first.
+- [x] `Decide later` keeps both copies untouched.
+
+## Sign-out identity cleanup
+
+Signing out removes what identifies the previous account on this device: the uploaded
+photo blob and its crop record, the nickname, the username mirror and the cached
+availability answers. Learning progress, reviews, streaks, themes and local backups are
+kept, because removing an account must never look like study data was destroyed. The
+prompt and the one-line disclosure next to every sign-out button say this before it
+happens, and the cleanup also runs when another tab announces the sign-out. Remote
+Google/Drive photos stay hidden until the next signed-in session.
+
+On a shared device the identity cleanup is not enough on its own: the next person can still
+read the previous learner's progress, reviews and streak in the same browser profile. Each
+sign-out button therefore also carries an unticked **Shared device: also erase the study
+data stored here** box. Ticking it adds a second prompt that names everything deleted on
+this device (progress, reviews, streak, settings and themes, photo and background, local
+API keys, backups, recovery copy) and everything spared (the cloud copy, Google Drive). The
+session ends first and the wipe second, so an autosave can never push empty progress into
+the cloud copy; cancelling only the second prompt still signs out and keeps the data. The
+wipe is the same code path as `Disconnect & clear this device`, which stays available in
+Recovery & privacy.
+
+## Profile photo cropping
+
+Uploaded photos are cropped into a square before they are stored (`avatar-crop.js`,
+`kanji_avatar_crop`). The crop is metadata applied with CSS, so GIFs keep animating and
+original bytes stay in full backups. Add it to the manual list: upload a tall photo, a
+wide photo and an animated GIF, adjust each crop, and confirm the header, account panel
+and profile hero all match.
+
+The two avatars that can change the photo — the profile hero avatar and the account
+popup's avatar — cover themselves with a translucent white layer and a grey pencil on hover
+or keyboard focus, with no label text (a small corner pencil when there is no hover, so the
+photo is never permanently washed out).
+
+Google actions carry Google's own mark in its brand colours, never recoloured: `Continue
+with Google`, `Link Google` and the three `Connect with Google` buttons, because the mark is
+both what people scan for and a trust signal. Their buttons are neutral rather than themed —
+white with dark text on light themes, Google's dark surface (`#202124`) with light text on
+every theme whose own text is light — because the mark's four fixed colours fight an accent
+colour. A test reads the theme blocks out of `styles.css` and fails if a dark theme is
+missing from that list, so a new theme cannot silently ship a white button in a black app.
+Buttons that end a connection (`Unlink Google`, `Disconnect`, `Disconnect Google`)
+deliberately stay plain. The profile hero opens the file picker; the popup avatar opens the
+profile page with the photo control focused. The small header icon carries no photo
+affordance: it only opens the popup. The account popup itself keeps no upload, crop or
+display-name controls, so it does not scroll for a few lines of form at phone widths.
+
+Cancelling the file chooser is a first-class case: a file input dispatches its own bubbling
+`cancel` event when the picker is dismissed, so both dialogs ignore any `cancel` whose
+target is not the dialog itself. Without that guard the event reached the profile page's
+Escape handler and closed the page, dropping the learner on the main screen.
+
+`Remove photo` keeps an immediate, in-memory undo: the removed bytes and crop come back in
+one click, and nothing is written to storage, so a reload, another upload, a sign-out or a
+different account ends the undo for good. On a shared device the bytes must not stay
+recoverable after the session that owned them.
+
 ## Current implementation notes
 
 - The reported missing-header diagnostic was addressed without removing the overwrite guard. Most operations still use Drive v3; guarded checkpoint reads/updates use the v2 metadata `etag` and v2 conditional update endpoint. Same OAuth client, project and `drive.file` scope; no client secret or additional setup.
@@ -106,6 +205,8 @@ The frontend can remain on GitHub Pages; these features require a managed authen
 - Save order uses the content-save timestamp; label and pin edits preserve it. Legacy files are given a saved timestamp when their metadata is first edited.
 - Autosave batches observed app data/media changes, never opens consent popups, and still pauses offline, while hidden, during conflicts, and during account switching. Changed data is saved after 15 seconds without another observed change; cloud checks remain roughly once per minute when idle. Normal failure retries back off; explicit user actions can retry immediately.
 - Dedicated profile page is implemented as an in-app `#profile` view, keeping Google access in memory. It includes avatar, nickname/device editing, recorded learning start date, progress/review stats, save controls and conflict/recovery navigation.
+- Account labels never expose the private alias address a username account signs in with, and an account without a Google provider is never labelled as a Google account: with no display name, the heading shows `@username` and the line under it says the account keeps no mailbox.
+- The profile page owns the display name and every photo action; the account popup only shows them. Account creation therefore asks for email, username and password, takes the display name from the stored profile, and needs no consent tick-box: an auth change never writes progress, and the first save still shows both copies and asks which to keep.
 - All listed Should items are implemented for the existing app and its known backup formats. No new backend or optional account features are being added in this pass. Future backup schema changes will need their own migration step and tests.
 - Settings now has an always-visible My profile entry and shortcuts for Learning, Appearance, Audio, AI Sensei, Backups & sync, and Recovery & privacy. Shortcuts scroll/focus existing sections rather than duplicating their controls.
 
@@ -126,7 +227,7 @@ Use disposable/test progress and export your real data before testing. Update bo
 Record live results here (date, browser/device, pass/fail and relevant error text). Never record credentials or access tokens.
 
 - Previous header-based Drive diagnostic: **user ran it and reported NOT VERIFIED: no usable revision token/readback**. This is not a successful live verification.
-- Updated metadata-ETag diagnostic: **PASS, user-reported**, on `http://localhost:5000`, build `profile-v1`, protocol `metadata-etag-v1`, at `2026-09-22T16:52:02.499Z`. Create, read, update and stale-revision rejection succeeded on a real Google account. No account email or credentials are recorded here.
+- Updated metadata-ETag diagnostic: **PASS, user-reported**, on `http://localhost:5000`, build `profile-v1` (later reported as `login-v1` after the username-login release), protocol `metadata-etag-v1`, at `2026-09-22T16:52:02.499Z`. Create, read, update and stale-revision rejection succeeded on a real Google account. No account email or credentials are recorded here.
 - Real two-device acceptance: **pending**.
 - Automated regression suite: run `npm test`; service responses and browser DOM are simulated, with fake IndexedDB transaction tests.
 
@@ -160,3 +261,28 @@ nicknames, imported data and generated third-party content are not rewritten.
 - [ ] User browser acceptance of the combined Practice/account experience. Real Firebase/Drive acceptance and rule-emulator verification remain separate from these automated tests.
 
 No PR is opened by this integration. The live site is not deployed from this working branch.
+
+## Email/username login release
+
+Implemented in the login-management work; see [the setup and limits guide](username-login-setup.md).
+
+- One `#authDialog` carries Sign in, Create account and account management panes. Both
+  existing sign-in entry points open it instead of jumping straight to a Google popup.
+- Password accounts sign in with an email or their unique username. Username-only
+  accounts use a private alias address (`users.kanji.qd.je`), so no email lookup is
+  needed on the client and no mailbox is stored anywhere.
+- `username-policy.js` holds every rule (3–20 characters, lowercase `a–z 0–9 _`,
+  single underscores, reserved words, suggestions). `username-directory.js` talks to
+  Firestore: availability reads, reservations, renames, the published verified email
+  and the local handle mirror (`kanji_handle_v1`, never backed up or synced).
+- `firestore.rules` adds `usernames/{name}` (public single-document reads, no listing,
+  create-only claim, release/claim-after-expiry updates) and `users/{uid}` account
+  records. Progress-sync rules are untouched.
+- The offline cache is `kanji-widgets-v19`, the diagnostic build marker is
+  `login-v1`, and the deploy workflow copies the three new scripts.
+- `test/test-username-login.js` covers the policy, AppAuth, the directory and the
+  dialog; `test/test-main-integration.js` guards the wiring. Username rule tests were
+  added to `test/test-firestore-rules.js` but not executed here (no Java), so
+  `npm run test:rules` still needs a real run.
+- Owner actions pending: enable the Email/Password provider with email link off,
+  publish the updated rules, and walk the manual checklist in the setup guide.

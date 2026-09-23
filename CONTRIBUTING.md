@@ -56,6 +56,10 @@ kanji-widget-app/
 ├── script.js               # Core application logic
 ├── styles.css              # All theme styles
 ├── storage-manager.js      # LocalStorage abstraction
+├── app-auth.js             # Firebase identity: Google, email/username + password
+├── username-policy.js      # Username rules, validation and alias addresses
+├── username-directory.js   # Username availability, reservations and renames
+├── auth-dialog.js          # The sign-in / create-account dialog controller
 ├── audio-manager.js        # Audio playback system
 ├── kanji-data.js           # Database loader
 ├── manifest.json           # PWA manifest

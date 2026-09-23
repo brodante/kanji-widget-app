@@ -24,6 +24,8 @@ async function setup(options = {}) {
     const { window } = dom;
     await new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
     window.eval(fs.readFileSync(require.resolve('../app-auth.js'), 'utf8'));
+    // Sign-out asks for confirmation first (jsdom has no confirm of its own).
+    window.confirm = () => true;
     let notify;
     const calls = [];
     const sdk = {
@@ -142,7 +144,14 @@ test('app logout preserves local progress and separate Drive session', async () 
     try {
         window.localStorage.setItem('kanji_progress', '{"studied":["日"]}');
         window.driveBackup = { token: 'drive-only', renderAccount() {} };
+        let asked = '';
+        window.confirm = (text) => {
+            asked = text;
+            return true;
+        };
         assert.equal(await auth.signOut(), true);
+        assert.match(asked, /photo/i, 'the prompt names the identity being removed');
+        assert.match(asked, /Kept: kanji progress/, 'and the study data being kept');
         assert.equal(auth.user, null);
         assert.equal(window.driveBackup.token, 'drive-only');
         assert.equal(window.localStorage.getItem('kanji_progress'), '{"studied":["日"]}');

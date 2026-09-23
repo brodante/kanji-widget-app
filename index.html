@@ -73,6 +73,8 @@
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="KanjiWidgets" />
+        <!-- Browser tab icon. Put favicon.gif in the repository root next to index.html. -->
+        <link rel="icon" type="image/gif" href="favicon.gif" />
         <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180x180.png" />
     </head>
     <body>
@@ -174,21 +176,24 @@
 
                     <button
                         id="accountBtn"
-                        class="icon-btn"
+                        class="icon-btn avatar-frame"
                         type="button"
                         title="Account & sync"
                         aria-label="Account & sync"
                         aria-expanded="false"
                         aria-controls="accountPanel"
                     >
-                        <img
-                            id="accountAvatar"
-                            class="account-avatar"
-                            alt=""
-                            referrerpolicy="no-referrer"
-                            hidden
-                        />
-                        <i class="fas fa-circle-user" aria-hidden="true"></i>
+                        <span class="account-avatar-frame">
+                            <img
+                                id="accountAvatar"
+                                class="account-avatar"
+                                alt=""
+                                referrerpolicy="no-referrer"
+                                data-avatar-crop
+                                hidden
+                            />
+                            <i class="fas fa-circle-user" aria-hidden="true"></i>
+                        </span>
                     </button>
                     <button id="settingsBtn" class="icon-btn" title="Settings">
                         <i class="fas fa-cog"></i>
@@ -199,16 +204,26 @@
                 </div>
                 <section id="accountPanel" hidden aria-labelledby="accountHeading">
                     <div class="account-panel-heading">
-                        <div class="account-avatar-large">
+                        <button
+                            id="accountAvatarEdit"
+                            type="button"
+                            class="account-avatar-large avatar-frame avatar-editable"
+                            title="Change your profile photo"
+                            aria-label="Change your profile photo"
+                        >
                             <img
                                 id="accountAvatarPreview"
                                 class="account-avatar"
-                                alt="Profile photo"
+                                alt=""
                                 referrerpolicy="no-referrer"
+                                data-avatar-crop
                                 hidden
                             />
                             <i class="fas fa-circle-user" aria-hidden="true"></i>
-                        </div>
+                            <span class="avatar-edit-cover" aria-hidden="true">
+                                <i class="fas fa-pen"></i>
+                            </span>
+                        </button>
                         <div class="account-heading-copy">
                             <h2 id="accountHeading">Guest user</h2>
                             <p id="accountIdentity">Learning data stays on this device.</p>
@@ -222,9 +237,10 @@
                         <p data-app-auth-status role="status" aria-live="polite">
                             Checking app sign-in…
                         </p>
+                        <p class="app-auth-identities" data-app-auth-identities></p>
                         <div class="backup-buttons">
                             <button type="button" class="backup-btn" data-app-sign-in disabled>
-                                Sign in with Google
+                                Sign in or create account
                             </button>
                             <button
                                 type="button"
@@ -234,26 +250,49 @@
                             >
                                 Sign out of app
                             </button>
+                            <p class="backup-signout-note" data-sign-out-note hidden>
+                                Signing out removes your photo, name and username from this device.
+                                Progress stays unless you tick the box below.
+                            </p>
+                            <label class="backup-signout-option" data-sign-out-wipe-row hidden>
+                                <input type="checkbox" data-sign-out-wipe />
+                                Shared device: also erase the study data stored here
+                            </label>
                             <button type="button" class="backup-btn" data-app-auth-retry hidden>
                                 Retry connection
                             </button>
+                            <button
+                                type="button"
+                                class="backup-btn"
+                                data-auth-open="account"
+                                data-username-control
+                                hidden
+                            >
+                                Username &amp; sign-in methods
+                            </button>
+                            <button
+                                type="button"
+                                class="backup-btn"
+                                data-auth-open="account"
+                                data-auth-verify
+                                hidden
+                            >
+                                Confirm your email
+                            </button>
                         </div>
+                        <p class="app-auth-help">
+                            Password sign-in accepts your email or your unique username. Signing in
+                            on its own never uploads progress.
+                        </p>
                     </div>
                     <section class="cloud-progress" aria-label="Cloud progress">
                         <h3>Cloud progress</h3>
                         <p data-cloud-status role="status" aria-live="polite">
                             Sign in to save progress across devices.
                         </p>
-                        <p data-cloud-summary></p>
                         <div class="backup-buttons">
                             <button type="button" class="backup-btn" data-cloud-action="save">
                                 Save this device
-                            </button>
-                            <button type="button" class="backup-btn" data-cloud-action="check">
-                                Check cloud
-                            </button>
-                            <button type="button" class="backup-btn" data-cloud-action="pause">
-                                Pause autosave
                             </button>
                             <button
                                 type="button"
@@ -263,15 +302,31 @@
                             >
                                 Use cloud progress
                             </button>
-                            <button type="button" class="backup-btn" data-cloud-action="download">
-                                Download Drive copy
-                            </button>
                         </div>
-                        <small
-                            >Progress, reviews, nickname and learning settings. Uploaded photos,
-                            backgrounds and AI credentials stay on this device. Saves run while the
-                            app is open.</small
-                        >
+
+                        <details id="popupSaveOptions" class="account-details">
+                            <summary>Save options &amp; help</summary>
+                            <div class="backup-buttons">
+                                <button type="button" class="backup-btn" data-cloud-action="check">
+                                    Check cloud
+                                </button>
+                                <button type="button" class="backup-btn" data-cloud-action="pause">
+                                    Pause autosave
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-cloud-action="download"
+                                >
+                                    Download Drive copy
+                                </button>
+                            </div>
+                            <small
+                                >Progress, reviews, nickname and learning settings. Uploaded photos,
+                                backgrounds and AI credentials stay on this device. Saves run while
+                                the app is open.</small
+                            >
+                        </details>
                     </section>
                     <button
                         id="openProfilePage"
@@ -280,51 +335,6 @@
                     >
                         My profile <span aria-hidden="true">↗</span>
                     </button>
-                    <details id="accountProfileDetails" class="account-details">
-                        <summary>Profile &amp; device</summary>
-                        <form id="accountProfileForm">
-                            <label for="profileNickname"
-                                >Display name <span>(optional)</span></label
-                            >
-                            <input
-                                id="profileNickname"
-                                type="text"
-                                maxlength="40"
-                                autocomplete="nickname"
-                                placeholder="Google name or Guest user"
-                            />
-                            <label for="profileDeviceLabel"
-                                >This device’s label <span>(optional)</span></label
-                            >
-                            <input
-                                id="profileDeviceLabel"
-                                type="text"
-                                maxlength="24"
-                                autocomplete="off"
-                                placeholder="e.g. My phone"
-                            />
-                            <button type="submit" class="backup-btn">Save profile</button>
-                        </form>
-                        <div class="account-photo-controls">
-                            <button id="avatarUpload" type="button" class="backup-btn">
-                                Upload photo
-                            </button>
-                            <small>Image or GIF · under 2 MB</small>
-                        </div>
-                        <input
-                            id="avatarFile"
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            aria-label="Choose profile photo"
-                        />
-                        <p id="avatarStatus" role="status" aria-live="polite"></p>
-                        <p id="profileStatus" role="status" aria-live="polite"></p>
-                        <small
-                            >Your name and photo sync with backups. The device label stays here and
-                            identifies new cloud saves; it is not a login session.</small
-                        >
-                    </details>
                     <button
                         id="accountSettings"
                         type="button"
@@ -850,8 +860,35 @@
                             </p>
                             <p class="app-auth-label">Google Drive backups (separate connection)</p>
                             <div class="backup-buttons account-primary-actions">
-                                <button id="accountConnect" type="button" class="backup-btn">
-                                    Connect with Google
+                                <button
+                                    id="accountConnect"
+                                    type="button"
+                                    class="backup-btn google-btn"
+                                >
+                                    <svg
+                                        class="google-icon"
+                                        viewBox="0 0 48 48"
+                                        aria-hidden="true"
+                                        focusable="false"
+                                    >
+                                        <path
+                                            fill="#EA4335"
+                                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                                        />
+                                        <path
+                                            fill="#4285F4"
+                                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                                        />
+                                        <path
+                                            fill="#FBBC05"
+                                            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                                        />
+                                        <path
+                                            fill="#34A853"
+                                            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                                        />
+                                    </svg>
+                                    <span>Connect with Google</span>
                                 </button>
                                 <button
                                     id="accountDisconnect"
@@ -934,9 +971,32 @@
                                     <button
                                         id="profilePageConnect"
                                         type="button"
-                                        class="backup-btn profile-cloud-action"
+                                        class="backup-btn profile-cloud-action google-btn"
                                     >
-                                        Connect with Google
+                                        <svg
+                                            class="google-icon"
+                                            viewBox="0 0 48 48"
+                                            aria-hidden="true"
+                                            focusable="false"
+                                        >
+                                            <path
+                                                fill="#EA4335"
+                                                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                                            />
+                                            <path
+                                                fill="#4285F4"
+                                                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                                            />
+                                            <path
+                                                fill="#FBBC05"
+                                                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                                            />
+                                            <path
+                                                fill="#34A853"
+                                                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                                            />
+                                        </svg>
+                                        <span>Connect with Google</span>
                                     </button>
                                     <button
                                         id="profilePageQuickSave"
@@ -1020,8 +1080,35 @@
                                 >
                             </p>
                             <div class="backup-buttons">
-                                <button id="driveConnect" class="backup-btn" type="button">
-                                    Connect with Google
+                                <button
+                                    id="driveConnect"
+                                    class="backup-btn google-btn"
+                                    type="button"
+                                >
+                                    <svg
+                                        class="google-icon"
+                                        viewBox="0 0 48 48"
+                                        aria-hidden="true"
+                                        focusable="false"
+                                    >
+                                        <path
+                                            fill="#EA4335"
+                                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                                        />
+                                        <path
+                                            fill="#4285F4"
+                                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                                        />
+                                        <path
+                                            fill="#FBBC05"
+                                            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                                        />
+                                        <path
+                                            fill="#34A853"
+                                            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                                        />
+                                    </svg>
+                                    <span>Connect with Google</span>
                                 </button>
                                 <button
                                     id="driveDisconnect"
@@ -1197,6 +1284,28 @@
                             <span>Danger Zone</span>
                         </div>
                         <div class="setting-group">
+                            <p data-account-deletion-status class="setting-help-text"></p>
+                            <div class="backup-buttons">
+                                <button
+                                    id="deleteAccountSettings"
+                                    class="backup-btn danger-action"
+                                    type="button"
+                                    data-auth-open="account"
+                                    data-delete-account-open
+                                    hidden
+                                >
+                                    Delete account
+                                </button>
+                                <button
+                                    id="cancelDeletionSettings"
+                                    class="backup-btn"
+                                    type="button"
+                                    data-cancel-deletion
+                                    hidden
+                                >
+                                    Cancel scheduled deletion
+                                </button>
+                            </div>
                             <button id="resetProgress" class="reset-btn danger-action">
                                 Reset All Progress
                             </button>
@@ -1791,14 +1900,24 @@ filter: blur(10px) brightness(1) saturate(1);
                     <span>YOUR LEARNING SPACE</span>
                 </header>
                 <section class="profile-hero">
-                    <div class="profile-page-avatar">
+                    <button
+                        id="profilePageAvatarEdit"
+                        type="button"
+                        class="profile-page-avatar avatar-frame avatar-editable"
+                        title="Change your profile photo"
+                        aria-label="Change your profile photo"
+                    >
                         <img
                             id="profilePageAvatar"
-                            alt="Your profile photo"
+                            alt=""
                             referrerpolicy="no-referrer"
+                            data-avatar-crop
                             hidden
                         /><i class="fas fa-circle-user" aria-hidden="true"></i>
-                    </div>
+                        <span class="avatar-edit-cover" aria-hidden="true">
+                            <i class="fas fa-pen"></i>
+                        </span>
+                    </button>
                     <div>
                         <p class="profile-eyebrow">My profile</p>
                         <h1 id="profilePageTitle">Guest user</h1>
@@ -1840,6 +1959,15 @@ filter: blur(10px) brightness(1) saturate(1);
                                 Change photo
                             </button>
                             <button
+                                id="profilePageAdjustPhoto"
+                                type="button"
+                                class="profile-subtle-btn"
+                                title="Crop the uploaded photo into a square"
+                                hidden
+                            >
+                                Adjust crop
+                            </button>
+                            <button
                                 id="profilePageRemovePhoto"
                                 type="button"
                                 class="profile-subtle-btn danger-action remove-photo-button"
@@ -1849,6 +1977,15 @@ filter: blur(10px) brightness(1) saturate(1);
                                 hidden
                             >
                                 <i class="fas fa-trash-can" aria-hidden="true"></i>
+                            </button>
+                            <button
+                                id="profilePageUndoRemovePhoto"
+                                type="button"
+                                class="profile-subtle-btn"
+                                title="Put the removed photo back"
+                                hidden
+                            >
+                                Undo remove
                             </button>
                         </div>
                         <input
@@ -1860,19 +1997,44 @@ filter: blur(10px) brightness(1) saturate(1);
                         />
                         <p class="profile-hint">
                             Images and GIFs under 2 MB. Your uploaded photo takes priority over your
-                            Google photo.
+                            Google photo. Every photo is cropped to a square, so what you see here
+                            is what appears in the header.
                         </p>
                         <p id="profilePageFeedback" role="status" aria-live="polite"></p>
                     </section>
                     <section class="profile-card" aria-label="Account sign-in">
+                        <div class="app-auth-section" aria-label="Account deletion">
+                            <p class="app-auth-label">Deleting this account</p>
+                            <p class="app-auth-identities" data-account-deletion-status></p>
+                            <div class="backup-buttons">
+                                <button
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                    data-auth-open="account"
+                                    data-delete-account-open
+                                    hidden
+                                >
+                                    Delete account
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-cancel-deletion
+                                    hidden
+                                >
+                                    Cancel scheduled deletion
+                                </button>
+                            </div>
+                        </div>
                         <div class="app-auth-section" aria-label="App sign-in">
                             <p class="app-auth-label">KanjiWidgets account</p>
                             <p data-app-auth-status role="status" aria-live="polite">
                                 Checking app sign-in…
                             </p>
+                            <p class="app-auth-identities" data-app-auth-identities></p>
                             <div class="backup-buttons">
                                 <button type="button" class="backup-btn" data-app-sign-in disabled>
-                                    Sign in with Google
+                                    Sign in or create account
                                 </button>
                                 <button
                                     type="button"
@@ -1882,14 +2044,42 @@ filter: blur(10px) brightness(1) saturate(1);
                                 >
                                     Sign out of app
                                 </button>
+                                <p class="backup-signout-note" data-sign-out-note hidden>
+                                    Signing out removes your photo, name and username from this
+                                    device. Progress stays unless you tick the box below.
+                                </p>
+                                <label class="backup-signout-option" data-sign-out-wipe-row hidden>
+                                    <input type="checkbox" data-sign-out-wipe />
+                                    Shared device: also erase the study data stored here
+                                </label>
                                 <button type="button" class="backup-btn" data-app-auth-retry hidden>
                                     Retry connection
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-auth-open="account"
+                                    data-username-control
+                                    hidden
+                                >
+                                    Username &amp; sign-in methods
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-auth-open="account"
+                                    data-auth-verify
+                                    hidden
+                                >
+                                    Confirm your email
                                 </button>
                             </div>
                         </div>
                         <p class="profile-hint">
                             Sign-in does not upload, restore or separate this browser’s learning
                             data. Only sign in on a trusted device. Drive authorization is separate.
+                            Passwords are handled by Firebase Authentication and are never written
+                            to a backup.
                         </p>
                     </section>
                 </div>
@@ -1916,6 +2106,40 @@ filter: blur(10px) brightness(1) saturate(1);
                             Download Drive copy
                         </button>
                     </div>
+                    <div class="cloud-choice" data-cloud-choice hidden>
+                        <p class="cloud-choice-title">
+                            This device and the account both have progress
+                        </p>
+                        <div class="cloud-choice-grid">
+                            <div>
+                                <h4>This device</h4>
+                                <p data-cloud-choice-local></p>
+                            </div>
+                            <div>
+                                <h4>Cloud copy</h4>
+                                <p data-cloud-choice-remote></p>
+                            </div>
+                        </div>
+                        <div class="backup-buttons">
+                            <button type="button" class="backup-btn" data-cloud-action="restore">
+                                Load cloud progress
+                            </button>
+                            <button
+                                type="button"
+                                class="backup-btn danger-action"
+                                data-cloud-action="save"
+                            >
+                                Keep this device's progress
+                            </button>
+                            <button type="button" class="backup-btn" data-cloud-action="later">
+                                Decide later
+                            </button>
+                        </div>
+                        <p class="cloud-choice-note">
+                            A recovery copy of this device's progress is saved before anything is
+                            replaced. Nothing changes until you choose.
+                        </p>
+                    </div>
                     <small
                         >Progress, reviews, nickname and learning settings. Uploaded photos,
                         backgrounds and AI credentials stay on this device. Saves run while the app
@@ -1925,6 +2149,520 @@ filter: blur(10px) brightness(1) saturate(1);
                 <footer class="profile-page-footer">
                     <span id="profileLastStudied"></span><span id="profileAppBuild"></span>
                 </footer>
+            </div>
+        </dialog>
+
+        <dialog id="authDialog" class="auth-dialog" aria-labelledby="authDialogTitle">
+            <div class="auth-dialog-shell">
+                <header class="auth-dialog-header">
+                    <div>
+                        <p class="auth-dialog-eyebrow">KanjiWidgets account</p>
+                        <h2 id="authDialogTitle">Sign in</h2>
+                        <p id="authDialogIntro" class="auth-dialog-intro">
+                            Use your email or username and password, or continue with Google.
+                        </p>
+                    </div>
+                    <button
+                        id="authClose"
+                        type="button"
+                        class="auth-dialog-close"
+                        aria-label="Close sign-in"
+                    >
+                        ×
+                    </button>
+                </header>
+                <div class="auth-tabs" role="tablist" aria-label="Sign in or create an account">
+                    <button
+                        id="authTabSignIn"
+                        type="button"
+                        role="tab"
+                        class="is-active"
+                        data-auth-tab="signin"
+                        aria-selected="true"
+                    >
+                        Sign in
+                    </button>
+                    <button
+                        id="authTabCreate"
+                        type="button"
+                        role="tab"
+                        data-auth-tab="create"
+                        aria-selected="false"
+                    >
+                        Create account
+                    </button>
+                </div>
+                <p
+                    id="authFeedback"
+                    class="auth-feedback"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                ></p>
+
+                <section data-auth-pane="signin" class="auth-pane" aria-label="Sign in">
+                    <form id="authSignInForm" class="auth-form" novalidate>
+                        <label for="authSignInIdentifier">Email or username</label>
+                        <input
+                            id="authSignInIdentifier"
+                            name="identifier"
+                            type="text"
+                            autocomplete="username"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            placeholder="you@example.com or your_username"
+                            required
+                        />
+                        <label for="authSignInPassword">Password</label>
+                        <div class="auth-password-row">
+                            <input
+                                id="authSignInPassword"
+                                name="password"
+                                type="password"
+                                autocomplete="current-password"
+                                required
+                            />
+                            <button
+                                type="button"
+                                class="auth-reveal"
+                                data-auth-reveal="authSignInPassword"
+                                aria-label="Show password"
+                            >
+                                Show
+                            </button>
+                        </div>
+                        <div class="auth-form-actions">
+                            <button id="authSignInSubmit" type="submit" class="backup-btn">
+                                Sign in
+                            </button>
+                            <button id="authSignInForgot" type="button" class="auth-link">
+                                Forgot password?
+                            </button>
+                        </div>
+                    </form>
+                    <p class="auth-hint">
+                        Username accounts keep no mailbox on file, so a lost password cannot be
+                        emailed. Add a recovery email in Profile while you are signed in.
+                    </p>
+                </section>
+
+                <section
+                    data-auth-pane="create"
+                    class="auth-pane"
+                    aria-label="Create account"
+                    hidden
+                >
+                    <form id="authCreateForm" class="auth-form" novalidate>
+                        <label for="authCreateEmail">Email</label>
+                        <input
+                            id="authCreateEmail"
+                            type="email"
+                            autocomplete="email"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            placeholder="you@example.com"
+                        />
+                        <label for="authCreateUsername">Username</label>
+                        <input
+                            id="authCreateUsername"
+                            type="text"
+                            maxlength="20"
+                            autocomplete="username"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            placeholder="e.g. dante_kanji"
+                        />
+                        <p
+                            id="authUsernameStatus"
+                            class="auth-username-status"
+                            role="status"
+                            aria-live="polite"
+                            hidden
+                        ></p>
+                        <p id="authUsernameSuggestions" class="auth-suggestions" hidden></p>
+                        <label for="authCreatePassword">Password</label>
+                        <div class="auth-password-row">
+                            <input
+                                id="authCreatePassword"
+                                type="password"
+                                autocomplete="new-password"
+                                minlength="8"
+                            />
+                            <button
+                                type="button"
+                                class="auth-reveal"
+                                data-auth-reveal="authCreatePassword"
+                                aria-label="Show password"
+                            >
+                                Show
+                            </button>
+                        </div>
+                        <div id="authCreateStrength" class="auth-strength">
+                            <div
+                                id="authCreateStrengthMeter"
+                                class="auth-strength-meter"
+                                data-level="none"
+                                aria-hidden="true"
+                            >
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                            <p
+                                id="authCreatePasswordStrength"
+                                class="auth-hint"
+                                role="status"
+                                aria-live="polite"
+                            ></p>
+                        </div>
+                        <label for="authCreatePasswordConfirm">Confirm password</label>
+                        <input
+                            id="authCreatePasswordConfirm"
+                            type="password"
+                            autocomplete="new-password"
+                            minlength="8"
+                        />
+                        <p class="auth-hint">
+                            Your display name and photo are set on your profile, and signing in
+                            never uploads progress on its own.
+                        </p>
+                        <div class="auth-form-actions">
+                            <button id="authCreateSubmit" type="submit" class="backup-btn">
+                                Create account
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section data-auth-pane="account" class="auth-pane" aria-label="Account" hidden>
+                    <p id="authAccountIdentity" class="auth-identity"></p>
+                    <div class="auth-verify-row">
+                        <button
+                            id="authVerifyEmail"
+                            type="button"
+                            class="backup-btn"
+                            data-auth-verify
+                            hidden
+                        >
+                            Send confirmation link
+                        </button>
+                        <button
+                            id="authRefreshVerification"
+                            type="button"
+                            class="backup-btn"
+                            data-auth-verify
+                            hidden
+                        >
+                            I confirmed it, refresh
+                        </button>
+                        <p class="auth-hint" data-auth-verify hidden>
+                            The link is sent automatically when you create the account. It is only
+                            needed for password recovery, so learning and cloud saves keep working
+                            before you confirm.
+                        </p>
+                    </div>
+                    <form id="authUsernameForm" class="auth-form">
+                        <label id="authUsernameLabel" for="authUsernameChange"
+                            >Choose your username</label
+                        >
+                        <div class="auth-inline-row">
+                            <input
+                                id="authUsernameChange"
+                                type="text"
+                                maxlength="20"
+                                autocomplete="off"
+                                autocapitalize="none"
+                                spellcheck="false"
+                                placeholder="your_username"
+                            />
+                            <button id="authUsernameCheck" type="button" class="backup-btn">
+                                Check
+                            </button>
+                        </div>
+                        <p
+                            id="authUsernameChangeStatus"
+                            class="auth-username-status"
+                            role="status"
+                            aria-live="polite"
+                            hidden
+                        ></p>
+                        <p id="authUsernameHint" class="auth-hint">
+                            Letters, numbers and underscores. 3 to 20 characters, starting with a
+                            letter.
+                        </p>
+                        <button id="authSaveUsername" type="submit" class="backup-btn">
+                            Claim username
+                        </button>
+                    </form>
+                    <div id="authAddPasswordSection" class="auth-card" hidden>
+                        <h3>Add a password</h3>
+                        <p class="auth-hint">
+                            Only needed if you signed in with Google. The password is added to this
+                            same account, never merged with another one.
+                        </p>
+                        <form id="authAddPasswordForm" class="auth-form">
+                            <label for="authAddPasswordEmail">Email</label>
+                            <input
+                                id="authAddPasswordEmail"
+                                type="email"
+                                autocomplete="email"
+                                autocapitalize="none"
+                                spellcheck="false"
+                            />
+                            <label for="authAddPasswordValue">Password</label>
+                            <input
+                                id="authAddPasswordValue"
+                                type="password"
+                                autocomplete="new-password"
+                                minlength="8"
+                            />
+                            <button type="submit" class="backup-btn">Add password</button>
+                        </form>
+                    </div>
+                    <div id="authRecoverySection" class="auth-card" hidden>
+                        <h3>Add a recovery email</h3>
+                        <p class="auth-hint">
+                            This account is username-only, so there is no mailbox for a reset link.
+                            Adding one enables password recovery.
+                        </p>
+                        <div class="auth-inline-row">
+                            <input
+                                id="authRecoveryEmail"
+                                type="email"
+                                autocomplete="email"
+                                autocapitalize="none"
+                                spellcheck="false"
+                                aria-label="Recovery email"
+                                placeholder="you@example.com"
+                            />
+                            <button id="authAddRecoveryEmail" type="button" class="backup-btn">
+                                Send link
+                            </button>
+                        </div>
+                    </div>
+                    <div id="authMethodsSection" class="auth-card" hidden>
+                        <h3>Sign-in methods</h3>
+                        <p
+                            id="authMethodsStatus"
+                            class="auth-username-status"
+                            role="status"
+                            aria-live="polite"
+                        ></p>
+                        <p id="authMethodsHint" class="auth-hint"></p>
+                        <div class="backup-buttons">
+                            <button id="authUnlinkGoogle" type="button" class="backup-btn" hidden>
+                                Unlink Google
+                            </button>
+                        </div>
+                        <div id="authRemovePasswordSection" class="auth-form" hidden>
+                            <label for="authRemovePasswordValue">Current password</label>
+                            <input
+                                id="authRemovePasswordValue"
+                                type="password"
+                                autocomplete="current-password"
+                            />
+                            <button
+                                id="authRemovePasswordBtn"
+                                type="button"
+                                class="backup-btn danger-action"
+                            >
+                                Remove password
+                            </button>
+                        </div>
+                    </div>
+                    <div class="backup-buttons auth-account-actions">
+                        <button id="authLinkGoogle" type="button" class="backup-btn google-btn">
+                            <svg
+                                class="google-icon"
+                                viewBox="0 0 48 48"
+                                aria-hidden="true"
+                                focusable="false"
+                            >
+                                <path
+                                    fill="#EA4335"
+                                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                                />
+                                <path
+                                    fill="#4285F4"
+                                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                                />
+                                <path
+                                    fill="#FBBC05"
+                                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                                />
+                                <path
+                                    fill="#34A853"
+                                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                                />
+                            </svg>
+                            <span>Link Google</span>
+                        </button>
+                        <button id="authSignOut" type="button" class="backup-btn danger-action">
+                            Sign out of app
+                        </button>
+                        <button id="authDialogDone" type="button" class="backup-btn">Done</button>
+                        <small class="auth-signout-note">
+                            Signing out removes your photo, name and username from this device.
+                            Kanji progress, reviews and local backups stay unless you tick the box
+                            below.
+                        </small>
+                        <label
+                            id="authSignOutWipeRow"
+                            class="backup-signout-option"
+                            data-sign-out-wipe-row
+                            hidden
+                        >
+                            <input id="authSignOutWipe" type="checkbox" />
+                            Shared device: also erase the study data stored here
+                        </label>
+                    </div>
+                    <div id="authDeleteSection" class="auth-card" hidden>
+                        <h3>Delete this account</h3>
+                        <p class="auth-hint">
+                            Removes the sign-in, the account record, the cloud copy of your progress
+                            and the username, which becomes claimable again after the usual 30 days.
+                            Learning data on this device is kept, so nothing you studied is lost.
+                        </p>
+                        <label id="authDeletePasswordLabel" for="authDeletePassword" hidden
+                            >Confirm your password</label
+                        >
+                        <input
+                            id="authDeletePassword"
+                            type="password"
+                            autocomplete="current-password"
+                            hidden
+                        />
+                        <p id="authDeletionPending" class="auth-hint" hidden></p>
+                        <div class="backup-buttons">
+                            <button
+                                id="authDeleteAccount"
+                                type="button"
+                                class="backup-btn danger-action"
+                            >
+                                Delete account
+                            </button>
+                            <button id="authDeleteNow" type="button" class="backup-btn" hidden>
+                                Delete now instead
+                            </button>
+                            <button id="authCancelDeletion" type="button" class="backup-btn" hidden>
+                                Cancel deletion
+                            </button>
+                        </div>
+                        <p
+                            id="authDeleteStatus"
+                            class="auth-hint"
+                            role="status"
+                            aria-live="polite"
+                            hidden
+                        ></p>
+                    </div>
+                </section>
+
+                <footer class="auth-dialog-footer">
+                    <button
+                        id="authGoogleBtn"
+                        type="button"
+                        class="backup-btn auth-google-btn google-btn"
+                    >
+                        <svg
+                            class="google-icon"
+                            viewBox="0 0 48 48"
+                            aria-hidden="true"
+                            focusable="false"
+                        >
+                            <path
+                                fill="#EA4335"
+                                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                            />
+                            <path
+                                fill="#4285F4"
+                                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                            />
+                            <path
+                                fill="#FBBC05"
+                                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                            />
+                            <path
+                                fill="#34A853"
+                                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                            />
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+                    <small
+                        >Passwords are handled by Firebase Authentication. Nothing is written to
+                        this browser’s backups, and signing in never uploads learning data on its
+                        own.</small
+                    >
+                </footer>
+            </div>
+        </dialog>
+
+        <dialog id="avatarCropDialog" class="avatar-crop" aria-labelledby="avatarCropTitle">
+            <div class="avatar-crop-shell">
+                <header class="avatar-crop-header">
+                    <div>
+                        <p class="avatar-crop-eyebrow">Profile photo</p>
+                        <h2 id="avatarCropTitle">Adjust your photo</h2>
+                        <p class="avatar-crop-intro" id="avatarCropCaption"></p>
+                    </div>
+                    <button
+                        id="avatarCropClose"
+                        type="button"
+                        class="avatar-crop-close"
+                        aria-label="Cancel photo adjustment"
+                    >
+                        ×
+                    </button>
+                </header>
+                <div class="avatar-crop-body">
+                    <div
+                        id="avatarCropStage"
+                        class="avatar-crop-stage"
+                        tabindex="0"
+                        role="application"
+                        aria-label="Photo crop area. Drag to move, arrow keys to nudge, plus and minus to zoom."
+                    >
+                        <div id="avatarCropFrame" class="avatar-frame avatar-crop-frame">
+                            <img id="avatarCropImage" alt="Cropped preview" />
+                        </div>
+                        <div class="avatar-crop-ring" aria-hidden="true"></div>
+                    </div>
+                    <figure class="avatar-crop-original">
+                        <img id="avatarCropSource" alt="The whole uploaded photo" />
+                        <figcaption>Whole photo</figcaption>
+                    </figure>
+                </div>
+                <label class="avatar-crop-zoomrow" for="avatarCropZoom">
+                    <span>Zoom</span>
+                    <input id="avatarCropZoom" type="range" min="1" max="3" step="0.01" value="1" />
+                </label>
+                <p id="avatarCropStatus" class="profile-hint" role="status" aria-live="polite"></p>
+                <div class="avatar-crop-actions">
+                    <button
+                        id="avatarCropZoomOut"
+                        type="button"
+                        class="profile-subtle-btn"
+                        aria-label="Zoom out"
+                    >
+                        −
+                    </button>
+                    <button
+                        id="avatarCropZoomIn"
+                        type="button"
+                        class="profile-subtle-btn"
+                        aria-label="Zoom in"
+                    >
+                        +
+                    </button>
+                    <button id="avatarCropReset" type="button" class="profile-subtle-btn">
+                        Reset
+                    </button>
+                    <button id="avatarCropCancel" type="button" class="profile-subtle-btn">
+                        Cancel
+                    </button>
+                    <button id="avatarCropSave" type="button" class="backup-btn">
+                        Use this crop
+                    </button>
+                </div>
             </div>
         </dialog>
 
@@ -1939,8 +2677,12 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="backup-config.js"></script>
         <script src="backup-manager.js?v=practice-merge-v1"></script>
         <script src="profile-page.js?v=practice-merge-v1"></script>
+        <script src="avatar-crop.js?v=avatar-v1"></script>
         <script src="firebase-config.js?v=practice-merge-v1"></script>
+        <script src="username-policy.js?v=login-v1"></script>
         <script src="app-auth.js?v=practice-merge-v1"></script>
+        <script src="username-directory.js?v=login-v1"></script>
+        <script src="auth-dialog.js?v=login-v1"></script>
         <script src="cloud-sync.js?v=practice-merge-v1"></script>
         <script src="script.js?v=practice-merge-v1"></script>
     </body>

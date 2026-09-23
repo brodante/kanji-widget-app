@@ -39,12 +39,16 @@ jobs:
                   cp -r database deploy/
                   cp backup-config.js deploy/
                   cp firebase-config.js deploy/
+                  cp username-policy.js deploy/
                   cp app-auth.js deploy/
+                  cp username-directory.js deploy/
+                  cp auth-dialog.js deploy/
                   cp cloud-sync.js deploy/
                   cp ui-feedback.js deploy/
                   cp firestore.rules deploy/
                   cp backup-manager.js deploy/
                   cp profile-page.js deploy/
+                  cp avatar-crop.js deploy/
                   cp kanji-data.js deploy/
                   cp audio-manager.js deploy/
                   cp ai-manager.js deploy/
@@ -52,6 +56,8 @@ jobs:
                   cp srs-engine.js deploy/
                   cp storage-manager.js deploy/
                   cp manifest.json deploy/
+                  # Favicon is optional: skip the copy instead of failing the deploy
+                  if [ -f "favicon.gif" ]; then cp favicon.gif deploy/; fi
                   cp sw.js deploy/
                   cp README.md deploy/
                   # Copy docs if they exist

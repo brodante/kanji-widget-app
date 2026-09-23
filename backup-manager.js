@@ -1,7 +1,7 @@
 /* global openCustomThemeDB */
 // Drive OAuth: access tokens stay in memory, never in a backup or storage.
 class BackupManager {
-    static BUILD = 'profile-v1';
+    static BUILD = 'login-v1';
     static DIAGNOSTIC = 'metadata-etag-v1';
     static keys = [
         'kanji_profile',
@@ -17,7 +17,8 @@ class BackupManager {
         'lastLightTheme',
         'dailyStreak',
         'lastStudyDate',
-        'aiSenseiFabPos'
+        'aiSenseiFabPos',
+        'kanji_avatar_crop'
     ];
     static allowed(key) {
         return this.keys.includes(key) || /^customTheme:slot[123]:settings$/.test(key);
@@ -311,6 +312,26 @@ class BackupManager {
             : Date.parse(file.modifiedTime || file.createdTime) || 0;
     }
 
+    // Google's own mark, in its four brand colours and never recoloured: it is what people
+    // scan a crowded button row for, and it is a trust signal next to a sign-in or a
+    // Drive connection. Kept as one constant so every Google action looks the same.
+    static GOOGLE_MARK =
+        '<svg class="google-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">' +
+        '<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>' +
+        '<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>' +
+        '<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>' +
+        '<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>' +
+        '</svg>';
+
+    // The label is always static app text, never user input.
+    static setGoogleAction(button, label) {
+        if (!button) {
+            return;
+        }
+        button.classList.add('google-btn');
+        button.innerHTML = `${BackupManager.GOOGLE_MARK}<span>${label}</span>`;
+    }
+
     static isPinned(file) {
         const props = file.appProperties || {};
         return (
@@ -488,15 +509,18 @@ class BackupManager {
         }
     }
 
-    async clearLocalData() {
+    async clearLocalData({ confirm: ask = true } = {}) {
         if (
+            ask &&
             !confirm(
                 'Disconnect and erase learning progress, settings, uploaded themes, avatar, local backups, API keys and recovery copy ON THIS DEVICE? Google Drive files will NOT be deleted. Export first if needed.'
             )
         ) {
             return;
         }
-        if (window.kanjiAuth?.user && !(await window.kanjiAuth.signOut())) {
+        // The confirmation above already named everything being erased, including the
+        // photo, so the sign-out prompt is skipped here.
+        if (window.kanjiAuth?.user && !(await window.kanjiAuth.signOut({ confirm: false }))) {
             throw new Error('Could not sign out of the app. Retry before clearing local data.');
         }
         this.config.autoSync = false;
@@ -786,6 +810,15 @@ class BackupManager {
         this.busy = false;
         this.retryAfter = 0;
         this.files = [];
+        // Avatar state lives here so every caller sees a defined value, even before
+        // the first upload (tests and the profile page both read it).
+        this.avatarURL = '';
+        this.avatarBusy = false;
+        this.avatarSignedOut = false;
+        // Undo for "Remove photo": the removed bytes and crop are held in memory only.
+        // Nothing is written back to storage, so a reload, a new upload or a sign-out
+        // really does end the undo.
+        this.avatarUndo = null;
     }
     save() {
         localStorage.setItem('kanji_drive_backup', JSON.stringify(this.config));
@@ -1459,7 +1492,7 @@ class BackupManager {
             this.pendingCloud ? 'Account & sync: cloud copy needs review' : 'Account & sync'
         );
         document.getElementById('accountHeading').textContent = appUser
-            ? appUser.displayName || 'Google account'
+            ? window.AppAuth?.accountLabel?.(appUser) || appUser.displayName || 'Signed-in account'
             : connected
               ? this.user.displayName || 'Google account'
               : 'Guest user';
@@ -1472,13 +1505,16 @@ class BackupManager {
             /* A malformed local profile must not prevent connecting. */
         }
         document.getElementById('accountIdentity').textContent = appUser
-            ? appUser.email || 'Signed in to KanjiWidgets'
+            ? window.AppAuth?.accountDetail?.(appUser) ||
+              appUser.email ||
+              'Signed in to KanjiWidgets'
             : connected
               ? this.user.emailAddress
               : 'Local profile · connect to save to Drive.';
-        document.getElementById('accountConnect').textContent = connected
-            ? 'Switch Drive account'
-            : 'Connect with Google Drive';
+        BackupManager.setGoogleAction(
+            document.getElementById('accountConnect'),
+            connected ? 'Switch Drive account' : 'Connect with Google Drive'
+        );
         document.getElementById('accountDisconnect').hidden = !connected;
         document.getElementById('accountOnboarding').hidden = !connected || !this.onboardingPending;
         document.getElementById('syncConflict').hidden =
@@ -1498,7 +1534,6 @@ class BackupManager {
             );
         };
         window.addEventListener('resize', fitPanel);
-        this.initProfile();
         document.getElementById('onboardingStart').onclick = () =>
             this.run(async () => {
                 if (this.files.length) {
@@ -1534,6 +1569,18 @@ class BackupManager {
                 'Local-only learning selected. You can Quick save or enable sync whenever you are ready.'
             );
         };
+        // The popup's big avatar is the obvious place to change a photo, so it opens the
+        // profile page (where the picker, the crop and the removal live).
+        const avatarEdit = document.getElementById('accountAvatarEdit');
+        if (avatarEdit) {
+            avatarEdit.onclick = () => {
+                close();
+                if (window.kanjiProfilePage?.open) {
+                    window.kanjiProfilePage.open();
+                }
+                document.getElementById('profilePagePhoto')?.focus();
+            };
+        }
         const close = () => {
             panel.hidden = true;
             button.setAttribute('aria-expanded', 'false');
@@ -1621,7 +1668,7 @@ class BackupManager {
                 await this.backup({ allowAccountSwitch: true });
             });
         this.renderAccount();
-        this.initAvatar();
+        this.loadStoredAvatar();
     }
 
     showOnboarding() {
@@ -1671,31 +1718,7 @@ class BackupManager {
         this.observedLocalSignature = signature;
     }
 
-    initProfile() {
-        const nickname = document.getElementById('profileNickname');
-        const device = document.getElementById('profileDeviceLabel');
-        const feedback = document.getElementById('profileStatus');
-        try {
-            nickname.value =
-                JSON.parse(localStorage.getItem('kanji_profile') || '{}').nickname || '';
-        } catch {
-            nickname.value = '';
-        }
-        device.value = this.config.deviceLabel || '';
-        document.getElementById('accountProfileForm').onsubmit = (event) => {
-            event.preventDefault();
-            const name = nickname.value.trim();
-            const label = device.value.trim();
-            try {
-                this.saveProfilePreferences(name, label);
-                feedback.textContent =
-                    'Profile saved on this device. Quick save to include your name in the cloud copy. Device labels appear on future saves.';
-            } catch (error) {
-                feedback.textContent = error.message;
-            }
-        };
-    }
-
+    // Display name and photo live on the profile page only; the manager just stores them.
     saveProfilePreferences(name, label) {
         name = name.trim();
         label = label.trim();
@@ -1719,8 +1742,18 @@ class BackupManager {
                 'Could not save the complete profile. Browser storage may be full or unavailable. Free space and retry.'
             );
         }
-        document.getElementById('profileNickname').value = name;
-        document.getElementById('profileDeviceLabel').value = label;
+        for (const id of ['profileNickname', 'profilePageNickname']) {
+            const field = document.getElementById(id);
+            if (field) {
+                field.value = name;
+            }
+        }
+        for (const id of ['profileDeviceLabel', 'profilePageDevice']) {
+            const field = document.getElementById(id);
+            if (field) {
+                field.value = label;
+            }
+        }
         this.renderAccount();
         this.refreshSaveStatus();
     }
@@ -1735,19 +1768,36 @@ class BackupManager {
     }
 
     renderAvatar() {
-        for (const id of ['avatarUpload', 'profilePagePhoto', 'profilePageRemovePhoto']) {
+        if (window.kanjiAuth?.user) {
+            this.avatarSignedOut = false;
+        }
+        const undo = document.getElementById('profilePageUndoRemovePhoto');
+        if (undo) {
+            undo.hidden = !this.avatarUndo;
+            undo.disabled = Boolean(this.avatarBusy);
+        }
+        for (const id of [
+            'profilePagePhoto',
+            'profilePageAvatarEdit',
+            'profilePageAdjustPhoto',
+            'profilePageRemovePhoto'
+        ]) {
             const control = document.getElementById(id);
             if (control) {
                 control.disabled = Boolean(this.avatarBusy);
-                if (id === 'profilePageRemovePhoto') {
+                if (id !== 'profilePagePhoto' && id !== 'profilePageAvatarEdit') {
                     control.hidden = !this.avatarURL;
                 }
             }
         }
         const appPhoto = window.kanjiAuth?.user?.photoURL;
         const photo = appPhoto || this.user?.photoLink;
+        // A sign-out hides remote photos too, so the next person opening the app
+        // cannot mistake the previous account's picture for a local profile.
+        const remoteAllowed = Boolean(appPhoto) || !this.avatarSignedOut;
         // App session or authorized Drive photo is a fallback only; custom uploads win.
         const googlePhoto =
+            remoteAllowed &&
             (appPhoto || this.authorized()) &&
             typeof photo === 'string' &&
             photo.startsWith('https://')
@@ -1780,57 +1830,138 @@ class BackupManager {
                 image.removeAttribute('src');
             }
         }
+        // A Google or default photo is never cropped; an uploaded one uses its record.
+        window.AvatarCrop?.apply(document, this.avatarURL ? window.AvatarCrop.read() : null);
         window.kanjiProfilePage?.refresh();
     }
 
-    async setAvatar(file) {
+    async setAvatar(file, crop) {
         if (this.avatarBusy) {
             throw new Error('Please wait for the current photo change to finish.');
         }
         this.avatarBusy = true;
         this.renderAvatar();
         try {
-            return await this.writeAvatar(file);
+            return await this.writeAvatar(file, crop);
         } finally {
             this.avatarBusy = false;
             this.renderAvatar();
         }
     }
 
-    async writeAvatar(file) {
+    // Upload path: validate, decode, let the user place the square, then store the
+    // original bytes plus the crop record. The bytes are never re-encoded, so an
+    // animated GIF keeps every frame.
+    async uploadAvatar(file, options = {}) {
+        BackupManager.validateAvatar(file);
+        if (this.avatarBusy) {
+            throw new Error('Please wait for the current photo change to finish.');
+        }
+        const url = URL.createObjectURL(file);
+        let crop = null;
+        try {
+            const decoded = await BackupManager.decodeAvatar(url);
+            const chooser = options.chooser || window.avatarCrop;
+            const stored = window.AvatarCrop?.read();
+            const ratio = window.AvatarCrop.ratioOf(decoded?.naturalWidth, decoded?.naturalHeight);
+            const suggested = { ...(stored || window.AvatarCrop.DEFAULTS), ratio };
+            crop =
+                (typeof chooser?.open === 'function'
+                    ? await chooser.open({
+                          src: url,
+                          crop: suggested,
+                          name: options.name || file.name || 'your photo'
+                      })
+                    : null) || null;
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+        if (!crop) {
+            throw Object.assign(new Error('cancelled'), { code: 'app/cancelled' });
+        }
+        return this.setAvatar(file, crop);
+    }
+
+    // Re-crops the photo already stored on this device, without re-writing the bytes.
+    async adjustAvatar() {
+        if (!this.avatarURL || this.avatarBusy) {
+            return null;
+        }
+        const chooser = window.avatarCrop;
+        if (typeof chooser?.open !== 'function') {
+            return null;
+        }
+        this.avatarBusy = true;
+        this.renderAvatar();
+        try {
+            const result = await chooser.open({
+                src: this.avatarURL,
+                crop: window.AvatarCrop?.read(),
+                name: 'your photo'
+            });
+            if (!result) {
+                return null;
+            }
+            window.AvatarCrop.write(result);
+            return result;
+        } finally {
+            this.avatarBusy = false;
+            this.renderAvatar();
+        }
+    }
+
+    // Decodes without canvas conversion: animated GIFs retain every frame. Resolves
+    // with the image so callers can read its natural size from the same decode.
+    static async decodeAvatar(url) {
+        return new Promise((resolve, reject) => {
+            const image = new Image();
+            const timer = setTimeout(
+                () => reject(new Error('Image could not be loaded. Try a different file.')),
+                10000
+            );
+            image.onload = () => {
+                clearTimeout(timer);
+                resolve(image);
+            };
+            image.onerror = () => {
+                clearTimeout(timer);
+                reject(
+                    new Error(
+                        'This image format cannot be displayed in your browser. Try PNG, JPEG, WebP or GIF.'
+                    )
+                );
+            };
+            image.src = url;
+        });
+    }
+
+    async writeAvatar(file, crop) {
         let url;
         if (file) {
             BackupManager.validateAvatar(file);
             url = URL.createObjectURL(file);
             try {
-                // Decode without canvas conversion: animated GIFs retain every frame.
-                await new Promise((resolve, reject) => {
-                    const image = new Image();
-                    const timer = setTimeout(
-                        () => reject(new Error('Image could not be loaded. Try a different file.')),
-                        10000
-                    );
-                    image.onload = () => {
-                        clearTimeout(timer);
-                        resolve();
-                    };
-                    image.onerror = () => {
-                        clearTimeout(timer);
-                        reject(
-                            new Error(
-                                'This image format cannot be displayed in your browser. Try PNG, JPEG, WebP or GIF.'
-                            )
-                        );
-                    };
-                    image.src = url;
-                });
+                await BackupManager.decodeAvatar(url);
             } catch (error) {
                 URL.revokeObjectURL(url);
                 throw error;
             }
         }
+        // Removing is reversible for as long as this page lives: keep the bytes and the
+        // crop that are about to be deleted, and let any other photo change drop them.
+        const undo =
+            !file && this.avatarBlob
+                ? { blob: this.avatarBlob, crop: window.AvatarCrop?.read?.() || null }
+                : null;
         try {
             await BackupManager.media(file ? { avatar: file } : {}, ['avatar']);
+            if (file) {
+                this.avatarBlob = file;
+                window.AvatarCrop?.write(crop || window.AvatarCrop.DEFAULTS);
+            } else {
+                this.avatarBlob = null;
+                window.AvatarCrop?.clear();
+            }
         } catch (error) {
             if (url) {
                 URL.revokeObjectURL(url);
@@ -1841,48 +1972,68 @@ class BackupManager {
             URL.revokeObjectURL(this.avatarURL);
         }
         this.avatarURL = url || '';
+        this.avatarUndo = undo;
         this.renderAvatar();
         window.kanjiProfilePage?.refresh();
-        document.getElementById('avatarStatus').textContent = file
-            ? 'Profile photo saved on this device. Included in full backups, not Firestore progress sync.'
-            : 'Custom photo removed. Using your Google photo when connected.';
     }
 
-    async initAvatar() {
-        const input = document.getElementById('avatarFile');
-        const upload = document.getElementById('avatarUpload');
-        const feedback = document.getElementById('avatarStatus');
-        upload.disabled = true;
+    // Undo for "Remove photo". The bytes never left this page, so this restores the exact
+    // file and crop that were removed, without a re-upload or a re-crop.
+    async restoreRemovedAvatar() {
+        const undo = this.avatarUndo;
+        if (!undo?.blob) {
+            return false;
+        }
+        await this.setAvatar(undo.blob, undo.crop || undefined);
+        return true;
+    }
+
+    // Signing out must not leave the previous account's face and name on the device.
+    // Learning progress, reviews, themes and backups are deliberately kept: only the
+    // visible identity (uploaded photo, its crop, nickname, username mirror and the
+    // remembered availability answers) is removed.
+    async clearSignedOutIdentity() {
+        try {
+            await BackupManager.media({}, ['avatar']);
+        } catch {
+            // A storage failure must not block sign-out; the UI still resets below.
+        }
+        window.AvatarCrop?.clear();
+        this.avatarUndo = null;
+        this.avatarSignedOut = true;
+        if (this.avatarURL) {
+            URL.revokeObjectURL(this.avatarURL);
+            this.avatarURL = '';
+        }
+        this.avatarBlob = null;
+        try {
+            localStorage.setItem('kanji_profile', JSON.stringify({}));
+        } catch {
+            /* a full store is not a reason to keep the name visible */
+        }
+        window.kanjiUsernames?.forgetIdentity?.();
+        const nickname = document.getElementById('profilePageNickname');
+        if (nickname) {
+            nickname.value = '';
+        }
+        this.renderAccount();
+        this.renderAvatar();
+        window.kanjiProfilePage?.refresh();
+        return true;
+    }
+
+    // Uploading, cropping and removing a photo are profile-page actions; the manager only
+    // brings the stored photo back on screen when the app starts.
+    async loadStoredAvatar() {
         try {
             const media = await BackupManager.media(undefined, ['avatar']);
             if (media.avatar) {
                 this.avatarURL = URL.createObjectURL(media.avatar);
             }
         } catch {
-            feedback.textContent =
-                'Profile photo storage is unavailable. Your Google photo can still be displayed.';
-        } finally {
-            upload.disabled = false;
-            this.renderAvatar();
+            // Without photo storage the custom picture is simply absent; nothing else breaks.
         }
-        upload.onclick = () => input.click();
-        input.onchange = async () => {
-            const file = input.files[0];
-            if (!file) {
-                return;
-            }
-            upload.disabled = true;
-            try {
-                await this.setAvatar(file);
-            } catch (error) {
-                feedback.textContent = error.message;
-                window.KanjiFeedback?.show(error.message, { title: 'Photo not uploaded' });
-            } finally {
-                input.value = '';
-                upload.disabled = false;
-                this.renderAvatar();
-            }
-        };
+        this.renderAvatar();
     }
 
     static async fingerprint(data) {

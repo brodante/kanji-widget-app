@@ -34,7 +34,11 @@ async function setup() {
                     db.set(key, value);
                 }
             }),
-        serverTimestamp: () => 'server-time'
+        serverTimestamp: () => 'server-time',
+        deleteDoc: async (key) => {
+            calls.deletes = (calls.deletes || 0) + 1;
+            db.delete(key);
+        }
     };
     window.BackupManager.createRecovery = async () => {
         calls.recovery++;
@@ -67,6 +71,173 @@ test('first login only reads; explicit consent is required before associating lo
         assert.equal(calls.recovery, 1);
         assert.equal(cloud.enabled, true);
         assert.equal(cloud.metadata().uid, 'alice');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a fresh device loads the cloud copy without asking, and says what it loaded', async () => {
+    const { dom, window, cloud, db, calls } = await setup();
+    try {
+        // A fresh device: no progress keys at all.
+        window.localStorage.clear();
+        window.confirm = () => {
+            throw new Error('a fresh device must not need a confirmation');
+        };
+        calls.restores = 0;
+        window.BackupManager.snapshot = async () => ({
+            app: 'kanji-widgets',
+            version: 3,
+            storage: {},
+            media: {}
+        });
+        window.BackupManager.restore = async (snapshot, options) => {
+            calls.restores += 1;
+            calls.restoreOptions = options;
+            for (const [key, value] of Object.entries(snapshot.storage)) {
+                if (value === undefined) {
+                    window.localStorage.removeItem(key);
+                } else {
+                    window.localStorage.setItem(key, value);
+                }
+            }
+        };
+        window.localStorage.setItem(
+            'kanji_progress',
+            JSON.stringify({ studied: ['日', '本'], mastered: ['日'], skipped: [] })
+        );
+        window.localStorage.setItem(
+            'kanji_recent',
+            JSON.stringify([{ character: '日', timestamp: Date.now() }])
+        );
+        const cloudPayload = window.CloudSync.payload();
+        window.localStorage.clear();
+
+        db.set('alice', {
+            version: 1,
+            revision: 4,
+            payload: cloudPayload,
+            updatedAt: 'server-time'
+        });
+        cloud.remote = undefined;
+        await cloud.check();
+
+        assert.equal(calls.restores, 1, 'the cloud copy is applied on its own');
+        assert.equal(calls.restoreOptions.cloudSync, true);
+        assert.equal(
+            JSON.parse(window.localStorage.getItem('kanji_progress')).studied.length,
+            2,
+            'the cloud progress is now on this device'
+        );
+        assert.match(cloud.message, /loaded on this fresh device/i);
+        assert.equal(cloud.choice, null, 'a fresh device is never asked to compare');
+        assert.equal(cloud.enabled, true);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a device with its own progress gets both gists and a direct choice', async () => {
+    const { dom, window, cloud, db, calls } = await setup();
+    try {
+        // Somebody else's device: local progress that is different from the cloud copy.
+        window.localStorage.setItem(
+            'kanji_progress',
+            JSON.stringify({ studied: ['日', '本', '語'], mastered: [], skipped: [] })
+        );
+        const cloudPayload = JSON.stringify({
+            kanji_progress: JSON.stringify({
+                studied: ['火', '水'],
+                mastered: ['火'],
+                skipped: []
+            }),
+            kanji_recent: null,
+            kanji_srs_data: JSON.stringify({ 火: { totalReviews: 4, dueDate: Date.now() - 1000 } }),
+            kanji_profile: null,
+            kanji_settings: null,
+            kanjiSettings: null
+        });
+        db.set('alice', {
+            version: 1,
+            revision: 2,
+            payload: cloudPayload,
+            updatedAt: new Date(Date.now() - 86400000).toISOString()
+        });
+        window.localStorage.removeItem(window.CloudSync.KEY);
+        cloud.remote = undefined;
+
+        await cloud.check();
+
+        assert.ok(cloud.choice, 'the comparison is offered instead of a silent replace');
+        assert.equal(
+            JSON.parse(window.localStorage.getItem('kanji_progress')).studied.length,
+            3,
+            'nothing local was replaced'
+        );
+        assert.equal(calls.writes, 0, 'and nothing was uploaded either');
+        assert.match(
+            cloud.message,
+            /Nothing is replaced until you choose/i,
+            'the status line no longer points at a card, because only the profile page has one'
+        );
+
+        const doc = window.document;
+        const card = doc.querySelector('[data-cloud-choice]');
+        assert.equal(card.hidden, false, 'the card is visible');
+        const local = doc.querySelector('[data-cloud-choice-local]').textContent;
+        const remote = doc.querySelector('[data-cloud-choice-remote]').textContent;
+        assert.match(local, /3 kanji studied/, local);
+        assert.match(remote, /2 kanji studied/, remote);
+        assert.match(remote, /1 mastered/, remote);
+        assert.match(remote, /4 reviews/, remote);
+        assert.match(remote, /1 due now/, remote);
+        assert.match(remote, /saved /, 'the cloud copy says when it was saved');
+        assert.ok(
+            [...doc.querySelectorAll('[data-cloud-choice] [data-cloud-action]')].some(
+                (button) => button.dataset.cloudAction === 'restore'
+            ),
+            'loading the cloud copy is one of the choices'
+        );
+        assert.ok(
+            [...doc.querySelectorAll('[data-cloud-choice] [data-cloud-action]')].some(
+                (button) => button.dataset.cloudAction === 'save'
+            ),
+            'keeping this device is the other one'
+        );
+
+        // "Decide later" leaves both copies alone and hides the card.
+        cloud.decideLater();
+        assert.equal(card.hidden, true);
+        assert.equal(cloud.choice, null);
+        assert.match(cloud.message, /kept for later/i);
+        assert.equal(JSON.parse(window.localStorage.getItem('kanji_progress')).studied.length, 3);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('deleting the account removes the cloud copy and stops autosave, keeping device data', async () => {
+    const { dom, window, cloud, db, calls } = await setup();
+    try {
+        window.confirm = () => true;
+        await cloud.save(true);
+        db.set('alice', record(window));
+        await cloud.check();
+        assert.equal(cloud.enabled, true, 'the account was saving before deletion');
+
+        assert.equal(await cloud.deleteAccountData(), true);
+        assert.equal(calls.deletes, 1, 'exactly one document is deleted');
+        assert.equal(db.has('alice'), false);
+        assert.equal(cloud.enabled, false, 'autosave stops; nothing re-uploads after deletion');
+        assert.equal(cloud.uid, 'alice', 'the session is app-auth’s to end, not this module’s');
+        assert.match(cloud.message, /deleted with the account/i);
+        assert.equal(
+            JSON.parse(window.localStorage.getItem('kanji_progress')).studied[0],
+            '日',
+            'the device keeps its learning data'
+        );
+        await cloud.save();
+        assert.equal(db.has('alice'), false, 'a later save cannot recreate the deleted document');
     } finally {
         dom.window.close();
     }

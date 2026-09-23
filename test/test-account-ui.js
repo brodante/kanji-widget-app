@@ -385,6 +385,208 @@ test('partial cloud deletion reports progress and keeps autosaves paused', async
     }
 });
 
+test('every Google action carries Google’s mark, and the removal paths do not', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        const doc = window.document;
+        manager.token = 'token';
+        manager.expires = Date.now() + 60000;
+        manager.user = { displayName: 'Learner', emailAddress: 'learner@example.com' };
+        manager.renderAccount();
+
+        // The mark is what people scan for, so it is on every action that talks to Google.
+        for (const id of [
+            'authGoogleBtn',
+            'accountConnect',
+            'profilePageConnect',
+            'driveConnect',
+            'authLinkGoogle'
+        ]) {
+            const button = doc.getElementById(id);
+            assert.ok(button, id);
+            const icon = button.querySelector('svg.google-icon');
+            assert.ok(icon, `${id} shows the Google mark`);
+            assert.equal(button.classList.contains('google-btn'), true, `${id} lays the mark out`);
+            assert.equal(
+                icon.querySelectorAll('path').length,
+                4,
+                `${id} uses the four-part Google G`
+            );
+            assert.equal(
+                icon.getAttribute('aria-hidden'),
+                'true',
+                'the mark is decoration; the label carries the meaning'
+            );
+        }
+
+        // Removing or disconnecting a connection is not a Google invitation.
+        for (const id of ['authUnlinkGoogle', 'driveDisconnect', 'accountDisconnect']) {
+            const button = doc.getElementById(id);
+            assert.ok(button, id);
+            assert.equal(
+                button.querySelector('svg.google-icon'),
+                null,
+                `${id} must not carry the Google mark`
+            );
+        }
+
+        // The mark keeps Google's own colours: brand rules, and the trust signal depends on it.
+        const sources = [
+            fs.readFileSync(require.resolve('../index.html'), 'utf8'),
+            fs.readFileSync(require.resolve('../backup-manager.js'), 'utf8')
+        ].join('\n');
+        for (const colour of ['#4285F4', '#EA4335', '#FBBC05', '#34A853']) {
+            assert.ok(sources.includes(colour), `${colour} is part of the mark`);
+        }
+        const css = fs.readFileSync(require.resolve('../styles.css'), 'utf8');
+        const rules = css.slice(css.indexOf('.google-icon'), css.indexOf('.google-icon') + 200);
+        assert.doesNotMatch(
+            rules,
+            /fill\s*:|filter\s*:/,
+            'the mark must never be recoloured or greyed out by theme CSS'
+        );
+
+        // Google's mark lands on a neutral surface, not a themed one: on a coloured button
+        // the four brand colours clash with the accent.
+        const surface = css.slice(
+            css.indexOf('.backup-btn.google-btn {'),
+            css.indexOf('.backup-btn.google-btn {') + 400
+        );
+        assert.match(surface, /background-color: var\(--google-surface/, 'neutral surface');
+        assert.match(surface, /color: var\(--google-on-surface/, 'readable label');
+        assert.doesNotMatch(
+            surface,
+            /--primary-color|--primary-variant/,
+            'a Google button must not be painted with the accent colour'
+        );
+        assert.ok(
+            css.indexOf('.backup-btn.google-btn {') > css.indexOf('.backup-btn:hover {'),
+            'the neutral surface has to win over .backup-btn:hover, which shares its specificity'
+        );
+        assert.match(
+            css,
+            /--google-surface: #ffffff;/,
+            'light themes get white with dark text, as Google specifies'
+        );
+
+        // Every theme whose own text is light gets Google's dark surface, so a new dark
+        // theme cannot quietly be left with a white button in a black app.
+        // Only top-level theme blocks: a selector at column 0, body up to the line that is
+        // exactly "}" at column 0. Nested rules inside a block must not be mistaken for one.
+        const themes = [...css.matchAll(/^\[data-theme='([a-z]+)'\] \{$/gm)].map((match) => {
+            const start = match.index + match[0].length;
+            const end = css.indexOf('\n}', start);
+            return [match[1], `${match[0]}${css.slice(start, end)}`];
+        });
+        const isLightText = (hex) => {
+            const value = hex.trim().replace('#', '');
+            const full =
+                value.length === 3
+                    ? value
+                          .split('')
+                          .map((c) => c + c)
+                          .join('')
+                    : value;
+            const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+            return 0.299 * r + 0.587 * g + 0.114 * b > 128;
+        };
+        const darkThemes = themes
+            .filter(([, body]) => {
+                const match = body.match(/--on-surface:\s*(#[0-9a-fA-F]{3,6})/);
+                return match && isLightText(match[1]);
+            })
+            .map(([name]) => name)
+            .sort();
+        assert.ok(darkThemes.length >= 5, `dark themes detected: ${darkThemes.join(', ')}`);
+        const varBlock = css.slice(
+            css.indexOf('/* Themes whose own text is light'),
+            css.indexOf("[data-theme='dark'] {\n    --primary-color")
+        );
+        const listed = [...varBlock.matchAll(/\[data-theme='([a-z]+)'\]/g)]
+            .map(([, name]) => name)
+            .sort();
+        assert.deepEqual(
+            listed,
+            darkThemes,
+            'the dark Google-button surface is listed for exactly the themes with light text'
+        );
+
+        // The label is still plain text for tests, screen readers and translations, and it
+        // survives a re-render in both states without losing the mark.
+        assert.match(doc.getElementById('accountConnect').textContent, /Switch Drive account/);
+        manager.token = null;
+        manager.user = null;
+        manager.renderAccount();
+        const account = doc.getElementById('accountConnect');
+        assert.match(account.textContent, /Connect with Google Drive/);
+        assert.ok(account.querySelector('svg.google-icon'), 'the label change keeps the mark');
+        // The profile page owns its own copy of that button; test-profile-page.js checks it
+        // with profile-page.js really loaded.
+        assert.match(doc.getElementById('profilePageConnect').textContent, /Connect with Google/);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the photo hover is a grey pencil over a washed-out picture, with no label', async () => {
+    const { dom, window } = await setupUI();
+    try {
+        const doc = window.document;
+        for (const id of ['accountAvatarEdit', 'profilePageAvatarEdit']) {
+            const cover = doc.getElementById(id).querySelector('.avatar-edit-cover');
+            assert.ok(cover, `${id} keeps a hover cover`);
+            assert.ok(cover.querySelector('i.fa-pen'), `${id} shows a pencil`);
+            assert.equal(
+                cover.textContent.trim(),
+                '',
+                'the cover is the pencil alone: no cramped label in a bad font'
+            );
+        }
+        assert.equal(
+            doc.querySelector('.avatar-edit-cover-text'),
+            null,
+            'the old cover label is gone from the markup'
+        );
+        const css = fs.readFileSync(require.resolve('../styles.css'), 'utf8');
+        assert.equal(
+            css.includes('.avatar-edit-cover-text'),
+            false,
+            'and gone from the stylesheet'
+        );
+        const heroSize = Number(
+            css.match(/\.profile-page-avatar \.avatar-edit-cover \{\s*font-size: ([\d.]+)rem/)[1]
+        );
+        assert.ok(heroSize >= 2, `the hero pencil is big enough (got ${heroSize}rem)`);
+        const coverColour = css.match(/\.avatar-edit-cover \{[\s\S]*?color: ([^;]+);/)[1].trim();
+        assert.match(coverColour, /#5f6368|grey|gray/, `a quiet themed pencil, got ${coverColour}`);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the local-data wipe skips its own prompt when the sign-out already asked', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        window.indexedDB = indexedDB;
+        window.BackupManager.media = async () => ({});
+        window.BackupManager.recoveryStore = async () => {};
+        let prompts = 0;
+        window.confirm = () => {
+            prompts++;
+            return false;
+        };
+        window.localStorage.setItem('kanji_progress', JSON.stringify({ studied: ['日'] }));
+        manager.token = null;
+        manager.user = null;
+        await manager.clearLocalData({ confirm: false });
+        assert.equal(prompts, 0, 'the erase is confirmed once, by the sign-out flow');
+        assert.equal(window.localStorage.getItem('kanji_progress'), null, 'progress is erased');
+        assert.equal(manager.config.autoSync, false, 'automatic backups are left off');
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('cancelling local data deletion leaves local data and authorization unchanged', async () => {
     const { dom, window, manager } = await setupUI();
     try {
@@ -431,24 +633,64 @@ test('failed diagnostic preserves learning files and attempts temporary-file cle
     }
 });
 
-test('compact account menu keeps secondary sections collapsed and primary controls reachable', async () => {
+test('compact account menu leaves the profile form and photo controls to the profile page', async () => {
     const { dom, window } = await setupUI();
     try {
         const doc = window.document;
         doc.getElementById('accountBtn').click();
-        assert.equal(doc.getElementById('accountProfileDetails').open, false);
+        // The popup used to scroll because it carried a second copy of the display-name
+        // form and the photo controls. Both surfaces now live on the profile page.
+        for (const id of [
+            'accountProfileDetails',
+            'accountProfileForm',
+            'profileNickname',
+            'profileDeviceLabel',
+            'profileStatus',
+            'avatarUpload',
+            'avatarAdjust',
+            'avatarFile'
+        ]) {
+            assert.equal(doc.getElementById(id), null, `${id} belongs to the profile page`);
+        }
         assert.equal(doc.getElementById('accountSaveDetails').open, false);
         assert.equal(doc.getElementById('accountSync').closest('details').id, 'driveBackup');
         assert.equal(
             doc.getElementById('accountPanel').contains(doc.getElementById('accountConnect')),
             false
         );
-        assert.ok(doc.getElementById('accountPanel').querySelector('[data-cloud-action=save]'));
+        const panel = doc.getElementById('accountPanel');
+        assert.ok(panel.querySelector('[data-cloud-action=save]'));
+        // The comparison card and the counts line are the profile page's job now: the
+        // popup opens on a small screen and must not lead with two progress summaries.
+        assert.equal(panel.querySelector('[data-cloud-choice]'), null, 'no comparison card');
+        assert.equal(panel.querySelector('[data-cloud-summary]'), null, 'no second counts line');
+        const page = doc.getElementById('profilePage');
+        assert.ok(page.querySelector('[data-cloud-choice]'), 'the profile page keeps the card');
+        assert.ok(page.querySelector('[data-cloud-summary]'), 'and its counts line');
+        // Round two of the slimming: the popup keeps the two actions that matter when it
+        // opens and folds the maintenance ones away, so the panel stays short.
+        const primary = ['save', 'restore'];
+        const folded = ['check', 'pause', 'download'];
+        for (const action of primary) {
+            assert.equal(
+                panel.querySelector(`[data-cloud-action=${action}]`).closest('details'),
+                null,
+                `${action} stays visible`
+            );
+        }
+        for (const action of folded) {
+            const button = panel.querySelector(`[data-cloud-action=${action}]`);
+            const details = button.closest('details');
+            assert.ok(details, `${action} is folded away`);
+            assert.equal(details.id, 'popupSaveOptions');
+            assert.equal(details.open, false);
+            assert.equal(details.querySelector('summary').textContent, 'Save options & help');
+            assert.ok(
+                details.querySelector('small'),
+                'the progress/credentials note moves in with the options'
+            );
+        }
         assert.equal(doc.getElementById('accountSettings').closest('details'), null);
-        assert.equal(
-            doc.getElementById('avatarUpload').closest('details').id,
-            'accountProfileDetails'
-        );
         assert.ok(
             doc.getElementById('accountPanel').style.getPropertyValue('--account-panel-room')
         );
@@ -457,45 +699,43 @@ test('compact account menu keeps secondary sections collapsed and primary contro
     }
 });
 
-test('nickname saves safely and clearing it returns to the Google name', async () => {
-    const { dom, window, manager } = await setupUI();
+test('the popup avatar is a pencil that reaches the profile photo without a profile page', async () => {
+    const { dom, window } = await setupUI();
     try {
-        manager.token = 'test';
-        manager.expires = Date.now() + 60000;
-        manager.user = { displayName: 'Google Name', emailAddress: 'learner@example.com' };
         const doc = window.document;
-        doc.getElementById('profileNickname').value = 'Mizu <b>name</b>';
-        doc.getElementById('profileDeviceLabel').value = 'My phone';
-        doc.getElementById('accountProfileForm').dispatchEvent(
-            new window.Event('submit', { cancelable: true })
-        );
-        assert.equal(doc.getElementById('accountHeading').textContent, 'Mizu <b>name</b>');
-        assert.equal(doc.getElementById('accountHeading').querySelector('b'), null);
-        assert.equal(
-            JSON.parse(window.localStorage.getItem('kanji_profile')).nickname,
-            'Mizu <b>name</b>'
-        );
-        assert.equal(manager.config.deviceLabel, 'My phone');
-        doc.getElementById('profileNickname').value = '';
-        doc.getElementById('accountProfileForm').dispatchEvent(
-            new window.Event('submit', { cancelable: true })
-        );
-        assert.equal(doc.getElementById('accountHeading').textContent, 'Google Name');
+        const edit = doc.getElementById('accountAvatarEdit');
+        assert.ok(edit, 'the large popup avatar is the edit control');
+        assert.equal(edit.classList.contains('avatar-editable'), true);
+        assert.equal(edit.getAttribute('aria-label'), 'Change your profile photo');
+        assert.ok(edit.querySelector('.avatar-edit-cover'), 'hovering washes it out and shows');
+        assert.ok(doc.getElementById('accountAvatarPreview'), 'the avatar image is unchanged');
+        // Without the profile page loaded the control must stay inert instead of throwing.
+        assert.equal(window.kanjiProfilePage, undefined);
+        edit.click();
     } finally {
         dom.window.close();
     }
 });
 
-test('profile form rejects oversized values without changing saved data', async () => {
-    const { dom, window } = await setupUI();
+test('the compact menu shows the stored nickname without offering a second form', async () => {
+    const { dom, window, manager } = await setupUI();
     try {
-        const doc = window.document;
-        doc.getElementById('profileNickname').value = 'x'.repeat(41);
-        doc.getElementById('accountProfileForm').dispatchEvent(
-            new window.Event('submit', { cancelable: true })
+        manager.token = 'test';
+        manager.expires = Date.now() + 60000;
+        manager.user = { displayName: 'Google Name', emailAddress: 'learner@example.com' };
+        window.localStorage.setItem(
+            'kanji_profile',
+            JSON.stringify({ nickname: 'Mizu <b>name</b>' })
         );
-        assert.equal(window.localStorage.getItem('kanji_profile'), null);
-        assert.match(doc.getElementById('profileStatus').textContent, /40 characters/);
+        manager.renderAccount();
+        const doc = window.document;
+        assert.equal(doc.getElementById('accountHeading').textContent, 'Mizu <b>name</b>');
+        assert.equal(doc.getElementById('accountHeading').querySelector('b'), null);
+        assert.equal(
+            doc.querySelector('#accountPanel input:not([type=checkbox])'),
+            null,
+            'nothing to type in the panel, so it never scrolls to be filled in'
+        );
     } finally {
         dom.window.close();
     }

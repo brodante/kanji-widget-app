@@ -1,6 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    // Usernames are stored lowercased, so the rules only accept the lowercase shape.
+    // The client normalises before writing; anything else is rejected.
+    function usernameShape(value) {
+      return value is string
+        && value.size() >= 3
+        && value.size() <= 20
+        && value.matches('^[a-z][a-z0-9_]*$')
+        && !value.matches('.*__.*')
+        && !value.matches('.*_$');
+    }
+
     match /users/{uid}/sync/progress {
       function owner() {
         return request.auth != null && request.auth.uid == uid;
@@ -18,7 +35,105 @@ service cloud.firestore {
       allow create: if owner() && valid() && request.resource.data.revision == 1;
       allow update: if owner() && valid()
         && request.resource.data.revision == resource.data.revision + 1;
-      // No collection listing, deletion, or access to any other path from clients.
+      // Deleting the account removes this document, so the owner may delete their own
+      // progress. No collection listing, and no access to any other path from clients.
+      allow delete: if owner();
+    }
+
+    // Account record: username mirror, published email and the rename timestamp.
+    // Owner-only, no listing. The owner may delete it only as part of deleting the
+    // account; there is no other client-side delete path.
+    match /users/{uid} {
+      // deletionRequestedAt/deletionScheduledFor are null unless a deletion is pending.
+      function deletion() {
+        return (!request.resource.data.keys().hasAny(['deletionRequestedAt', 'deletionScheduledFor'])
+            || ((request.resource.data.get('deletionRequestedAt', null) == null
+                  && request.resource.data.get('deletionScheduledFor', null) == null)
+                || (request.resource.data.deletionRequestedAt is timestamp
+                  && request.resource.data.deletionScheduledFor is timestamp
+                  && request.resource.data.deletionScheduledFor > request.resource.data.deletionRequestedAt)));
+      }
+
+      function record() {
+        return request.resource.data.keys().hasOnly([
+            'uid', 'username', 'display', 'email', 'createdAt', 'updatedAt', 'renamedAt',
+            'deletionRequestedAt', 'deletionScheduledFor'
+          ])
+          && request.resource.data.uid == uid
+          && request.resource.data.username is string
+          && request.resource.data.username.size() <= 20
+          && (request.resource.data.username == ''
+            || usernameShape(request.resource.data.username))
+          && request.resource.data.display is string
+          && request.resource.data.display.size() <= 20
+          && request.resource.data.email is string
+          && request.resource.data.email.size() <= 254
+          && deletion();
+      }
+      allow get: if isOwner(uid);
+      allow list: if false;
+      allow create: if isOwner(uid) && record();
+      allow update: if isOwner(uid) && record();
+      // Account deletion removes the record; only its owner can, and nothing else
+      // in this file can write it afterwards.
+      allow delete: if isOwner(uid);
+    }
+
+    // Username ownership. One document per name, named by the lowercase username.
+    // Single-document reads keep availability checks possible; listing is denied so
+    // the directory cannot be harvested and usernames cannot be enumerated.
+    match /usernames/{name} {
+      function record() {
+        return request.resource.data.keys().hasOnly([
+            'uid', 'display', 'kind', 'email', 'createdAt', 'updatedAt', 'releasedAt',
+            'reservedUntil'
+          ])
+          && request.resource.data.uid is string
+          && request.resource.data.kind is string
+          && request.resource.data.display is string
+          && request.resource.data.display.size() <= 20
+          && request.resource.data.email is string
+          && request.resource.data.email.size() <= 254;
+      }
+      function claim() {
+        return request.resource.data.kind == 'user'
+          && request.resource.data.uid == request.auth.uid;
+      }
+      // Renaming away from a name you own: it becomes a reservation, not a free name.
+      function release() {
+        return resource.data.kind == 'user'
+          && resource.data.uid == request.auth.uid
+          && request.resource.data.kind == 'reserved'
+          && request.resource.data.uid == ''
+          && request.resource.data.reservedUntil is timestamp
+          && request.resource.data.reservedUntil > request.time;
+      }
+      // After the reservation lapses anyone signed in may claim the name.
+      function claimReleased() {
+        return resource.data.kind == 'reserved'
+          && resource.data.uid == ''
+          && resource.data.reservedUntil is timestamp
+          && resource.data.reservedUntil <= request.time
+          && claim();
+      }
+      // Names that would let an account look official, or that collide with routes. Kept in
+      // step with USERNAME_POLICY.reserved in username-policy.js; test-username-login.js
+      // fails if the two lists ever drift apart.
+      function reservedName() {
+        return name in ['admin', 'administrator', 'root', 'support', 'help', 'moderator',
+          'mod', 'staff', 'official', 'system', 'security', 'api', 'www', 'mail', 'email',
+          'guest', 'user', 'users', 'me', 'you', 'null', 'undefined', 'anonymous', 'kanji',
+          'kanjiwidgets', 'kanjiwidget', 'qd', 'd4nte', 'brodante'];
+      }
+      allow get: if true;
+      allow list: if false;
+      // Reserved names cannot be taken, but a name that is already reserved to an account
+      // stays releasable, so nobody is trapped in a name they cannot keep.
+      allow create: if isSignedIn() && usernameShape(name) && !reservedName() && record()
+        && claim();
+      allow update: if isSignedIn() && usernameShape(name) && record()
+        && (release() || (!reservedName() && claimReleased()));
+      allow delete: if false;
     }
   }
 }

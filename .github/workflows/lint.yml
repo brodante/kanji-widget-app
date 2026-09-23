@@ -32,3 +32,55 @@ jobs:
             - name: Run test suites
               run: |
                   npm test
+
+    # The Firestore security rules only run under the emulator, which needs Java 21+.
+    # Keeping that here means nobody has to install a JDK to know the rules still hold.
+    rules:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: 'npm'
+
+            - name: Set up Java 21 for the Firestore emulator
+              uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: '21'
+
+            - name: Install dependencies
+              run: npm ci
+
+            # The emulator jar and firebase-tools are the slow part of this job, so they
+            # are cached against package.json (which pins firebase-tools@15).
+            - name: Cache the Firestore emulator
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cache/firebase/emulators
+                      ~/.npm/_npx
+                  key: firebase-emulators-${{ runner.os }}-${{ hashFiles('package.json', 'firebase.json') }}
+                  restore-keys: |
+                      firebase-emulators-${{ runner.os }}-
+
+            # The output is kept so a failure can be read back without downloading logs.
+            - name: Run security rules tests
+              shell: bash
+              run: |
+                  set -o pipefail
+                  npm run test:rules 2>&1 | tee rules-output.log
+
+            - name: Turn rules failures into annotations
+              if: failure()
+              shell: bash
+              run: |
+                  grep -E "not ok|Error|assert|expected|actual|Cannot|throw" rules-output.log \
+                      | grep -v "^ *at " | tail -10 | while IFS= read -r line; do
+                      echo "::error title=rules::${line}"
+                  done

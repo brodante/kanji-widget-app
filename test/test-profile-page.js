@@ -89,7 +89,7 @@ test('profile statistics use stored progress and review records, not invented da
     }
 });
 
-test('profile editing shares validation and persistence with the compact menu', async () => {
+test('profile editing validates and persists the fields the page owns', async () => {
     const { dom, window, page } = await setup();
     try {
         page.open();
@@ -104,12 +104,43 @@ test('profile editing shares validation and persistence with the compact menu', 
             'Mizu <b>hello</b>'
         );
         assert.equal(doc.getElementById('profilePageTitle').querySelector('b'), null);
-        assert.equal(doc.getElementById('profileNickname').value, 'Mizu <b>hello</b>');
+        assert.equal(
+            doc.getElementById('profileNickname'),
+            null,
+            'the compact menu keeps no second display-name field'
+        );
         doc.getElementById('profilePageNickname').value = 'x'.repeat(41);
         doc.getElementById('profilePageForm').dispatchEvent(
             new window.Event('submit', { cancelable: true })
         );
         assert.match(doc.getElementById('profilePageFeedback').textContent, /40 characters/);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the avatar pencils open the photo picker from the hero and from the popup', async () => {
+    const { dom, window, dialog } = await setup();
+    try {
+        const doc = window.document;
+        let opened = 0;
+        doc.getElementById('profilePagePhotoFile').click = () => opened++;
+        doc.getElementById('openProfilePage').click();
+        assert.equal(dialog.open, true);
+        doc.getElementById('profilePageAvatarEdit').click();
+        assert.equal(opened, 1, 'the hero avatar is the picker');
+
+        doc.getElementById('profilePageBack').click();
+        assert.equal(dialog.open, false);
+        doc.getElementById('accountBtn').click();
+        doc.getElementById('accountAvatarEdit').click();
+        assert.equal(dialog.open, true, 'the popup avatar opens the profile page');
+        assert.equal(doc.activeElement.id, 'profilePagePhoto');
+        assert.equal(
+            window.location.hash,
+            '#profile',
+            'the profile page stays addressable after hopping from the popup'
+        );
     } finally {
         dom.window.close();
     }
@@ -151,7 +182,7 @@ test('diagnostic history is labelled as saved and current build is visible befor
         manager.initSafety();
         assert.match(
             window.document.getElementById('driveDiagnosticBuild').textContent,
-            /profile-v1/
+            /login-v1/
         );
         assert.match(
             window.document.getElementById('driveDiagnosticBuild').textContent,
@@ -161,7 +192,7 @@ test('diagnostic history is labelled as saved and current build is visible befor
             window.document.getElementById('driveDiagnosticResult').textContent,
             /Older saved result/
         );
-        assert.equal(window.BackupManager.BUILD, 'profile-v1');
+        assert.equal(window.BackupManager.BUILD, 'login-v1');
     } finally {
         dom.window.close();
     }
@@ -184,6 +215,39 @@ test('app entry points and offline cache use the same versioned profile assets',
             .readFileSync(require.resolve('../.github/workflows/deploy.yml'), 'utf8')
             .includes('cp profile-page.js deploy/')
     );
+});
+
+test('the profile save buttons keep Google’s mark and re-render their labels', async () => {
+    const { dom, window, manager, page } = await setup();
+    try {
+        page.open();
+        const doc = window.document;
+        for (const id of ['profilePageConnect', 'profilePageQuickSave']) {
+            assert.ok(doc.getElementById(id), id);
+        }
+        const button = doc.getElementById('profilePageConnect');
+        assert.ok(
+            button.querySelector('svg.google-icon'),
+            'the Google mark is on the connect button'
+        );
+        assert.equal(button.classList.contains('google-btn'), true);
+        assert.match(button.textContent, /Connect with Google Drive/);
+        assert.equal(
+            doc.getElementById('profilePageQuickSave').querySelector('svg.google-icon'),
+            null,
+            'Quick save is not a Google action and stays plain'
+        );
+
+        // Connecting swaps the label without losing the mark.
+        manager.token = 'token';
+        manager.expires = Date.now() + 60000;
+        manager.user = { displayName: 'Learner', emailAddress: 'learner@example.com' };
+        page.refresh();
+        assert.match(button.textContent, /Switch Drive account/);
+        assert.ok(button.querySelector('svg.google-icon'));
+    } finally {
+        dom.window.close();
+    }
 });
 
 test('settings shortcuts open profile and navigate to all existing sections', async () => {
@@ -209,6 +273,31 @@ test('settings shortcuts open profile and navigate to all existing sections', as
             assert.equal(doc.activeElement, target);
         }
         assert.equal(doc.getElementById('backupSafety').open, true);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('cancelling the file chooser keeps the profile page open', async () => {
+    const { dom, window, page, dialog } = await setup();
+    try {
+        page.open();
+        assert.equal(dialog.open, true);
+        // A real file input dispatches a bubbling "cancel" when the picker is dismissed
+        // (Chrome does this without any file being chosen). That event used to travel up
+        // to the dialog's own Escape handler and close the whole page.
+        const input = window.document.getElementById('profilePagePhotoFile');
+        input.dispatchEvent(new window.Event('cancel', { bubbles: true }));
+        assert.equal(
+            dialog.open,
+            true,
+            'the learner stays on the profile page after cancelling the file chooser'
+        );
+        assert.equal(window.location.hash, '#profile');
+
+        // The dialog's own Escape cancel still closes the page.
+        dialog.dispatchEvent(new window.Event('cancel', { bubbles: false, cancelable: true }));
+        assert.equal(dialog.open, false);
     } finally {
         dom.window.close();
     }
@@ -263,6 +352,90 @@ test('remove DP confirms removal, updates fallback and deletes only the avatar s
             window.document.getElementById('accountAvatar').dataset.source,
             'https://example.com/google.png'
         );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('removing a photo can be undone with the same bytes and crop, until the page is left', async () => {
+    const { dom, window, manager } = await setup();
+    try {
+        window.eval(fs.readFileSync(require.resolve('../avatar-crop.js'), 'utf8'));
+        window.URL.createObjectURL = () => 'blob:created';
+        window.URL.revokeObjectURL = () => {};
+        window.BackupManager.decodeAvatar = async () => ({ naturalWidth: 120, naturalHeight: 90 });
+        const writes = [];
+        window.BackupManager.media = async (data, slots) => {
+            writes.push([Object.keys(data).join(','), slots.join(',')]);
+        };
+        const blob = new window.Blob(['photo-bytes'], { type: 'image/png' });
+        const crop = { x: 0.3, y: 0.4, zoom: 1.7, ratio: 1.5 };
+        await manager.setAvatar(blob, crop);
+        assert.equal(manager.avatarURL, 'blob:created');
+        assert.equal(manager.avatarUndo, null, 'an upload has nothing to undo');
+
+        window.confirm = () => true;
+        await window.document.getElementById('profilePageRemovePhoto').onclick();
+        assert.equal(manager.avatarURL, '', 'the photo is gone from the UI');
+        assert.ok(manager.avatarUndo, 'the removed bytes are held in memory for the undo');
+        assert.equal(manager.avatarUndo.blob, blob, 'the exact bytes, not a re-encode');
+        const undo = window.document.getElementById('profilePageUndoRemovePhoto');
+        assert.equal(undo.hidden, false, 'undo is offered right after the removal');
+        assert.match(
+            window.document.getElementById('profilePageFeedback').textContent,
+            /Undo puts the same photo back/
+        );
+
+        await undo.onclick();
+        assert.equal(manager.avatarURL, 'blob:created', 'the same photo comes back');
+        assert.deepEqual(writes.at(-1), ['avatar', 'avatar'], 'and goes back into its own slot');
+        assert.equal(manager.avatarBlob, blob);
+        const restoredCrop = window.AvatarCrop.read();
+        for (const [key, value] of Object.entries(crop)) {
+            assert.equal(
+                restoredCrop[key],
+                value,
+                `crop.${key} comes back, so nothing is re-placed`
+            );
+        }
+        assert.equal(manager.avatarUndo, null, 'the undo is spent');
+        assert.equal(undo.hidden, true);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a later upload or a sign-out ends the photo undo for good', async () => {
+    const { dom, window, manager } = await setup();
+    try {
+        window.eval(fs.readFileSync(require.resolve('../avatar-crop.js'), 'utf8'));
+        window.URL.createObjectURL = () => 'blob:created';
+        window.URL.revokeObjectURL = () => {};
+        window.BackupManager.decodeAvatar = async () => ({ naturalWidth: 120, naturalHeight: 90 });
+        window.BackupManager.media = async () => {};
+        const first = new window.Blob(['first'], { type: 'image/png' });
+        const second = new window.Blob(['second'], { type: 'image/png' });
+        const crop = { x: 0.5, y: 0.5, zoom: 1, ratio: 1 };
+        const undo = window.document.getElementById('profilePageUndoRemovePhoto');
+        window.confirm = () => true;
+
+        await manager.setAvatar(first, crop);
+        await window.document.getElementById('profilePageRemovePhoto').onclick();
+        assert.ok(manager.avatarUndo);
+        await manager.setAvatar(second, crop);
+        assert.equal(manager.avatarUndo, null, 'a different photo supersedes the undo');
+        assert.equal(undo.hidden, true);
+
+        await window.document.getElementById('profilePageRemovePhoto').onclick();
+        assert.ok(manager.avatarUndo);
+        await manager.clearSignedOutIdentity();
+        assert.equal(
+            manager.avatarUndo,
+            null,
+            'signing out must not leave the removed bytes recoverable'
+        );
+        assert.equal(undo.hidden, true);
+        assert.equal(manager.avatarURL, '');
     } finally {
         dom.window.close();
     }
