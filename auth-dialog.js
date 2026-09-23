@@ -7,25 +7,54 @@ class AuthDialog {
     // typing cannot fire a request faster than this.
     static MIN_GAP = 700;
 
+    // Length tiers carry most of the weight so a long passphrase scores well even
+    // without symbols; variety adds the rest.
+    static levels = [
+        {
+            key: 'none',
+            label: 'Not set',
+            detail: 'Use at least 8 characters. A passphrase of 12 or more is stronger.'
+        },
+        {
+            key: 'weak',
+            label: 'Weak',
+            detail: 'Too easy to guess. Add length, or mix letters, numbers and symbols.'
+        },
+        {
+            key: 'fair',
+            label: 'Fair',
+            detail: 'Better. A few more characters or a symbol would help.'
+        },
+        { key: 'good', label: 'Good', detail: 'A solid password. Keep it unique to this site.' },
+        {
+            key: 'strong',
+            label: 'Strong',
+            detail: 'Excellent. Store it in a password manager, not in a note.'
+        }
+    ];
+
     static strength(value) {
         const password = String(value || '');
-        const score = [
-            password.length >= 8,
-            password.length >= 12,
+        if (!password) {
+            return AuthDialog.levels[0];
+        }
+        // Below the minimum length nothing else matters: it cannot be accepted anyway.
+        if (password.length < 8) {
+            return AuthDialog.levels[1];
+        }
+        const variety = [
             /[a-z]/.test(password) && /[A-Z]/.test(password),
             /[0-9]/.test(password),
             /[^A-Za-z0-9]/.test(password)
         ].filter(Boolean).length;
-        if (score >= 5) {
-            return 'Strong';
+        let score = variety;
+        for (const size of [8, 12, 16, 20]) {
+            if (password.length >= size) {
+                score += 1;
+            }
         }
-        if (score >= 4) {
-            return 'Good';
-        }
-        if (score >= 3) {
-            return 'Fair';
-        }
-        return 'Weak';
+        const index = score <= 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4;
+        return AuthDialog.levels[index];
     }
 
     static maskEmail(value) {
@@ -199,13 +228,21 @@ class AuthDialog {
         return Boolean(this.auth()?.ready) && !this.busy;
     }
 
+    // A failed startup has its own explanation; do not hide it behind "still starting".
+    startupMessage(auth) {
+        if (auth?.message && !/^Checking your saved sign-in/.test(auth.message)) {
+            return auth.message;
+        }
+        return 'Sign-in is still starting. Wait a moment, then try again.';
+    }
+
     // ---------------------------------------------------------------- sign in
 
     async submitSignIn(event) {
         event.preventDefault();
         const auth = this.auth();
         if (!auth?.ready) {
-            this.setFeedback('error', 'Sign-in is still starting. Wait a moment, then try again.');
+            this.setFeedback('error', this.startupMessage(this.auth()));
             return;
         }
         const identifier = this.el('authSignInIdentifier').value.trim();
@@ -258,7 +295,7 @@ class AuthDialog {
     async resetPassword() {
         const auth = this.auth();
         if (!auth?.ready) {
-            this.setFeedback('error', 'Sign-in is still starting. Wait a moment, then try again.');
+            this.setFeedback('error', this.startupMessage(this.auth()));
             return;
         }
         const identifier = this.el('authSignInIdentifier').value.trim();
@@ -307,7 +344,7 @@ class AuthDialog {
     async continueWithGoogle() {
         const auth = this.auth();
         if (!auth?.ready) {
-            this.setFeedback('error', 'Sign-in is still starting. Wait a moment, then try again.');
+            this.setFeedback('error', this.startupMessage(this.auth()));
             return;
         }
         this.setBusy(true, 'Complete sign-in in the Google window.');
@@ -339,7 +376,7 @@ class AuthDialog {
         event.preventDefault();
         const auth = this.auth();
         if (!auth?.ready) {
-            this.setFeedback('error', 'Sign-in is still starting. Wait a moment, then try again.');
+            this.setFeedback('error', this.startupMessage(this.auth()));
             return;
         }
         const email = this.el('authCreateEmail').value.trim();
@@ -622,13 +659,17 @@ class AuthDialog {
 
     renderStrength() {
         const node = this.el('authCreatePasswordStrength');
-        if (!node) {
+        const meter = this.el('authCreateStrengthMeter');
+        const field = this.el('authCreatePassword');
+        if (!node || !field) {
             return;
         }
-        const value = this.el('authCreatePassword').value;
-        node.textContent = value
-            ? `Password strength: ${AuthDialog.strength(value)}. Twelve or more characters with a mix is best.`
-            : 'Use at least 8 characters. A passphrase of 12 or more is stronger.';
+        const level = AuthDialog.strength(field.value);
+        node.textContent = `${level.label}: ${level.detail}`;
+        if (meter) {
+            meter.dataset.level = level.key;
+            meter.setAttribute('aria-hidden', 'true');
+        }
     }
 
     render() {

@@ -18,6 +18,9 @@ opened from the account menu and the Profile page.
   from Profile while signed in.
 - Passwords, verification links and reset tokens are handled by the Firebase SDK.
   They are never written to localStorage, a backup file or cloud sync.
+- A four-step strength meter (red, orange, yellow, green) and level wording appear while
+  a password is typed. Length carries most of the score, so a long passphrase is not
+  punished for having no symbols; anything under 8 characters is always "Weak".
 
 Firestore layout (all client writes are checked by `firestore.rules`):
 
@@ -38,6 +41,27 @@ Rules facts worth remembering:
   `reservedUntil` has passed.
 - `users/{uid}` documents are owner-only and cannot be deleted by a client.
 - The existing progress-sync rules are unchanged.
+
+## When sign-in fails
+
+Firebase reports a terse code and the app maps the common ones to a plain sentence. If a
+failure is not mapped, the message keeps the raw code in brackets, for example
+`Sign-in is unavailable right now (auth/configuration-not-found). ...`, and the raw code
+and SDK text are also written to the browser console as
+`KanjiWidgets sign-in error: ...`. Use that code to identify the setup step:
+
+| Code                                               | Meaning                                                                                                                                                                                                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auth/configuration-not-found`                     | The sign-in method is not enabled on the project, or the browser API key cannot reach Identity Toolkit. Enable Email/Password and Google under Authentication → Sign-in method.                                                            |
+| `auth/internal-error`                              | The request was refused before it reached the provider. Usually HTTP referrer restrictions on the browser API key (Google Cloud → Credentials → Website restrictions) that do not list this origin, for example `http://localhost:5000/*`. |
+| `auth/unauthorized-domain`                         | The hostname is missing from Authentication → Settings → Authorized domains. Add the hostname only, with no scheme or port.                                                                                                                |
+| `auth/api-key-not-valid`                           | The Web API key in `firebase-config.js` is wrong, deleted or restricted away from this origin.                                                                                                                                             |
+| `auth/operation-not-allowed`                       | The selected provider is disabled.                                                                                                                                                                                                         |
+| `auth/operation-not-supported-in-this-environment` | An embedded preview or restricted browser blocked the popup or storage. Open the site in a normal tab.                                                                                                                                     |
+
+Adding `localhost` to Google Cloud **Authorized JavaScript origins** only covers the
+Google popup. Password sign-in additionally needs the provider enabled and the origin
+authorised in Firebase, and both flows need the browser API key to allow the origin.
 
 ## Owner setup steps
 
@@ -100,8 +124,8 @@ These cannot be verified in a sandbox and must be checked on a real project:
   Owners who do not want their email discoverable simply keep a username-only
   account: the published address is written only after it is verified and is removed
   when the account switches to an alias.
-- There is no server, so there is no server-side password-length policy beyond
-  Firebase's own minimum, and no CAPTCHA. Firebase rate-limits sign-in and reset
+- The strength meter is guidance only. Firebase enforces its own minimum; there is no
+  server-side length policy to enforce, and no CAPTCHA. Firebase rate-limits sign-in and reset
   attempts; App Check is a later option.
 - Deleting an account is still a manual owner action in the Firebase Console. The app
   never deletes accounts.

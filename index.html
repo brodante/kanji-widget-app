@@ -2117,7 +2117,22 @@ filter: blur(10px) brightness(1) saturate(1);
                                 Show
                             </button>
                         </div>
-                        <p id="authCreatePasswordStrength" class="auth-hint"></p>
+                        <div id="authCreateStrength" class="auth-strength">
+                            <div
+                                id="authCreateStrengthMeter"
+                                class="auth-strength-meter"
+                                data-level="none"
+                                aria-hidden="true"
+                            >
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                            <p
+                                id="authCreatePasswordStrength"
+                                class="auth-hint"
+                                role="status"
+                                aria-live="polite"
+                            ></p>
+                        </div>
                         <label for="authCreatePasswordConfirm">Confirm password</label>
                         <input
                             id="authCreatePasswordConfirm"

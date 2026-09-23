@@ -963,6 +963,124 @@ test('username typing shows taken, reserved and available states with suggestion
     }
 });
 
+test('password strength levels use the length tiers and variety, not just length', async () => {
+    const { dom, window } = await setupDialog();
+    try {
+        const strength = window.AuthDialog.strength;
+        assert.equal(strength('').key, 'none');
+        assert.equal(strength('short').key, 'weak');
+        assert.equal(strength('password').key, 'weak', 'eight plain letters stay weak');
+        assert.equal(strength('password123').key, 'weak');
+        assert.equal(strength('CorrectHorse123').key, 'good');
+        assert.equal(strength('CorrectHorse123!').key, 'strong');
+        assert.equal(
+            strength('a quiet river bends around the stones').key,
+            'strong',
+            'a long passphrase must not be punished for having no symbols'
+        );
+        assert.equal(strength('Ab1!').key, 'weak');
+        for (const level of window.AuthDialog.levels) {
+            assert.ok(level.label && level.detail, level.key);
+        }
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the meter repaints its level, colour hook and text as the password is typed', async () => {
+    const { dom, window } = await setupDialog();
+    try {
+        const doc = window.document;
+        const dialog = window.kanjiAuthDialog;
+        dialog.open('create');
+        const field = doc.getElementById('authCreatePassword');
+        const meter = doc.getElementById('authCreateStrengthMeter');
+        const label = doc.getElementById('authCreatePasswordStrength');
+        assert.ok(meter, 'the strength meter must be present');
+        assert.equal(meter.querySelectorAll('span').length, 4, 'four colour steps');
+        assert.equal(meter.dataset.level, 'none');
+        assert.match(label.textContent, /Not set/);
+        assert.equal(label.getAttribute('aria-live'), 'polite');
+
+        for (const [value, level] of [
+            ['password', 'weak'],
+            ['password1234', 'fair'],
+            ['CorrectHorse123', 'good'],
+            ['CorrectHorse123!', 'strong']
+        ]) {
+            field.value = value;
+            field.dispatchEvent(new window.Event('input'));
+            assert.equal(meter.dataset.level, level, value);
+            assert.match(label.textContent, new RegExp(window.AuthDialog.strength(value).label));
+        }
+        const css = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+        for (const step of ['weak', 'fair', 'good', 'strong']) {
+            assert.ok(
+                css.includes(`.auth-strength-meter[data-level='${step}']`),
+                `meter styling for ${step}`
+            );
+        }
+        assert.ok(css.includes('--auth-strength-weak: #d32f2f'), 'red for weak');
+        assert.ok(css.includes('--auth-strength-strong: #2e7d32'), 'green for strong');
+        assert.ok(css.includes('--auth-strength-strong: #6ddc7f'), 'a dark-theme variant exists');
+        assert.match(
+            css,
+            /@media \(prefers-reduced-motion: reduce\) \{\s*\.auth-strength-meter span/,
+            'the transition respects reduced motion'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('every sign-in failure reports a code, and the vague fallback keeps it visible', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('app-auth.js'));
+        const cases = [
+            ['auth/configuration-not-found', /enable Email\/Password/i],
+            ['auth/internal-error', /Website restrictions/i],
+            ['auth/operation-not-supported-in-this-environment', /regular tab/i],
+            ['auth/user-token-expired', /expired/i],
+            ['auth/unauthorized-domain', /authorized/i]
+        ];
+        for (const [code, pattern] of cases) {
+            assert.match(window.AppAuth.errorMessage({ code }), pattern, code);
+        }
+        const unknown = window.AppAuth.errorMessage({ code: 'auth/something-new' });
+        assert.match(unknown, /\(auth\/something-new\)/, 'the raw code must stay visible');
+        assert.match(unknown, /Local learning still works/);
+        assert.ok(
+            window.AppAuth.errorMessage({}).includes('Sign-in is unavailable right now'),
+            'a code-less failure still says something useful'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a failed startup is explained in the dialog instead of "still starting"', async () => {
+    const { dom, window } = await setupDialog();
+    try {
+        const doc = window.document;
+        const dialog = window.kanjiAuthDialog;
+        window.kanjiAuth.ready = false;
+        window.kanjiAuth.message = 'This site is not authorized for Firebase login yet.';
+        dialog.open('signin');
+        doc.getElementById('authSignInIdentifier').value = 'learner@example.com';
+        doc.getElementById('authSignInPassword').value = 'whatever';
+        doc.getElementById('authSignInForm').dispatchEvent(
+            new window.Event('submit', { cancelable: true })
+        );
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.match(doc.getElementById('authFeedback').textContent, /not authorized/i);
+        window.kanjiAuth.message = 'Checking your saved sign-in…';
+        assert.match(dialog.startupMessage(window.kanjiAuth), /still starting/i);
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('creating an account validates the form, then claims the username', async () => {
     const { dom, window, calls, directoryCalls } = await setupDialog();
     try {

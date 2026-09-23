@@ -68,12 +68,32 @@ class AppAuth {
                 'That sign-in method already belongs to another account.',
             'auth/provider-already-linked': 'That sign-in method is already on this account.',
             'auth/account-exists-with-different-credential':
-                'That email already has an account with another sign-in method. Sign in that way first, then link this one.'
+                'That email already has an account with another sign-in method. Sign in that way first, then link this one.',
+            'auth/configuration-not-found':
+                'Sign-in is not configured for this project yet. Firefox/Chrome: the site owner must enable Email/Password and Google under Authentication → Sign-in method.',
+            'auth/internal-error':
+                'The sign-in service refused the request. Check that this origin is allowed on the project’s browser API key (Google Cloud → Credentials → Website restrictions), then try again.',
+            'auth/api-key-not-valid':
+                'The Firebase Web API key is missing or not valid for this site.',
+            'auth/api-key-not-valid.-please-pass-a-valid-api-key.':
+                'The Firebase Web API key is missing or not valid for this site.',
+            'auth/invalid-app-credential':
+                'This browser refused the sign-in request. Clear the site’s cookies or try a private window.',
+            'auth/operation-not-supported-in-this-environment':
+                'This browser cannot complete the sign-in window. Open the site in a regular tab, not an embedded preview.',
+            'auth/quota-exceeded': 'The sign-in service hit its daily limit. Try again later.',
+            'auth/user-token-expired': 'Your session expired. Sign in again to continue.'
         };
-        return (
-            messages[error?.code] ||
-            'Sign-in is unavailable right now. Please try again. Local learning still works.'
-        );
+        const code = error?.code || '';
+        if (messages[code]) {
+            return messages[code];
+        }
+        if (error) {
+            // Keep the raw code visible: it is the fastest way to identify a
+            // project-side setup problem, and the SDK's own text is too technical.
+            console.warn('KanjiWidgets sign-in error:', code || '(no code)', error.message || '');
+        }
+        return `Sign-in is unavailable right now${code ? ` (${code})` : ''}. Please try again. Local learning still works.`;
     }
 
     static aliasEmail(value) {

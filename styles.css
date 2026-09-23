@@ -6747,3 +6747,65 @@ body.auth-dialog-open {
         flex: 1 1 100%;
     }
 }
+
+/* Password strength meter: red → orange → yellow → green, readable on light and
+   dark themes while still using each theme's surface for the empty tracks. */
+.auth-strength {
+    --auth-strength-weak: #d32f2f;
+    --auth-strength-fair: #ef6c00;
+    --auth-strength-good: #c8a200;
+    --auth-strength-strong: #2e7d32;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+[data-theme='dark'] .auth-strength {
+    --auth-strength-weak: #ff6b5e;
+    --auth-strength-fair: #ffa94d;
+    --auth-strength-good: #ffd54f;
+    --auth-strength-strong: #6ddc7f;
+}
+.auth-strength-meter {
+    display: flex;
+    gap: 6px;
+}
+.auth-strength-meter span {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--border-color, #8884);
+    transition: background-color 160ms ease;
+}
+.auth-strength-meter[data-level='weak'] span:nth-child(-n + 1) {
+    background: var(--auth-strength-weak);
+}
+.auth-strength-meter[data-level='fair'] span:nth-child(-n + 2) {
+    background: var(--auth-strength-fair);
+}
+.auth-strength-meter[data-level='good'] span:nth-child(-n + 3) {
+    background: var(--auth-strength-good);
+}
+.auth-strength-meter[data-level='strong'] span:nth-child(-n + 4) {
+    background: var(--auth-strength-strong);
+}
+.auth-strength-meter[data-level='weak'] + #authCreatePasswordStrength {
+    color: var(--auth-strength-weak);
+    opacity: 1;
+}
+.auth-strength-meter[data-level='fair'] + #authCreatePasswordStrength {
+    color: var(--auth-strength-fair);
+    opacity: 1;
+}
+.auth-strength-meter[data-level='good'] + #authCreatePasswordStrength {
+    color: var(--auth-strength-good);
+    opacity: 1;
+}
+.auth-strength-meter[data-level='strong'] + #authCreatePasswordStrength {
+    color: var(--auth-strength-strong);
+    opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+    .auth-strength-meter span {
+        transition: none;
+    }
+}
