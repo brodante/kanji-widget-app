@@ -198,6 +198,11 @@ class AvatarCrop {
             this.setZoom(Number(event.target.value), { x: 0, y: 0 })
         );
         dialog.addEventListener('cancel', (event) => {
+            // Only this dialog's own Escape cancel may dismiss the crop: an input's
+            // bubbling "cancel" event must never close it.
+            if (event.target !== dialog) {
+                return;
+            }
             event.preventDefault();
             this.close(null);
         });

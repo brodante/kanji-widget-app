@@ -98,10 +98,14 @@ Uploading a photo opens a crop dialog before anything is saved:
   dialog on the stored photo without re-uploading it) and `Remove photo` (takes the crop
   with it). A removal is immediately followed by **Undo remove**, which puts the same bytes
   and crop back in one click; the removed copy is held in memory only, so a reload, another
-  upload or a sign-out really does end the undo. The avatars themselves are shortcuts — the
-  profile hero avatar and the pencil badge on it open the picker, and the account panel's
-  avatar opens the profile page with `Change photo` focused. Hovering any avatar reveals
-  the pencil badge; without hover support the badge stays visible.
+  upload or a sign-out really does end the undo.
+- Two avatars are shortcuts to the photo: the profile hero avatar (opens the picker) and the
+  account popup's avatar (opens the profile page with `Change photo` focused). Hovering
+  either one covers the whole picture with a translucent white layer and a pencil, so the
+  affordance is obvious without hiding whose face it is; the profile hero also labels it
+  `Change photo`. Without hover a small corner pencil is shown instead, and the picture is
+  never permanently washed out. The small user icon in the header deliberately has no photo
+  affordance at all — it only opens the account popup.
 - Display name lives on the profile page too. The account popup shows the saved name but
   carries no field for it, and account creation asks for email, username and password
   only: no second display-name box and no consent tick-box (the no-silent-upload promise

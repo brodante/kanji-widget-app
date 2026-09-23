@@ -173,6 +173,13 @@ class ProfilePage {
         document.getElementById('openProfilePage').onclick = () => this.open();
         document.getElementById('profilePageBack').onclick = () => this.close();
         this.dialog.addEventListener('cancel', (event) => {
+            // A file input dispatches its own bubbling "cancel" when the picker is
+            // dismissed, and it travels through this dialog. Only the dialog's own
+            // Escape cancel may close the page; otherwise cancelling the file chooser
+            // drops the learner back on the main screen.
+            if (event.target !== this.dialog) {
+                return;
+            }
             event.preventDefault();
             this.close();
         });

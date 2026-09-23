@@ -175,7 +175,11 @@ test('a device with its own progress gets both gists and a direct choice', async
             'nothing local was replaced'
         );
         assert.equal(calls.writes, 0, 'and nothing was uploaded either');
-        assert.match(cloud.message, /Compare the two below/i);
+        assert.match(
+            cloud.message,
+            /Nothing is replaced until you choose/i,
+            'the status line no longer points at a card, because only the profile page has one'
+        );
 
         const doc = window.document;
         const card = doc.querySelector('[data-cloud-choice]');

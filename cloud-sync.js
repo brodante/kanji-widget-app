@@ -300,7 +300,9 @@ class CloudSync {
                         ? `Up to date. This device matches cloud revision ${remote.revision}.`
                         : `Cloud revision ${remote.revision} checked. This device has changes waiting to save; nothing was uploaded by this check.`
                     : remote
-                      ? 'This account has a cloud copy. Compare both below, then choose which progress to keep. Nothing has been replaced.'
+                      ? `This account has a cloud copy: ${CloudSync.describe(remote, {
+                            savedAt: this.savedAt(remote)
+                        })}. Nothing has been replaced — load it, or keep this device’s progress.`
                       : 'No cloud save yet. Choose Save this device to create your first save for this account.';
                 if (meta?.uid && meta.uid !== this.uid) {
                     this.enabled = false;
@@ -340,7 +342,7 @@ class CloudSync {
         }
         this.choice = { local, remote };
         this.message =
-            'This device already has progress, and so does the account. Compare the two below, then choose which copy to keep. Nothing is replaced until you choose.';
+            'Both this device and the account have progress. Nothing is replaced until you choose: load the account’s copy, or keep this device’s progress.';
         this.render();
         return { asked: true };
     }

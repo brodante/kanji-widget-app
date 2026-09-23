@@ -2343,7 +2343,7 @@ body {
     flex-wrap: wrap;
 }
 
-/* Avatars are editable: the pencil shows on hover or keyboard focus. */
+/* Avatars are editable: hovering or focusing one washes it out and shows the pencil. */
 .avatar-editable {
     position: relative;
     padding: 0;
@@ -2354,49 +2354,56 @@ body {
     font: inherit;
 }
 
-.avatar-edit-badge {
+/* Translucent white over the whole photo: covers the old corner badge, and reads as
+   "click me to change this picture" without hiding whose face it is. */
+.avatar-edit-cover {
     position: absolute;
-    inset-inline-end: -2px;
-    inset-block-end: -2px;
+    inset: 0;
+    z-index: 2;
     display: grid;
     place-items: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--primary-color);
-    color: var(--on-primary);
-    font-size: 0.7rem;
-    border: 2px solid var(--background, #fff);
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.62);
+    color: #1c1c1c;
+    font-size: 1rem;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
     opacity: 0;
-    transform: scale(0.85);
-    transition:
-        opacity 0.15s ease,
-        transform 0.15s ease;
+    transition: opacity 0.15s ease;
     pointer-events: none;
 }
 
-/* The header icon clips to a circle, so its badge sits inside rather than overhanging. */
-.avatar-edit-badge--small {
-    width: 14px;
-    height: 14px;
-    font-size: 0.45rem;
-    inset-inline-end: 0;
-    inset-block-end: 0;
+.avatar-edit-cover-text {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 8%;
+    text-align: center;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
-#accountBtn:hover .avatar-edit-badge,
-#accountBtn:focus-visible .avatar-edit-badge,
-.avatar-editable:hover .avatar-edit-badge,
-.avatar-editable:focus-visible .avatar-edit-badge {
+.avatar-editable:hover .avatar-edit-cover,
+.avatar-editable:focus-visible .avatar-edit-cover {
     opacity: 1;
-    transform: scale(1);
 }
 
-/* A touch screen has no hover, so the badge stays visible there. */
+/* No hover means no way to uncover the photo, so touch gets a small corner pencil
+   instead of a permanent white wash over the picture. */
 @media (hover: none) {
-    .avatar-edit-badge {
+    .avatar-edit-cover {
+        inset: auto 0 0 auto;
+        width: 22px;
+        height: 22px;
+        font-size: 0.6rem;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: var(--on-primary);
+        text-shadow: none;
         opacity: 1;
-        transform: scale(1);
+    }
+
+    .avatar-edit-cover-text {
+        display: none;
     }
 }
 
@@ -6905,7 +6912,7 @@ body.auth-dialog-open {
    upload can never be stretched into an oval. The crop itself is CSS only, which
    keeps animated GIFs animating.
 --------------------------------------------------------------------------- */
-/* Hovering the header icon or the profile avatar shows the pencil that opens the photo. */
+/* Avatars that change the photo carry a see-through cover, not a corner badge. */
 .account-avatar-frame {
     position: relative;
     display: grid;
@@ -6918,10 +6925,6 @@ body.auth-dialog-open {
     overflow: hidden;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
-}
-/* An editable avatar keeps its pencil badge visible in the corner, so it cannot clip. */
-.avatar-frame.avatar-editable {
-    overflow: visible;
 }
 .avatar-frame > img {
     position: absolute;

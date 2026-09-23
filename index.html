@@ -193,12 +193,6 @@
                                 hidden
                             />
                             <i class="fas fa-circle-user" aria-hidden="true"></i>
-                            <span
-                                class="avatar-edit-badge avatar-edit-badge--small"
-                                aria-hidden="true"
-                            >
-                                <i class="fas fa-pencil"></i>
-                            </span>
                         </span>
                     </button>
                     <button id="settingsBtn" class="icon-btn" title="Settings">
@@ -226,7 +220,7 @@
                                 hidden
                             />
                             <i class="fas fa-circle-user" aria-hidden="true"></i>
-                            <span class="avatar-edit-badge" aria-hidden="true">
+                            <span class="avatar-edit-cover" aria-hidden="true">
                                 <i class="fas fa-pencil"></i>
                             </span>
                         </button>
@@ -296,7 +290,6 @@
                         <p data-cloud-status role="status" aria-live="polite">
                             Sign in to save progress across devices.
                         </p>
-                        <p data-cloud-summary></p>
                         <div class="backup-buttons">
                             <button type="button" class="backup-btn" data-cloud-action="save">
                                 Save this device
@@ -310,44 +303,7 @@
                                 Use cloud progress
                             </button>
                         </div>
-                        <div class="cloud-choice" data-cloud-choice hidden>
-                            <p class="cloud-choice-title">
-                                This device and the account both have progress
-                            </p>
-                            <div class="cloud-choice-grid">
-                                <div>
-                                    <h4>This device</h4>
-                                    <p data-cloud-choice-local></p>
-                                </div>
-                                <div>
-                                    <h4>Cloud copy</h4>
-                                    <p data-cloud-choice-remote></p>
-                                </div>
-                            </div>
-                            <div class="backup-buttons">
-                                <button
-                                    type="button"
-                                    class="backup-btn"
-                                    data-cloud-action="restore"
-                                >
-                                    Load cloud progress
-                                </button>
-                                <button
-                                    type="button"
-                                    class="backup-btn danger-action"
-                                    data-cloud-action="save"
-                                >
-                                    Keep this device's progress
-                                </button>
-                                <button type="button" class="backup-btn" data-cloud-action="later">
-                                    Decide later
-                                </button>
-                            </div>
-                            <p class="cloud-choice-note">
-                                A recovery copy of this device's progress is saved before anything
-                                is replaced. Nothing changes until you choose.
-                            </p>
-                        </div>
+
                         <details id="popupSaveOptions" class="account-details">
                             <summary>Save options &amp; help</summary>
                             <div class="backup-buttons">
@@ -1881,8 +1837,9 @@ filter: blur(10px) brightness(1) saturate(1);
                             data-avatar-crop
                             hidden
                         /><i class="fas fa-circle-user" aria-hidden="true"></i>
-                        <span class="avatar-edit-badge" aria-hidden="true">
+                        <span class="avatar-edit-cover" aria-hidden="true">
                             <i class="fas fa-pencil"></i>
+                            <span class="avatar-edit-cover-text">Change photo</span>
                         </span>
                     </button>
                     <div>

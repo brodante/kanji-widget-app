@@ -501,20 +501,28 @@ test('the crop assets are versioned, precached, deployed and wired to both surfa
     const deploy = read('.github/workflows/deploy.yml');
     assert.ok(html.includes('avatar-crop.js?v=avatar-v1'));
     assert.ok(worker.includes("'/avatar-crop.js?v=avatar-v1'"));
-    assert.match(worker, /kanji-widgets-v21/);
+    assert.match(worker, /kanji-widgets-v22/);
     assert.ok(deploy.includes('cp avatar-crop.js deploy/'));
     const dom = new JSDOM(html);
     try {
         const doc = dom.window.document;
         const ids = [...doc.querySelectorAll('[id]')].map((node) => node.id);
         assert.equal(new Set(ids).size, ids.length, 'duplicate IDs break avatar controls');
-        // Both avatars that can change the photo carry the pencil badge.
+        // Only the two avatars that can change the photo carry the see-through cover. The
+        // small header icon opens the account popup and must stay free of photo controls.
         for (const id of ['accountAvatarEdit', 'profilePageAvatarEdit']) {
             const control = doc.getElementById(id);
             assert.ok(control, `${id} must offer the photo`);
-            assert.ok(control.querySelector('.avatar-edit-badge'), `${id} needs its pencil`);
+            assert.ok(control.querySelector('.avatar-edit-cover'), `${id} needs its pencil cover`);
             assert.ok(control.querySelector('[data-avatar-crop]'), `${id} shows the cropped image`);
         }
+        assert.equal(
+            doc
+                .getElementById('accountBtn')
+                .querySelector('.avatar-edit-cover, .avatar-edit-badge'),
+            null,
+            'the header icon is only the popup opener'
+        );
         assert.ok(doc.getElementById('profilePageAdjustPhoto'));
         assert.equal(doc.querySelectorAll('[data-avatar-crop]').length, 3);
         assert.equal(

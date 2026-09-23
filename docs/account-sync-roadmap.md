@@ -62,8 +62,10 @@ Other feature work is paused. See [the setup guide and phased plan](firebase-aut
 
 ## Should add: everyday usability
 
-The account popover now shows essential controls first, with collapsed Profile & device
-and Save options & help sections. It is wider on desktop and a compact bottom sheet on
+The account popover now shows essential controls first, with a collapsed Save options &
+help section, and it keeps only the two progress decisions (**Save this device**, **Use
+cloud progress**) in the open. The device-versus-cloud comparison card and the counts line
+are the profile page's job, so the popup does not lead with two progress summaries. It is wider on desktop and a compact bottom sheet on
 phones. Scrollbars remain available when needed (expanded controls, conflicts, or small
 screens), using a thin theme-matched treatment rather than hiding accessible scrolling.
 
@@ -167,11 +169,18 @@ original bytes stay in full backups. Add it to the manual list: upload a tall ph
 wide photo and an animated GIF, adjust each crop, and confirm the header, account panel
 and profile hero all match.
 
-Every avatar that can change the photo carries a pencil badge that appears on hover (and
-stays visible where hover does not exist): the profile hero avatar opens the file picker,
-and the account panel's avatar opens the profile page with the photo control focused. The
-account popup itself keeps no upload, crop or display-name controls, so it does not scroll
-for a few lines of form at phone widths.
+The two avatars that can change the photo — the profile hero avatar and the account
+popup's avatar — cover themselves with a translucent white layer and a pencil on hover or
+keyboard focus (a small corner pencil when there is no hover, so the photo is never
+permanently washed out). The profile hero opens the file picker; the popup avatar opens the
+profile page with the photo control focused. The small header icon carries no photo
+affordance: it only opens the popup. The account popup itself keeps no upload, crop or
+display-name controls, so it does not scroll for a few lines of form at phone widths.
+
+Cancelling the file chooser is a first-class case: a file input dispatches its own bubbling
+`cancel` event when the picker is dismissed, so both dialogs ignore any `cancel` whose
+target is not the dialog itself. Without that guard the event reached the profile page's
+Escape handler and closed the page, dropping the learner on the main screen.
 
 `Remove photo` keeps an immediate, in-memory undo: the removed bytes and crop come back in
 one click, and nothing is written to storage, so a reload, another upload, a sign-out or a

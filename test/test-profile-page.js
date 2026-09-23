@@ -245,6 +245,31 @@ test('settings shortcuts open profile and navigate to all existing sections', as
     }
 });
 
+test('cancelling the file chooser keeps the profile page open', async () => {
+    const { dom, window, page, dialog } = await setup();
+    try {
+        page.open();
+        assert.equal(dialog.open, true);
+        // A real file input dispatches a bubbling "cancel" when the picker is dismissed
+        // (Chrome does this without any file being chosen). That event used to travel up
+        // to the dialog's own Escape handler and close the whole page.
+        const input = window.document.getElementById('profilePagePhotoFile');
+        input.dispatchEvent(new window.Event('cancel', { bubbles: true }));
+        assert.equal(
+            dialog.open,
+            true,
+            'the learner stays on the profile page after cancelling the file chooser'
+        );
+        assert.equal(window.location.hash, '#profile');
+
+        // The dialog's own Escape cancel still closes the page.
+        dialog.dispatchEvent(new window.Event('cancel', { bubbles: false, cancelable: true }));
+        assert.equal(dialog.open, false);
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('oversized profile photo raises a persistent alert inside the open profile dialog', async () => {
     const { dom, window, page, dialog, manager } = await setup();
     try {

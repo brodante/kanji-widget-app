@@ -481,6 +481,13 @@ test('compact account menu leaves the profile form and photo controls to the pro
         );
         const panel = doc.getElementById('accountPanel');
         assert.ok(panel.querySelector('[data-cloud-action=save]'));
+        // The comparison card and the counts line are the profile page's job now: the
+        // popup opens on a small screen and must not lead with two progress summaries.
+        assert.equal(panel.querySelector('[data-cloud-choice]'), null, 'no comparison card');
+        assert.equal(panel.querySelector('[data-cloud-summary]'), null, 'no second counts line');
+        const page = doc.getElementById('profilePage');
+        assert.ok(page.querySelector('[data-cloud-choice]'), 'the profile page keeps the card');
+        assert.ok(page.querySelector('[data-cloud-summary]'), 'and its counts line');
         // Round two of the slimming: the popup keeps the two actions that matter when it
         // opens and folds the maintenance ones away, so the panel stays short.
         const primary = ['save', 'restore'];
@@ -521,7 +528,7 @@ test('the popup avatar is a pencil that reaches the profile photo without a prof
         assert.ok(edit, 'the large popup avatar is the edit control');
         assert.equal(edit.classList.contains('avatar-editable'), true);
         assert.equal(edit.getAttribute('aria-label'), 'Change your profile photo');
-        assert.ok(edit.querySelector('.avatar-edit-badge'), 'hovering reveals the pencil');
+        assert.ok(edit.querySelector('.avatar-edit-cover'), 'hovering washes it out and shows');
         assert.ok(doc.getElementById('accountAvatarPreview'), 'the avatar image is unchanged');
         // Without the profile page loaded the control must stay inert instead of throwing.
         assert.equal(window.kanjiProfilePage, undefined);

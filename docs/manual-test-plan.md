@@ -257,15 +257,20 @@ released by its previous owner and can be claimed", and claiming it as B succeed
 ## Step 7 — profile photo and crop (human only)
 
 Every photo action lives on the profile page. Reach it from the account panel (**My
-profile**) or by clicking an avatar: the popup's large avatar is a button, and the pencil
-badge on it opens the profile page. The popup itself no longer carries upload, crop or
+profile**) or by clicking an avatar. The popup itself carries no upload, crop or
 display-name controls, so it stays short.
 
-- **The pencil appears on hover.** Hover the header user icon, the popup avatar and the
-  profile hero avatar: each shows a small pencil badge. On a touch screen (no hover) the
-  badge is always visible.
+- **The photo changes colour on hover.** Hover the **popup avatar** or the **profile hero
+  avatar**: the whole picture goes translucent white with a pencil over it (the profile one
+  also reads **Change photo**). On a touch screen there is no wash — a small pencil sits in
+  the corner instead.
+- **The small header icon stays plain.** Hovering the user icon in the top bar shows no
+  pencil at all: it only opens the account popup.
 - Clicking the **profile hero avatar** (or its pencil) opens the file picker directly;
   clicking the **popup avatar** opens the profile page with **Change photo** focused.
+- **Cancelling the file chooser keeps you where you were.** Open the picker and press
+  Cancel (or Escape in the picker) without choosing anything: the profile page must stay
+  open. This was broken — it dropped you back on the main screen.
 - Upload a **tall** photo, a **wide** photo and an **animated GIF**. Each opens the crop
   dialog.
 - Drag, wheel, pinch, arrow keys, slider, reset. You cannot drag the photo away from the
