@@ -2059,6 +2059,10 @@ test('a username-only account keeps its alias private and is not called a Google
             assert.doesNotMatch(text, /users\.kanji\.qd\.je/, 'the sign-in alias stays internal');
             assert.doesNotMatch(text, /Google account/, 'no Google provider, no Google label');
         }
+        // Without a local handle mirror the label still avoids the alias address.
+        const bare = { ...aliasAccount, displayName: '' };
+        assert.equal(window.AppAuth.accountLabel(bare), 'Username account');
+        assert.equal(window.AppAuth.accountDetail(bare), 'Username sign-in · no mailbox on file');
     } finally {
         dom.window.close();
     }

@@ -301,7 +301,7 @@ class CloudSync {
                         : `Cloud revision ${remote.revision} checked. This device has changes waiting to save; nothing was uploaded by this check.`
                     : remote
                       ? 'This account has a cloud copy. Compare both below, then choose which progress to keep. Nothing has been replaced.'
-                      : 'No cloud save yet. Choose Save this device to create your first save for this Google account.';
+                      : 'No cloud save yet. Choose Save this device to create your first save for this account.';
                 if (meta?.uid && meta.uid !== this.uid) {
                     this.enabled = false;
                     this.message =
@@ -371,7 +371,9 @@ class CloudSync {
             explicit &&
             !confirm(
                 `Keep this device’s progress and replace the cloud copy for ${
-                    window.kanjiAuth.user.email || 'this Google account'
+                    window.AppAuth?.accountLabel?.(window.kanjiAuth.user) ||
+                    window.kanjiAuth.user.email ||
+                    'this account'
                 }?\n\nThis device: ${CloudSync.describe(
                     this.summaryLocal()
                 )}\nCloud now: ${CloudSync.describe(
