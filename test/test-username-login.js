@@ -655,6 +655,82 @@ test('sign-out clears the photo, nickname and username but keeps learning progre
     }
 });
 
+test('signing out on a shared device can erase the study data in the same step', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('ui-feedback.js'));
+        window.eval(read('app-auth.js'));
+        const erased = [];
+        window.driveBackup = {
+            clearSignedOutIdentity: async () => {},
+            clearLocalData: async (options) => {
+                erased.push(options);
+            }
+        };
+        const calls = [];
+        const auth = new window.AppAuth(config, async () => fakeAuthSdk({ calls }));
+        await auth.init();
+        auth.user = passwordAccount;
+
+        const prompts = [];
+        window.confirm = (text) => {
+            prompts.push(text);
+            return true;
+        };
+        assert.equal(await auth.signOut({ confirm: false, wipe: true }), true);
+        assert.equal(erased.length, 1, 'the erase runs once');
+        assert.equal(
+            erased[0].confirm,
+            false,
+            'the erase reuses the local-data wipe without asking a second time'
+        );
+        const asked = prompts.join('\n');
+        assert.match(asked, /Erase the study data this device stores/);
+        assert.match(asked, /Deleted on this device: kanji progress/);
+        assert.match(asked, /Kept: the cloud copy of your progress/, 'the cloud copy is spared');
+        assert.match(auth.message, /erased the study data stored on this device/i);
+        assert.match(auth.message, /Cloud progress and Google Drive files were not touched/);
+
+        // Refusing only the erase still ends the session, and says the data was kept.
+        erased.length = 0;
+        window.confirm = () => false;
+        auth.user = passwordAccount;
+        assert.equal(await auth.signOut({ confirm: false, wipe: true }), true);
+        assert.equal(erased.length, 0, 'a refused erase removes nothing');
+        assert.match(auth.message, /erase was cancelled/i);
+        assert.match(auth.message, /study data stored on this device was kept/i);
+
+        // A page that cannot erase anything must say so instead of claiming it did.
+        const missing = new window.AppAuth(config, async () => fakeAuthSdk({}));
+        await missing.init();
+        missing.user = passwordAccount;
+        delete window.driveBackup;
+        window.confirm = () => true;
+        assert.equal(await missing.signOut({ confirm: false, wipe: true }), true);
+        assert.match(missing.message, /cannot erase local study data/i);
+        assert.match(missing.message, /Disconnect & clear this device/);
+
+        // A wipe that fails must not look like a success.
+        window.driveBackup = { clearSignedOutIdentity: async () => {}, clearLocalData: null };
+        erased.length = 0;
+        window.driveBackup.clearLocalData = async () => {
+            throw new Error('Storage is full.');
+        };
+        window.confirm = () => true;
+        auth.user = passwordAccount;
+        assert.equal(await auth.signOut({ confirm: false, wipe: true }), true);
+        assert.match(auth.message, /could not be erased/i);
+        assert.match(auth.message, /Disconnect & clear this device to retry/);
+        assert.match(
+            window.document.querySelector('.attention-notice')?.textContent || '',
+            /could not be erased/i,
+            'the failure is shown on screen, not only in the panel'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('a sign-out announced by another tab still clears this tab', async () => {
     const { dom, window } = await setupDom();
     try {
@@ -1733,6 +1809,45 @@ test('the delete button confirms before acting and reports the result honestly',
     }
 });
 
+test('the dialog passes the shared-device tick to the sign-out, and never invents it', async () => {
+    const { dom, window, auth } = await setupDialog({
+        user: {
+            uid: 'password-uid',
+            email: 'learner@example.com',
+            providerData: [{ providerId: 'password' }]
+        }
+    });
+    try {
+        const doc = window.document;
+        window.kanjiAuthDialog.open('account');
+        const seen = [];
+        window.confirm = () => true;
+        auth.signOut = async (options = {}) => {
+            seen.push(options);
+            return true;
+        };
+        const row = doc.getElementById('authSignOutWipeRow');
+        assert.equal(row.hidden, false, 'signed in: the erase option is offered');
+        assert.equal(doc.getElementById('authSignOutWipe').checked, false, 'and starts unticked');
+
+        doc.getElementById('authSignOut').click();
+        await settle();
+        assert.equal(seen.length, 1);
+        assert.equal(seen[0].wipe, false, 'without a tick the study data stays');
+
+        doc.getElementById('authSignOutWipe').checked = true;
+        doc.getElementById('authSignOut').click();
+        await settle();
+        assert.equal(seen[1].wipe, true, 'the tick travels with the sign-out');
+        assert.match(
+            doc.getElementById('authSignOutWipeRow').textContent,
+            /erase the study data stored here/
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('the sign-in dialog exposes both paths and keeps one namespace of IDs', async () => {
     const { dom, window } = await setupDialog();
     try {
@@ -1783,6 +1898,32 @@ test('the sign-in dialog exposes both paths and keeps one namespace of IDs', asy
                 'the disclosure sits directly after its sign-out button'
             );
         }
+        // The shared-device erase rides along with a sign-out, so it appears exactly where
+        // a sign-out does, and it never brings a stale tick into the next session.
+        const wipeRows = [...doc.querySelectorAll('[data-sign-out-wipe-row]')];
+        assert.equal(wipeRows.length, 3, 'one erase option per sign-out surface');
+        for (const row of wipeRows) {
+            assert.equal(row.hidden, true, 'hidden until somebody is signed in');
+            assert.ok(
+                row.parentElement.querySelector('[data-app-sign-out], #authSignOut'),
+                'the option sits in the same button row as a sign-out button'
+            );
+            assert.ok(row.querySelector('[data-sign-out-wipe], #authSignOutWipe'));
+        }
+        window.kanjiAuth.user = { uid: 'password-uid', email: 'learner@example.com' };
+        window.kanjiAuth.render();
+        for (const row of wipeRows) {
+            assert.equal(row.hidden, false, 'shown while signed in');
+        }
+        doc.querySelector('[data-sign-out-wipe]').checked = true;
+        window.kanjiAuth.user = null;
+        window.kanjiAuth.render();
+        assert.equal(
+            doc.querySelector('[data-sign-out-wipe]').checked,
+            false,
+            'a tick does not survive into a signed-out panel'
+        );
+
         const dialogNote = doc.querySelector('.auth-signout-note');
         assert.match(dialogNote.textContent, /Kanji progress, reviews and local backups stay/);
         assert.ok(

@@ -8,7 +8,7 @@ KanjiWidgets now has a separate app sign-in using Firebase Authentication. The o
 - The account menu and Profile page show the app identity and Google photo. An uploaded custom photo still takes priority.
 - Signing in alone does not associate a new account with this device’s learning data. Previously approved cloud sync can resume; first sync asks which data to keep.
 - Drive still has its own Connect and Disconnect controls and short-lived permission.
-- Signing out of the app keeps local data and does not disconnect Drive. On a shared device, disconnect Drive too. Local progress is shared by everyone using that browser profile, not isolated by Firebase account.
+- Signing out of the app keeps local data and does not disconnect Drive. On a shared device, tick **Shared device: also erase the study data stored here** before signing out (it asks again and names everything it deletes), and disconnect Drive too. Local progress is otherwise shared by everyone using that browser profile, not isolated by Firebase account.
 - Local learning and existing backups still work when Firebase is unconfigured or unavailable.
 - Session credentials are managed by the Firebase SDK and excluded from app backups. There is no frontend client secret, service-account key or manual refresh-token handling.
 

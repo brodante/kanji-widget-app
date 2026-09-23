@@ -258,8 +258,12 @@
                             </button>
                             <p class="backup-signout-note" data-sign-out-note hidden>
                                 Signing out removes your photo, name and username from this device.
-                                Progress stays.
+                                Progress stays unless you tick the box below.
                             </p>
+                            <label class="backup-signout-option" data-sign-out-wipe-row hidden>
+                                <input type="checkbox" data-sign-out-wipe />
+                                Shared device: also erase the study data stored here
+                            </label>
                             <button type="button" class="backup-btn" data-app-auth-retry hidden>
                                 Retry connection
                             </button>
@@ -2000,8 +2004,12 @@ filter: blur(10px) brightness(1) saturate(1);
                                 </button>
                                 <p class="backup-signout-note" data-sign-out-note hidden>
                                     Signing out removes your photo, name and username from this
-                                    device. Progress stays.
+                                    device. Progress stays unless you tick the box below.
                                 </p>
+                                <label class="backup-signout-option" data-sign-out-wipe-row hidden>
+                                    <input type="checkbox" data-sign-out-wipe />
+                                    Shared device: also erase the study data stored here
+                                </label>
                                 <button type="button" class="backup-btn" data-app-auth-retry hidden>
                                     Retry connection
                                 </button>
@@ -2428,8 +2436,18 @@ filter: blur(10px) brightness(1) saturate(1);
                         <button id="authDialogDone" type="button" class="backup-btn">Done</button>
                         <small class="auth-signout-note">
                             Signing out removes your photo, name and username from this device.
-                            Kanji progress, reviews and local backups stay.
+                            Kanji progress, reviews and local backups stay unless you tick the box
+                            below.
                         </small>
+                        <label
+                            id="authSignOutWipeRow"
+                            class="backup-signout-option"
+                            data-sign-out-wipe-row
+                            hidden
+                        >
+                            <input id="authSignOutWipe" type="checkbox" />
+                            Shared device: also erase the study data stored here
+                        </label>
                     </div>
                     <div id="authDeleteSection" class="auth-card" hidden>
                         <h3>Delete this account</h3>

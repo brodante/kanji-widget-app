@@ -2400,6 +2400,24 @@ body {
     }
 }
 
+/* The shared-device erase is a full-width line under its sign-out button. */
+.backup-signout-option {
+    flex-basis: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    opacity: 0.85;
+    cursor: pointer;
+}
+
+.backup-signout-option input {
+    flex: none;
+    margin: 0.15rem 0 0;
+}
+
 /* First-contact comparison: this device's progress beside the cloud copy. */
 .cloud-choice {
     display: flex;

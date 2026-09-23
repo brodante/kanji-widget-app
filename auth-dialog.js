@@ -629,7 +629,9 @@ class AuthDialog {
             return;
         }
         this.setBusy(true);
-        const done = await auth.signOut();
+        const done = await auth.signOut({
+            wipe: Boolean(this.el('authSignOutWipe')?.checked)
+        });
         this.setBusy(false);
         this.tab = 'signin';
         this.render();
@@ -987,6 +989,13 @@ class AuthDialog {
         const recovery = this.el('authRecoverySection');
         if (recovery) {
             recovery.hidden = !signedIn || !AppAuth.isAliasAccount(auth?.user);
+        }
+        const wipeRow = this.el('authSignOutWipeRow');
+        if (wipeRow) {
+            wipeRow.hidden = !signedIn;
+            if (!signedIn && this.el('authSignOutWipe')) {
+                this.el('authSignOutWipe').checked = false;
+            }
         }
         this.renderMethods(auth);
         this.renderStrength();

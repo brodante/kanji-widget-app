@@ -79,7 +79,7 @@ If access is denied, check that the rules were published in the same project and
 - [ ] Pause autosave, import a backup and clear local data behaviors are checked.
 - [ ] Verify desktop/mobile and the production origin after deployment.
 
-Local progress is still shared by people using the same browser profile. Signing out does not erase it. Use separate browser profiles on shared devices; switching Google accounts is not a local privacy boundary.
+Local progress is still shared by people using the same browser profile. Signing out does not erase it unless you tick **Shared device: also erase the study data stored here**; the cloud copy is spared either way, so the same account can load it back. Use separate browser profiles on shared devices; switching Google accounts is not a local privacy boundary.
 
 ## Automated testing
 

@@ -77,7 +77,31 @@ class AppAuth {
         'Signed out in another tab. This tab ended its session too, and removed your photo, name and username from this device; learning progress stays.';
 
     static SIGNED_OUT_MESSAGE =
-        'Signed out of the app. Your photo, name and username were removed from this device; learning progress stays. On a shared device, Recovery & privacy → Disconnect & clear this device also removes local study data. Drive has its own Disconnect button.';
+        'Signed out of the app. Your photo, name and username were removed from this device; learning progress stays. On a shared device, tick the box next to Sign out to erase the study data stored here in the same step. Drive has its own Disconnect button.';
+
+    // Signing out keeps what the learner studied. On a shared device the erase is a second,
+    // separate answer, and it names everything it takes before it takes it.
+    static SIGN_OUT_WIPE_CONFIRM =
+        'Erase the study data this device stores for KanjiWidgets?\n\n' +
+        'Deleted on this device: kanji progress, review schedule, streak, settings and themes, ' +
+        'uploaded photo and background, local API keys, local backups and the recovery copy.\n' +
+        'Kept: the cloud copy of your progress and every file in Google Drive.\n\n' +
+        'This cannot be undone on this device. Export a local backup first if you want a copy.';
+
+    static SIGN_OUT_WIPE_UNAVAILABLE =
+        'Signed out, but this page cannot erase local study data. Open Settings → Recovery & privacy → Disconnect & clear this device to remove it.';
+
+    static SIGNED_OUT_WIPED_MESSAGE =
+        'Signed out and erased the study data stored on this device. Cloud progress and Google Drive files were not touched.';
+
+    static SIGNED_OUT_KEPT_MESSAGE =
+        'Signed out. The erase was cancelled, so the study data stored on this device was kept.';
+
+    // The tick sits in the same button row as the sign-out button it belongs to, so two
+    // surfaces can each offer it without sharing an id.
+    static wipeRequested(button) {
+        return Boolean(button?.parentElement?.querySelector('[data-sign-out-wipe]:checked'));
+    }
 
     // The visible identity goes with the session: the uploaded photo and its crop, the
     // nickname, the username mirror and the remembered availability answers. Learning
@@ -608,7 +632,7 @@ class AppAuth {
             };
         });
         document.querySelectorAll('[data-app-sign-out]').forEach((button) => {
-            button.onclick = () => this.signOut();
+            button.onclick = () => this.signOut({ wipe: AppAuth.wipeRequested(button) });
         });
         document.querySelectorAll('[data-app-auth-retry]').forEach((button) => {
             button.onclick = () => this.start();
@@ -1013,6 +1037,8 @@ class AppAuth {
             this.render();
             return false;
         }
+        // The erase is asked separately, and refusing it still ends the session.
+        const wipe = options.wipe === true && window.confirm(AppAuth.SIGN_OUT_WIPE_CONFIRM);
         this.busy = true;
         this.signingOut = true;
         this.render();
@@ -1020,12 +1046,36 @@ class AppAuth {
             await this.sdk.signOut(this.auth);
             this.user = null;
             await this.afterSignOut();
-            this.message = AppAuth.SIGNED_OUT_MESSAGE;
+            if (wipe) {
+                this.message = 'Signed out. Erasing the study data stored on this device…';
+                this.render();
+                if (!window.driveBackup?.clearLocalData) {
+                    // Never claim an erase that no code on this page can perform.
+                    this.message = AppAuth.SIGN_OUT_WIPE_UNAVAILABLE;
+                    window.KanjiFeedback?.show(this.message, { title: 'Local data not erased' });
+                    return true;
+                }
+                // Signed out first: the wipe must not race an autosave into the cloud copy.
+                await window.driveBackup.clearLocalData({ confirm: false });
+                this.message = AppAuth.SIGNED_OUT_WIPED_MESSAGE;
+                return true;
+            }
+            this.message =
+                options.wipe === true
+                    ? AppAuth.SIGNED_OUT_KEPT_MESSAGE
+                    : AppAuth.SIGNED_OUT_MESSAGE;
             return true;
         } catch (error) {
-            this.message = AppAuth.errorMessage(error);
-            window.KanjiFeedback?.show(this.message, { title: 'Could not sign out' });
-            return false;
+            const erased = this.user === null;
+            this.message = erased
+                ? `Signed out, but the local study data could not be erased: ${AppAuth.errorMessage(
+                      error
+                  )} Use Settings → Recovery & privacy → Disconnect & clear this device to retry.`
+                : AppAuth.errorMessage(error);
+            window.KanjiFeedback?.show(this.message, {
+                title: erased ? 'Local data not erased' : 'Could not sign out'
+            });
+            return erased;
         } finally {
             this.busy = false;
             this.render();
@@ -1052,6 +1102,15 @@ class AppAuth {
         // The disclosure is shown exactly while the sign-out button is.
         document.querySelectorAll('[data-sign-out-note]').forEach((note) => {
             note.hidden = !this.user;
+        });
+        // So is the shared-device erase, and it never carries a tick into the next session.
+        document.querySelectorAll('[data-sign-out-wipe-row]').forEach((row) => {
+            row.hidden = !this.user;
+        });
+        document.querySelectorAll('[data-sign-out-wipe]').forEach((box) => {
+            if (!this.user) {
+                box.checked = false;
+            }
         });
         document.querySelectorAll('[data-app-auth-retry]').forEach((button) => {
             button.hidden = this.ready || this.busy || !AppAuth.configured(this.config);

@@ -148,6 +148,17 @@ prompt and the one-line disclosure next to every sign-out button say this before
 happens, and the cleanup also runs when another tab announces the sign-out. Remote
 Google/Drive photos stay hidden until the next signed-in session.
 
+On a shared device the identity cleanup is not enough on its own: the next person can still
+read the previous learner's progress, reviews and streak in the same browser profile. Each
+sign-out button therefore also carries an unticked **Shared device: also erase the study
+data stored here** box. Ticking it adds a second prompt that names everything deleted on
+this device (progress, reviews, streak, settings and themes, photo and background, local
+API keys, backups, recovery copy) and everything spared (the cloud copy, Google Drive). The
+session ends first and the wipe second, so an autosave can never push empty progress into
+the cloud copy; cancelling only the second prompt still signs out and keeps the data. The
+wipe is the same code path as `Disconnect & clear this device`, which stays available in
+Recovery & privacy.
+
 ## Profile photo cropping
 
 Uploaded photos are cropped into a square before they are stored (`avatar-crop.js`,

@@ -385,6 +385,29 @@ test('partial cloud deletion reports progress and keeps autosaves paused', async
     }
 });
 
+test('the local-data wipe skips its own prompt when the sign-out already asked', async () => {
+    const { dom, window, manager } = await setupUI();
+    try {
+        window.indexedDB = indexedDB;
+        window.BackupManager.media = async () => ({});
+        window.BackupManager.recoveryStore = async () => {};
+        let prompts = 0;
+        window.confirm = () => {
+            prompts++;
+            return false;
+        };
+        window.localStorage.setItem('kanji_progress', JSON.stringify({ studied: ['日'] }));
+        manager.token = null;
+        manager.user = null;
+        await manager.clearLocalData({ confirm: false });
+        assert.equal(prompts, 0, 'the erase is confirmed once, by the sign-out flow');
+        assert.equal(window.localStorage.getItem('kanji_progress'), null, 'progress is erased');
+        assert.equal(manager.config.autoSync, false, 'automatic backups are left off');
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('cancelling local data deletion leaves local data and authorization unchanged', async () => {
     const { dom, window, manager } = await setupUI();
     try {
@@ -522,7 +545,11 @@ test('the compact menu shows the stored nickname without offering a second form'
         const doc = window.document;
         assert.equal(doc.getElementById('accountHeading').textContent, 'Mizu <b>name</b>');
         assert.equal(doc.getElementById('accountHeading').querySelector('b'), null);
-        assert.equal(doc.querySelector('#accountPanel input'), null, 'no form means no scrolling');
+        assert.equal(
+            doc.querySelector('#accountPanel input:not([type=checkbox])'),
+            null,
+            'nothing to type in the panel, so it never scrolls to be filled in'
+        );
     } finally {
         dom.window.close();
     }

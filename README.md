@@ -95,6 +95,11 @@ undoes either one while the other still works: unlinking Google needs a password
 fall back on, removing the password needs Google linked and the current password
 typed, and the last method is never removable.
 
+Signing out removes the photo, nickname and username from the device but keeps what was
+studied; on a shared device, the **Shared device: also erase the study data stored here**
+box next to a sign-out button erases that local data in the same step, after a second
+prompt that names what goes and what the cloud copy keeps.
+
 Username-only accounts keep no mailbox: their identifier resolves to a private alias
 address, so password recovery for them is honestly refused until a recovery email is
 added from Profile. Passwords, reset links and session tokens stay with the Firebase

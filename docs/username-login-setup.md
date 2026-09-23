@@ -116,6 +116,11 @@ photo next to "local account" reads as someone else still being signed in.
 
 - The prompt names what goes and what stays before anything is removed; dismissing it
   changes nothing. Each sign-out button also carries the same one-line disclosure.
+- On a shared device, the unticked **Shared device: also erase the study data stored here**
+  box next to every sign-out button erases this device's study data in the same step. It
+  asks a second time and names what goes (progress, reviews, streak, settings and themes,
+  photo and background, local API keys, backups, recovery copy) and what stays (the cloud
+  copy, Google Drive). Cancelling that second prompt still signs out.
 - The cleanup runs for every route out of the session, not just the button: a sign-out
   announced by another open tab (Firebase syncs sessions per browser profile) clears
   this tab too, and says so in the status line.
@@ -129,9 +134,9 @@ and local backups. Removing an account must never look like it destroyed study d
 and signing in never silently claims local data either. Drive keeps its own separate
 `Disconnect` action, so a sign-out does not revoke Drive access; remote (Google/Drive)
 photos stay hidden until the next sign-in so the panel can't show a face that does not
-belong to a signed-in account. On a shared device, `Recovery & privacy → Disconnect &
-clear this device` is the separate, explicitly confirmed action that also removes local
-study data.
+belong to a signed-in account. On a shared device, the erase box next to a sign-out button
+does that removal in the same step; `Recovery & privacy → Disconnect & clear this device`
+still does it on its own, with the same confirmation.
 
 Signing out of every device at once is not possible on the Spark plan: revoking refresh
 tokens needs the Admin SDK or Cloud Functions, which require billing. The honest scope
@@ -164,8 +169,8 @@ Asking to delete **schedules** it, it does not delete anything on the spot:
 older confirmation that spells out that it cannot be undone.
 
 Kept on purpose in both paths: kanji progress, reviews, streaks, themes and local backups
-on this device. `Disconnect & clear this device` remains the separate action for local
-study data.
+on this device. The **Shared device** box next to a sign-out button, or `Disconnect &
+clear this device` in Recovery & privacy, is how local study data is removed.
 
 ### What the confirmation email can and cannot be on Spark
 

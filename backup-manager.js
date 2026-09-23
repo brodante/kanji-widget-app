@@ -489,8 +489,9 @@ class BackupManager {
         }
     }
 
-    async clearLocalData() {
+    async clearLocalData({ confirm: ask = true } = {}) {
         if (
+            ask &&
             !confirm(
                 'Disconnect and erase learning progress, settings, uploaded themes, avatar, local backups, API keys and recovery copy ON THIS DEVICE? Google Drive files will NOT be deleted. Export first if needed.'
             )

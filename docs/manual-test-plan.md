@@ -67,8 +67,8 @@ nickname and username all intact. Expected prompt text:
   also carries it as a one-line note before you click):
 
     > Signed out of the app. Your photo, name and username were removed from this device;
-    > learning progress stays. On a shared device, Recovery & privacy → Disconnect & clear
-    > this device also removes local study data. Drive has its own Disconnect button.
+    > learning progress stays. On a shared device, tick the box next to Sign out to erase
+    > the study data stored here in the same step. Drive has its own Disconnect button.
 
 **3.3 — reload.** Ctrl+Shift+R. Still no photo, no nickname, no username. **This is the
 exact bug you reported**, so it matters that it holds after a reload, not just on screen.
@@ -91,6 +91,22 @@ still there. Check a widget and the counts in Settings.
 bytes were deleted at sign-out rather than hidden, so they cannot be recovered from this
 device afterwards. A full backup restore brings the photo back; re-uploading takes a
 moment.
+
+**3.9 — shared device: erase in the same step (run this last, or after exporting).** Sign
+in again, then tick **Shared device: also erase the study data stored here** (the same box
+sits under the profile page's sign-out and in the sign-in dialog's account pane). Press
+**Sign out of app** → OK → a second prompt names exactly what will be deleted on this
+device (progress, reviews, streak, settings and themes, photo and background, local API
+keys, backups and the recovery copy) and what is spared (the cloud copy, Google Drive).
+Expect after OK:
+
+- Signed out, identity cleared as in 3.2, and the status line and the panel both say the
+  study data was erased.
+- Progress, reviews, streak, theme, uploaded photo, API keys, local backups and the
+  recovery copy are **gone from this device** — Settings shows empty progress.
+- The cloud copy still exists: sign in again and the comparison offers the cloud numbers.
+- Cancelling the second prompt still signs out, keeps the study data, and says the erase
+  was cancelled. Dismissing the first prompt does nothing at all.
 
 ## Step 4 — deleting an account (7-day schedule)
 
