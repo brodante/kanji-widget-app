@@ -446,6 +446,71 @@ test('every Google action carries Google’s mark, and the removal paths do not'
             'the mark must never be recoloured or greyed out by theme CSS'
         );
 
+        // Google's mark lands on a neutral surface, not a themed one: on a coloured button
+        // the four brand colours clash with the accent.
+        const surface = css.slice(
+            css.indexOf('.backup-btn.google-btn {'),
+            css.indexOf('.backup-btn.google-btn {') + 400
+        );
+        assert.match(surface, /background-color: var\(--google-surface/, 'neutral surface');
+        assert.match(surface, /color: var\(--google-on-surface/, 'readable label');
+        assert.doesNotMatch(
+            surface,
+            /--primary-color|--primary-variant/,
+            'a Google button must not be painted with the accent colour'
+        );
+        assert.ok(
+            css.indexOf('.backup-btn.google-btn {') > css.indexOf('.backup-btn:hover {'),
+            'the neutral surface has to win over .backup-btn:hover, which shares its specificity'
+        );
+        assert.match(
+            css,
+            /--google-surface: #ffffff;/,
+            'light themes get white with dark text, as Google specifies'
+        );
+
+        // Every theme whose own text is light gets Google's dark surface, so a new dark
+        // theme cannot quietly be left with a white button in a black app.
+        // Only top-level theme blocks: a selector at column 0, body up to the line that is
+        // exactly "}" at column 0. Nested rules inside a block must not be mistaken for one.
+        const themes = [...css.matchAll(/^\[data-theme='([a-z]+)'\] \{$/gm)].map((match) => {
+            const start = match.index + match[0].length;
+            const end = css.indexOf('\n}', start);
+            return [match[1], `${match[0]}${css.slice(start, end)}`];
+        });
+        const isLightText = (hex) => {
+            const value = hex.trim().replace('#', '');
+            const full =
+                value.length === 3
+                    ? value
+                          .split('')
+                          .map((c) => c + c)
+                          .join('')
+                    : value;
+            const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+            return 0.299 * r + 0.587 * g + 0.114 * b > 128;
+        };
+        const darkThemes = themes
+            .filter(([, body]) => {
+                const match = body.match(/--on-surface:\s*(#[0-9a-fA-F]{3,6})/);
+                return match && isLightText(match[1]);
+            })
+            .map(([name]) => name)
+            .sort();
+        assert.ok(darkThemes.length >= 5, `dark themes detected: ${darkThemes.join(', ')}`);
+        const varBlock = css.slice(
+            css.indexOf('/* Themes whose own text is light'),
+            css.indexOf("[data-theme='dark'] {\n    --primary-color")
+        );
+        const listed = [...varBlock.matchAll(/\[data-theme='([a-z]+)'\]/g)]
+            .map(([, name]) => name)
+            .sort();
+        assert.deepEqual(
+            listed,
+            darkThemes,
+            'the dark Google-button surface is listed for exactly the themes with light text'
+        );
+
         // The label is still plain text for tests, screen readers and translations, and it
         // survives a re-render in both states without losing the mark.
         assert.match(doc.getElementById('accountConnect').textContent, /Switch Drive account/);

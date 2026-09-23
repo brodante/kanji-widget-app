@@ -101,11 +101,17 @@ Uploading a photo opens a crop dialog before anything is saved:
   upload or a sign-out really does end the undo.
 - Two avatars are shortcuts to the photo: the profile hero avatar (opens the picker) and the
   account popup's avatar (opens the profile page with `Change photo` focused). Hovering
-  either one covers the whole picture with a translucent white layer and a pencil, so the
-  affordance is obvious without hiding whose face it is; the profile hero also labels it
-  `Change photo`. Without hover a small corner pencil is shown instead, and the picture is
-  never permanently washed out. The small user icon in the header deliberately has no photo
-  affordance at all — it only opens the account popup.
+  either one covers the whole picture with a translucent white layer and a grey pencil — no
+  label text, sized up on the hero — so the affordance is obvious without hiding whose face
+  it is. Without hover a small corner pencil in the theme's own colours is shown instead, and
+  the picture is never permanently washed out. The small user icon in the header deliberately
+  has no photo affordance at all — it only opens the account popup.
+- Every Google action carries Google's own four-colour mark (`BackupManager.GOOGLE_MARK`,
+  never recoloured by theme CSS) and is styled as a neutral button rather than a themed one:
+  white with dark text on the light themes, Google's dark surface with light text on the nine
+  dark themes. A themed surface would fight the mark's fixed colours. The removal paths
+  (`Unlink Google`, `Disconnect`, `Disconnect Google`) stay plain, because the mark invites a
+  connection rather than ending one.
 - Display name lives on the profile page too. The account popup shows the saved name but
   carries no field for it, and account creation asks for email, username and password
   only: no second display-name box and no consent tick-box (the no-silent-upload promise

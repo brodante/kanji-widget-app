@@ -176,8 +176,13 @@ photo is never permanently washed out).
 
 Google actions carry Google's own mark in its brand colours, never recoloured: `Continue
 with Google`, `Link Google` and the three `Connect with Google` buttons, because the mark is
-both what people scan for and a trust signal. Buttons that end a connection (`Unlink
-Google`, `Disconnect`, `Disconnect Google`) deliberately do not. The profile hero opens the file picker; the popup avatar opens the
+both what people scan for and a trust signal. Their buttons are neutral rather than themed —
+white with dark text on light themes, Google's dark surface (`#202124`) with light text on
+every theme whose own text is light — because the mark's four fixed colours fight an accent
+colour. A test reads the theme blocks out of `styles.css` and fails if a dark theme is
+missing from that list, so a new theme cannot silently ship a white button in a black app.
+Buttons that end a connection (`Unlink Google`, `Disconnect`, `Disconnect Google`)
+deliberately stay plain. The profile hero opens the file picker; the popup avatar opens the
 profile page with the photo control focused. The small header icon carries no photo
 affordance: it only opens the popup. The account popup itself keeps no upload, crop or
 display-name controls, so it does not scroll for a few lines of form at phone widths.

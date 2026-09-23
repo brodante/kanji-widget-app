@@ -271,11 +271,18 @@ profile**) or by clicking an avatar. The popup itself carries no upload, crop or
 display-name controls, so it stays short.
 
 - **The photo changes colour on hover.** Hover the **popup avatar** or the **profile hero
-  avatar**: the whole picture goes translucent white with a pencil over it (the profile one
-  also reads **Change photo**). On a touch screen there is no wash — a small pencil sits in
-  the corner instead.
+  avatar**: the whole picture goes translucent white with a grey pencil over it — no label
+  text, and the hero's pencil is sized up for the bigger circle. On a touch screen there is
+  no wash; a small pencil in the theme's own colours sits in the corner instead.
 - **The small header icon stays plain.** Hovering the user icon in the top bar shows no
   pencil at all: it only opens the account popup.
+- **Google's mark, on a neutral button.** Every action that starts a Google connection —
+  **Continue with Google**, **Link Google**, and the three **Connect with Google** buttons
+  (account panel, profile page, Settings) — shows Google's four-colour G on a **white button
+  with dark text**, or Google's dark surface with light text on the dark themes. It must
+  never be painted with the theme's accent colour: the four brand colours fight it. The
+  buttons that _end_ a connection (**Unlink Google**, **Disconnect**, **Disconnect Google**)
+  stay plain on purpose.
 - Clicking the **profile hero avatar** (or its pencil) opens the file picker directly;
   clicking the **popup avatar** opens the profile page with **Change photo** focused.
 - **Cancelling the file chooser keeps you where you were.** Open the picker and press
