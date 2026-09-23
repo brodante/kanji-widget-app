@@ -259,11 +259,24 @@ class ProfilePage {
             const feedback = document.getElementById('profilePageFeedback');
             try {
                 await this.manager.setAvatar(null);
-                feedback.textContent =
-                    'Uploaded photo and its crop removed. Your Google photo or default icon is now shown.';
+                feedback.textContent = this.manager.avatarUndo
+                    ? 'Uploaded photo and its crop removed. Your Google photo or default icon is now shown. Undo puts the same photo back until you leave this page, upload another photo or sign out.'
+                    : 'Uploaded photo and its crop removed. Your Google photo or default icon is now shown.';
             } catch (error) {
                 feedback.textContent = error.message;
                 window.KanjiFeedback?.show(error.message, { title: 'Photo could not be removed' });
+            }
+        };
+        document.getElementById('profilePageUndoRemovePhoto').onclick = async () => {
+            const feedback = document.getElementById('profilePageFeedback');
+            try {
+                const restored = await this.manager.restoreRemovedAvatar();
+                feedback.textContent = restored
+                    ? 'Photo restored with the same crop. It is saved with your next backup.'
+                    : 'There is no removed photo left to restore.';
+            } catch (error) {
+                feedback.textContent = error.message;
+                window.KanjiFeedback?.show(error.message, { title: 'Photo not restored' });
             }
         };
         document.getElementById('profilePageConnect').onclick = () => this.manager.connect();

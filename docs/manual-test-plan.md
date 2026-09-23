@@ -241,6 +241,10 @@ display-name controls, so it stays short.
 - The **GIF still animates** after saving (the bytes are never re-encoded).
 - **Adjust crop** and **Remove photo** (profile page, under _Make it yours_) work on the
   stored photo: no re-upload, and removing it takes the crop record with it.
+- **Undo remove** appears after a removal and puts back the _same_ file and crop — no
+  re-upload, no re-crop. It is held in memory only, so a reload, a new upload or a sign-out
+  ends it (deliberate: the removed bytes must not stay recoverable on the device), and after
+  any of those the button is gone.
 - **Display name** is on the profile page only. The popup shows the saved name but has no
   field for it, and **Create account** asks for email, username and password only — no
   display-name box and no consent tick-box.

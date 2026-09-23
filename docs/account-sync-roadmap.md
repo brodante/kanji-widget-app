@@ -173,6 +173,11 @@ and the account panel's avatar opens the profile page with the photo control foc
 account popup itself keeps no upload, crop or display-name controls, so it does not scroll
 for a few lines of form at phone widths.
 
+`Remove photo` keeps an immediate, in-memory undo: the removed bytes and crop come back in
+one click, and nothing is written to storage, so a reload, another upload, a sign-out or a
+different account ends the undo for good. On a shared device the bytes must not stay
+recoverable after the session that owned them.
+
 ## Current implementation notes
 
 - The reported missing-header diagnostic was addressed without removing the overwrite guard. Most operations still use Drive v3; guarded checkpoint reads/updates use the v2 metadata `etag` and v2 conditional update endpoint. Same OAuth client, project and `drive.file` scope; no client secret or additional setup.

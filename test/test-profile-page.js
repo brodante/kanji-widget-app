@@ -299,6 +299,90 @@ test('remove DP confirms removal, updates fallback and deletes only the avatar s
     }
 });
 
+test('removing a photo can be undone with the same bytes and crop, until the page is left', async () => {
+    const { dom, window, manager } = await setup();
+    try {
+        window.eval(fs.readFileSync(require.resolve('../avatar-crop.js'), 'utf8'));
+        window.URL.createObjectURL = () => 'blob:created';
+        window.URL.revokeObjectURL = () => {};
+        window.BackupManager.decodeAvatar = async () => ({ naturalWidth: 120, naturalHeight: 90 });
+        const writes = [];
+        window.BackupManager.media = async (data, slots) => {
+            writes.push([Object.keys(data).join(','), slots.join(',')]);
+        };
+        const blob = new window.Blob(['photo-bytes'], { type: 'image/png' });
+        const crop = { x: 0.3, y: 0.4, zoom: 1.7, ratio: 1.5 };
+        await manager.setAvatar(blob, crop);
+        assert.equal(manager.avatarURL, 'blob:created');
+        assert.equal(manager.avatarUndo, null, 'an upload has nothing to undo');
+
+        window.confirm = () => true;
+        await window.document.getElementById('profilePageRemovePhoto').onclick();
+        assert.equal(manager.avatarURL, '', 'the photo is gone from the UI');
+        assert.ok(manager.avatarUndo, 'the removed bytes are held in memory for the undo');
+        assert.equal(manager.avatarUndo.blob, blob, 'the exact bytes, not a re-encode');
+        const undo = window.document.getElementById('profilePageUndoRemovePhoto');
+        assert.equal(undo.hidden, false, 'undo is offered right after the removal');
+        assert.match(
+            window.document.getElementById('profilePageFeedback').textContent,
+            /Undo puts the same photo back/
+        );
+
+        await undo.onclick();
+        assert.equal(manager.avatarURL, 'blob:created', 'the same photo comes back');
+        assert.deepEqual(writes.at(-1), ['avatar', 'avatar'], 'and goes back into its own slot');
+        assert.equal(manager.avatarBlob, blob);
+        const restoredCrop = window.AvatarCrop.read();
+        for (const [key, value] of Object.entries(crop)) {
+            assert.equal(
+                restoredCrop[key],
+                value,
+                `crop.${key} comes back, so nothing is re-placed`
+            );
+        }
+        assert.equal(manager.avatarUndo, null, 'the undo is spent');
+        assert.equal(undo.hidden, true);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a later upload or a sign-out ends the photo undo for good', async () => {
+    const { dom, window, manager } = await setup();
+    try {
+        window.eval(fs.readFileSync(require.resolve('../avatar-crop.js'), 'utf8'));
+        window.URL.createObjectURL = () => 'blob:created';
+        window.URL.revokeObjectURL = () => {};
+        window.BackupManager.decodeAvatar = async () => ({ naturalWidth: 120, naturalHeight: 90 });
+        window.BackupManager.media = async () => {};
+        const first = new window.Blob(['first'], { type: 'image/png' });
+        const second = new window.Blob(['second'], { type: 'image/png' });
+        const crop = { x: 0.5, y: 0.5, zoom: 1, ratio: 1 };
+        const undo = window.document.getElementById('profilePageUndoRemovePhoto');
+        window.confirm = () => true;
+
+        await manager.setAvatar(first, crop);
+        await window.document.getElementById('profilePageRemovePhoto').onclick();
+        assert.ok(manager.avatarUndo);
+        await manager.setAvatar(second, crop);
+        assert.equal(manager.avatarUndo, null, 'a different photo supersedes the undo');
+        assert.equal(undo.hidden, true);
+
+        await window.document.getElementById('profilePageRemovePhoto').onclick();
+        assert.ok(manager.avatarUndo);
+        await manager.clearSignedOutIdentity();
+        assert.equal(
+            manager.avatarUndo,
+            null,
+            'signing out must not leave the removed bytes recoverable'
+        );
+        assert.equal(undo.hidden, true);
+        assert.equal(manager.avatarURL, '');
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('failed photo removal retains custom photo and shows an actionable alert', async () => {
     const { dom, window, manager, page, dialog } = await setup();
     try {

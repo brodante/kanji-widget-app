@@ -795,6 +795,10 @@ class BackupManager {
         this.avatarURL = '';
         this.avatarBusy = false;
         this.avatarSignedOut = false;
+        // Undo for "Remove photo": the removed bytes and crop are held in memory only.
+        // Nothing is written back to storage, so a reload, a new upload or a sign-out
+        // really does end the undo.
+        this.avatarUndo = null;
     }
     save() {
         localStorage.setItem('kanji_drive_backup', JSON.stringify(this.config));
@@ -1746,6 +1750,11 @@ class BackupManager {
         if (window.kanjiAuth?.user) {
             this.avatarSignedOut = false;
         }
+        const undo = document.getElementById('profilePageUndoRemovePhoto');
+        if (undo) {
+            undo.hidden = !this.avatarUndo;
+            undo.disabled = Boolean(this.avatarBusy);
+        }
         for (const id of [
             'profilePagePhoto',
             'profilePageAvatarEdit',
@@ -1917,6 +1926,12 @@ class BackupManager {
                 throw error;
             }
         }
+        // Removing is reversible for as long as this page lives: keep the bytes and the
+        // crop that are about to be deleted, and let any other photo change drop them.
+        const undo =
+            !file && this.avatarBlob
+                ? { blob: this.avatarBlob, crop: window.AvatarCrop?.read?.() || null }
+                : null;
         try {
             await BackupManager.media(file ? { avatar: file } : {}, ['avatar']);
             if (file) {
@@ -1936,8 +1951,20 @@ class BackupManager {
             URL.revokeObjectURL(this.avatarURL);
         }
         this.avatarURL = url || '';
+        this.avatarUndo = undo;
         this.renderAvatar();
         window.kanjiProfilePage?.refresh();
+    }
+
+    // Undo for "Remove photo". The bytes never left this page, so this restores the exact
+    // file and crop that were removed, without a re-upload or a re-crop.
+    async restoreRemovedAvatar() {
+        const undo = this.avatarUndo;
+        if (!undo?.blob) {
+            return false;
+        }
+        await this.setAvatar(undo.blob, undo.crop || undefined);
+        return true;
     }
 
     // Signing out must not leave the previous account's face and name on the device.
@@ -1951,6 +1978,7 @@ class BackupManager {
             // A storage failure must not block sign-out; the UI still resets below.
         }
         window.AvatarCrop?.clear();
+        this.avatarUndo = null;
         this.avatarSignedOut = true;
         if (this.avatarURL) {
             URL.revokeObjectURL(this.avatarURL);
