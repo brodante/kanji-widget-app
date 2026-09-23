@@ -1,8 +1,41 @@
 # Manual test plan: accounts, sign-out, deletion and first sign-in
 
-Only what a browser can verify is in here. The automated suite (`npm test`, 199 tests)
+Only what a browser can verify is in here. The automated suite (`npm test`, 209 tests)
 already covers the logic, the edge cases and the exact strings; this plan checks the real
 thing in a real browser, which no test in this repo can do.
+
+## Start here — the ten-minute pass
+
+The numbered steps below are the full checklist, wording quotes and all. If you only want
+the short version, do these five things and ignore the rest:
+
+1. **Open the account popup while signed in.** It should be short: the account line, **Save
+   this device**, **Use cloud progress** when a cloud copy exists, and a collapsed **Save
+   options & help** holding Check cloud, Pause autosave and Download Drive copy. Nothing in
+   it needs typing, and nothing needs scrolling at phone width.
+2. **Sign-in methods** (same pane, further down): **Unlink Google** is offered only while a
+   password remains, **Remove password** only while Google remains and after typing the
+   current password. Neither can ever remove your last way in, and progress, backups and
+   Drive access must be untouched by either.
+3. **Sign out on a shared device.** Tick **Shared device: also erase the study data stored
+   here** before signing out: after the second prompt the local progress, reviews, photo and
+   local backups are gone while the cloud copy stays and loads again on the next sign-in.
+   Do it once with the second prompt cancelled too: you still sign out and the data stays.
+4. **The photo.** Upload any image or GIF, crop it, then **Remove photo** → **Undo remove**
+   puts the same file and the same crop back without re-uploading. Reload after a removal:
+   the undo button is gone, which is deliberate.
+5. **Delete an account** (use a throwaway account): the dialog offers the 7-day schedule
+   with the date, the confirmation email, **Cancel deletion**, and **Delete now instead**
+   for the immediate path.
+
+## State of play
+
+- **Step 0 (publish `firestore.rules`)** — done by the owner on 23 September 2026; the
+  published file matches the repo's `firestore.rules`.
+- **Step 2 (favicon)** — the updated `favicon.gif` works locally; it still has to be
+  committed at the repo root to reach the deployed site, and the deploy step copies it only
+  if the file is there.
+- Steps 1 and 3-7 are open. Step 8 needs two devices and a real Drive account.
 
 Report every failure with: **step number, browser and version, the exact on-screen text,
 the console output, and a screenshot**. Never paste passwords, tokens or account emails.
