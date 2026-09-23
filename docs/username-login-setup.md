@@ -214,7 +214,8 @@ replaces progress without an answer:
   copy) and **Keep this device's progress** (replaces the cloud copy, also after a recovery
   copy). **Decide later** hides the comparison and keeps both copies exactly as they are.
 
-The comparison also appears when **Check cloud** is pressed in that state, and the same two
+The comparison also appears when **Check cloud** (inside **Save options & help**) is
+pressed in that state, and the same two
 gists are repeated in the confirmation text of each action, so the numbers are never a
 surprise. Uploaded media, API keys and AI credentials are excluded from cloud progress and
 stay on the device either way.

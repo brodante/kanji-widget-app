@@ -456,7 +456,31 @@ test('compact account menu leaves the profile form and photo controls to the pro
             doc.getElementById('accountPanel').contains(doc.getElementById('accountConnect')),
             false
         );
-        assert.ok(doc.getElementById('accountPanel').querySelector('[data-cloud-action=save]'));
+        const panel = doc.getElementById('accountPanel');
+        assert.ok(panel.querySelector('[data-cloud-action=save]'));
+        // Round two of the slimming: the popup keeps the two actions that matter when it
+        // opens and folds the maintenance ones away, so the panel stays short.
+        const primary = ['save', 'restore'];
+        const folded = ['check', 'pause', 'download'];
+        for (const action of primary) {
+            assert.equal(
+                panel.querySelector(`[data-cloud-action=${action}]`).closest('details'),
+                null,
+                `${action} stays visible`
+            );
+        }
+        for (const action of folded) {
+            const button = panel.querySelector(`[data-cloud-action=${action}]`);
+            const details = button.closest('details');
+            assert.ok(details, `${action} is folded away`);
+            assert.equal(details.id, 'popupSaveOptions');
+            assert.equal(details.open, false);
+            assert.equal(details.querySelector('summary').textContent, 'Save options & help');
+            assert.ok(
+                details.querySelector('small'),
+                'the progress/credentials note moves in with the options'
+            );
+        }
         assert.equal(doc.getElementById('accountSettings').closest('details'), null);
         assert.ok(
             doc.getElementById('accountPanel').style.getPropertyValue('--account-panel-room')

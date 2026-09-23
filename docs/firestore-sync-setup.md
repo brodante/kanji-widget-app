@@ -13,7 +13,8 @@ Implemented in this change:
 - Each write checks the current server revision in a transaction. An older device cannot silently overwrite a newer save.
 - Cloud changes are checked at startup, on reconnect, on focus after at least a minute, and every five minutes during active sync. New cloud revisions require review, not an automatic local overwrite.
 - Restoring uses the existing recovery/rollback path and retains local media and AI data. Recovery failure blocks replacement.
-- Pause autosave stops automatic saving on this browser. Local imports/restores invalidate sync approval. A cloud-copy download is a partial progress export and can be imported using the existing Import Backup control.
+- **Pause autosave** (under **Save options & help** in the account menu) stops automatic
+  saving on this browser. Local imports/restores invalidate sync approval. A cloud-copy download is a partial progress export and can be imported using the existing Import Backup control.
 - Drive is under **Settings → Advanced: optional Google Drive backups**. It remains useful for full media backups. Enabling Firestore sync disables existing automatic Drive schedules on this device; explicit Drive backups still work.
 
 This is ready for configuration and controlled testing, not a claim of verified production sync. The owner reports initial Firestore sync testing works. The detailed two-device, offline/reconnect and security-rule acceptance checks remain to be verified. App tests use a mock Firestore adapter. Emulator rule tests are included, but this sandbox could not run them because Java is unavailable and its Java download attempt was blocked.
@@ -53,11 +54,13 @@ Use the updated app, not an older deployed version. Changes on an Arena branch d
 
 1. Export a full local backup first using Settings → Create Local Backup.
 2. Sign in with Google on the device containing the progress you want to keep.
-3. Open the account menu. Under **Cloud progress**, choose **Check cloud**.
+3. Open the account menu, then open **Save options & help** under **Cloud progress** and
+   choose **Check cloud**.
 4. If this is the first save, choose **Save this device** and confirm the displayed account.
 5. Check that it reports a successful save. In Firestore's Data tab, the UID's progress document should now exist.
 6. Study one kanji, leave the app visible for at least 30 seconds, then check that the save status/revision updates. Reload the same device and confirm it resumes without asking for Drive permission.
-7. Open another device or browser profile, sign in with the same Google account, and choose **Check cloud**. Choose **Use cloud progress**, not Save this device, to bring your existing progress to the new device.
+7. Open another device or browser profile, sign in with the same Google account, open
+   **Save options & help** and choose **Check cloud**. Choose **Use cloud progress**, not Save this device, to bring your existing progress to the new device.
 8. Confirm that progress/reviews appear after the reload. Uploaded photos/backgrounds are deliberately not part of this transfer.
 
 If access is denied, check that the rules were published in the same project and default database shown in `firebase-config.js`. Do not fix it by making the database public.

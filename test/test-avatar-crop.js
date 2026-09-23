@@ -501,7 +501,7 @@ test('the crop assets are versioned, precached, deployed and wired to both surfa
     const deploy = read('.github/workflows/deploy.yml');
     assert.ok(html.includes('avatar-crop.js?v=avatar-v1'));
     assert.ok(worker.includes("'/avatar-crop.js?v=avatar-v1'"));
-    assert.match(worker, /kanji-widgets-v20/);
+    assert.match(worker, /kanji-widgets-v21/);
     assert.ok(deploy.includes('cp avatar-crop.js deploy/'));
     const dom = new JSDOM(html);
     try {

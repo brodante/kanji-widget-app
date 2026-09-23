@@ -6918,9 +6918,6 @@ body.auth-dialog-open {
 }
 
 /* Crop dialog */
-body.avatar-crop-open {
-    overflow: hidden;
-}
 .avatar-crop {
     position: fixed;
     inset: 0;

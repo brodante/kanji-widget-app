@@ -297,12 +297,6 @@
                             <button type="button" class="backup-btn" data-cloud-action="save">
                                 Save this device
                             </button>
-                            <button type="button" class="backup-btn" data-cloud-action="check">
-                                Check cloud
-                            </button>
-                            <button type="button" class="backup-btn" data-cloud-action="pause">
-                                Pause autosave
-                            </button>
                             <button
                                 type="button"
                                 class="backup-btn"
@@ -310,9 +304,6 @@
                                 hidden
                             >
                                 Use cloud progress
-                            </button>
-                            <button type="button" class="backup-btn" data-cloud-action="download">
-                                Download Drive copy
                             </button>
                         </div>
                         <div class="cloud-choice" data-cloud-choice hidden>
@@ -353,11 +344,29 @@
                                 is replaced. Nothing changes until you choose.
                             </p>
                         </div>
-                        <small
-                            >Progress, reviews, nickname and learning settings. Uploaded photos,
-                            backgrounds and AI credentials stay on this device. Saves run while the
-                            app is open.</small
-                        >
+                        <details id="popupSaveOptions" class="account-details">
+                            <summary>Save options &amp; help</summary>
+                            <div class="backup-buttons">
+                                <button type="button" class="backup-btn" data-cloud-action="check">
+                                    Check cloud
+                                </button>
+                                <button type="button" class="backup-btn" data-cloud-action="pause">
+                                    Pause autosave
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-cloud-action="download"
+                                >
+                                    Download Drive copy
+                                </button>
+                            </div>
+                            <small
+                                >Progress, reviews, nickname and learning settings. Uploaded photos,
+                                backgrounds and AI credentials stay on this device. Saves run while
+                                the app is open.</small
+                            >
+                        </details>
                     </section>
                     <button
                         id="openProfilePage"

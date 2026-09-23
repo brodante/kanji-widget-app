@@ -168,7 +168,8 @@ cloud copy. Expect, right after sign-in:
 progress is unchanged, and no cloud write happened (check the revision in Firestore is
 unchanged).
 
-**5.4 — load the cloud copy.** Re-open the comparison (**Check cloud**), then press **Load
+**5.4 — load the cloud copy.** Re-open the comparison (open **Save options & help** under
+Cloud progress, then **Check cloud**), then press **Load
 cloud progress** → confirm the prompt, which repeats both gists. Expect the local progress
 to match the cloud numbers, the message about what was loaded, and a recovery copy in
 Settings → Recovery & privacy (**Download recovery copy** should return the pre-load state).
