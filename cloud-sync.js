@@ -70,6 +70,100 @@ class CloudSync {
         return { ...data, payload: this.validatePayload(data.payload) };
     }
 
+    // Reads the payload's own copy of a storage key, so a cloud summary never depends on
+    // what is currently on this device.
+    static payloadReader(payload) {
+        let entries = {};
+        try {
+            entries = JSON.parse(payload);
+        } catch {
+            entries = {};
+        }
+        return (key) => {
+            try {
+                return JSON.parse(entries[key] ?? 'null') || {};
+            } catch {
+                return {};
+            }
+        };
+    }
+
+    // Standalone on purpose: this gist has to be computable for a cloud payload too, and
+    // the sync module must not depend on the profile page being loaded.
+    static summary(read) {
+        const progress = read('kanji_progress') || {};
+        const cards = Object.values(read('kanji_srs_data') || {}).filter(
+            (card) => card && typeof card === 'object'
+        );
+        const count = (list) =>
+            Array.isArray(list)
+                ? new Set(list.filter((value) => typeof value === 'string')).size
+                : 0;
+        const number = (value) => (Number.isFinite(value) && value > 0 ? Math.floor(value) : 0);
+        const now = Date.now();
+        const date = (value) =>
+            typeof value === 'number' && Number.isFinite(value) && value > 0 && value <= now
+                ? value
+                : null;
+        const stats = {
+            studied: count(progress.studied),
+            mastered: count(progress.mastered),
+            reviews: cards.reduce((total, card) => total + number(card.totalReviews), 0),
+            due: cards.filter(
+                (card) =>
+                    typeof card.dueDate === 'number' && card.dueDate > 0 && card.dueDate <= now
+            ).length,
+            lastStudied: date(progress.lastStudied)
+        };
+        return { ...stats, empty: !stats.studied && !stats.mastered && !stats.reviews };
+    }
+
+    static describe(summary, { savedAt = null } = {}) {
+        const parts = [
+            `${summary.studied} kanji studied`,
+            `${summary.mastered} mastered`,
+            `${summary.reviews} review${summary.reviews === 1 ? '' : 's'}`
+        ];
+        if (summary.due) {
+            parts.push(`${summary.due} due now`);
+        }
+        if (summary.lastStudied) {
+            parts.push(`last studied ${new Date(summary.lastStudied).toLocaleDateString()}`);
+        } else {
+            parts.push('nothing studied here yet');
+        }
+        if (savedAt) {
+            parts.push(`saved ${new Date(savedAt).toLocaleDateString()}`);
+        }
+        return parts.join(' · ');
+    }
+
+    summaryFromPayload(payload) {
+        return CloudSync.summary(CloudSync.payloadReader(payload));
+    }
+
+    summaryLocal() {
+        return CloudSync.summary((key) => {
+            try {
+                return JSON.parse(localStorage.getItem(key) || 'null') || {};
+            } catch {
+                return {};
+            }
+        });
+    }
+
+    savedAt(remote = this.remote) {
+        const value = remote?.updatedAt;
+        if (!value) {
+            return null;
+        }
+        if (typeof value?.toMillis === 'function') {
+            return value.toMillis();
+        }
+        const millis = typeof value === 'number' ? value : Date.parse(value);
+        return Number.isFinite(millis) ? millis : null;
+    }
+
     constructor() {
         this.generation = 0;
         this.uid = null;
@@ -186,7 +280,7 @@ class CloudSync {
     }
 
     async check(manual = false) {
-        return this.task(
+        const outcome = await this.task(
             async (ref, generation) => {
                 const remote = CloudSync.record(await this.sdk.getDocFromServer(ref));
                 if (!this.valid(generation)) {
@@ -206,7 +300,7 @@ class CloudSync {
                         ? `Up to date. This device matches cloud revision ${remote.revision}.`
                         : `Cloud revision ${remote.revision} checked. This device has changes waiting to save; nothing was uploaded by this check.`
                     : remote
-                      ? 'Review needed: this account has a cloud copy. Choose which progress to keep. Nothing has been replaced.'
+                      ? 'This account has a cloud copy. Compare both below, then choose which progress to keep. Nothing has been replaced.'
                       : 'No cloud save yet. Choose Save this device to create your first save for this Google account.';
                 if (meta?.uid && meta.uid !== this.uid) {
                     this.enabled = false;
@@ -221,6 +315,34 @@ class CloudSync {
                     'Checking cloud… Reading the latest server copy. No progress is being changed.'
             }
         );
+        await this.firstContact();
+        return outcome;
+    }
+
+    // A device that has never been associated with an account has nothing to lose, so a
+    // cloud copy loads straight away. A device with its own progress gets both gists side
+    // by side and an explicit choice; nothing is replaced before that choice.
+    async firstContact() {
+        if (!this.uid || !this.remote || this.metadata()) {
+            return null;
+        }
+        const local = this.summaryLocal();
+        const remote = this.summaryFromPayload(this.remote.payload, {
+            savedAt: this.savedAt(this.remote)
+        });
+        if (local.empty) {
+            this.choice = null;
+            this.message = `This device is fresh: loading your cloud progress (${CloudSync.describe(
+                remote
+            )}).`;
+            this.render();
+            return this.restore({ auto: true });
+        }
+        this.choice = { local, remote };
+        this.message =
+            'This device already has progress, and so does the account. Compare the two below, then choose which copy to keep. Nothing is replaced until you choose.';
+        this.render();
+        return { asked: true };
     }
 
     remember(remote) {
@@ -248,7 +370,13 @@ class CloudSync {
         if (
             explicit &&
             !confirm(
-                `Save this device’s progress to ${window.kanjiAuth.user.email || 'this Google account'}? This replaces its current cloud progress. Download the cloud copy first if you want to keep both.`
+                `Keep this device’s progress and replace the cloud copy for ${
+                    window.kanjiAuth.user.email || 'this Google account'
+                }?\n\nThis device: ${CloudSync.describe(
+                    this.summaryLocal()
+                )}\nCloud now: ${CloudSync.describe(
+                    this.summaryFromPayload(this.remote?.payload || '{}')
+                )}\n\nA local recovery copy is saved first.`
             )
         ) {
             return;
@@ -305,16 +433,24 @@ class CloudSync {
         );
     }
 
-    async restore() {
+    async restore(options = {}) {
+        if (!this.remote) {
+            return;
+        }
+        const local = this.summaryLocal();
+        const remote = this.summaryFromPayload(this.remote.payload, {
+            savedAt: this.savedAt(this.remote)
+        });
         if (
-            !this.remote ||
+            options.auto !== true &&
             !confirm(
-                'Use the cloud progress on this device? Current progress will be kept in a local recovery copy. Uploaded media and AI credentials stay on this device.'
+                `Load the cloud progress on this device?\n\nCloud: ${CloudSync.describe(remote)}\nThis device: ${CloudSync.describe(local)}\n\nThe current local progress is kept in a local recovery copy first. Uploaded media and AI credentials stay on this device.`
             )
         ) {
             return;
         }
         const selected = this.remote;
+        const auto = options.auto === true;
         return this.task(
             async (ref, generation) => {
                 const current = CloudSync.record(await this.sdk.getDocFromServer(ref));
@@ -344,6 +480,11 @@ class CloudSync {
                 document.body.inert = true;
                 try {
                     await BackupManager.restore(snapshot, { cloudSync: true });
+                    if (auto) {
+                        this.message = `Cloud progress loaded on this fresh device: ${CloudSync.describe(
+                            remote
+                        )}.`;
+                    }
                     if (!this.valid(generation)) {
                         throw new Error(
                             'Account changed. Restored data is local; review before enabling sync again.'
@@ -365,6 +506,14 @@ class CloudSync {
         this.remote = undefined;
         this.message =
             'Local data was restored. Choose Check cloud and review before saving again.';
+        this.render();
+    }
+
+    // "Decide later" keeps the cloud copy and the device's progress exactly as they are.
+    decideLater() {
+        this.choice = null;
+        this.message =
+            'Cloud copy kept for later. Nothing was replaced. Choose Check cloud when you want to compare them again.';
         this.render();
     }
 
@@ -410,7 +559,22 @@ class CloudSync {
             if (action === 'restore') {
                 button.hidden = this.enabled || !this.remote;
             }
+            if (action === 'later') {
+                button.hidden = !this.choice;
+            }
         });
+        document.querySelectorAll('[data-cloud-choice]').forEach((node) => {
+            node.hidden = !this.choice;
+        });
+        document.querySelectorAll('[data-cloud-choice-local]').forEach((node) => {
+            node.textContent = this.choice ? CloudSync.describe(this.choice.local) : '';
+        });
+        document.querySelectorAll('[data-cloud-choice-remote]').forEach((node) => {
+            node.textContent = this.choice
+                ? CloudSync.describe(this.choice.remote, { savedAt: this.savedAt() })
+                : '';
+        });
+
         document.querySelectorAll('[data-cloud-summary]').forEach((node) => {
             try {
                 const count = (payload) => {
@@ -436,7 +600,8 @@ class CloudSync {
                     save: () => this.save(true),
                     restore: () => this.restore(),
                     download: () => this.download(),
-                    pause: () => this.pause()
+                    pause: () => this.pause(),
+                    later: () => this.decideLater()
                 };
                 actions[button.dataset.cloudAction]();
             };

@@ -960,6 +960,20 @@ test('the dialog button runs the real deletion end to end', async () => {
         doc.getElementById('authDeleteAccount').click();
         await settle();
 
+        // The default path schedules: the account survives, with a 7-day deadline.
+        assert.match(asked, /scheduled for permanent deletion in 7 days/i);
+        assert.ok(
+            store.get('users/password-uid').deletionScheduledFor.toMillis() > Date.now(),
+            'the deadline is stored on the account record'
+        );
+        assert.equal(auth.user, passwordAccount, 'still signed in until the deadline passes');
+        assert.equal(store.has('users/password-uid/sync/progress'), true);
+        assert.match(doc.getElementById('authDeleteStatus').textContent, /scheduled/i);
+
+        // "Delete now instead" is the immediate path, end to end.
+        doc.getElementById('authDeletePassword').value = 'correct horse';
+        doc.getElementById('authDeleteNow').click();
+        await settle();
         assert.match(asked, /Delete this account permanently/i);
         assert.ok(authCalls.some((call) => call[0] === 'reauth-password'));
         assert.ok(authCalls.some((call) => call[0] === 'delete-user'));
@@ -977,6 +991,119 @@ test('the dialog button runs the real deletion end to end', async () => {
             window.localStorage.getItem('kanji_progress'),
             '{"studied":["日"]}',
             'the device keeps learning data through the whole flow'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('deleting asks for a 7-day schedule, emails a confirmation and stays cancellable', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { auth, store, authCalls } = await setupDeletion(window);
+        let asked = '';
+        window.confirm = (text) => {
+            asked = text;
+            return true;
+        };
+        const result = await auth.scheduleAccountDeletion({ password: 'correct horse' });
+        assert.equal(result.ok, true, result.message);
+        const deadline = auth.constructor.deletionDeadline();
+        const stored = store.get('users/password-uid').deletionScheduledFor.toMillis();
+        assert.match(asked, /scheduled for permanent deletion in 7 days/i);
+        assert.match(asked, /Kept: the kanji progress/, 'the prompt says what stays');
+        assert.ok(
+            Math.abs(stored - deadline) < 60000,
+            'the stored deadline is 7 days out, not "now"'
+        );
+        assert.equal(auth.user, passwordAccount, 'the account is not deleted yet');
+        assert.equal(store.has('users/password-uid/sync/progress'), true, 'nothing was removed');
+        assert.ok(
+            authCalls.some((call) => call[0] === 'verify-email'),
+            'an unverified real address gets the confirmation link'
+        );
+        assert.match(result.message, /scheduled for/i);
+        assert.match(result.message, /Nothing is removed yet/i);
+        assert.match(result.message, /emailed/i);
+
+        // Cancelling can happen any time before the deadline and removes nothing.
+        window.confirm = (text) => /Cancel the scheduled deletion/.test(text);
+        const cancelled = await auth.cancelAccountDeletion();
+        assert.equal(cancelled.ok, true);
+        assert.equal(store.get('users/password-uid').deletionScheduledFor, null);
+        assert.equal(store.get('users/password-uid').deletionRequestedAt, null);
+        assert.equal(store.has('users/password-uid'), true, 'the record is untouched');
+        assert.equal(store.get('usernames/dante_kanji').kind, 'user', 'the username is still held');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a username-only account is told no email can be sent, and a confirmed address is not spammed', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { auth, authCalls } = await setupDeletion(window);
+        // Alias accounts have a generated address with no mailbox behind it.
+        auth.user = {
+            uid: 'password-uid',
+            email: 'dante_kanji@users.kanji.qd.je',
+            emailVerified: false,
+            providerData: [{ providerId: 'password' }]
+        };
+        const alias = await auth.sendDeletionNotice();
+        assert.equal(alias.sent, false);
+        assert.match(alias.note, /no mailbox/i);
+        assert.equal(
+            authCalls.some((call) => call[0] === 'verify-email'),
+            false
+        );
+
+        // A verified address gets an explanation instead of a pointless verification email.
+        auth.user = { ...passwordAccount, emailVerified: true };
+        const verified = await auth.sendDeletionNotice();
+        assert.equal(verified.sent, false);
+        assert.match(verified.note, /already confirmed/i);
+        assert.equal(
+            authCalls.some((call) => call[0] === 'verify-email'),
+            false
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('the deadline is honoured on the next visit, and only then', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        const { auth, store, authCalls } = await setupDeletion(window);
+        window.confirm = () => true;
+        await auth.scheduleAccountDeletion({ password: 'correct horse' });
+
+        // Not due yet: opening the app changes nothing.
+        const early = await auth.enforceScheduledDeletion();
+        assert.equal(early.deleted, false);
+        assert.equal(auth.user, passwordAccount);
+        assert.equal(store.has('users/password-uid'), true);
+
+        // The deadline passes.
+        store.set('users/password-uid', {
+            ...store.get('users/password-uid'),
+            deletionScheduledFor: { toMillis: () => Date.now() - 1000 }
+        });
+        window.kanjiUsernames.profile = {
+            deletionScheduledFor: { toMillis: () => Date.now() - 1000 }
+        };
+        const overdue = await auth.enforceScheduledDeletion();
+        assert.equal(overdue.deleted, true, overdue.message);
+        assert.equal(store.has('users/password-uid'), false);
+        assert.equal(store.has('users/password-uid/sync/progress'), false);
+        assert.equal(store.get('usernames/dante_kanji').kind, 'reserved');
+        assert.ok(authCalls.some((call) => call[0] === 'delete-user'));
+        assert.equal(auth.user, null);
+        assert.equal(
+            window.localStorage.getItem('kanji_progress'),
+            '{"studied":["日"]}',
+            'the device keeps its learning data'
         );
     } finally {
         dom.window.close();
@@ -1339,7 +1466,8 @@ async function setupDialog(overrides = {}) {
             directoryCalls.push(['sync']);
             return overrides.handle ?? null;
         },
-        directoryEmail: async () => ''
+        directoryEmail: async () => '',
+        deletionScheduledFor: () => overrides.deletionDue ?? null
     };
     const auth = {
         ready: true,
@@ -1386,6 +1514,20 @@ async function setupDialog(overrides = {}) {
             calls.push(['sign-out']);
             return true;
         },
+        scheduleAccountDeletion: async (options) => {
+            calls.push(['schedule-deletion', options]);
+            return (
+                overrides.scheduleResult ?? {
+                    ok: true,
+                    message: 'Account deletion scheduled for 1 October 2026.'
+                }
+            );
+        },
+        cancelAccountDeletion: async () => {
+            calls.push(['cancel-deletion']);
+            return overrides.cancelResult ?? { ok: true, message: 'Scheduled deletion cancelled.' };
+        },
+        enforceScheduledDeletion: async () => ({ due: null, deleted: false }),
         deleteAccount: async (options) => {
             calls.push(['delete-account', options]);
             return (
@@ -1445,6 +1587,53 @@ test('account deletion is offered only while signed in, and only asks password a
     }
 });
 
+test('a scheduled deletion shows its deadline everywhere and can be cancelled', async () => {
+    const due = Date.now() + 3 * 24 * 60 * 60 * 1000;
+    const { dom, window, calls } = await setupDialog({
+        user: {
+            uid: 'password-uid',
+            email: 'learner@example.com',
+            providerData: [{ providerId: 'password' }]
+        },
+        deletionDue: due
+    });
+    try {
+        const doc = window.document;
+        window.kanjiAuthDialog.open('account');
+        const expected = new Date(due).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        // The dialog, the profile page and the Danger Zone all read from one renderer.
+        const states = [...doc.querySelectorAll('[data-account-deletion-status]')];
+        assert.equal(states.length, 2, 'profile page and Danger Zone both say something');
+        for (const node of states) {
+            assert.match(
+                node.textContent,
+                new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+            );
+            assert.match(node.textContent, /3 days left/);
+            assert.match(node.textContent, /learning data on this device stays/i);
+        }
+        assert.match(doc.getElementById('authDeletionPending').textContent, /scheduled for/i);
+        for (const button of doc.querySelectorAll('[data-cancel-deletion]')) {
+            assert.equal(button.hidden, false, 'cancelling is one click from both places');
+        }
+        assert.equal(doc.getElementById('authCancelDeletion').hidden, false);
+
+        doc.getElementById('authCancelDeletion').click();
+        await settle();
+        assert.equal(
+            calls.some(([name]) => name === 'cancel-deletion'),
+            true
+        );
+        assert.match(doc.getElementById('authDeleteStatus').textContent, /cancelled/i);
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('the delete button confirms before acting and reports the result honestly', async () => {
     const { dom, window, calls } = await setupDialog({
         user: {
@@ -1459,30 +1648,46 @@ test('the delete button confirms before acting and reports the result honestly',
         dialog.open('account');
         const button = doc.getElementById('authDeleteAccount');
 
-        let asked = '';
-        window.confirm = (text) => {
-            asked = text;
-            return false;
+        window.kanjiAuth.scheduleAccountDeletion = async (options) => {
+            calls.push(['schedule-deletion', options]);
+            return { ok: false, cancelled: true, message: '' };
         };
         button.click();
         await settle();
-        assert.match(asked, /Delete this account permanently/i);
-        assert.match(asked, /cannot be undone/i);
-        assert.match(asked, /Kept: the kanji progress/);
         assert.equal(
             calls.some(([name]) => name === 'delete-account'),
             false,
-            'a dismissed confirmation must not touch the account'
+            'a dismissed confirmation must not delete anything'
         );
-        assert.match(doc.getElementById('authDeleteStatus').textContent, /cancelled/i);
+        assert.match(
+            doc.getElementById('authDeleteStatus').textContent,
+            /Nothing was removed and nothing was scheduled/i
+        );
 
-        window.confirm = () => true;
+        window.kanjiAuth.scheduleAccountDeletion = async (options) => {
+            calls.push(['schedule-deletion', options]);
+            return { ok: true, message: 'Account deletion scheduled for 1 October 2026.' };
+        };
         doc.getElementById('authDeletePassword').value = 'secret';
         button.click();
         await settle();
-        const called = calls.find(([name]) => name === 'delete-account');
-        assert.ok(called, 'confirming asks the app to delete');
-        assert.equal(called[1].password, 'secret', 'the password is passed through untouched');
+        const scheduled = calls.filter(([name]) => name === 'schedule-deletion').pop();
+        assert.ok(scheduled, 'the default is the 7-day schedule, not an immediate delete');
+        assert.equal(scheduled[1].password, 'secret', 'the password is passed through untouched');
+        assert.equal(
+            calls.some(([name]) => name === 'delete-account'),
+            false,
+            'nothing is deleted on the spot'
+        );
+        assert.match(doc.getElementById('authDeleteStatus').textContent, /scheduled/i);
+
+        // "Delete now instead" keeps the immediate path, with its own explanation.
+        doc.getElementById('authDeletePassword').value = 'secret';
+        doc.getElementById('authDeleteNow').click();
+        await settle();
+        const called = calls.filter(([name]) => name === 'delete-account').pop();
+        assert.ok(called, 'the immediate path still exists');
+        assert.equal(called[1].password, 'secret', 'and gets the password too');
         assert.match(doc.getElementById('authDeleteStatus').textContent, /Account deleted/i);
         assert.equal(
             doc.getElementById('authDeletePassword').value,
@@ -1491,16 +1696,16 @@ test('the delete button confirms before acting and reports the result honestly',
         );
 
         // A refusal is shown as an error, never as success.
-        window.kanjiAuth.deleteAccount = async () => ({
+        window.kanjiAuth.scheduleAccountDeletion = async () => ({
             ok: false,
-            message: 'The account was not deleted: wrong password.'
+            message: 'The deletion could not be scheduled: wrong password. Nothing was removed.'
         });
         button.click();
         await settle();
         const status = doc.getElementById('authDeleteStatus');
         assert.equal(status.hidden, false);
         assert.ok(status.classList.contains('auth-feedback--error'));
-        assert.match(status.textContent, /was not deleted/i);
+        assert.match(status.textContent, /could not be scheduled/i);
     } finally {
         dom.window.close();
     }

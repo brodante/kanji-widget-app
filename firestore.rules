@@ -44,9 +44,20 @@ service cloud.firestore {
     // Owner-only, no listing. The owner may delete it only as part of deleting the
     // account; there is no other client-side delete path.
     match /users/{uid} {
+      // deletionRequestedAt/deletionScheduledFor are null unless a deletion is pending.
+      function deletion() {
+        return (!request.resource.data.keys().hasAny(['deletionRequestedAt', 'deletionScheduledFor'])
+            || ((request.resource.data.get('deletionRequestedAt', null) == null
+                  && request.resource.data.get('deletionScheduledFor', null) == null)
+                || (request.resource.data.deletionRequestedAt is timestamp
+                  && request.resource.data.deletionScheduledFor is timestamp
+                  && request.resource.data.deletionScheduledFor > request.resource.data.deletionRequestedAt)));
+      }
+
       function record() {
         return request.resource.data.keys().hasOnly([
-            'uid', 'username', 'display', 'email', 'createdAt', 'updatedAt', 'renamedAt'
+            'uid', 'username', 'display', 'email', 'createdAt', 'updatedAt', 'renamedAt',
+            'deletionRequestedAt', 'deletionScheduledFor'
           ])
           && request.resource.data.uid == uid
           && request.resource.data.username is string
@@ -56,7 +67,8 @@ service cloud.firestore {
           && request.resource.data.display is string
           && request.resource.data.display.size() <= 20
           && request.resource.data.email is string
-          && request.resource.data.email.size() <= 254;
+          && request.resource.data.email.size() <= 254
+          && deletion();
       }
       allow get: if isOwner(uid);
       allow list: if false;

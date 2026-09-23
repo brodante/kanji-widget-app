@@ -65,6 +65,145 @@ class AppAuth {
 
     static DELETE_LABEL = 'Delete account';
 
+    // Scheduling asks twice: the confirm explains the deadline, then the password (or the
+    // Google popup) proves it is the owner asking. Nothing is removed until the deadline.
+    static SCHEDULE_CONFIRM =
+        'Delete this account?\n\n' +
+        'It is scheduled for permanent deletion in 7 days, on %DATE%. Until then you can ' +
+        'cancel it by signing in and pressing Cancel deletion.\n\n' +
+        'Deleted then: the sign-in itself, the account record, the cloud copy of your ' +
+        'progress, and your username (claimable again after the usual 30 days).\n' +
+        'Kept: the kanji progress, reviews, themes and backups stored on this device.';
+
+    static DELETION_GRACE_DAYS = 7;
+
+    static scheduleConfirmText(when) {
+        return AppAuth.SCHEDULE_CONFIRM.replace('%DATE%', AppAuth.describeDeadline(when));
+    }
+
+    static deletionDeadline(from = Date.now()) {
+        return from + AppAuth.DELETION_GRACE_DAYS * 24 * 60 * 60 * 1000;
+    }
+
+    static describeDeadline(millis) {
+        return new Date(millis).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    scheduleMessage(when) {
+        return `Account deletion scheduled for ${AppAuth.describeDeadline(when)}. Until then you can cancel it from this dialog, the profile page or the Danger Zone. Nothing is removed yet; learning data on this device is never deleted.`;
+    }
+
+    // The only emails Firebase can send on the free plan are its own templates, so the
+    // confirmation is the standard verification link (which also proves the mailbox).
+    // Addresses that are already confirmed, and username-only accounts, get no email and
+    // are told exactly why instead of being promised one.
+    async sendDeletionNotice() {
+        const user = this.user;
+        if (!user?.email || AppAuth.isAliasAccount(user)) {
+            return {
+                sent: false,
+                note: 'No confirmation email was sent: this is a username-only account with no mailbox. Cancel any time from this dialog.'
+            };
+        }
+        if (user.emailVerified) {
+            return {
+                sent: false,
+                note: `No new email was sent: ${user.email} is already confirmed. Cancel any time from this dialog.`
+            };
+        }
+        try {
+            await this.sdk.sendEmailVerification(user, {
+                url: `${location.origin}/?account=deletion`
+            });
+            return {
+                sent: true,
+                note: `A confirmation link was emailed to ${user.email}. It confirms the mailbox; the link also returns you here, where you can cancel.`
+            };
+        } catch (error) {
+            return {
+                sent: false,
+                note: `The confirmation email could not be sent (${AppAuth.errorMessage(error)}). The schedule still stands; cancel from this dialog.`
+            };
+        }
+    }
+
+    async scheduleAccountDeletion({ password = '', confirm: ask = true } = {}) {
+        if (!this.ready || this.busy || !this.user) {
+            return { ok: false, message: 'Sign in first, then delete the account.' };
+        }
+        const when = AppAuth.deletionDeadline();
+        if (ask && !window.confirm(AppAuth.scheduleConfirmText(when))) {
+            this.message = '';
+            return { ok: false, cancelled: true, message: '' };
+        }
+        const identity = await this.reauthenticate({ password });
+        if (!identity.ok) {
+            return identity;
+        }
+        this.busy = true;
+        this.render();
+        try {
+            const directory = window.kanjiUsernames;
+            if (!directory?.requestDeletion) {
+                throw new Error('The account record is unavailable right now.');
+            }
+            await directory.requestDeletion(when);
+            const notice = await this.sendDeletionNotice();
+            this.message = `${this.scheduleMessage(when)} ${notice.note}`;
+            return { ok: true, message: this.message, scheduledFor: when, emailed: notice.sent };
+        } catch (error) {
+            const message = `The deletion could not be scheduled: ${AppAuth.errorMessage(error)} Nothing was removed.`;
+            window.KanjiFeedback?.show(message, { title: 'Not scheduled' });
+            return { ok: false, message };
+        } finally {
+            this.busy = false;
+            this.render();
+        }
+    }
+
+    async cancelAccountDeletion() {
+        if (!this.ready || this.busy || !this.user) {
+            return { ok: false, message: 'Sign in first.' };
+        }
+        if (
+            !window.confirm(
+                'Cancel the scheduled deletion? The account, its cloud progress and the username stay as they are.'
+            )
+        ) {
+            return { ok: false, cancelled: true, message: '' };
+        }
+        this.busy = true;
+        this.render();
+        try {
+            await window.kanjiUsernames?.cancelDeletion?.();
+            this.message = 'Scheduled deletion cancelled. The account and its cloud copy stay.';
+            return { ok: true, message: this.message };
+        } catch (error) {
+            const message = `The scheduled deletion could not be cancelled: ${AppAuth.errorMessage(error)}`;
+            window.KanjiFeedback?.show(message, { title: 'Still scheduled' });
+            return { ok: false, message };
+        } finally {
+            this.busy = false;
+            this.render();
+        }
+    }
+
+    // Nobody runs a server timer on the free plan, so the deadline is honoured the next
+    // time the account touches the app: overdue means delete now.
+    async enforceScheduledDeletion() {
+        const directory = window.kanjiUsernames;
+        const due = directory?.deletionScheduledFor?.();
+        if (!due || due > Date.now()) {
+            return { due: due || null, deleted: false };
+        }
+        const result = await this.deleteAccount({ confirm: false, reauth: false });
+        return { due, deleted: Boolean(result?.ok), message: result?.message };
+    }
+
     // Deleting a Firebase user needs a recent sign-in, so the password (or the Google
     // popup) is collected right before the request. Nothing is stored or cached here.
     async reauthenticate({ password = '' } = {}) {
@@ -105,13 +244,19 @@ class AppAuth {
     // Order matters. The username release and the account records need the session that
     // is about to disappear, and the sign-in itself is deleted last. A failure part way
     // through says exactly what did and did not happen; nothing claims success early.
-    async deleteAccount({ password = '' } = {}) {
+    async deleteAccount({ password = '', confirm: ask = true, reauth = true } = {}) {
         if (!this.ready || this.busy || !this.user) {
             return { ok: false, message: 'Sign in first, then delete the account.' };
         }
-        const identity = await this.reauthenticate({ password });
-        if (!identity.ok) {
-            return identity;
+        if (ask && !window.confirm(AppAuth.DELETE_CONFIRM)) {
+            this.message = '';
+            return { ok: false, cancelled: true, message: '' };
+        }
+        if (reauth) {
+            const identity = await this.reauthenticate({ password });
+            if (!identity.ok) {
+                return identity;
+            }
         }
         this.busy = true;
         this.render();
@@ -278,6 +423,54 @@ class AppAuth {
         });
     }
 
+    // One place draws the deletion state, so the dialog, the profile page and the Danger
+    // Zone can never disagree about whether a deletion is pending.
+    static renderDeletionState(user, { busy = false } = {}) {
+        const due = user ? window.kanjiUsernames?.deletionScheduledFor?.() || null : null;
+        const pending = Boolean(due);
+        const left = pending
+            ? Math.max(0, Math.ceil((due - Date.now()) / (24 * 60 * 60 * 1000)))
+            : 0;
+        const status = pending
+            ? `Deletion scheduled for ${AppAuth.describeDeadline(due)} (${left} day${
+                  left === 1 ? '' : 's'
+              } left). The sign-in, the account record, the cloud progress and the username go then; learning data on this device stays.`
+            : user
+              ? 'Asking to delete the account schedules it 7 days later, so a mistake can be undone. Local learning data is never deleted with it.'
+              : '';
+        document.querySelectorAll('[data-delete-account-open]').forEach((button) => {
+            button.hidden = !user;
+            button.disabled = Boolean(busy);
+        });
+        document.querySelectorAll('[data-cancel-deletion]').forEach((button) => {
+            button.hidden = !pending;
+            button.disabled = Boolean(busy);
+        });
+        document.querySelectorAll('[data-account-deletion-status]').forEach((node) => {
+            node.textContent = status;
+        });
+        const line = document.getElementById('authDeletionPending');
+        if (line) {
+            line.textContent = status;
+            line.hidden = !pending;
+        }
+        const cancel = document.getElementById('authCancelDeletion');
+        if (cancel) {
+            cancel.hidden = !pending;
+            cancel.disabled = Boolean(busy);
+        }
+        const now = document.getElementById('authDeleteNow');
+        if (now) {
+            now.hidden = !user;
+            now.disabled = Boolean(busy);
+        }
+        const ask = document.getElementById('authDeleteAccount');
+        if (ask) {
+            ask.disabled = Boolean(busy);
+            ask.textContent = pending ? 'Change deletion' : 'Delete account';
+        }
+    }
+
     static providers(user) {
         return (user?.providerData || []).map((entry) => entry.providerId);
     }
@@ -301,6 +494,9 @@ class AppAuth {
         });
         document.querySelectorAll('[data-app-auth-retry]').forEach((button) => {
             button.onclick = () => this.start();
+        });
+        document.querySelectorAll('[data-cancel-deletion]').forEach((button) => {
+            button.onclick = () => this.cancelAccountDeletion();
         });
         // Returning from the inbox is the usual moment a confirmation lands.
         window.addEventListener('focus', () => {
@@ -757,6 +953,7 @@ class AppAuth {
             element.textContent = evidence.filter(Boolean).join(' · ');
         });
         AppAuth.renderAccountControls(this.user, { ready: this.ready, busy: this.busy });
+        AppAuth.renderDeletionState(this.user, { busy: this.busy });
         window.driveBackup?.renderAccount?.();
         window.kanjiProfilePage?.refresh();
     }

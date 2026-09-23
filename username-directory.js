@@ -623,6 +623,59 @@ class UsernameDirectory {
         }
     }
 
+    // Scheduled deletion: the request lives in the account record, so every device sees
+    // the same deadline and the same chance to cancel it. Nothing is removed until the
+    // deadline passes or the owner asks for it immediately.
+    static DELETION_GRACE_DAYS = 7;
+
+    deletionScheduledFor(profile = this.profile) {
+        const value = profile?.deletionScheduledFor;
+        if (!value) {
+            return null;
+        }
+        const millis = typeof value.toMillis === 'function' ? value.toMillis() : Number(value);
+        return Number.isFinite(millis) ? millis : null;
+    }
+
+    async requestDeletion(when) {
+        if (!this.user) {
+            return false;
+        }
+        await this.connect();
+        await this.sdk.setDoc(
+            this.profileRef(this.user.uid),
+            {
+                deletionRequestedAt: this.sdk.serverTimestamp(),
+                deletionScheduledFor: this.sdk.Timestamp.fromMillis(when),
+                updatedAt: this.sdk.serverTimestamp()
+            },
+            { merge: true }
+        );
+        this.profile = {
+            ...(this.profile || {}),
+            deletionScheduledFor: this.sdk.Timestamp.fromMillis(when)
+        };
+        return true;
+    }
+
+    async cancelDeletion() {
+        if (!this.user) {
+            return false;
+        }
+        await this.connect();
+        await this.sdk.setDoc(
+            this.profileRef(this.user.uid),
+            {
+                deletionRequestedAt: null,
+                deletionScheduledFor: null,
+                updatedAt: this.sdk.serverTimestamp()
+            },
+            { merge: true }
+        );
+        this.profile = { ...(this.profile || {}), deletionScheduledFor: null };
+        return true;
+    }
+
     // Account deletion: the name becomes a reservation for the usual window, exactly
     // like a rename, so nobody can grab it the moment the account disappears. The
     // rules allow only the owner to do this, so it has to run while the session is

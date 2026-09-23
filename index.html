@@ -294,6 +294,44 @@
                                 Download Drive copy
                             </button>
                         </div>
+                        <div class="cloud-choice" data-cloud-choice hidden>
+                            <p class="cloud-choice-title">
+                                This device and the account both have progress
+                            </p>
+                            <div class="cloud-choice-grid">
+                                <div>
+                                    <h4>This device</h4>
+                                    <p data-cloud-choice-local></p>
+                                </div>
+                                <div>
+                                    <h4>Cloud copy</h4>
+                                    <p data-cloud-choice-remote></p>
+                                </div>
+                            </div>
+                            <div class="backup-buttons">
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-cloud-action="restore"
+                                >
+                                    Load cloud progress
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                    data-cloud-action="save"
+                                >
+                                    Keep this device's progress
+                                </button>
+                                <button type="button" class="backup-btn" data-cloud-action="later">
+                                    Decide later
+                                </button>
+                            </div>
+                            <p class="cloud-choice-note">
+                                A recovery copy of this device's progress is saved before anything
+                                is replaced. Nothing changes until you choose.
+                            </p>
+                        </div>
                         <small
                             >Progress, reviews, nickname and learning settings. Uploaded photos,
                             backgrounds and AI credentials stay on this device. Saves run while the
@@ -1233,6 +1271,28 @@
                             <span>Danger Zone</span>
                         </div>
                         <div class="setting-group">
+                            <p data-account-deletion-status class="setting-help-text"></p>
+                            <div class="backup-buttons">
+                                <button
+                                    id="deleteAccountSettings"
+                                    class="backup-btn danger-action"
+                                    type="button"
+                                    data-auth-open="account"
+                                    data-delete-account-open
+                                    hidden
+                                >
+                                    Delete account
+                                </button>
+                                <button
+                                    id="cancelDeletionSettings"
+                                    class="backup-btn"
+                                    type="button"
+                                    data-cancel-deletion
+                                    hidden
+                                >
+                                    Cancel scheduled deletion
+                                </button>
+                            </div>
                             <button id="resetProgress" class="reset-btn danger-action">
                                 Reset All Progress
                             </button>
@@ -1912,6 +1972,29 @@ filter: blur(10px) brightness(1) saturate(1);
                         <p id="profilePageFeedback" role="status" aria-live="polite"></p>
                     </section>
                     <section class="profile-card" aria-label="Account sign-in">
+                        <div class="app-auth-section" aria-label="Account deletion">
+                            <p class="app-auth-label">Deleting this account</p>
+                            <p class="app-auth-identities" data-account-deletion-status></p>
+                            <div class="backup-buttons">
+                                <button
+                                    type="button"
+                                    class="backup-btn danger-action"
+                                    data-auth-open="account"
+                                    data-delete-account-open
+                                    hidden
+                                >
+                                    Delete account
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-cancel-deletion
+                                    hidden
+                                >
+                                    Cancel scheduled deletion
+                                </button>
+                            </div>
+                        </div>
                         <div class="app-auth-section" aria-label="App sign-in">
                             <p class="app-auth-label">KanjiWidgets account</p>
                             <p data-app-auth-status role="status" aria-live="polite">
@@ -1991,6 +2074,40 @@ filter: blur(10px) brightness(1) saturate(1);
                         <button type="button" class="backup-btn" data-cloud-action="download">
                             Download Drive copy
                         </button>
+                    </div>
+                    <div class="cloud-choice" data-cloud-choice hidden>
+                        <p class="cloud-choice-title">
+                            This device and the account both have progress
+                        </p>
+                        <div class="cloud-choice-grid">
+                            <div>
+                                <h4>This device</h4>
+                                <p data-cloud-choice-local></p>
+                            </div>
+                            <div>
+                                <h4>Cloud copy</h4>
+                                <p data-cloud-choice-remote></p>
+                            </div>
+                        </div>
+                        <div class="backup-buttons">
+                            <button type="button" class="backup-btn" data-cloud-action="restore">
+                                Load cloud progress
+                            </button>
+                            <button
+                                type="button"
+                                class="backup-btn danger-action"
+                                data-cloud-action="save"
+                            >
+                                Keep this device's progress
+                            </button>
+                            <button type="button" class="backup-btn" data-cloud-action="later">
+                                Decide later
+                            </button>
+                        </div>
+                        <p class="cloud-choice-note">
+                            A recovery copy of this device's progress is saved before anything is
+                            replaced. Nothing changes until you choose.
+                        </p>
                     </div>
                     <small
                         >Progress, reviews, nickname and learning settings. Uploaded photos,
@@ -2329,13 +2446,22 @@ filter: blur(10px) brightness(1) saturate(1);
                             autocomplete="current-password"
                             hidden
                         />
-                        <button
-                            id="authDeleteAccount"
-                            type="button"
-                            class="backup-btn danger-action"
-                        >
-                            Delete account
-                        </button>
+                        <p id="authDeletionPending" class="auth-hint" hidden></p>
+                        <div class="backup-buttons">
+                            <button
+                                id="authDeleteAccount"
+                                type="button"
+                                class="backup-btn danger-action"
+                            >
+                                Delete account
+                            </button>
+                            <button id="authDeleteNow" type="button" class="backup-btn" hidden>
+                                Delete now instead
+                            </button>
+                            <button id="authCancelDeletion" type="button" class="backup-btn" hidden>
+                                Cancel deletion
+                            </button>
+                        </div>
                         <p
                             id="authDeleteStatus"
                             class="auth-hint"

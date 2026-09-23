@@ -2343,6 +2343,51 @@ body {
     flex-wrap: wrap;
 }
 
+/* First-contact comparison: this device's progress beside the cloud copy. */
+.cloud-choice {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.6rem 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 10px;
+    background: var(--surface-color, transparent);
+}
+
+.cloud-choice-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.cloud-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+}
+
+.cloud-choice-grid h4 {
+    margin: 0 0 0.15rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.75;
+}
+
+.cloud-choice-grid p {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.cloud-choice-note {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    opacity: 0.75;
+}
+
 /* Sign-out disclosure: a full-width line inside the button row. */
 .backup-signout-note {
     flex-basis: 100%;

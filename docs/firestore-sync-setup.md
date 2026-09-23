@@ -100,6 +100,12 @@ This code does not link billing or create paid services. On Spark, quotas can st
 
 An oversized payload blocks sync with an export instruction; it does not discard local progress. There is no automatic background saving when the app is closed and no guaranteed merge of simultaneous edits. Choose which copy to keep explicitly.
 
+The owner may also schedule a deletion: `users/{uid}` accepts two nullable fields,
+`deletionRequestedAt` and `deletionScheduledFor`, which must be either absent/null or a
+matching pair of timestamps where the deadline is later than the request. Nothing else about
+the account record changed. **Publish the file again** after pulling this change, or
+scheduling a deletion is refused (the app reports that nothing was changed).
+
 The signed-in owner can delete their own progress document, but only through **Delete account** in
 the sign-in dialog, which removes the whole account (sign-in, `users/{uid}` record, cloud progress
 and the username) in one confirmed flow. There is no separate delete button for cloud progress, so

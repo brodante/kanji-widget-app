@@ -149,6 +149,10 @@ class AuthDialog {
         );
         this.el('authSignOut')?.addEventListener('click', () => this.signOut());
         this.el('authDeleteAccount')?.addEventListener('click', () => this.deleteAccount());
+        this.el('authDeleteNow')?.addEventListener('click', () =>
+            this.deleteAccount({ now: true })
+        );
+        this.el('authCancelDeletion')?.addEventListener('click', () => this.cancelDeletion());
         window.addEventListener('kanji-auth-changed', () => this.render());
         window.addEventListener('kanji-handle-changed', () => this.render());
     }
@@ -569,21 +573,42 @@ class AuthDialog {
     // Deleting the account cannot be undone, so it asks twice: the confirm spells out
     // what goes and what stays, then the password (or the Google popup) proves it is
     // really the owner asking.
-    async deleteAccount() {
+    // The default is the 7-day schedule: it states the deadline and can be cancelled.
+    // "Delete now instead" keeps the immediate path for anyone who wants it gone at once.
+    async deleteAccount({ now = false } = {}) {
         const auth = this.auth();
         if (!auth?.user || this.busy) {
             return;
         }
-        if (!window.confirm(AppAuth.DELETE_CONFIRM)) {
-            this.setDeleteStatus('Deletion cancelled. Nothing was removed.');
+        const password = this.el('authDeletePassword')?.value || '';
+        this.setBusy(true, now ? 'Deleting the account…' : 'Scheduling the deletion…');
+        const result = now
+            ? await auth.deleteAccount({ password })
+            : await auth.scheduleAccountDeletion({ password });
+        this.setBusy(false);
+        if (result.cancelled) {
+            this.setDeleteStatus('Nothing was removed and nothing was scheduled.');
+            this.render();
             return;
         }
-        const password = this.el('authDeletePassword')?.value || '';
-        this.setBusy(true, 'Deleting the account…');
-        const result = await auth.deleteAccount({ password });
-        this.setBusy(false);
         if (this.el('authDeletePassword')) {
             this.el('authDeletePassword').value = '';
+        }
+        this.setDeleteStatus(result.message, result.ok ? '' : 'error');
+        this.setFeedback(result.ok ? 'info' : 'error', result.message);
+        this.render();
+    }
+
+    async cancelDeletion() {
+        const auth = this.auth();
+        if (!auth?.user || this.busy) {
+            return;
+        }
+        this.setBusy(true, 'Cancelling the scheduled deletion…');
+        const result = await auth.cancelAccountDeletion();
+        this.setBusy(false);
+        if (result.cancelled) {
+            return;
         }
         this.setDeleteStatus(result.message, result.ok ? '' : 'error');
         this.setFeedback(result.ok ? 'info' : 'error', result.message);
@@ -822,6 +847,7 @@ class AuthDialog {
                 submit.disabled = this.busy;
             }
         }
+        AppAuth.renderDeletionState(auth?.user, { busy: this.busy });
         const deleteSection = this.el('authDeleteSection');
         if (deleteSection) {
             const hasPassword = AppAuth.hasPassword(auth?.user);
@@ -872,6 +898,19 @@ window.addEventListener('DOMContentLoaded', () => {
     window.kanjiAuthDialog = new AuthDialog();
     window.kanjiAuthDialog.init();
     window.addEventListener('kanji-auth-changed', () => {
-        window.kanjiUsernames.sync();
+        // After the account record is read, an overdue deletion is completed here: the
+        // free plan has no server timer, so the deadline is honoured on the next visit.
+        window.kanjiUsernames
+            .sync()
+            .then(() => window.kanjiAuth?.enforceScheduledDeletion?.())
+            .then((outcome) => {
+                if (outcome?.deleted) {
+                    window.KanjiFeedback?.show(
+                        'The scheduled 7 days passed, so the account was deleted now. Learning data on this device is untouched.',
+                        { kind: 'info', title: 'Account deleted' }
+                    );
+                }
+            })
+            .catch(() => {});
     });
 });

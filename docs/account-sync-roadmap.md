@@ -107,20 +107,35 @@ automated suite. Keep it in step with the features it describes.
 
 ## Account deletion
 
-- [x] **Delete account** in the sign-in dialog: re-authentication first (password or
-      Google popup), then the username released as a reservation, the `users/{uid}`
-      record and the cloud progress deleted, then the sign-in deleted, then the same
-      identity cleanup as a sign-out. Local learning data and local backups are kept,
-      and the confirmation lists both sides before anything happens.
-- [x] Partial failures name the completed steps, keep the sign-in so a retry is
-      possible, and never report success. A wrong password or a dismissed confirmation
-      removes nothing.
-- [x] Rules: the owner may delete their own `users/{uid}` and their own progress
-      document. Usernames are still never deletable (a deleted account releases its
-      name to the reservation window instead), listing stays denied, and no new path
-      became writable. **The owner must publish the updated `firestore.rules`.**
-- [ ] Verify the live flow on a disposable account after publishing the rules, then
-      confirm the released username is claimable after the reservation window.
+- [x] Offered in the sign-in dialog, the profile page and Settings → Danger Zone, all
+      leading to the same flow.
+- [x] **Scheduled, not instant**: a re-authenticated request writes a 7-day deadline to the
+      account record, every device shows the same date, and **Cancel deletion** is one click
+      away until then. **Delete now instead** keeps the immediate path.
+- [x] Completion: username released as a reservation, account record and cloud progress
+      deleted, sign-in deleted, then the sign-out identity cleanup. Local learning data and
+      local backups are kept in both paths.
+- [x] Confirmation email where Firebase can send one (real, unconfirmed address); accounts
+      that cannot be emailed are told exactly why instead of being promised a message.
+      A custom "deleted on <date>" email needs an owner-controlled mail service.
+- [x] Deadline enforcement is client-side on the next use of the account, because Spark has
+      no server timer. Documented rather than hidden.
+- [x] Partial failures name the completed steps, keep the sign-in so a retry is possible,
+      and never report success.
+- [x] Rules: the owner may delete their own `users/{uid}` and their own progress document,
+      and the account record accepts the two nullable deletion fields. Usernames stay
+      non-deletable. **The owner must publish the updated `firestore.rules`.**
+- [ ] Verify the live flow on a disposable account after publishing the rules, including a
+      real confirmation email, a cancel, and a deadline that has passed.
+
+## First sign-in on a new device
+
+- [x] A device with no learning progress loads the cloud copy automatically and reports the
+      gist it loaded.
+- [x] A device with progress gets both copies side by side (kanji studied, mastered,
+      reviews, due now, last session, cloud save date) and an explicit choice; nothing is
+      replaced before that, and a recovery copy is saved first.
+- [x] `Decide later` keeps both copies untouched.
 
 ## Sign-out identity cleanup
 

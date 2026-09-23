@@ -125,30 +125,85 @@ is ending this device's session.
 
 ## Deleting an account
 
-**Delete account** in the sign-in dialog (signed in → account pane) removes the account
-itself, in this order, and says exactly what happened if a step fails:
+**Delete account** is offered in three places that all lead to the same flow, so the account
+is never something you have to hunt for: the sign-in dialog's account pane, the profile
+page, and Settings → Danger Zone.
 
-1. **Confirm it is you.** Password accounts re-enter the password; Google-only accounts
-   get the Google popup. Firebase requires a recent sign-in for deletion, and a failed
-   check deletes nothing.
-2. **Release the username** as a reservation, exactly like a rename, so it cannot be
-   sniped the moment the account disappears. It becomes claimable again after the usual
-   `RESERVATION_DAYS` window.
-3. **Delete the account record** (`users/{uid}`) and the **cloud copy of the progress**
-   (`users/{uid}/sync/progress`).
-4. **Delete the sign-in** itself, then run the same identity cleanup as a sign-out.
+Asking to delete **schedules** it, it does not delete anything on the spot:
 
-Kept on purpose: kanji progress, reviews, streaks, themes and local backups on this
-device. Deleting an account must never look like study data was destroyed, and the
-confirmation says so before anything happens. Clearing the device's data remains a
-separate, separately confirmed action.
+1. **Confirm it is you.** Password accounts re-enter the password; Google-only accounts get
+   the Google popup. A failed check removes nothing.
+2. **A 7-day deadline** is written to the account record (`users/{uid}`:
+   `deletionRequestedAt`, `deletionScheduledFor`), so every device shows the same date.
+3. **A confirmation email** is sent when the account has a real, unconfirmed address. See
+   the limits below; the app says exactly which of these applied rather than promising an
+   email it did not send.
+4. Until the deadline the account works normally and the pending state is shown in all
+   three places, with **Cancel deletion** one click away. Cancelling clears both fields and
+   changes nothing else.
+5. **At the deadline the deletion completes** the next time the account touches the app:
+   the username becomes a reservation (as with a rename, so it cannot be sniped), the
+   account record and the cloud copy of the progress are deleted, the sign-in is deleted,
+   and the usual sign-out identity cleanup runs.
 
-A failure part way through reports the steps that already completed and states that the
-sign-in still exists and can be retried; partial success is never reported as success.
-Because step 3 needs permissions that older rules deny, publish the updated
-`firestore.rules` (owner-only `delete` on `users/{uid}` and on the owner's progress
-document) before testing this flow. Nothing else about the rules changed: usernames are
-still never deletable, listing is still denied, and no new path became writable.
+**Delete now instead** stays available for anyone who wants it gone immediately, with the
+older confirmation that spells out that it cannot be undone.
+
+Kept on purpose in both paths: kanji progress, reviews, streaks, themes and local backups
+on this device. `Disconnect & clear this device` remains the separate action for local
+study data.
+
+### What the confirmation email can and cannot be on Spark
+
+Firebase can only send its own templates, and only Cloud Functions (which need billing) can
+send arbitrary mail. So:
+
+- A real, unconfirmed address gets the standard **verification link**. It proves control of
+  the mailbox, and its continue URL returns the learner to the app.
+- An address that is **already confirmed** gets no email, and the app says so: sending
+  another verification link would either do nothing or confuse the reader.
+- A **username-only account has no mailbox at all**, and is told that instead.
+
+A custom "your account will be deleted on <date>, click here to cancel" message needs a
+mail service the owner controls (an external provider or a small serverless endpoint), or a
+move off the free plan. Nothing in the app pretends otherwise.
+
+### Why the deadline is enforced by the app, not a server
+
+There is no server timer on Spark. The schedule is stored on the account record, which is
+the honest place for it: it is visible to every device and to the app on the next sign-in,
+and an overdue schedule completes immediately at that point. Until the account is used
+again the sign-in still exists, which is the one thing a client-only design cannot avoid.
+
+### Rules
+
+The account record's allowed keys gained `deletionRequestedAt` and `deletionScheduledFor`.
+Both must be absent, null, or a matching pair of timestamps where the deadline is later than
+the request; anything else is rejected. **Publish the updated `firestore.rules`** before
+testing this: without it, scheduling is refused and the app reports that nothing was
+changed.
+
+## First sign-in on a device
+
+What happens straight after signing in depends on what the device already has, and it never
+replaces progress without an answer:
+
+- **A device with no learning progress** loads the cloud copy on its own and says what it
+  loaded ("Cloud progress loaded on this fresh device: 42 kanji studied, 18 mastered, 96
+  reviews · last studied 12 September 2026"). There is nothing local to lose, so there is
+  nothing to ask about.
+- **A device that already has progress** gets both copies side by side, in plain numbers:
+  kanji studied, mastered, reviews, cards due now, and the date of the last session, plus
+  when the cloud copy was saved. Nothing is replaced until a choice is made, and every
+  replacement saves a local recovery copy first.
+- The two answers are **Load cloud progress** (replaces this device's, after the recovery
+  copy) and **Keep this device's progress** (replaces the cloud copy, also after a recovery
+  copy). **Decide later** hides the comparison and keeps both copies exactly as they are.
+
+The comparison also appears when **Check cloud** is pressed in that state, and the same two
+gists are repeated in the confirmation text of each action, so the numbers are never a
+surprise. Uploaded media, API keys and AI credentials are excluded from cloud progress and
+stay on the device either way.
 
 ## Email verification
 
