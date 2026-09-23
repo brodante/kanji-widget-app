@@ -92,10 +92,12 @@ class AppAuth {
         // These codes embed the origin or method, so they need a pattern, not a key.
         if (/^auth\/requests-from-referer/.test(code)) {
             const origin = window.location?.origin || 'this website';
-            return `This website is blocked for sign-in. Add ${origin}/* to Google Cloud → APIs & Services → Credentials → the browser API key → Website restrictions (HTTP referrers). Changes can take a few minutes to apply.`;
+            const project = window.KANJI_FIREBASE_CONFIG?.projectId || 'the Firebase project';
+            return `This website is blocked for sign-in. In Google Cloud, open project “${project}” → APIs & Services → Credentials → the key named “Browser key (auto created by Firebase)” → Application restrictions → Website restrictions (HTTP referrers), and add ${origin}/*. Changes can take a few minutes to apply.`;
         }
         if (/^auth\/requests-to-this-api/.test(code)) {
-            return 'The browser API key blocks the sign-in API. In Google Cloud → Credentials → the browser API key → API restrictions, allow Identity Toolkit API, Token Service API and Cloud Firestore API, or choose “Don’t restrict key”.';
+            const project = window.KANJI_FIREBASE_CONFIG?.projectId || 'the Firebase project';
+            return `The browser API key blocks the sign-in API. In Google Cloud project “${project}” → Credentials → the browser key → API restrictions, allow Identity Toolkit API, Token Service API and Cloud Firestore API, or choose “Don’t restrict key”.`;
         }
         if (error) {
             // Keep the raw code visible: it is the fastest way to identify a

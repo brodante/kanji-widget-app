@@ -1170,6 +1170,14 @@ test('the blocked-origin and restricted-key codes explain the exact setting', as
         });
         assert.match(api, /Identity Toolkit API/);
         assert.match(api, /API restrictions/i);
+
+        // Naming the project stops the wrong-project wild goose chase.
+        window.KANJI_FIREBASE_CONFIG = { projectId: 'kanji-widgets' };
+        const named = window.AppAuth.errorMessage({
+            code: 'auth/requests-from-referer-http://localhost:5000-are-blocked.'
+        });
+        assert.match(named, /kanji-widgets/);
+        assert.match(named, /Browser key \(auto created by Firebase\)/);
     } finally {
         dom.window.close();
     }
