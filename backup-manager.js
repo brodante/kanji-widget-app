@@ -1,7 +1,7 @@
 /* global openCustomThemeDB */
 // Drive OAuth: access tokens stay in memory, never in a backup or storage.
 class BackupManager {
-    static BUILD = 'profile-v1';
+    static BUILD = 'login-v1';
     static DIAGNOSTIC = 'metadata-etag-v1';
     static keys = [
         'kanji_profile',

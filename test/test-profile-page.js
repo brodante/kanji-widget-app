@@ -151,7 +151,7 @@ test('diagnostic history is labelled as saved and current build is visible befor
         manager.initSafety();
         assert.match(
             window.document.getElementById('driveDiagnosticBuild').textContent,
-            /profile-v1/
+            /login-v1/
         );
         assert.match(
             window.document.getElementById('driveDiagnosticBuild').textContent,
@@ -161,7 +161,7 @@ test('diagnostic history is labelled as saved and current build is visible befor
             window.document.getElementById('driveDiagnosticResult').textContent,
             /Older saved result/
         );
-        assert.equal(window.BackupManager.BUILD, 'profile-v1');
+        assert.equal(window.BackupManager.BUILD, 'login-v1');
     } finally {
         dom.window.close();
     }

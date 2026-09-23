@@ -165,18 +165,18 @@ A failure still keeps the safe fallback; share its exact text, not tokens or cre
 
 The message beginning “Drive did not expose a usable revision token/readback” belongs
 to the original header-based diagnostic, not the current metadata-based implementation.
-It could be old running code or a previously saved result. The `profile-v1` update:
+It could be old running code or a previously saved result. The `login-v1` update:
 
 - shows the **loaded app build**, diagnostic protocol and browser origin beside the test;
 - distinguishes historical results from fresh runs and does not replay older-build error text;
-- prefixes new results with `profile-v1 / metadata-etag-v1` and a timestamp;
+- prefixes new results with `login-v1 / metadata-etag-v1` and a timestamp;
 - versions the JS/CSS URLs and updates the app service-worker cache;
 - adds **Check for app update**, which checks the service worker and reloads without
   deleting progress, settings, IndexedDB media or local backups;
 - asks the local Express server to revalidate HTML/JS/CSS rather than reuse them silently.
 
 Pull the latest branch, stop any old local server, then run `npm start` from this checkout.
-Open `http://localhost:5000`, reload, and verify **Loaded app: profile-v1** before testing.
+Open `http://localhost:5000`, reload, and verify **Loaded app: login-v1** before testing.
 If that marker is absent, check your working directory, port and checked-out commit.
 Do not clear site data. Reloading loses the in-memory Google token, so reconnect before
 running the test. Share the new build-prefixed result if it fails. A user-reported localhost PASS is now recorded below; production-origin and two-device checks are not inferred from that result.
@@ -215,6 +215,6 @@ settings stores so the current UI uses them. Unsupported/newer formats and malfo
 records are rejected. A recovery failure stops the import before data changes.
 
 The user reported a successful real-Drive diagnostic on `http://localhost:5000` at
-`2026-09-22T16:52:02.499Z`, using `profile-v1 / metadata-etag-v1`. This confirms the tested
+`2026-09-22T16:52:02.499Z`, using `login-v1 / metadata-etag-v1`. This confirms the tested
 conditional read/update path. The Settings/navigation update does not change that protocol
 or invalidate the saved PASS. Production-origin and two-device acceptance are separate checks.

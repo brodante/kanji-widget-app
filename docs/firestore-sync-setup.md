@@ -32,6 +32,17 @@ No collections need to be created manually. The first approved save creates:
 users/{Firebase Authentication UID}/sync/progress
 ```
 
+The same rules file also covers the account layer added with email/username login:
+
+```text
+usernames/{lowercase username}   ownership, reservations and the published verified email
+users/{Firebase Authentication UID}   account record (username mirror, rename timestamp)
+```
+
+`usernames/*` documents are readable one at a time and can never be listed; ownership
+is decided by the first successful write. See
+[Email, username and password sign-in](username-login-setup.md).
+
 The app uses the UID, not an email address, to identify the owner. Each document contains `version`, `revision`, `payload` and a server-generated `updatedAt`. Rules allow only the signed-in owner to get/create/update that exact document, enforce the envelope and revision progression, and reject listing, deletion and all other paths. The payload is serialized JSON with client-side schema checks and a 350 KB client limit; rules validate its type/length but do not parse its internal JSON.
 
 Do not enable test mode, public access, Firebase Storage, Cloud Functions or Blaze billing.

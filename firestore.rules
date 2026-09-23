@@ -1,6 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    // Usernames are stored lowercased, so the rules only accept the lowercase shape.
+    // The client normalises before writing; anything else is rejected.
+    function usernameShape(value) {
+      return value is string
+        && value.size() >= 3
+        && value.size() <= 20
+        && value.matches('^[a-z][a-z0-9_]*$')
+        && !value.matches('.*__.*')
+        && !value.matches('.*_$');
+    }
+
     match /users/{uid}/sync/progress {
       function owner() {
         return request.auth != null && request.auth.uid == uid;
@@ -19,6 +36,75 @@ service cloud.firestore {
       allow update: if owner() && valid()
         && request.resource.data.revision == resource.data.revision + 1;
       // No collection listing, deletion, or access to any other path from clients.
+    }
+
+    // Account record: username mirror, published email and the rename timestamp.
+    // Owner-only, no listing, never deleted by a client.
+    match /users/{uid} {
+      function record() {
+        return request.resource.data.keys().hasOnly([
+            'uid', 'username', 'display', 'email', 'createdAt', 'updatedAt', 'renamedAt'
+          ])
+          && request.resource.data.uid == uid
+          && request.resource.data.username is string
+          && request.resource.data.username.size() <= 20
+          && (request.resource.data.username == ''
+            || usernameShape(request.resource.data.username))
+          && request.resource.data.display is string
+          && request.resource.data.display.size() <= 20
+          && request.resource.data.email is string
+          && request.resource.data.email.size() <= 254;
+      }
+      allow get: if isOwner(uid);
+      allow list: if false;
+      allow create: if isOwner(uid) && record();
+      allow update: if isOwner(uid) && record();
+      allow delete: if false;
+    }
+
+    // Username ownership. One document per name, named by the lowercase username.
+    // Single-document reads keep availability checks possible; listing is denied so
+    // the directory cannot be harvested and usernames cannot be enumerated.
+    match /usernames/{name} {
+      function record() {
+        return request.resource.data.keys().hasOnly([
+            'uid', 'display', 'kind', 'email', 'createdAt', 'updatedAt', 'releasedAt',
+            'reservedUntil'
+          ])
+          && request.resource.data.uid is string
+          && request.resource.data.kind is string
+          && request.resource.data.display is string
+          && request.resource.data.display.size() <= 20
+          && request.resource.data.email is string
+          && request.resource.data.email.size() <= 254;
+      }
+      function claim() {
+        return request.resource.data.kind == 'user'
+          && request.resource.data.uid == request.auth.uid;
+      }
+      // Renaming away from a name you own: it becomes a reservation, not a free name.
+      function release() {
+        return resource.data.kind == 'user'
+          && resource.data.uid == request.auth.uid
+          && request.resource.data.kind == 'reserved'
+          && request.resource.data.uid == ''
+          && request.resource.data.reservedUntil is timestamp
+          && request.resource.data.reservedUntil > request.time;
+      }
+      // After the reservation lapses anyone signed in may claim the name.
+      function claimReleased() {
+        return resource.data.kind == 'reserved'
+          && resource.data.uid == ''
+          && resource.data.reservedUntil is timestamp
+          && resource.data.reservedUntil <= request.time
+          && claim();
+      }
+      allow get: if true;
+      allow list: if false;
+      allow create: if isSignedIn() && usernameShape(name) && record() && claim();
+      allow update: if isSignedIn() && usernameShape(name) && record()
+        && (release() || claimReleased());
+      allow delete: if false;
     }
   }
 }

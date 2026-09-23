@@ -98,6 +98,88 @@ test('offline precache and static deployment include both practice and account b
     assert.equal(read('CNAME').trim(), 'kanji.qd.je');
 });
 
+test('username login assets are versioned, precached and deployed together', () => {
+    const html = read('index.html');
+    const worker = read('sw.js');
+    const deploy = read('.github/workflows/deploy.yml');
+    for (const file of ['username-policy.js', 'username-directory.js', 'auth-dialog.js']) {
+        const versioned = `${file}?v=login-v1`;
+        assert.ok(html.includes(versioned), `HTML: ${versioned}`);
+        assert.ok(worker.includes(`'/${versioned}'`), `precache: ${versioned}`);
+        assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
+    }
+    assert.match(worker, /kanji-widgets-v19/, 'the offline cache version must be bumped');
+    assert.ok(html.indexOf('username-policy.js') < html.indexOf('app-auth.js'));
+    assert.ok(html.indexOf('app-auth.js') < html.indexOf('username-directory.js'));
+    assert.ok(html.indexOf('username-directory.js') < html.indexOf('auth-dialog.js'));
+});
+
+test('one sign-in dialog carries password, username and Google entry points', () => {
+    const dom = new JSDOM(read('index.html'));
+    try {
+        const doc = dom.window.document;
+        const dialog = doc.getElementById('authDialog');
+        assert.ok(dialog, 'the sign-in dialog must exist');
+        for (const pane of ['signin', 'create', 'account']) {
+            assert.ok(dialog.querySelector(`[data-auth-pane=${pane}]`), `pane: ${pane}`);
+        }
+        for (const tab of ['signin', 'create']) {
+            assert.ok(dialog.querySelector(`[data-auth-tab=${tab}]`), `tab: ${tab}`);
+        }
+        for (const id of [
+            'authSignInIdentifier',
+            'authSignInPassword',
+            'authCreateEmail',
+            'authCreateUsername',
+            'authUsernameStatus',
+            'authUsernameSuggestions',
+            'authCreatePassword',
+            'authCreatePasswordConfirm',
+            'authCreateConsent',
+            'authUsernameChange',
+            'authUsernameChangeStatus',
+            'authSaveUsername',
+            'authAddPasswordEmail',
+            'authRecoveryEmail',
+            'authGoogleBtn'
+        ]) {
+            assert.ok(dialog.querySelector(`#${id}`), id);
+        }
+        const ids = [...doc.querySelectorAll('[id]')].map((node) => node.id);
+        assert.equal(new Set(ids).size, ids.length, 'duplicate IDs break dialog controls');
+        const buttons = [...doc.querySelectorAll('[data-app-sign-in]')];
+        assert.equal(buttons.length, 2, 'account panel and profile page both offer sign-in');
+        for (const button of buttons) {
+            assert.match(button.textContent, /Sign in or create account/);
+            assert.equal(button.classList.contains('danger-action'), false);
+            assert.equal(button.hasAttribute('onclick'), false, 'app-auth owns event wiring');
+        }
+        assert.ok(doc.querySelector('[data-username-control]'));
+        assert.ok(doc.querySelector('[data-app-auth-identities]'));
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('no credential, password or username handle reaches backups or cloud sync', () => {
+    const cloudKeys = read('cloud-sync.js');
+    const backupKeys = read('backup-manager.js');
+    const rules = read('firestore.rules');
+    assert.equal(/kanji_handle_v1/.test(cloudKeys), false, 'the handle mirror stays local');
+    assert.equal(
+        /kanji_handle_v1/.test(backupKeys),
+        false,
+        'the handle mirror stays out of backups'
+    );
+    assert.equal(/password/i.test(cloudKeys.match(/static keys = \[[\s\S]*?\];/)[0]), false);
+    assert.equal(/password/i.test(backupKeys.match(/static keys = \[[\s\S]*?\];/)[0]), false);
+    assert.match(rules, /match \/usernames\/\{name\} \{/);
+    assert.match(rules, /allow get: if true;/);
+    assert.match(rules, /allow list: if false;/);
+    assert.match(rules, /match \/users\/\{uid\}\/sync\/progress \{/);
+    assert.match(rules, /request\.resource\.data\.payload\.size\(\) <= 350000/);
+});
+
 test('default tests and CI retain the practice regression gate along with account tests', () => {
     const pkg = JSON.parse(read('package.json'));
     assert.match(pkg.scripts.test, /test\/test-cloud-sync\.js/);

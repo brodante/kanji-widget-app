@@ -70,7 +70,7 @@ live Google Drive acceptance tests.
 
 Open Account → **My profile** for profile editing, learning statistics and save controls
 without leaving the app. The checkpoint diagnostic displays its loaded build and run
-time; verify `profile-v1` before reporting a new diagnostic result.
+time; verify `login-v1` before reporting a new diagnostic result.
 
 Settings now includes profile and section shortcuts. Imports of known v1/v2 exports use
 the same validated, recovery-protected restore path as current backups.
@@ -78,6 +78,24 @@ the same validated, recovery-protected restore path as current backups.
 ### Persistent Google app sign-in (Firebase Spark)
 
 Persistent app sign-in is implemented separately from Google Drive permissions. The owner's public `kanji-widgets` project configuration is now in `firebase-config.js`. Google sign-in has been confirmed working by the owner. See [Firebase setup and phased plan](docs/firebase-auth-setup.md) for the exact free-plan setup steps and verification checklist.
+
+### Email, username and password sign-in
+
+The account menu and Profile page open one sign-in dialog with **Sign in** and
+**Create account** tabs. Password accounts need an email and choose a unique
+username; the username can also be used to sign in. Availability is checked while
+typing, and the reservation document in Firestore, not the browser, decides who owns
+a name. Google accounts can add a password, and password accounts can link Google,
+without ever merging two accounts by email.
+
+Username-only accounts keep no mailbox: their identifier resolves to a private alias
+address, so password recovery for them is honestly refused until a recovery email is
+added from Profile. Passwords, reset links and session tokens stay with the Firebase
+SDK and are never written to backups or cloud sync.
+
+Enable the Email/Password provider, publish the updated security rules and keep the
+project on Spark. See [Email, username and password sign-in](docs/username-login-setup.md)
+for the setup steps, the Firestore layout and what still needs a real-project check.
 
 Keep the project on **Spark with no billing account linked**. Google login does not require moving the site off GitHub Pages. The new Firestore progress-sync layer requires published rules and first-sync consent. It does not renew Drive access. Signing out of the app does not disconnect Drive; both controls are explicitly labeled. Firebase session credentials are excluded from learning backups. Real Firestore and two-device verification remain pending.
 

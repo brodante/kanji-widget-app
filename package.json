@@ -8,7 +8,7 @@
         "lint:fix": "eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/ --fix",
         "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
         "format:check": "prettier --check . --ignore-path .gitignore --ignore-path .prettierignore",
-        "test": "node test/test-srs-ai.js && node --test test/test-backup.js test/test-account-ui.js test/test-profile-page.js test/test-app-auth.js test/test-cloud-sync.js test/test-main-integration.js test/test-analytics.js && npm run test:drawing-pad",
+        "test": "node test/test-srs-ai.js && node --test test/test-backup.js test/test-account-ui.js test/test-profile-page.js test/test-app-auth.js test/test-cloud-sync.js test/test-username-login.js test/test-main-integration.js test/test-analytics.js && npm run test:drawing-pad",
         "prepare": "husky install",
         "test:rules": "npx --yes firebase-tools@15 emulators:exec --only firestore --project demo-kanji-widget \"node --test test/test-firestore-rules.js\"",
         "test:drawing-pad": "node test/test-drawing-pad.js"

@@ -31,6 +31,7 @@ This is ongoing free-plan setup, not a promise that a vendor's pricing will neve
 
 Implemented for controlled testing. The default database is in Singapore. Publishing security rules, emulator execution and live acceptance are still pending. Follow [the Firestore setup guide](firestore-sync-setup.md). Authentication alone is not cloud progress sync.
 
+0. Username ownership and account records are implemented (`usernames/{name}`, `users/{uid}`) with published-shape rules and mocked tests. Live verification is pending.
 1. Design per-user Firestore documents for progress, SRS and ordinary preferences, with explicit consent before associating existing guest data with an account.
 2. Add owner-only security rules based on `request.auth.uid`, validate document shape and size, and test rules with the emulator before publishing.
 3. Add debounced saves and quota-aware reads, conflict checks, account-switch guards and recovery before restore. Never silently replace local progress on login.
@@ -84,7 +85,24 @@ Keep the supplied `authDomain` ending in `.firebaseapp.com`. Do not replace it w
 4. Choose your project support email and a public-facing project name if requested.
 5. Save.
 
-Do not enable phone authentication, Identity Platform upgrades or email-link sign-in for this phase. Do not manually add Drive scopes to the Firebase provider.
+Do not enable phone authentication, Identity Platform upgrades or email-link sign-in. Email link (passwordless) stays off: username/password accounts are created in the app and confirmed with a normal verification link.
+
+### 3b. Enable Email/Password sign-in
+
+The app's sign-in dialog also offers email/username + password accounts, so the
+**Email/Password** provider must be enabled:
+
+1. Open **Build → Authentication → Sign-in method**.
+2. Select **Email/Password**, enable it, and leave **Email link (passwordless sign-in)**
+   off.
+3. Save.
+
+Usernames are stored in Firestore, not in the provider: see
+[Email, username and password sign-in](username-login-setup.md) for the collection
+layout, the alias address shape used by username-only accounts, and the rules that
+decide ownership.
+
+Do not manually add Drive scopes to the Firebase provider.
 
 ### 4. Authorize your site domains
 

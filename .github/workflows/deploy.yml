@@ -39,7 +39,10 @@ jobs:
                   cp -r database deploy/
                   cp backup-config.js deploy/
                   cp firebase-config.js deploy/
+                  cp username-policy.js deploy/
                   cp app-auth.js deploy/
+                  cp username-directory.js deploy/
+                  cp auth-dialog.js deploy/
                   cp cloud-sync.js deploy/
                   cp ui-feedback.js deploy/
                   cp firestore.rules deploy/

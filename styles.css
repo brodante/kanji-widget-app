@@ -6393,3 +6393,357 @@ button.danger-action:disabled {
         animation: none;
     }
 }
+
+/* ---------------------------------------------------------------------------
+   Sign-in dialog: email/username + password, account creation and username
+   availability. Theme-aware, using the same surface variables as the profile
+   page. The Google button keeps the normal sign-in styling; only destructive
+   actions use the vermilion danger treatment.
+--------------------------------------------------------------------------- */
+body.auth-dialog-open {
+    overflow: hidden;
+}
+.auth-dialog {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--on-background);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+}
+.auth-dialog:not([open]) {
+    display: none;
+}
+.auth-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+}
+.auth-dialog-shell {
+    width: min(560px, calc(100vw - 24px));
+    margin: max(24px, env(safe-area-inset-top)) auto 48px;
+    padding: 24px;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 18px;
+    background: var(--surface);
+    color: var(--on-surface);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+.auth-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+.auth-dialog-eyebrow {
+    margin: 0 0 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+.auth-dialog-header h2 {
+    margin: 0 0 6px;
+    font-size: 1.35rem;
+}
+.auth-dialog-intro {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+.auth-dialog-close {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.auth-dialog-close:hover {
+    background: var(--shadow);
+}
+.auth-dialog :is(button, input, a):focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+.auth-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 18px 0 12px;
+    padding: 4px;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 12px;
+    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 85%, var(--primary-color) 15%);
+}
+.auth-tabs button {
+    flex: 1;
+    min-height: 44px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.auth-tabs button.is-active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+.auth-feedback {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color, #8884);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 92%, var(--primary-color) 8%);
+}
+.auth-feedback--error {
+    border-left-color: var(--error, #b00020);
+    color: var(--error, #b00020);
+}
+.auth-feedback--success {
+    border-left-color: var(--secondary-color, #03dac6);
+}
+.auth-pane {
+    display: block;
+}
+.auth-pane[hidden] {
+    display: none;
+}
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.auth-form label {
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+.auth-form label span {
+    font-weight: 400;
+    opacity: 0.7;
+}
+.auth-form input[type='text'],
+.auth-form input[type='email'],
+.auth-form input[type='password'] {
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 10px;
+    background: var(--background);
+    color: var(--on-background);
+    font: inherit;
+}
+.auth-password-row,
+.auth-inline-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+.auth-password-row input {
+    flex: 1;
+    min-width: 0;
+}
+.auth-inline-row input {
+    flex: 1;
+    min-width: 0;
+}
+.auth-reveal {
+    flex: 0 0 auto;
+    min-width: 64px;
+    min-height: 44px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.auth-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+.auth-form-actions .backup-btn {
+    flex: 0 1 auto;
+}
+.auth-link {
+    border: 0;
+    background: transparent;
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 0.88rem;
+    text-decoration: underline;
+    cursor: pointer;
+    min-height: 44px;
+}
+.auth-hint {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    opacity: 0.7;
+}
+.auth-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+.auth-check input {
+    margin-top: 2px;
+    width: 20px;
+    height: 20px;
+}
+.auth-username-status {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.auth-username-status--checking {
+    opacity: 0.75;
+    font-weight: 400;
+}
+.auth-username-status--free {
+    color: var(--secondary-color, #03dac6);
+}
+.auth-username-status--taken,
+.auth-username-status--reserved,
+.auth-username-status--format,
+.auth-username-status--short,
+.auth-username-status--long,
+.auth-username-status--start,
+.auth-username-status--underscore,
+.auth-username-status--empty {
+    color: var(--error, #b00020);
+}
+.auth-username-status--yours,
+.auth-username-status--released {
+    color: var(--primary-color);
+}
+.auth-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.82rem;
+    opacity: 0.85;
+}
+.auth-suggestion {
+    min-height: 34px;
+    padding: 4px 10px;
+    border: 1px dashed var(--border-color, #8886);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.auth-suggestion:hover {
+    border-style: solid;
+    border-color: var(--primary-color);
+}
+.auth-card {
+    margin: 12px 0;
+    padding: 16px;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 14px;
+}
+.auth-card[hidden] {
+    display: none;
+}
+.auth-card h3 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+}
+.auth-card .auth-form {
+    margin: 12px 0 0;
+}
+.auth-identity {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    word-break: break-word;
+}
+.auth-identity:empty {
+    display: none;
+}
+.auth-account-actions {
+    margin-top: 8px;
+}
+.auth-dialog-footer {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color, #8884);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.auth-dialog-footer small {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.7;
+}
+.auth-google-btn {
+    flex: 0 1 auto;
+    align-self: flex-start;
+}
+.app-auth-identities {
+    margin: 0.35rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0.85;
+    word-break: break-word;
+}
+.app-auth-identities:empty {
+    display: none;
+}
+.app-auth-help {
+    margin: 0.5rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.65;
+}
+@media (max-width: 620px) {
+    .auth-dialog-shell {
+        width: 100%;
+        margin: 0;
+        min-height: 100%;
+        border: 0;
+        border-radius: 0;
+        padding: max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+    }
+    .auth-tabs {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--surface);
+    }
+    .auth-google-btn,
+    .auth-form-actions .backup-btn {
+        flex: 1 1 100%;
+    }
+}

@@ -222,9 +222,10 @@
                         <p data-app-auth-status role="status" aria-live="polite">
                             Checking app sign-in…
                         </p>
+                        <p class="app-auth-identities" data-app-auth-identities></p>
                         <div class="backup-buttons">
                             <button type="button" class="backup-btn" data-app-sign-in disabled>
-                                Sign in with Google
+                                Sign in or create account
                             </button>
                             <button
                                 type="button"
@@ -237,7 +238,29 @@
                             <button type="button" class="backup-btn" data-app-auth-retry hidden>
                                 Retry connection
                             </button>
+                            <button
+                                type="button"
+                                class="backup-btn"
+                                data-auth-open="account"
+                                data-username-control
+                                hidden
+                            >
+                                Username &amp; sign-in methods
+                            </button>
+                            <button
+                                type="button"
+                                class="backup-btn"
+                                data-auth-open="account"
+                                data-auth-verify
+                                hidden
+                            >
+                                Confirm your email
+                            </button>
                         </div>
+                        <p class="app-auth-help">
+                            Password sign-in accepts your email or your unique username. Signing in
+                            on its own never uploads progress.
+                        </p>
                     </div>
                     <section class="cloud-progress" aria-label="Cloud progress">
                         <h3>Cloud progress</h3>
@@ -1870,9 +1893,10 @@ filter: blur(10px) brightness(1) saturate(1);
                             <p data-app-auth-status role="status" aria-live="polite">
                                 Checking app sign-in…
                             </p>
+                            <p class="app-auth-identities" data-app-auth-identities></p>
                             <div class="backup-buttons">
                                 <button type="button" class="backup-btn" data-app-sign-in disabled>
-                                    Sign in with Google
+                                    Sign in or create account
                                 </button>
                                 <button
                                     type="button"
@@ -1885,11 +1909,31 @@ filter: blur(10px) brightness(1) saturate(1);
                                 <button type="button" class="backup-btn" data-app-auth-retry hidden>
                                     Retry connection
                                 </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-auth-open="account"
+                                    data-username-control
+                                    hidden
+                                >
+                                    Username &amp; sign-in methods
+                                </button>
+                                <button
+                                    type="button"
+                                    class="backup-btn"
+                                    data-auth-open="account"
+                                    data-auth-verify
+                                    hidden
+                                >
+                                    Confirm your email
+                                </button>
                             </div>
                         </div>
                         <p class="profile-hint">
                             Sign-in does not upload, restore or separate this browser’s learning
                             data. Only sign in on a trusted device. Drive authorization is separate.
+                            Passwords are handled by Firebase Authentication and are never written
+                            to a backup.
                         </p>
                     </section>
                 </div>
@@ -1928,6 +1972,295 @@ filter: blur(10px) brightness(1) saturate(1);
             </div>
         </dialog>
 
+        <dialog id="authDialog" class="auth-dialog" aria-labelledby="authDialogTitle">
+            <div class="auth-dialog-shell">
+                <header class="auth-dialog-header">
+                    <div>
+                        <p class="auth-dialog-eyebrow">KanjiWidgets account</p>
+                        <h2 id="authDialogTitle">Sign in</h2>
+                        <p id="authDialogIntro" class="auth-dialog-intro">
+                            Use your email or username and password, or continue with Google.
+                        </p>
+                    </div>
+                    <button
+                        id="authClose"
+                        type="button"
+                        class="auth-dialog-close"
+                        aria-label="Close sign-in"
+                    >
+                        ×
+                    </button>
+                </header>
+                <div class="auth-tabs" role="tablist" aria-label="Sign in or create an account">
+                    <button
+                        id="authTabSignIn"
+                        type="button"
+                        role="tab"
+                        class="is-active"
+                        data-auth-tab="signin"
+                        aria-selected="true"
+                    >
+                        Sign in
+                    </button>
+                    <button
+                        id="authTabCreate"
+                        type="button"
+                        role="tab"
+                        data-auth-tab="create"
+                        aria-selected="false"
+                    >
+                        Create account
+                    </button>
+                </div>
+                <p
+                    id="authFeedback"
+                    class="auth-feedback"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                ></p>
+
+                <section data-auth-pane="signin" class="auth-pane" aria-label="Sign in">
+                    <form id="authSignInForm" class="auth-form" novalidate>
+                        <label for="authSignInIdentifier">Email or username</label>
+                        <input
+                            id="authSignInIdentifier"
+                            name="identifier"
+                            type="text"
+                            autocomplete="username"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            placeholder="you@example.com or your_username"
+                            required
+                        />
+                        <label for="authSignInPassword">Password</label>
+                        <div class="auth-password-row">
+                            <input
+                                id="authSignInPassword"
+                                name="password"
+                                type="password"
+                                autocomplete="current-password"
+                                required
+                            />
+                            <button
+                                type="button"
+                                class="auth-reveal"
+                                data-auth-reveal="authSignInPassword"
+                                aria-label="Show password"
+                            >
+                                Show
+                            </button>
+                        </div>
+                        <div class="auth-form-actions">
+                            <button id="authSignInSubmit" type="submit" class="backup-btn">
+                                Sign in
+                            </button>
+                            <button id="authSignInForgot" type="button" class="auth-link">
+                                Forgot password?
+                            </button>
+                        </div>
+                    </form>
+                    <p class="auth-hint">
+                        Username accounts keep no mailbox on file, so a lost password cannot be
+                        emailed. Add a recovery email in Profile while you are signed in.
+                    </p>
+                </section>
+
+                <section
+                    data-auth-pane="create"
+                    class="auth-pane"
+                    aria-label="Create account"
+                    hidden
+                >
+                    <form id="authCreateForm" class="auth-form" novalidate>
+                        <label for="authCreateEmail">Email</label>
+                        <input
+                            id="authCreateEmail"
+                            type="email"
+                            autocomplete="email"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            placeholder="you@example.com"
+                        />
+                        <label for="authCreateUsername">Username</label>
+                        <input
+                            id="authCreateUsername"
+                            type="text"
+                            maxlength="20"
+                            autocomplete="username"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            placeholder="e.g. dante_kanji"
+                        />
+                        <p
+                            id="authUsernameStatus"
+                            class="auth-username-status"
+                            role="status"
+                            aria-live="polite"
+                            hidden
+                        ></p>
+                        <p id="authUsernameSuggestions" class="auth-suggestions" hidden></p>
+                        <label for="authCreatePassword">Password</label>
+                        <div class="auth-password-row">
+                            <input
+                                id="authCreatePassword"
+                                type="password"
+                                autocomplete="new-password"
+                                minlength="8"
+                            />
+                            <button
+                                type="button"
+                                class="auth-reveal"
+                                data-auth-reveal="authCreatePassword"
+                                aria-label="Show password"
+                            >
+                                Show
+                            </button>
+                        </div>
+                        <p id="authCreatePasswordStrength" class="auth-hint"></p>
+                        <label for="authCreatePasswordConfirm">Confirm password</label>
+                        <input
+                            id="authCreatePasswordConfirm"
+                            type="password"
+                            autocomplete="new-password"
+                            minlength="8"
+                        />
+                        <label for="authCreateName">Display name <span>(optional)</span></label>
+                        <input
+                            id="authCreateName"
+                            type="text"
+                            maxlength="40"
+                            autocomplete="nickname"
+                        />
+                        <label class="auth-check">
+                            <input id="authCreateConsent" type="checkbox" />
+                            <span
+                                >I understand that signing in does not upload my progress. Cloud
+                                saving still asks before it saves.</span
+                            >
+                        </label>
+                        <div class="auth-form-actions">
+                            <button id="authCreateSubmit" type="submit" class="backup-btn">
+                                Create account
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section data-auth-pane="account" class="auth-pane" aria-label="Account" hidden>
+                    <p id="authAccountIdentity" class="auth-identity"></p>
+                    <button
+                        id="authVerifyEmail"
+                        type="button"
+                        class="backup-btn"
+                        data-auth-verify
+                        hidden
+                    >
+                        Send confirmation link
+                    </button>
+                    <form id="authUsernameForm" class="auth-form">
+                        <label id="authUsernameLabel" for="authUsernameChange"
+                            >Choose your username</label
+                        >
+                        <div class="auth-inline-row">
+                            <input
+                                id="authUsernameChange"
+                                type="text"
+                                maxlength="20"
+                                autocomplete="off"
+                                autocapitalize="none"
+                                spellcheck="false"
+                                placeholder="your_username"
+                            />
+                            <button id="authUsernameCheck" type="button" class="backup-btn">
+                                Check
+                            </button>
+                        </div>
+                        <p
+                            id="authUsernameChangeStatus"
+                            class="auth-username-status"
+                            role="status"
+                            aria-live="polite"
+                            hidden
+                        ></p>
+                        <p id="authUsernameHint" class="auth-hint">
+                            Letters, numbers and underscores. 3 to 20 characters, starting with a
+                            letter.
+                        </p>
+                        <button id="authSaveUsername" type="submit" class="backup-btn">
+                            Claim username
+                        </button>
+                    </form>
+                    <div id="authAddPasswordSection" class="auth-card" hidden>
+                        <h3>Add a password</h3>
+                        <p class="auth-hint">
+                            Only needed if you signed in with Google. The password is added to this
+                            same account, never merged with another one.
+                        </p>
+                        <form id="authAddPasswordForm" class="auth-form">
+                            <label for="authAddPasswordEmail">Email</label>
+                            <input
+                                id="authAddPasswordEmail"
+                                type="email"
+                                autocomplete="email"
+                                autocapitalize="none"
+                                spellcheck="false"
+                            />
+                            <label for="authAddPasswordValue">Password</label>
+                            <input
+                                id="authAddPasswordValue"
+                                type="password"
+                                autocomplete="new-password"
+                                minlength="8"
+                            />
+                            <button type="submit" class="backup-btn">Add password</button>
+                        </form>
+                    </div>
+                    <div id="authRecoverySection" class="auth-card" hidden>
+                        <h3>Add a recovery email</h3>
+                        <p class="auth-hint">
+                            This account is username-only, so there is no mailbox for a reset link.
+                            Adding one enables password recovery.
+                        </p>
+                        <div class="auth-inline-row">
+                            <input
+                                id="authRecoveryEmail"
+                                type="email"
+                                autocomplete="email"
+                                autocapitalize="none"
+                                spellcheck="false"
+                                aria-label="Recovery email"
+                                placeholder="you@example.com"
+                            />
+                            <button id="authAddRecoveryEmail" type="button" class="backup-btn">
+                                Send link
+                            </button>
+                        </div>
+                    </div>
+                    <div class="backup-buttons auth-account-actions">
+                        <button id="authLinkGoogle" type="button" class="backup-btn">
+                            Link Google
+                        </button>
+                        <button id="authSignOut" type="button" class="backup-btn danger-action">
+                            Sign out of app
+                        </button>
+                        <button id="authDialogDone" type="button" class="backup-btn">Done</button>
+                    </div>
+                </section>
+
+                <footer class="auth-dialog-footer">
+                    <button id="authGoogleBtn" type="button" class="backup-btn auth-google-btn">
+                        Continue with Google
+                    </button>
+                    <small
+                        >Passwords are handled by Firebase Authentication. Nothing is written to
+                        this browser’s backups, and signing in never uploads learning data on its
+                        own.</small
+                    >
+                </footer>
+            </div>
+        </dialog>
+
         <script src="storage-manager.js"></script>
         <script src="srs-engine.js"></script>
         <script src="ai-manager.js"></script>
@@ -1940,7 +2273,10 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="backup-manager.js?v=practice-merge-v1"></script>
         <script src="profile-page.js?v=practice-merge-v1"></script>
         <script src="firebase-config.js?v=practice-merge-v1"></script>
+        <script src="username-policy.js?v=login-v1"></script>
         <script src="app-auth.js?v=practice-merge-v1"></script>
+        <script src="username-directory.js?v=login-v1"></script>
+        <script src="auth-dialog.js?v=login-v1"></script>
         <script src="cloud-sync.js?v=practice-merge-v1"></script>
         <script src="script.js?v=practice-merge-v1"></script>
     </body>

@@ -1,6 +1,6 @@
 # Account, sign-in and cloud-save roadmap
 
-This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app connects to Drive using browser OAuth. Persistent Firebase Google app sign-in is now implemented but has the owner’s public project configuration; Google sign-in has been confirmed working by the owner; Firestore verification is pending. App login does not renew Drive permissions. Firestore progress sync is implemented for controlled testing; password sign-up is not implemented.
+This checklist tracks the agreed priorities. Checked items mean implemented and covered by automated tests, **not that live Google production behavior has been independently verified**. The app connects to Drive using browser OAuth. Persistent Firebase app sign-in is implemented with the owner’s public project configuration; Google sign-in has been confirmed working by the owner; Firestore verification is pending. App login does not renew Drive permissions. Firestore progress sync is implemented for controlled testing. Email/username + password sign-in with unique usernames is now implemented and needs the owner to enable the Email/Password provider and publish the updated rules; see [Email, username and password sign-in](username-login-setup.md).
 
 ## Current focus: Firebase Spark app sign-in
 
@@ -67,7 +67,7 @@ and Save options & help sections. It is wider on desktop and a compact bottom sh
 phones. Scrollbars remain available when needed (expanded controls, conflicts, or small
 screens), using a thin theme-matched treatment rather than hiding accessible scrolling.
 
-- [x] Editable display name/nickname, stored with the profile and included in backups (not globally unique).
+- [x] Editable display name/nickname, stored with the profile and included in backups (not globally unique). Usernames are the unique, claimable identifier; nicknames stay free-form and local to the profile.
 - [x] Dedicated profile page: avatar, nickname, learning start date, stats and save controls.
 - [x] Guided first-connection onboarding: local/cloud explanation and first checkpoint vs restore.
 - [x] Debounced autosave after meaningful changes, grouped writes and exponential backoff (15-second quiet window, 5-second observation, retries from 15 seconds up to 5 minutes; respects server Retry-After).
@@ -81,12 +81,12 @@ screens), using a thin theme-matched treatment rather than hiding accessible scr
 
 The frontend can remain on GitHub Pages; these features require a managed authentication/database service or secure backend. Evaluate current Firebase/Supabase capabilities and pricing before selecting one. Do not build custom password storage as a shortcut.
 
-- [ ] Persistent app accounts across reloads; separate from expiring Google Drive authorization.
+- [x] Persistent app accounts across reloads; separate from expiring Google Drive authorization.
 - [ ] GitHub sign-in as an alternative provider, paired with app-managed storage or separately connected Drive.
-- [ ] Secure Google/GitHub account linking with explicit verified linking, never email-only automatic merging.
-- [ ] Unique usernames with reservation, rename rules, uniqueness checks and abuse protections.
+- [x] Secure account linking with explicit verified linking, never email-only automatic merging (Google ↔ password on one account).
+- [x] Unique usernames with reservation, rename rules, uniqueness checks and abuse protections (30-day rename cooldown, 30-day reservation of the previous name, reserved-word list, live availability checks).
 - [ ] Structured cross-device database sync with defined review/reset/deletion conflict rules.
-- [ ] Account recovery, session list/revocation and safe provider unlinking that preserves a login method.
+- [x] Account recovery for real mailboxes (password reset + verification). Username-only accounts are told there is no mailbox and can add a recovery email; session list/revocation and provider unlinking that preserves a login method remain open.
 
 ## Optional: nice extras
 
@@ -126,7 +126,7 @@ Use disposable/test progress and export your real data before testing. Update bo
 Record live results here (date, browser/device, pass/fail and relevant error text). Never record credentials or access tokens.
 
 - Previous header-based Drive diagnostic: **user ran it and reported NOT VERIFIED: no usable revision token/readback**. This is not a successful live verification.
-- Updated metadata-ETag diagnostic: **PASS, user-reported**, on `http://localhost:5000`, build `profile-v1`, protocol `metadata-etag-v1`, at `2026-09-22T16:52:02.499Z`. Create, read, update and stale-revision rejection succeeded on a real Google account. No account email or credentials are recorded here.
+- Updated metadata-ETag diagnostic: **PASS, user-reported**, on `http://localhost:5000`, build `profile-v1` (later reported as `login-v1` after the username-login release), protocol `metadata-etag-v1`, at `2026-09-22T16:52:02.499Z`. Create, read, update and stale-revision rejection succeeded on a real Google account. No account email or credentials are recorded here.
 - Real two-device acceptance: **pending**.
 - Automated regression suite: run `npm test`; service responses and browser DOM are simulated, with fake IndexedDB transaction tests.
 
@@ -160,3 +160,28 @@ nicknames, imported data and generated third-party content are not rewritten.
 - [ ] User browser acceptance of the combined Practice/account experience. Real Firebase/Drive acceptance and rule-emulator verification remain separate from these automated tests.
 
 No PR is opened by this integration. The live site is not deployed from this working branch.
+
+## Email/username login release
+
+Implemented in the login-management work; see [the setup and limits guide](username-login-setup.md).
+
+- One `#authDialog` carries Sign in, Create account and account management panes. Both
+  existing sign-in entry points open it instead of jumping straight to a Google popup.
+- Password accounts sign in with an email or their unique username. Username-only
+  accounts use a private alias address (`users.kanji.qd.je`), so no email lookup is
+  needed on the client and no mailbox is stored anywhere.
+- `username-policy.js` holds every rule (3–20 characters, lowercase `a–z 0–9 _`,
+  single underscores, reserved words, suggestions). `username-directory.js` talks to
+  Firestore: availability reads, reservations, renames, the published verified email
+  and the local handle mirror (`kanji_handle_v1`, never backed up or synced).
+- `firestore.rules` adds `usernames/{name}` (public single-document reads, no listing,
+  create-only claim, release/claim-after-expiry updates) and `users/{uid}` account
+  records. Progress-sync rules are untouched.
+- The offline cache is `kanji-widgets-v19`, the diagnostic build marker is
+  `login-v1`, and the deploy workflow copies the three new scripts.
+- `test/test-username-login.js` covers the policy, AppAuth, the directory and the
+  dialog; `test/test-main-integration.js` guards the wiring. Username rule tests were
+  added to `test/test-firestore-rules.js` but not executed here (no Java), so
+  `npm run test:rules` still needs a real run.
+- Owner actions pending: enable the Email/Password provider with email link off,
+  publish the updated rules, and walk the manual checklist in the setup guide.
