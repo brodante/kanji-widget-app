@@ -627,8 +627,9 @@ test('sign-out clears the photo, nickname and username but keeps learning progre
         assert.ok(avatarImg.hidden, 'the placeholder, not a face, is shown');
         assert.equal(doc.querySelector('#accountAvatar + *')?.hidden, false);
         assert.match(
-            doc.getElementById('profilePageFeedback').textContent,
-            /photo, name and username were removed/i
+            doc.querySelector('[data-app-auth-status]').textContent,
+            /photo, name and username were removed/i,
+            'the account panel says what the sign-out removed'
         );
         assert.match(auth.message, /photo, name and username were removed/i);
         assert.match(auth.message, /Drive has its own Disconnect/, 'Drive guidance is kept');
@@ -1748,15 +1749,24 @@ test('the sign-in dialog exposes both paths and keeps one namespace of IDs', asy
         for (const button of doc.querySelectorAll('[data-app-sign-out]')) {
             assert.equal(button.classList.contains('danger-action'), true);
         }
-        // Every sign-out button is paired with a line naming what goes and what stays.
-        assert.equal(doc.querySelectorAll('[data-sign-out-note]').length, 2);
-        for (const note of doc.querySelectorAll('[data-sign-out-note]')) {
+        // The account panel (the shared-device path) and the profile page each name what
+        // goes and what stays, directly after their own sign-out button and only once.
+        const notes = [...doc.querySelectorAll('[data-sign-out-note]')];
+        assert.equal(notes.length, 2, 'one disclosure per sign-out button, never duplicated');
+        for (const note of notes) {
             assert.match(note.textContent, /removes your photo, name and username/);
             assert.match(note.textContent, /Progress stays/);
+            assert.equal(
+                note.previousElementSibling?.hasAttribute('data-app-sign-out'),
+                true,
+                'the disclosure sits directly after its sign-out button'
+            );
         }
-        assert.match(
-            doc.querySelector('.auth-signout-note').textContent,
-            /Kanji progress, reviews and local backups stay/
+        const dialogNote = doc.querySelector('.auth-signout-note');
+        assert.match(dialogNote.textContent, /Kanji progress, reviews and local backups stay/);
+        assert.ok(
+            dialogNote.parentElement.contains(doc.getElementById('authSignOut')),
+            'the dialog states it in the same button row as its sign-out'
         );
         assert.ok(doc.querySelector('[data-username-control]'));
         assert.ok(doc.querySelector('[data-auth-verify]'));

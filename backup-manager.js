@@ -1964,11 +1964,6 @@ class BackupManager {
         if (nickname) {
             nickname.value = '';
         }
-        const feedback = document.getElementById('profilePageFeedback');
-        if (feedback) {
-            feedback.textContent =
-                'Signed out: your photo, name and username were removed from this device. Learning progress stays.';
-        }
         this.renderAccount();
         this.renderAvatar();
         window.kanjiProfilePage?.refresh();

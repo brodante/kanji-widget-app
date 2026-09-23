@@ -59,13 +59,16 @@ nickname and username all intact. Expected prompt text:
 
 **3.2 — the real sign-out.** Click again → **OK**. Expect:
 
-- Photo replaced by the placeholder (or your Google photo, if that account has one).
-- Nickname gone; the account heading is no longer your nickname.
+- Photo replaced by the placeholder, even if the account has a Google photo: remote
+  photos stay hidden until the next signed-in session, so nobody sees whose face it was.
+- Nickname gone; the account heading reads **Guest user**.
 - **Username & sign-in methods** disappears.
-- Status line: "Signed out: your photo, name and username were removed from this device.
-  Learning progress stays."
-- Signing out from inside the dialog instead shows the longer line about the shared-device
-  option in `Recovery & privacy → Disconnect & clear this device`.
+- Status line, in the account panel and in the dialog (the account panel's sign-out button
+  also carries it as a one-line note before you click):
+
+    > Signed out of the app. Your photo, name and username were removed from this device;
+    > learning progress stays. On a shared device, Recovery & privacy → Disconnect & clear
+    > this device also removes local study data. Drive has its own Disconnect button.
 
 **3.3 — reload.** Ctrl+Shift+R. Still no photo, no nickname, no username. **This is the
 exact bug you reported**, so it matters that it holds after a reload, not just on screen.
