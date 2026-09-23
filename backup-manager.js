@@ -1467,7 +1467,7 @@ class BackupManager {
             this.pendingCloud ? 'Account & sync: cloud copy needs review' : 'Account & sync'
         );
         document.getElementById('accountHeading').textContent = appUser
-            ? appUser.displayName || 'Google account'
+            ? window.AppAuth?.accountLabel?.(appUser) || appUser.displayName || 'Signed-in account'
             : connected
               ? this.user.displayName || 'Google account'
               : 'Guest user';
@@ -1480,7 +1480,9 @@ class BackupManager {
             /* A malformed local profile must not prevent connecting. */
         }
         document.getElementById('accountIdentity').textContent = appUser
-            ? appUser.email || 'Signed in to KanjiWidgets'
+            ? window.AppAuth?.accountDetail?.(appUser) ||
+              appUser.email ||
+              'Signed in to KanjiWidgets'
             : connected
               ? this.user.emailAddress
               : 'Local profile · connect to save to Drive.';

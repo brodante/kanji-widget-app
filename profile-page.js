@@ -78,16 +78,17 @@ class ProfilePage {
         const connected = manager.authorized() && manager.user;
         const appUser = window.kanjiAuth?.user;
         const nickname = ProfilePage.read('kanji_profile').nickname;
+        const labels = window.AppAuth;
         document.getElementById('profilePageTitle').textContent =
             typeof nickname === 'string' && nickname.trim()
                 ? nickname
                 : appUser
-                  ? appUser.displayName || 'Google account'
+                  ? labels?.accountLabel?.(appUser) || appUser.displayName || 'Signed-in account'
                   : connected
                     ? manager.user.displayName || 'Google account'
                     : 'Guest user';
         document.getElementById('profilePageIdentity').textContent = appUser
-            ? appUser.email || 'Signed in to KanjiWidgets'
+            ? labels?.accountDetail?.(appUser) || appUser.email || 'Signed in to KanjiWidgets'
             : connected
               ? manager.user.emailAddress
               : 'Local profile. Connect whenever you want a cloud copy.';

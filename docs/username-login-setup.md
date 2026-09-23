@@ -9,7 +9,9 @@ opened from the account menu and the Profile page.
 - Unique usernames with live availability feedback, suggestions and a reservation
   document that is the only authority on ownership.
 - Username sign-in: the identifier is turned into a private alias address, so the
-  browser never has to look an email up to sign someone in.
+  browser never has to look an email up to sign someone in. That alias stays internal:
+  the account heading and status lines show `@username`, and an account with no Google
+  provider is never labelled as a Google account.
 - Google linking on an existing account, and `Add a password` for Google accounts.
   Emails are never merged automatically: linking writes to the one account the user
   is already signed into.

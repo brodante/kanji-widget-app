@@ -2013,6 +2013,57 @@ test('creating an account sends the confirmation link automatically', async () =
     }
 });
 
+test('a username-only account keeps its alias private and is not called a Google account', async () => {
+    const { dom, window } = await setupDom();
+    try {
+        window.eval(read('backup-config.js'));
+        window.eval(read('app-auth.js'));
+        window.eval(read('backup-manager.js'));
+        const auth = new window.AppAuth(config, async () => fakeAuthSdk({}));
+        await auth.init();
+        // The create form no longer asks for a display name, so this is the common case.
+        auth.user = { ...aliasAccount, displayName: '' };
+        window.kanjiAuth = auth;
+        const directory = new window.UsernameDirectory();
+        directory.handle = {
+            uid: aliasAccount.uid,
+            username: 'dante_kanji',
+            display: 'dante_kanji'
+        };
+        window.kanjiUsernames = directory;
+        const manager = new window.BackupManager();
+        window.driveBackup = manager;
+
+        auth.render();
+        manager.renderAccount();
+        const doc = window.document;
+        assert.equal(doc.getElementById('accountHeading').textContent, '@dante_kanji');
+        assert.equal(
+            doc.getElementById('accountIdentity').textContent,
+            '@dante_kanji · no mailbox on file'
+        );
+        assert.match(
+            doc.querySelector('[data-app-auth-status]').textContent,
+            /@dante_kanji/,
+            'the status line uses the handle the learner knows'
+        );
+        assert.match(
+            doc.querySelector('[data-app-auth-identities]').textContent,
+            /Username account/
+        );
+        for (const text of [
+            doc.getElementById('accountHeading').textContent,
+            doc.getElementById('accountIdentity').textContent,
+            doc.querySelector('[data-app-auth-status]').textContent
+        ]) {
+            assert.doesNotMatch(text, /users\.kanji\.qd\.je/, 'the sign-in alias stays internal');
+            assert.doesNotMatch(text, /Google account/, 'no Google provider, no Google label');
+        }
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('the app notices a confirmed address without a new sign-in', async () => {
     const { dom, window } = await setupDom();
     try {

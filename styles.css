@@ -6677,18 +6677,6 @@ body.auth-dialog-open {
     line-height: 1.5;
     opacity: 0.7;
 }
-.auth-check {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 0.85rem;
-    font-weight: 400;
-}
-.auth-check input {
-    margin-top: 2px;
-    width: 20px;
-    height: 20px;
-}
 .auth-username-status {
     margin: 0;
     font-size: 0.85rem;

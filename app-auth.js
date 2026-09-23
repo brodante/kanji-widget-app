@@ -29,6 +29,43 @@ class AppAuth {
         this.lastRefreshAt = 0;
     }
 
+    // What the learner sees for the signed-in account. The alias address used for
+    // username sign-in is an implementation detail, and an account without a Google
+    // provider must never be labelled as a Google account.
+    static accountLabel(user, handle = window.kanjiUsernames?.handle) {
+        if (!user) {
+            return '';
+        }
+        const username = handle && (!handle?.uid || handle.uid === user.uid) ? handle.username : '';
+        const name = typeof user.displayName === 'string' ? user.displayName.trim() : '';
+        if (name) {
+            return name;
+        }
+        if (username) {
+            return `@${username}`;
+        }
+        if (AppAuth.isAliasAccount(user)) {
+            return 'Username account';
+        }
+        return user.email || 'Signed-in account';
+    }
+
+    // The line under that label: the address the account really has, or an honest note
+    // that a username-only account keeps no mailbox.
+    static accountDetail(user, handle = window.kanjiUsernames?.handle) {
+        if (!user) {
+            return '';
+        }
+        if (AppAuth.isAliasAccount(user)) {
+            const username =
+                handle && (!handle?.uid || handle.uid === user.uid) ? handle.username : '';
+            return username
+                ? `@${username} · no mailbox on file`
+                : 'Username sign-in · no mailbox on file';
+        }
+        return user.email || 'Signed in to KanjiWidgets';
+    }
+
     // Shown before the session ends, so nobody loses a photo they meant to keep.
     static SIGN_OUT_CONFIRM =
         'Sign out of the app?\n\nRemoved from this device: your uploaded photo and its crop, ' +
@@ -918,7 +955,7 @@ class AppAuth {
         const status =
             this.message ||
             (this.user
-                ? `App signed in: ${this.user.email || this.user.displayName || 'Google account'}. See Cloud progress below for save status.`
+                ? `App signed in: ${AppAuth.accountLabel(this.user)}. See Cloud progress below for save status.`
                 : 'Sign in to stay connected to the app across reloads. Cloud saving starts only after you review your progress.');
         document.querySelectorAll('[data-app-auth-status]').forEach((element) => {
             element.textContent = status;

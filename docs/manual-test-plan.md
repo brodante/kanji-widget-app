@@ -87,9 +87,10 @@ still there. Check a widget and the counts in Settings.
 **3.7 — Drive is separate.** Sign-out does not disconnect Drive. Go to Settings → Backups
 & sync → Drive still shows connected until you press its own **Disconnect**.
 
-**3.8 — expected, by design.** Signing back in as A shows no photo: the stored photo was
-deleted, not hidden, because that is the only thing that survives a reload. A full backup
-restore brings it back; re-uploading takes a moment.
+**3.8 — expected, by design.** Signing back in as A shows no uploaded photo: the stored
+bytes were deleted at sign-out rather than hidden, so they cannot be recovered from this
+device afterwards. A full backup restore brings the photo back; re-uploading takes a
+moment.
 
 ## Step 4 — deleting an account (7-day schedule)
 
