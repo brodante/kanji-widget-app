@@ -4,6 +4,7 @@
     "main": "audio-manager.js",
     "scripts": {
         "start": "node server.js",
+        "dev":"nodemon server.js",
         "lint": "eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/",
         "lint:fix": "eslint . --ext .js --ignore-pattern node_modules/ --ignore-pattern database/ --fix",
         "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
@@ -27,7 +28,8 @@
     "license": "GPL-3.0",
     "description": "Interactive Japanese Kanji learning with widgets and spaced repetition",
     "dependencies": {
-        "express": "^5.1.0"
+        "express": "^5.1.0",
+        "nodemon": "^3.1.14"
     },
     "devDependencies": {
         "@firebase/rules-unit-testing": "^5.0.2",
