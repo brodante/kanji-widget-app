@@ -52,6 +52,10 @@ Firebase's Web API key is a public project identifier, not a Gemini secret. The 
 
 Allow a few minutes for API-key restriction changes to take effect. A 403 mentioning `firebasevertexai.googleapis.com` commonly indicates this API is missing from the key allowlist.
 
+### What “Unregistered” means on the Firebase AI Logic page
+
+On **AI Services → AI Logic → All apps**, an **Unregistered** App Check status means AI Logic is enabled but the Web app has not yet been registered with an App Check attestation provider. Enabling `firebaseappcheck.googleapis.com` alone does not register the app. Register the app using the steps below; do not enable enforcement until the client is configured and valid tokens have been tested.
+
 ### 3. Register Web App Check with reCAPTCHA Enterprise
 
 1. In the correct Google Cloud project, open **Fraud Defense / reCAPTCHA Enterprise** and create a **Web, score-based** site key. If prompted, enable the reCAPTCHA Enterprise API. Do not select a checkbox challenge.
