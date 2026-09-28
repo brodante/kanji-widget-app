@@ -45,7 +45,7 @@ The reCAPTCHA Enterprise site key in `firebase-config.js` is currently empty. **
 
 Firebase's Web API key is a public project identifier, not a Gemini secret. The existing key may have an API allowlist from Auth/Firestore setup. In Google Cloud Console → **APIs & Services → Credentials**, open the browser key used by `firebase-config.js` and verify:
 
-- **Firebase AI Logic API** (`firebasevertexai.googleapis.com`) is in the API restrictions allowlist.
+- **Firebase AI Logic API** (`firebasevertexai.googleapis.com`) and **Firebase App Check API** (`firebaseappcheck.googleapis.com`) are in the API restrictions allowlist.
 - Keep only the other Firebase APIs required by the existing app (Auth/Firestore and related configured services).
 - If using HTTP-referrer application restrictions, include the actual production origins, such as `https://kanji.qd.je/*` and the GitHub Pages origin if that deployment is intentionally supported. Keep restrictions narrow and do not remove existing Auth/Firestore requirements.
 - Do **not** paste a Gemini Developer API key into the app or add it to the Firebase config. Firebase AI Logic uses the Firebase project configuration and App Check, not a learner-facing Gemini key.
@@ -62,6 +62,33 @@ Allow a few minutes for API-key restriction changes to take effect. A 403 mentio
 6. Monitor App Check metrics before enforcing it for Firebase AI Logic. Once real traffic is verified, enable enforcement for **Firebase AI Logic only**. Avoid changing Auth/Firestore enforcement as part of this task.
 
 Firebase App Check's reCAPTCHA Enterprise assessments have a no-cost quota, with charges possible above that quota according to Google's current pricing. Keep Spark/no billing, monitor the assessment quota, and do not link billing to avoid an interruption. If the free quota is exhausted or setup requires billing, stop and ask the owner; the safe fallback is BYOK/local functionality, not a paid upgrade. Firebase requires App Check enforcement for Firebase AI Logic starting **2026-11-02**.
+
+## Test the pushed branch locally
+
+Clone the branch without opening a PR:
+
+```sh
+git clone --single-branch --branch arena/01a0e9de-kanji-widget-app \
+  https://github.com/brodante/kanji-widget-app.git
+cd kanji-widget-app
+npm ci
+npm test
+npm run lint
+npm run format:check
+npm start
+```
+
+Open `http://localhost:5000`. The UI, keyless Settings, local learning and mocked tests can be checked immediately. **The built-in live AI call will not work yet while `recaptchaEnterpriseSiteKey` is empty.** The push only updates the branch; it does not deploy the site.
+
+For a localhost live-AI smoke test after Firebase AI Logic and App Check are registered:
+
+1. Do not add `localhost` to the production reCAPTCHA Enterprise key. In your local, uncommitted `firebase-config.js` only, set the public site key and set `window.FIREBASE_APPCHECK_DEBUG_TOKEN = true` before App Check initializes.
+2. Run `npm start`, open DevTools, and copy the debug token printed by the Firebase SDK.
+3. In Firebase Console → **Security → App Check → Apps**, open the Web app's menu → **Manage debug tokens** and register that token.
+4. Reload `http://localhost:5000`, choose the built-in provider, and send a small test prompt. If the Firebase API key has HTTP-referrer restrictions, use a dev-only key/project that allows localhost rather than broadening the production key.
+5. Treat the debug token as a credential: never commit or share it. Remove the local debug flag and delete the token from Firebase Console when testing is done. Never enable debug mode in a production build.
+
+A dedicated Spark development Firebase project is the safer place for debug tokens and test traffic because it isolates the production AI quota. If using the existing production project for a brief smoke test, keep requests minimal; they share that project's model quota. For actual production-host validation, use the production reCAPTCHA key on a registered, allowed origin without the debug provider.
 
 ### 4. Live validation checklist
 
