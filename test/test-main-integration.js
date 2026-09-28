@@ -77,17 +77,21 @@ test('offline precache and static deployment include both practice and account b
     const html = read('index.html');
     const worker = read('sw.js');
     const deploy = read('.github/workflows/deploy.yml');
-    for (const file of [
-        'drawing-pad.js',
-        'script.js',
-        'ui-feedback.js',
-        'backup-manager.js',
-        'profile-page.js',
-        'firebase-config.js',
-        'app-auth.js',
-        'cloud-sync.js'
-    ]) {
-        const versioned = `${file}?v=practice-merge-v1`;
+    const assets = [
+        ['drawing-pad.js', 'practice-merge-v1'],
+        ['ui-feedback.js', 'practice-merge-v1'],
+        ['backup-manager.js', 'practice-merge-v1'],
+        ['profile-page.js', 'practice-merge-v1'],
+        ['cloud-sync.js', 'practice-merge-v1'],
+        ['styles.css', 'ai-free-v1'],
+        ['script.js', 'ai-free-v1'],
+        ['firebase-config.js', 'ai-free-v1'],
+        ['app-auth.js', 'ai-free-v1'],
+        ['ai-manager.js', 'ai-free-v1'],
+        ['ai-tutor-modal.js', 'ai-free-v1']
+    ];
+    for (const [file, version] of assets) {
+        const versioned = `${file}?v=${version}`;
         assert.ok(html.includes(versioned), `HTML: ${versioned}`);
         assert.ok(worker.includes(`'/${versioned}'`), `precache: ${versioned}`);
         assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
@@ -129,7 +133,7 @@ test('username login assets are versioned, precached and deployed together', () 
         assert.ok(worker.includes(`'/${versioned}'`), `precache: ${versioned}`);
         assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
     }
-    assert.match(worker, /kanji-widgets-v24/, 'the offline cache version must be bumped');
+    assert.match(worker, /kanji-widgets-v25/, 'the offline cache version must be bumped');
     assert.ok(html.indexOf('username-policy.js') < html.indexOf('app-auth.js'));
     assert.ok(html.indexOf('app-auth.js') < html.indexOf('username-directory.js'));
     assert.ok(html.indexOf('username-directory.js') < html.indexOf('auth-dialog.js'));

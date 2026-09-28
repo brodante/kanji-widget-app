@@ -22,19 +22,30 @@ async function setup(options = {}) {
         runScripts: 'outside-only'
     });
     const { window } = dom;
+    if (options.suppressWarnings) {
+        window.console.warn = () => {};
+    }
     await new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
     window.eval(fs.readFileSync(require.resolve('../app-auth.js'), 'utf8'));
+    window.KANJI_APP_CHECK_CONFIG = {
+        recaptchaEnterpriseSiteKey: options.appCheckSiteKey || ''
+    };
     // Sign-out asks for confirmation first (jsdom has no confirm of its own).
     window.confirm = () => true;
     let notify;
     const calls = [];
+    const bootstrapOrder = options.bootstrapOrder || [];
     const sdk = {
         getApps: () => [],
         initializeApp: (value, name) => {
+            bootstrapOrder.push('initialize-app');
             calls.push(['initialize', value, name]);
             return {};
         },
-        getAuth: () => ({}),
+        getAuth: () => {
+            bootstrapOrder.push('initialize-auth');
+            return {};
+        },
         browserLocalPersistence: 'LOCAL',
         setPersistence: async (_auth, value) => {
             calls.push(['persistence', value]);
@@ -75,9 +86,20 @@ async function setup(options = {}) {
         }
         return sdk;
     });
+    if (options.appCheckSDK) {
+        auth.loadAppCheckSDK = async () => options.appCheckSDK;
+    }
     window.kanjiAuth = auth;
     await auth.init();
-    return { dom, window, auth, calls, notify: (value) => notify(value), loads: () => loads };
+    return {
+        dom,
+        window,
+        auth,
+        calls,
+        bootstrapOrder,
+        notify: (value) => notify(value),
+        loads: () => loads
+    };
 }
 
 test('unconfigured static site does not fetch Firebase or block local learning', async () => {
@@ -90,6 +112,66 @@ test('unconfigured static site does not fetch Firebase or block local learning',
             window.document.querySelector('[data-app-auth-status]').textContent,
             /not set up/
         );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('configured Web App Check initializes before Auth and is kept on the app instance', async () => {
+    const bootstrapOrder = [];
+    const appCheckSDK = {
+        ReCaptchaEnterpriseProvider: class {
+            constructor(siteKey) {
+                this.siteKey = siteKey;
+            }
+        },
+        initializeAppCheck: (app, options) => {
+            bootstrapOrder.push('initialize-app-check');
+            assert.deepEqual(options.provider.siteKey, 'public-recaptcha-site-key');
+            assert.equal(options.isTokenAutoRefreshEnabled, true);
+            return { app, provider: options.provider };
+        }
+    };
+    const { dom, window, auth } = await setup({
+        user,
+        appCheckSiteKey: 'public-recaptcha-site-key',
+        appCheckSDK,
+        bootstrapOrder
+    });
+    try {
+        assert.equal(auth.ready, true);
+        assert.ok(auth.appCheck);
+        assert.equal(window.KANJI_APP_CHECK_INSTANCE, auth.appCheck);
+        assert.ok(
+            bootstrapOrder.indexOf('initialize-app-check') <
+                bootstrapOrder.indexOf('initialize-auth'),
+            'App Check must be initialized before Firebase Auth services'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('App Check configuration errors do not block sign-in or local learning startup', async () => {
+    const appCheckSDK = {
+        ReCaptchaEnterpriseProvider: class {},
+        initializeAppCheck: () => {
+            const error = new Error('invalid test site key');
+            error.code = 'app-check/invalid-test-key';
+            throw error;
+        }
+    };
+    const { dom, auth } = await setup({
+        user,
+        appCheckSiteKey: 'invalid-test-key',
+        appCheckSDK,
+        suppressWarnings: true
+    });
+    try {
+        assert.equal(auth.ready, true);
+        assert.equal(auth.user, user);
+        assert.equal(auth.appCheck, null);
+        assert.equal(auth.appCheckError?.message, 'invalid test site key');
     } finally {
         dom.window.close();
     }
@@ -233,8 +315,8 @@ test('Firebase session keys cannot enter backups; deploy and cache include auth 
         const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
         const deploy = fs.readFileSync(require.resolve('../.github/workflows/deploy.yml'), 'utf8');
         for (const asset of ['app-auth.js', 'firebase-config.js']) {
-            assert.ok(html.includes(`${asset}?v=practice-merge-v1`));
-            assert.ok(worker.includes(`${asset}?v=practice-merge-v1`));
+            assert.ok(html.includes(`${asset}?v=ai-free-v1`));
+            assert.ok(worker.includes(`${asset}?v=ai-free-v1`));
             assert.ok(deploy.includes(`cp ${asset} deploy/`));
         }
     } finally {

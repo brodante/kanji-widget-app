@@ -1,19 +1,19 @@
-const CACHE_NAME = 'kanji-widgets-v24';
+const CACHE_NAME = 'kanji-widgets-v25';
 const urlsToCache = [
     '/',
     '/index.html',
     '/analytics.js?v=analytics-v1',
     '/styles.css',
-    '/styles.css?v=practice-merge-v1',
+    '/styles.css?v=ai-free-v1',
     '/script.js',
-    '/script.js?v=practice-merge-v1',
+    '/script.js?v=ai-free-v1',
     '/drawing-pad.js',
     '/drawing-pad.js?v=practice-merge-v1',
     '/backup-config.js',
     '/ui-feedback.js?v=practice-merge-v1',
-    '/firebase-config.js?v=practice-merge-v1',
+    '/firebase-config.js?v=ai-free-v1',
     '/username-policy.js?v=login-v1',
-    '/app-auth.js?v=practice-merge-v1',
+    '/app-auth.js?v=ai-free-v1',
     '/username-directory.js?v=login-v1',
     '/auth-dialog.js?v=login-v1',
     '/cloud-sync.js?v=practice-merge-v1',
@@ -25,8 +25,8 @@ const urlsToCache = [
     '/audio-manager.js',
     '/storage-manager.js',
     '/srs-engine.js',
-    '/ai-manager.js',
-    '/ai-tutor-modal.js'
+    '/ai-manager.js?v=ai-free-v1',
+    '/ai-tutor-modal.js?v=ai-free-v1'
 ];
 
 self.addEventListener('install', (event) => {

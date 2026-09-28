@@ -65,7 +65,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css?v=practice-merge-v1" />
+        <link rel="stylesheet" href="styles.css?v=ai-free-v1" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -682,14 +682,19 @@
 
                         <div id="settingsAI" class="settings-section-header" tabindex="-1">
                             <i class="fas fa-brain"></i>
-                            <span>AI Sensei &amp; LLM Configuration</span>
+                            <span>AI Sensei &amp; optional provider settings</span>
                         </div>
+                        <p class="setting-help-text ai-default-provider-note">
+                            Free AI Sensei needs no personal API key or model choice. It uses the
+                            app’s shared free service, whose availability and quotas can vary.
+                            Bring-your-own-key providers are optional; their own limits or charges
+                            may apply.
+                        </p>
                         <div class="setting-group">
                             <label for="aiProvider">AI Provider:</label>
                             <select id="aiProvider">
-                                <option value="gemini" selected>
-                                    Google Gemini (Recommended - Free)
-                                </option>
+                                <option value="firebase" selected>Free AI Sensei (no key)</option>
+                                <option value="gemini">Google Gemini (bring your own key)</option>
                                 <option value="openai">OpenAI (ChatGPT)</option>
                                 <option value="claude">Anthropic Claude</option>
                                 <option value="openrouter">OpenRouter</option>
@@ -715,8 +720,9 @@
                                 </button>
                             </div>
                             <small class="setting-help-text" id="aiKeyHelpText">
-                                Stored locally in your browser only - never sent to any KanjiWidgets
-                                server.
+                                Stored in this browser only and sent directly to your chosen AI
+                                provider when used; KanjiWidgets does not receive it. Provider
+                                limits or charges may apply.
                             </small>
                             <small class="setting-help-text">
                                 <a
@@ -745,7 +751,7 @@
                                 value="http://localhost:11434/api/generate"
                             />
                         </div>
-                        <div class="setting-group">
+                        <div class="setting-group" id="aiModelGroup">
                             <label for="aiModel">Model:</label>
                             <select id="aiModel">
                                 <option value="gemini-3.1-flash-lite" selected>
@@ -756,6 +762,9 @@
                                 </option>
                             </select>
                         </div>
+                        <p class="setting-help-text" id="aiFixedModelNote" hidden>
+                            The free provider selects its model automatically.
+                        </p>
                         <div class="setting-group">
                             <label for="aiPersona">Sensei Persona:</label>
                             <select id="aiPersona">
@@ -1532,6 +1541,12 @@ filter: blur(10px) brightness(1) saturate(1);
                                 <i class="fas fa-comments"></i> Ask Sensei
                             </button>
                         </div>
+                        <p class="ai-privacy-note">
+                            Your question and relevant kanji or study details are sent to the AI
+                            provider selected in Settings (Google for the free built-in Sensei).
+                            Google may use free-tier prompts to improve its products. Avoid
+                            sensitive information, and verify important kanji explanations.
+                        </p>
 
                         <!-- TAB 1: Diagnostics & Telemetry -->
                         <div id="aiTabDiagnostics" class="ai-tab-pane active">
@@ -2668,8 +2683,8 @@ filter: blur(10px) brightness(1) saturate(1);
 
         <script src="storage-manager.js"></script>
         <script src="srs-engine.js"></script>
-        <script src="ai-manager.js"></script>
-        <script src="ai-tutor-modal.js"></script>
+        <script src="ai-manager.js?v=ai-free-v1"></script>
+        <script src="ai-tutor-modal.js?v=ai-free-v1"></script>
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
         <script src="drawing-pad.js?v=practice-merge-v1"></script>
@@ -2678,12 +2693,12 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="backup-manager.js?v=practice-merge-v1"></script>
         <script src="profile-page.js?v=practice-merge-v1"></script>
         <script src="avatar-crop.js?v=avatar-v1"></script>
-        <script src="firebase-config.js?v=practice-merge-v1"></script>
+        <script src="firebase-config.js?v=ai-free-v1"></script>
         <script src="username-policy.js?v=login-v1"></script>
-        <script src="app-auth.js?v=practice-merge-v1"></script>
+        <script src="app-auth.js?v=ai-free-v1"></script>
         <script src="username-directory.js?v=login-v1"></script>
         <script src="auth-dialog.js?v=login-v1"></script>
         <script src="cloud-sync.js?v=practice-merge-v1"></script>
-        <script src="script.js?v=practice-merge-v1"></script>
+        <script src="script.js?v=ai-free-v1"></script>
     </body>
 </html>

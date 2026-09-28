@@ -204,7 +204,7 @@ test('app entry points and offline cache use the same versioned profile assets',
     for (const asset of [
         'backup-manager.js?v=practice-merge-v1',
         'profile-page.js?v=practice-merge-v1',
-        'styles.css?v=practice-merge-v1',
+        'styles.css?v=ai-free-v1',
         'ui-feedback.js?v=practice-merge-v1'
     ]) {
         assert.ok(html.includes(asset), asset);

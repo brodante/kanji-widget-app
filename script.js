@@ -612,7 +612,15 @@ class KanjiLearningApp {
         if (aiProvider) {
             aiProvider.addEventListener('change', (e) => {
                 const provider = e.target.value;
+                const providerInfo = AIManager.PROVIDER_DEFAULTS[provider];
+                const currentSettings = StorageManager.getAISettings();
                 StorageManager.updateAISetting('provider', provider);
+                if (
+                    providerInfo?.fixedModel ||
+                    (providerInfo?.models && !providerInfo.models.includes(currentSettings.model))
+                ) {
+                    StorageManager.updateAISetting('model', providerInfo.defaultModel);
+                }
                 this.syncAISettingsUI();
             });
         }
@@ -2541,10 +2549,15 @@ class KanjiLearningApp {
     // control, or every tap toggles twice and cancels itself out.
 
     syncAISettingsUI() {
-        if (!window.StorageManager) {
+        if (!window.StorageManager || !window.AIManager?.PROVIDER_DEFAULTS) {
             return;
         }
         const aiSettings = StorageManager.getAISettings();
+        const providerDefaults = AIManager.PROVIDER_DEFAULTS;
+        const selectedProvider = providerDefaults[aiSettings.provider]
+            ? aiSettings.provider
+            : 'firebase';
+        const providerInfo = providerDefaults[selectedProvider];
         const providerEl = document.getElementById('aiProvider');
         const apiKeyEl = document.getElementById('aiApiKey');
         const endpointEl = document.getElementById('aiCustomEndpoint');
@@ -2552,11 +2565,12 @@ class KanjiLearningApp {
         const personaEl = document.getElementById('aiPersona');
         const apiKeyGroup = document.getElementById('aiApiKeyGroup');
         const endpointGroup = document.getElementById('aiEndpointGroup');
-        // Update the "Get your API key" link based on the selected provider
+        const modelGroup = document.getElementById('aiModelGroup');
+        const fixedModelNote = document.getElementById('aiFixedModelNote');
         const keyLinkEl = document.getElementById('aiProviderKeyLink');
-        if (keyLinkEl && window.AIManager && AIManager.PROVIDER_DEFAULTS) {
-            const providerInfo = AIManager.PROVIDER_DEFAULTS[aiSettings.provider];
-            if (providerInfo && providerInfo.keyUrl) {
+
+        if (keyLinkEl) {
+            if (providerInfo.keyUrl) {
                 keyLinkEl.href = providerInfo.keyUrl;
                 keyLinkEl.style.display = 'inline';
             } else {
@@ -2564,7 +2578,7 @@ class KanjiLearningApp {
             }
         }
         if (providerEl) {
-            providerEl.value = aiSettings.provider || 'gemini';
+            providerEl.value = selectedProvider;
         }
         if (apiKeyEl) {
             apiKeyEl.value = aiSettings.apiKey || '';
@@ -2576,25 +2590,41 @@ class KanjiLearningApp {
             personaEl.value = aiSettings.persona || 'encouraging';
         }
 
-        const isOllama = aiSettings.provider === 'ollama';
+        const isOllama = selectedProvider === 'ollama';
         if (apiKeyGroup) {
-            apiKeyGroup.style.display = isOllama ? 'none' : 'block';
+            apiKeyGroup.style.display = providerInfo.requiresKey ? 'block' : 'none';
         }
         if (endpointGroup) {
             endpointGroup.style.display = isOllama ? 'block' : 'none';
         }
+        if (modelGroup) {
+            modelGroup.style.display = providerInfo.fixedModel ? 'none' : 'block';
+        }
+        if (fixedModelNote) {
+            fixedModelNote.hidden = !providerInfo.fixedModel;
+        }
 
-        // Populate models dropdown
-        if (modelEl && window.AIManager && AIManager.PROVIDER_DEFAULTS) {
-            const providerInfo =
-                AIManager.PROVIDER_DEFAULTS[aiSettings.provider] ||
-                AIManager.PROVIDER_DEFAULTS.gemini;
-            modelEl.innerHTML = providerInfo.models
-                .map(
-                    (m) =>
-                        `<option value="${m}" ${m === aiSettings.model ? 'selected' : ''}>${m}</option>`
-                )
-                .join('');
+        if (modelEl) {
+            const models = [...providerInfo.models];
+            if (
+                typeof aiSettings.model === 'string' &&
+                aiSettings.model &&
+                !models.includes(aiSettings.model)
+            ) {
+                // Keep an existing BYOK model visible even if it is no longer in the
+                // provider's current suggestions; don't silently replace saved settings.
+                models.unshift(aiSettings.model);
+            }
+            modelEl.replaceChildren(
+                ...models.map((model) => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    option.selected = model === aiSettings.model;
+                    return option;
+                })
+            );
+            modelEl.disabled = Boolean(providerInfo.fixedModel);
         }
     }
 
@@ -2620,16 +2650,15 @@ class KanjiLearningApp {
         }
 
         statusEl.className = 'ai-conn-status';
-        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+        const loadingIcon = document.createElement('i');
+        loadingIcon.className = 'fas fa-spinner fa-spin';
+        statusEl.replaceChildren(loadingIcon, document.createTextNode(' Connecting...'));
 
         const result = await AIManager.testConnection();
-        if (result.success) {
-            statusEl.className = 'ai-conn-status success';
-            statusEl.innerHTML = `<i class="fas fa-check-circle"></i> ${result.message}`;
-        } else {
-            statusEl.className = 'ai-conn-status error';
-            statusEl.innerHTML = `<i class="fas fa-times-circle"></i> ${result.message}`;
-        }
+        statusEl.className = result.success ? 'ai-conn-status success' : 'ai-conn-status error';
+        const resultIcon = document.createElement('i');
+        resultIcon.className = result.success ? 'fas fa-check-circle' : 'fas fa-times-circle';
+        statusEl.replaceChildren(resultIcon, document.createTextNode(` ${result.message}`));
     }
 
     resetProgress() {

@@ -1,9 +1,16 @@
 /**
  * Multi-Provider AI Integration Manager for KanjiWidgets
- * Supports Gemini, OpenAI, Claude, OpenRouter, and local Ollama.
+ * Supports Firebase AI Logic plus Gemini, OpenAI, Claude, OpenRouter, and local Ollama.
  */
 class AIManager {
     static PROVIDER_DEFAULTS = {
+        firebase: {
+            name: 'Free AI Sensei (no key)',
+            defaultModel: 'gemini-3.8-flash',
+            models: ['gemini-3.8-flash'],
+            requiresKey: false,
+            fixedModel: true
+        },
         gemini: {
             name: 'Google Gemini',
             defaultModel: 'gemini-3.1-flash-lite',
@@ -56,6 +63,158 @@ class AIManager {
         anime: 'You are your cheerful anime senpai study partner! You use energetic and friendly language, peppered with natural Japanese conversational encouragement like よし！, 頑張って！, and すごい！.'
     };
 
+    static FREE_TIER_LIMIT_ERROR_CODE = 'ai/free-tier-quota-exceeded';
+    static FIREBASE_SDK_VERSION = '12.3.0';
+    static _firebaseAIContextPromise = null;
+
+    static isProviderConfigured(settings = StorageManager.getAISettings()) {
+        const provider = settings.provider || 'firebase';
+        const providerConfig = this.PROVIDER_DEFAULTS[provider];
+        if (!providerConfig) {
+            return false;
+        }
+        if (provider === 'ollama') {
+            const endpoint =
+                typeof settings.customEndpoint === 'string' ? settings.customEndpoint.trim() : '';
+            return Boolean(endpoint || providerConfig.defaultEndpoint);
+        }
+        const apiKey = typeof settings.apiKey === 'string' ? settings.apiKey.trim() : '';
+        return !providerConfig.requiresKey || Boolean(apiKey);
+    }
+
+    static isFreeTierLimitError(error) {
+        return error?.code === this.FREE_TIER_LIMIT_ERROR_CODE;
+    }
+
+    static isQuotaError(error) {
+        const status = Number(
+            error?.status ??
+                error?.statusCode ??
+                error?.customData?.httpStatus ??
+                error?.cause?.status ??
+                0
+        );
+        if (status === 429) {
+            return true;
+        }
+
+        const serverResponse = error?.customData?.serverResponse;
+        const details = [
+            error?.code,
+            error?.message,
+            typeof serverResponse === 'string' ? serverResponse : serverResponse?.message,
+            serverResponse?.status,
+            serverResponse?.code,
+            error?.customData?.status,
+            error?.customData?.code,
+            error?.cause?.code,
+            error?.cause?.message
+        ]
+            .filter(Boolean)
+            .join(' ');
+        return /\b429\b|resource[_\s-]?exhausted|quota[_\s-]?(?:exceeded|exhausted)|rate[_\s-]?limit|too many requests/i.test(
+            details
+        );
+    }
+
+    static createFreeTierLimitError(cause) {
+        const error = new Error('The shared free AI Sensei quota has been reached.');
+        error.name = 'AIFreeTierLimitError';
+        error.code = this.FREE_TIER_LIMIT_ERROR_CODE;
+        if (cause) {
+            error.cause = cause;
+        }
+        return error;
+    }
+
+    static async getFirebaseAIContext() {
+        if (typeof window === 'undefined') {
+            const error = new Error('Firebase AI Logic is only available in the browser app.');
+            error.code = 'ai/browser-only';
+            throw error;
+        }
+        if (this._firebaseAIContextPromise) {
+            return this._firebaseAIContextPromise;
+        }
+
+        this._firebaseAIContextPromise = (async () => {
+            const config = window.KANJI_FIREBASE_CONFIG;
+            if (
+                !config ||
+                !['apiKey', 'authDomain', 'projectId', 'appId'].every((key) => config[key])
+            ) {
+                const error = new Error(
+                    'Free AI Sensei is not configured for this site yet. You can add your own provider key in Settings.'
+                );
+                error.code = 'ai/firebase-not-configured';
+                throw error;
+            }
+
+            const siteKey = window.KANJI_APP_CHECK_CONFIG?.recaptchaEnterpriseSiteKey?.trim();
+            if (!siteKey) {
+                const error = new Error(
+                    'Free AI Sensei is waiting for the site owner to finish Firebase App Check setup. You can use your own provider key in Settings for now.'
+                );
+                error.code = 'ai/app-check-not-configured';
+                throw error;
+            }
+
+            // Let the app's existing Firebase bootstrap finish first so Auth and AI Logic
+            // reuse the same named Firebase app and App Check instance where possible.
+            if (window.kanjiAuth?.readyPromise) {
+                await window.kanjiAuth.readyPromise.catch(() => {});
+            }
+
+            const version = this.FIREBASE_SDK_VERSION;
+            const [appSDK, aiSDK, appCheckSDK] = await Promise.all([
+                import(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
+                import(`https://www.gstatic.com/firebasejs/${version}/firebase-ai.js`),
+                import(`https://www.gstatic.com/firebasejs/${version}/firebase-app-check.js`)
+            ]);
+
+            const app =
+                window.kanjiAuth?.app ||
+                appSDK.getApps().find((candidate) => candidate.name === 'kanji-auth') ||
+                appSDK.initializeApp(config, 'kanji-auth');
+
+            let appCheck = window.kanjiAuth?.appCheck || window.KANJI_APP_CHECK_INSTANCE || null;
+            if (!appCheck) {
+                try {
+                    appCheck = appCheckSDK.initializeAppCheck(app, {
+                        provider: new appCheckSDK.ReCaptchaEnterpriseProvider(siteKey),
+                        isTokenAutoRefreshEnabled: true
+                    });
+                    window.KANJI_APP_CHECK_INSTANCE = appCheck;
+                } catch (error) {
+                    if (error?.code !== 'app-check/already-initialized') {
+                        throw error;
+                    }
+                    appCheck =
+                        window.kanjiAuth?.appCheck || window.KANJI_APP_CHECK_INSTANCE || null;
+                }
+            }
+
+            if (!appCheck) {
+                const error = new Error(
+                    'Firebase App Check could not start. Check the site key and Firebase Console setup, or use your own provider key in Settings.'
+                );
+                error.code = 'ai/app-check-unavailable';
+                throw error;
+            }
+
+            const ai = aiSDK.getAI(app, { backend: new aiSDK.GoogleAIBackend() });
+            return { aiSDK, ai };
+        })();
+
+        try {
+            return await this._firebaseAIContextPromise;
+        } catch (error) {
+            // Allow a retry after the owner fixes configuration or a transient module load.
+            this._firebaseAIContextPromise = null;
+            throw error;
+        }
+    }
+
     /**
      * Tests connectivity to the configured AI provider.
      */
@@ -94,12 +253,12 @@ class AIManager {
      */
     static async callProvider(prompt, systemInstruction = '', overrideSettings = null) {
         const settings = overrideSettings || StorageManager.getAISettings();
-        const provider = settings.provider || 'gemini';
-        const apiKey = settings.apiKey ? settings.apiKey.trim() : '';
+        const provider = settings.provider || 'firebase';
+        const apiKey = typeof settings.apiKey === 'string' ? settings.apiKey.trim() : '';
         const model =
             settings.model ||
             this.PROVIDER_DEFAULTS[provider]?.defaultModel ||
-            'gemini-3.1-flash-lite';
+            this.PROVIDER_DEFAULTS.firebase.defaultModel;
 
         if (this.PROVIDER_DEFAULTS[provider]?.requiresKey && !apiKey) {
             throw new Error(
@@ -108,6 +267,20 @@ class AIManager {
         }
 
         switch (provider) {
+            case 'firebase':
+                try {
+                    return await this.callFirebaseAI(
+                        prompt,
+                        systemInstruction,
+                        model,
+                        settings.temperature
+                    );
+                } catch (error) {
+                    if (this.isQuotaError(error)) {
+                        throw this.createFreeTierLimitError(error);
+                    }
+                    throw error;
+                }
             case 'gemini':
                 return this.callGemini(
                     prompt,
@@ -198,6 +371,24 @@ class AIManager {
 
         const data = await response.json();
         return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    }
+
+    /**
+     * Firebase AI Logic client. This uses the app's Firebase project quota and never asks
+     * the learner to paste a Gemini API key into the browser.
+     */
+    static async callFirebaseAI(prompt, systemInstruction, model, temperature = 0.7) {
+        const { aiSDK, ai } = await this.getFirebaseAIContext();
+        const generativeModel = aiSDK.getGenerativeModel(ai, {
+            model,
+            systemInstruction: systemInstruction || undefined,
+            generationConfig: {
+                temperature: Number.isFinite(Number(temperature)) ? Number(temperature) : 0.7,
+                maxOutputTokens: 1024
+            }
+        });
+        const result = await generativeModel.generateContent(prompt);
+        return result.response?.text?.().trim() || '';
     }
 
     /**
@@ -406,11 +597,15 @@ A short inspirational or coaching signoff tailored to your persona.`;
         } catch (error) {
             console.warn('AI analysis request failed, using algorithmic fallback:', error);
             const fallback = SRSEngine.generateRuleBasedDiagnostics(progressData, currentPool);
+            const limitReached = this.isFreeTierLimitError(error);
             return {
                 ...fallback,
                 aiGenerated: false,
                 error: error.message,
-                note: 'AI service was unavailable. Displaying local algorithmic diagnostics.'
+                limitReached,
+                note: limitReached
+                    ? 'The shared free AI limit was reached. Displaying local algorithmic diagnostics.'
+                    : 'AI service was unavailable. Displaying local algorithmic diagnostics.'
             };
         }
     }
