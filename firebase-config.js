@@ -9,8 +9,8 @@ window.KANJI_FIREBASE_CONFIG = {
 };
 
 // Public reCAPTCHA Enterprise site key used by Firebase App Check for the Web app.
-// Register the matching key in Firebase Console before enabling AI Logic enforcement.
-// This is a public site key (not a secret); keep the value empty until the owner configures it.
+// Register this matching key with the Web app and allow only the real app domains.
+// Never put a reCAPTCHA secret key or an App Check debug token in this browser config.
 window.KANJI_APP_CHECK_CONFIG = {
-    recaptchaEnterpriseSiteKey: ''
+    recaptchaEnterpriseSiteKey: '6LcvWdQtAAAAANd_LWYI2R5QWWzblzENzbC4Yrlh'
 };

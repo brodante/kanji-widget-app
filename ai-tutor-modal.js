@@ -27,6 +27,7 @@ const AISenseiModule = {
             if (!modal) {
                 return;
             }
+            this.resetAISenseiFabIdleTimer?.();
             modal.classList.add('show');
             this.switchAISenseiTab(initialTab);
             this.updateAISenseiTelemetry();
@@ -38,6 +39,7 @@ const AISenseiModule = {
             if (modal) {
                 modal.classList.remove('show');
             }
+            this.resetAISenseiFabIdleTimer?.();
         },
 
         switchAISenseiTab(tabName) {
@@ -58,7 +60,24 @@ const AISenseiModule = {
             }
             if (tabName === 'study-path') {
                 this.renderAIPriorityStudyPlan();
+            } else if (tabName === 'ask-sensei') {
+                this.updateAISenseiKanjiContext();
             }
+        },
+
+        updateAISenseiKanjiContext() {
+            const contextEl = document.getElementById('aiSenseiKanjiContext');
+            if (!contextEl) {
+                return;
+            }
+            const character = this.currentKanji?.character;
+            if (!character) {
+                contextEl.hidden = true;
+                contextEl.textContent = '';
+                return;
+            }
+            contextEl.textContent = `Current kanji context: ${character} · included when you send a message`;
+            contextEl.hidden = false;
         },
 
         updateAISenseiTelemetry() {
@@ -330,11 +349,7 @@ const AISenseiModule = {
 
         openAISenseiForCurrentKanji() {
             this.openAISenseiModal('ask-sensei');
-            if (this.currentKanji) {
-                this.askAISensei(
-                    `Explain the radicals and visual mnemonic for "${this.currentKanji.character}"`
-                );
-            }
+            document.getElementById('aiSenseiInput')?.focus();
         },
         // ==========================================
         // KANJI MNEMONIC & ETYMOLOGY DRAWER

@@ -83,12 +83,12 @@ test('offline precache and static deployment include both practice and account b
         ['backup-manager.js', 'practice-merge-v1'],
         ['profile-page.js', 'practice-merge-v1'],
         ['cloud-sync.js', 'practice-merge-v1'],
-        ['styles.css', 'ai-free-v1'],
-        ['script.js', 'ai-free-v1'],
-        ['firebase-config.js', 'ai-free-v1'],
+        ['styles.css', 'ai-free-v2'],
+        ['script.js', 'ai-free-v2'],
+        ['firebase-config.js', 'ai-free-v2'],
         ['app-auth.js', 'ai-free-v1'],
         ['ai-manager.js', 'ai-free-v1'],
-        ['ai-tutor-modal.js', 'ai-free-v1']
+        ['ai-tutor-modal.js', 'ai-free-v2']
     ];
     for (const [file, version] of assets) {
         const versioned = `${file}?v=${version}`;
@@ -123,6 +123,66 @@ test('the favicon link points at a root favicon.gif and the deploy ships it if p
     );
 });
 
+test('AI Sensei assistive button is icon-only, accessible and docks after idle', () => {
+    const dom = new JSDOM(read('index.html'), {
+        url: 'https://kanji.qd.je',
+        runScripts: 'outside-only'
+    });
+    const { window } = dom;
+    const pendingTimers = new Map();
+    let nextTimerId = 1;
+
+    try {
+        const fab = window.document.getElementById('aiSenseiFab');
+        assert.equal(fab.tagName, 'BUTTON');
+        assert.equal(fab.getAttribute('aria-label'), 'Open AI Sensei hub');
+        assert.ok(fab.querySelector('i.fa-brain'));
+        assert.equal(fab.querySelector('.ai-fab-text'), null);
+
+        Object.defineProperty(window, 'innerWidth', { configurable: true, value: 400 });
+        Object.defineProperty(window, 'innerHeight', { configurable: true, value: 700 });
+        Object.defineProperty(fab, 'offsetWidth', { configurable: true, value: 60 });
+        Object.defineProperty(fab, 'offsetHeight', { configurable: true, value: 60 });
+        window.setTimeout = (callback, delay) => {
+            const id = nextTimerId++;
+            pendingTimers.set(id, { callback, delay });
+            return id;
+        };
+        window.clearTimeout = (id) => pendingTimers.delete(id);
+        window.eval(
+            `${read('script.js')}\nwindow.__initAISenseiFab = KanjiLearningApp.prototype.initDraggableFab;`
+        );
+
+        const app = {};
+        window.__initAISenseiFab.call(app, fab);
+        assert.equal(fab.dataset.dockEdge, 'left');
+        assert.equal(pendingTimers.size, 1);
+        const [{ callback, delay }] = [...pendingTimers.values()];
+        assert.equal(delay, 5000);
+        pendingTimers.clear();
+        callback();
+        assert.equal(fab.classList.contains('is-idle'), true);
+
+        fab.dispatchEvent(new window.Event('mouseenter'));
+        assert.equal(fab.classList.contains('is-idle'), false);
+        assert.equal(pendingTimers.size, 0);
+        app.resetAISenseiFabIdleTimer();
+        assert.equal(pendingTimers.size, 1);
+
+        const css = read('styles.css');
+        assert.match(
+            css,
+            /\.ai-sensei-fab\.is-idle\[data-dock-edge='left'\][^{]*\{[^}]*translate: -38% 0/s
+        );
+        assert.match(
+            css,
+            /\.ai-sensei-fab\.is-idle\[data-dock-edge='right'\][^{]*\{[^}]*translate: 38% 0/s
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('username login assets are versioned, precached and deployed together', () => {
     const html = read('index.html');
     const worker = read('sw.js');
@@ -133,7 +193,7 @@ test('username login assets are versioned, precached and deployed together', () 
         assert.ok(worker.includes(`'/${versioned}'`), `precache: ${versioned}`);
         assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
     }
-    assert.match(worker, /kanji-widgets-v25/, 'the offline cache version must be bumped');
+    assert.match(worker, /kanji-widgets-v28/, 'the offline cache version must be bumped');
     assert.ok(html.indexOf('username-policy.js') < html.indexOf('app-auth.js'));
     assert.ok(html.indexOf('app-auth.js') < html.indexOf('username-directory.js'));
     assert.ok(html.indexOf('username-directory.js') < html.indexOf('auth-dialog.js'));

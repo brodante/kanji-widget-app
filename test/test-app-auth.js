@@ -303,6 +303,12 @@ test('failed logout leaves the identity visible', async () => {
     }
 });
 
+test('production Firebase config contains a site key but no App Check debug switch', () => {
+    const config = fs.readFileSync(require.resolve('../firebase-config.js'), 'utf8');
+    assert.match(config, /recaptchaEnterpriseSiteKey:\s*'[^']+'/);
+    assert.doesNotMatch(config, /FIREBASE_APPCHECK_DEBUG_TOKEN/);
+});
+
 test('Firebase session keys cannot enter backups; deploy and cache include auth assets', async () => {
     const { dom, window } = await setup();
     try {
@@ -314,9 +320,12 @@ test('Firebase session keys cannot enter backups; deploy and cache include auth 
         const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
         const worker = fs.readFileSync(require.resolve('../sw.js'), 'utf8');
         const deploy = fs.readFileSync(require.resolve('../.github/workflows/deploy.yml'), 'utf8');
-        for (const asset of ['app-auth.js', 'firebase-config.js']) {
-            assert.ok(html.includes(`${asset}?v=ai-free-v1`));
-            assert.ok(worker.includes(`${asset}?v=ai-free-v1`));
+        for (const [asset, version] of [
+            ['app-auth.js', 'ai-free-v1'],
+            ['firebase-config.js', 'ai-free-v2']
+        ]) {
+            assert.ok(html.includes(`${asset}?v=${version}`));
+            assert.ok(worker.includes(`${asset}?v=${version}`));
             assert.ok(deploy.includes(`cp ${asset} deploy/`));
         }
     } finally {

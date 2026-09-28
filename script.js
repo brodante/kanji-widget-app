@@ -1012,10 +1012,11 @@ class KanjiLearningApp {
         const STORAGE_KEY = 'aiSenseiFabPos';
         const MARGIN = 8;
         const DRAG_THRESHOLD = 4;
+        const IDLE_TIMEOUT_MS = 5000;
 
         const computed = getComputedStyle(fab);
-        const baseLeft = parseFloat(computed.left) || 26;
-        const baseTop = parseFloat(computed.top) || 26;
+        let baseLeft = parseFloat(computed.left) || 26;
+        let baseTop = parseFloat(computed.top) || 26;
 
         let pos = { x: 0, y: 0 };
         try {
@@ -1057,11 +1058,57 @@ class KanjiLearningApp {
             return window.innerWidth - MARGIN - baseLeft - w; // right edge
         };
 
+        const getDockEdge = (currentX) => {
+            const centerX = baseLeft + currentX + fab.offsetWidth / 2;
+            return centerX < window.innerWidth / 2 ? 'left' : 'right';
+        };
+
         // Apply restored position (clamp first in case viewport shrank)
         pos = clampXY(pos.x, pos.y);
         // Then snap to nearest edge on load so it always looks "docked"
         pos = { x: computeSnapX(pos.x), y: pos.y };
+        fab.dataset.dockEdge = getDockEdge(pos.x);
         fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+
+        let idleTimer = null;
+        const clearIdleTimer = () => {
+            if (idleTimer !== null) {
+                window.clearTimeout(idleTimer);
+                idleTimer = null;
+            }
+        };
+        const scheduleIdleState = () => {
+            clearIdleTimer();
+            idleTimer = window.setTimeout(() => {
+                idleTimer = null;
+                const modal = document.getElementById('aiSenseiModal');
+                if (
+                    fab.classList.contains('dragging') ||
+                    fab.matches(':hover') ||
+                    modal?.classList.contains('show')
+                ) {
+                    return;
+                }
+                fab.classList.add('is-idle');
+            }, IDLE_TIMEOUT_MS);
+        };
+        const wakeFab = () => {
+            clearIdleTimer();
+            fab.classList.remove('is-idle');
+            scheduleIdleState();
+        };
+        this.resetAISenseiFabIdleTimer = wakeFab;
+
+        fab.addEventListener('mouseenter', () => {
+            clearIdleTimer();
+            fab.classList.remove('is-idle');
+        });
+        fab.addEventListener('mouseleave', scheduleIdleState);
+        fab.addEventListener('focus', () => {
+            clearIdleTimer();
+            fab.classList.remove('is-idle');
+        });
+        fab.addEventListener('blur', scheduleIdleState);
 
         let activePointerId = null;
         let startPointer = { x: 0, y: 0 };
@@ -1072,6 +1119,8 @@ class KanjiLearningApp {
             if (e.pointerType === 'mouse' && e.button !== 0) {
                 return;
             }
+            clearIdleTimer();
+            fab.classList.remove('is-idle');
             activePointerId = e.pointerId;
             startPointer = { x: e.clientX, y: e.clientY };
             startPos = { x: pos.x, y: pos.y };
@@ -1113,6 +1162,7 @@ class KanjiLearningApp {
 
             if (!moved) {
                 fab.classList.remove('dragging');
+                scheduleIdleState();
                 return;
             }
 
@@ -1120,6 +1170,7 @@ class KanjiLearningApp {
             const targetX = computeSnapX(pos.x);
             const targetY = clampY(pos.y);
             pos = { x: targetX, y: targetY };
+            fab.dataset.dockEdge = getDockEdge(targetX);
 
             // Mark the drag so the click handler swallows the trailing click
             fab.dataset.lastDragEnd = Date.now().toString();
@@ -1136,21 +1187,28 @@ class KanjiLearningApp {
             } catch (err) {
                 /* ignore */
             }
+            scheduleIdleState();
         };
 
         fab.addEventListener('pointerup', endDrag);
         fab.addEventListener('pointercancel', endDrag);
 
-        // On resize / rotate, re-snap to the nearest edge
+        // On resize / rotate, re-snap to the nearest edge using the active breakpoint.
         window.addEventListener('resize', () => {
+            const resizedStyle = getComputedStyle(fab);
+            baseLeft = parseFloat(resizedStyle.left) || 26;
+            baseTop = parseFloat(resizedStyle.top) || 26;
             pos = { x: computeSnapX(pos.x), y: clampY(pos.y) };
+            fab.dataset.dockEdge = getDockEdge(pos.x);
             fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+            wakeFab();
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
             } catch (err) {
                 /* ignore */
             }
         });
+        scheduleIdleState();
     }
 
     updateLevelIcon() {

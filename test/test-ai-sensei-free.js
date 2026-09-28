@@ -27,11 +27,50 @@ async function setup() {
         },
         openSettings() {
             this.openedSettings++;
-        }
+        },
+        updatePersonaTag() {}
     };
     window.AISenseiModule.applyTo(app);
     return { dom, window, app };
 }
+
+test('opening Ask Sensei from a kanji card waits for the learner to submit a question', async () => {
+    const { dom, window, app } = await setup();
+    const requests = [];
+    window.AIManager = {
+        askSenseiQuestion: async (question, kanjiContext) => {
+            requests.push({ question, kanjiContext });
+            return '日 can mean sun or day.';
+        }
+    };
+
+    try {
+        app.openAISenseiForCurrentKanji();
+
+        const modal = window.document.getElementById('aiSenseiModal');
+        const askTab = window.document.getElementById('aiTabAskSensei');
+        const input = window.document.getElementById('aiSenseiInput');
+        const contextBadge = window.document.getElementById('aiSenseiKanjiContext');
+        const chatLog = window.document.getElementById('aiChatLog');
+        assert.equal(modal.classList.contains('show'), true);
+        assert.equal(askTab.classList.contains('active'), true);
+        assert.equal(window.document.activeElement, input);
+        assert.equal(contextBadge.hidden, false);
+        assert.match(contextBadge.textContent, /Current kanji context: 日/);
+        assert.match(contextBadge.textContent, /included when you send a message/);
+        assert.equal(input.value, '');
+        assert.equal(requests.length, 0);
+        assert.equal(chatLog.querySelectorAll('.ai-msg-user').length, 0);
+        assert.doesNotMatch(chatLog.textContent, /Explain the radicals and visual mnemonic/);
+
+        await app.askAISensei('How can I tell this apart from 目?');
+        assert.equal(requests.length, 1);
+        assert.equal(requests[0].question, 'How can I tell this apart from 目?');
+        assert.equal(requests[0].kanjiContext, app.currentKanji);
+    } finally {
+        dom.window.close();
+    }
+});
 
 test('Settings default to keyless Firebase AI and keep existing BYOK models visible', async () => {
     const { dom, window } = await setup();

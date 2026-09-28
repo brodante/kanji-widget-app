@@ -1,6 +1,6 @@
 # AI Sensei: free access and rate-limit fallback
 
-**Status:** Client implementation and automated checks complete; owner Firebase setup and live-browser validation remain pending.  
+**Status:** Client implementation and automated checks complete; the owner has confirmed a localhost live AI smoke test and reports the Web app is registered in App Check. Production origin/key validation and live deployment remain pending.
 **Last reviewed:** 2026-09-29
 
 This document tracks the no-key default, the free-tier quota response, and the production steps needed to enable the built-in service. The approved scope is deliberately no-backend: keep the project on Firebase Spark, do not link Cloud Billing, and do not add Cloud Functions, Cloud Run, a trial, or a paywall.
@@ -21,8 +21,10 @@ This document tracks the no-key default, the free-tier quota response, and the p
 - Firebase Web/App Check SDK modules are loaded lazily. When the owner supplies a reCAPTCHA Enterprise site key, App Check is initialized before Firebase Auth services and shared with AI Logic. Local learning/auth startup is not blocked by an App Check initialization error.
 - Only rate/quota errors from the built-in provider receive the `ai/free-tier-quota-exceeded` code. Setup, App Check, network, model, and ordinary provider errors remain distinct.
 - Ask Sensei, diagnostics, and kanji-drawer mnemonic/etymology flows show the quota choices. Diagnostics retain the local fallback. Chat and connection-test errors are rendered as text rather than interpolated HTML.
+- Opening Ask Sensei from a kanji card now opens the Ask tab and focuses the composer without submitting a default prompt. Only a learner's explicit message or selected quick-prompt button makes a chat request; the current kanji is shown as context and accompanies a message they choose to send.
+- The floating AI Sensei control is now an icon-only circular, draggable assistive button. After five seconds without interaction it docks partway off the nearest screen edge; hover, focus, drag, or touch wakes it.
 - Settings explain the key-free provider, optional BYOK risks, and that credentials stay in local storage and go directly to the selected provider. The AI modal discloses that relevant questions/kanji/study details are sent to the selected provider and that Google's free-tier prompts may be used to improve its products.
-- Changed assets use `ai-free-v1`; the service-worker cache is `kanji-widgets-v25`.
+- Changed AI modal, app config, main script, and stylesheet assets use `ai-free-v2`; the service-worker cache is `kanji-widgets-v28`.
 
 ## How the shared quota works
 
@@ -32,7 +34,7 @@ The app responds to actual built-in-provider rate/quota errors. A 429 may mean a
 
 ## Owner setup required before production AI is ready
 
-The reCAPTCHA Enterprise site key in `firebase-config.js` is currently empty. **The built-in Firebase AI provider is not production-ready until the steps below are completed and tested.** The normal settings remain usable for BYOK while this work is pending.
+The owner has supplied a public reCAPTCHA Enterprise site key, now configured in `firebase-config.js`, and reports the Web app is **Registered** in App Check. Confirm that the registered provider uses this same key and allows the production hostname. **The built-in Firebase AI provider is not production-ready until a non-debug live-origin test passes.** The normal settings remain usable for BYOK while this work is pending.
 
 ### 1. Confirm the project and cost boundary
 
@@ -54,7 +56,7 @@ Allow a few minutes for API-key restriction changes to take effect. A 403 mentio
 
 ### What “Unregistered” means on the Firebase AI Logic page
 
-On **AI Services → AI Logic → All apps**, an **Unregistered** App Check status means AI Logic is enabled but the Web app has not yet been registered with an App Check attestation provider. Enabling `firebaseappcheck.googleapis.com` alone does not register the app. Register the app using the steps below; do not enable enforcement until the client is configured and valid tokens have been tested.
+On **AI Services → AI Logic → All apps**, an **Unregistered** App Check status means the Web app has not been registered with a production App Check attestation provider. Enabling `firebaseappcheck.googleapis.com` alone does not register the app. For a localhost-only pre-production test, Firebase AI Logic supports the debug provider; the exact generated debug token must be allowlisted under **Security → App Check → Apps → Manage debug tokens**. A debug-token test does not prove that production reCAPTCHA is registered. Production requires registering the Web app with reCAPTCHA Enterprise. Guided AI Logic setup may automatically enforce baseline App Check, so check the **APIs** tab rather than assuming enforcement is off; do not disable baseline enforcement just to make local testing work.
 
 ### 3. Register Web App Check with reCAPTCHA Enterprise
 
@@ -62,14 +64,14 @@ On **AI Services → AI Logic → All apps**, an **Unregistered** App Check stat
 2. Restrict that key to the real app domains (for example, `kanji.qd.je` and `brodante.github.io` if GitHub Pages is in active use). Never add `localhost` to a production key; use a separate development/debug setup if needed, and never ship a debug token.
 3. In Firebase Console → **Security → App Check → Apps**, register the existing Web app with that provider and the matching site key. Keep the default one-hour token TTL unless there is a concrete reason to change it; shorter TTLs create assessments more often.
 4. Copy the **public site key** into `window.KANJI_APP_CHECK_CONFIG.recaptchaEnterpriseSiteKey` in `firebase-config.js`. This is not a secret. Do not put a secret key or service-account credential in the browser.
-5. Deploy the updated app and confirm App Check initializes before Firebase Auth, then verify AI Logic requests carry valid App Check tokens.
-6. Monitor App Check metrics before enforcing it for Firebase AI Logic. Once real traffic is verified, enable enforcement for **Firebase AI Logic only**. Avoid changing Auth/Firestore enforcement as part of this task.
+5. Before publishing, remove any local `FIREBASE_APPCHECK_DEBUG_TOKEN` flag; deploy only the public site key. The owner reports the production Web app is **Registered**; verify it uses this key, allows the production domain, and initializes App Check before Firebase Auth.
+6. The owner currently reports **Basic: Enforced** and **Replay: Monitoring** for Firebase AI Logic. Keep baseline protection enforced. Monitoring is non-blocking; do not enforce Replay until the client is upgraded to a supported Web SDK and configured to request limited-use tokens. Monitor App Check metrics for valid production traffic.
 
 Firebase App Check's reCAPTCHA Enterprise assessments have a no-cost quota, with charges possible above that quota according to Google's current pricing. Keep Spark/no billing, monitor the assessment quota, and do not link billing to avoid an interruption. If the free quota is exhausted or setup requires billing, stop and ask the owner; the safe fallback is BYOK/local functionality, not a paid upgrade. Firebase requires App Check enforcement for Firebase AI Logic starting **2026-11-02**.
 
-## Test the pushed branch locally
+## Test this branch locally
 
-Clone the branch without opening a PR:
+The current Arena session changes are not pushed yet. In this checked-out workspace, run `npm ci`, `npm test`, `npm run lint`, `npm run format:check`, and `npm start` directly. To reproduce in a separate clone after the feature branch is pushed, run:
 
 ```sh
 git clone --single-branch --branch arena/01a0e9de-kanji-widget-app \
@@ -82,17 +84,21 @@ npm run format:check
 npm start
 ```
 
-Open `http://localhost:5000`. The UI, keyless Settings, local learning and mocked tests can be checked immediately. **The built-in live AI call will not work yet while `recaptchaEnterpriseSiteKey` is empty.** The push only updates the branch; it does not deploy the site.
+Open `http://localhost:5000`. The UI, keyless Settings, local learning and mocked tests can be checked immediately. The public site key is now present in the branch config; a real localhost AI call also needs the local debug flag and a registered debug token. The push only updates the branch; it does not deploy the site.
 
-For a localhost live-AI smoke test after Firebase AI Logic and App Check are registered:
+For a localhost live-AI smoke test with the Firebase AI Logic API enabled:
 
-1. Do not add `localhost` to the production reCAPTCHA Enterprise key. In your local, uncommitted `firebase-config.js` only, set the public site key and set `window.FIREBASE_APPCHECK_DEBUG_TOKEN = true` before App Check initializes.
-2. Run `npm start`, open DevTools, and copy the debug token printed by the Firebase SDK.
-3. In Firebase Console → **Security → App Check → Apps**, open the Web app's menu → **Manage debug tokens** and register that token.
+1. Do not add `localhost` to the production reCAPTCHA Enterprise key. In your local, uncommitted `firebase-config.js` only, set the public site key and set `window.FIREBASE_APPCHECK_DEBUG_TOKEN = true` before App Check initializes. The app's public config needs a non-empty site key even though the local debug provider is used.
+2. Run `npm start`, open DevTools, and copy the debug token printed by the Firebase SDK. The `true` value is only the switch; the SDK prints a separate token.
+3. In Firebase Console → **Security → App Check → Apps**, open the Web app's menu → **Manage debug tokens** and register the exact token for that app.
 4. Reload `http://localhost:5000`, choose the built-in provider, and send a small test prompt. If the Firebase API key has HTTP-referrer restrictions, use a dev-only key/project that allows localhost rather than broadening the production key.
-5. Treat the debug token as a credential: never commit or share it. Remove the local debug flag and delete the token from Firebase Console when testing is done. Never enable debug mode in a production build.
+5. Treat the debug token as a credential: never commit or share it. If exposed, delete it in Firebase Console and register a fresh token for further local tests. Remove the local debug flag before any production build.
 
-A dedicated Spark development Firebase project is the safer place for debug tokens and test traffic because it isolates the production AI quota. If using the existing production project for a brief smoke test, keep requests minimal; they share that project's model quota. For actual production-host validation, use the production reCAPTCHA key on a registered, allowed origin without the debug provider.
+The owner confirmed that this localhost debug-token flow returned a real AI Sensei response. That validates the local debug path, not production reCAPTCHA or a live deployment. A dedicated Spark development Firebase project is safer for debug tokens and test traffic because it isolates the production AI quota. If using the existing project for a brief smoke test, keep requests minimal; they share that project's model quota. For production-origin validation, use the registered production reCAPTCHA key with debug mode off.
+
+## Staging and publishing
+
+The GitHub Pages workflow deploys pushes to `main` and also supports manual `workflow_dispatch`. The Arena branch is not live automatically. Manually dispatching the workflow against this branch deploys to the same GitHub Pages site, so treat that as a production release, not a staging preview. No separate staging deployment is currently configured. A staging test needs a separate Pages site/origin (ideally with a separate Spark Firebase project to isolate shared AI quota). After production App Check/configuration checks pass, publish through the normal review/merge to `main`; the Pages workflow deploys `main`. Do not open a PR or dispatch a deployment without explicit owner authorization.
 
 ### 4. Live validation checklist
 
@@ -113,14 +119,18 @@ Automated tests mock the SDK; they do not contact Firebase or a model. Before de
 - [x] Add quota-specific choices across Ask Sensei, diagnostics, and drawer mnemonic/etymology flows; keep non-quota errors distinct and safe.
 - [x] Add App Check initialization before Auth when the owner configures the public site key, with tests for success, ordering, and failure isolation.
 - [x] Add/update mocked tests for storage defaults/migration, BYOK preservation, key-free dispatch, quota classification, UI choices, asset cache/deploy versions, and existing regressions.
-- [ ] Owner configures Firebase AI Logic and the reCAPTCHA Enterprise site key; validate the live model and production origins.
-- [ ] Verify App Check assessment usage stays within the no-cost quota on Spark, then enable enforcement for Firebase AI Logic.
+- [x] Owner supplied the public reCAPTCHA Enterprise site key; it is configured in the browser config (no debug token or debug flag is committed).
+- [x] Owner confirmed a real localhost AI Sensei response using a registered App Check debug token; the shared project quota was used for that request.
+- [x] Owner reports Firebase AI Logic App Check is Basic/Enforced with Replay/Monitoring.
+- [x] Owner reports the production Web app is registered in Firebase App Check.
+- [ ] Verify the registered provider matches the configured public site key and production host; check API-key restrictions.
+- [ ] Validate App Check metrics and the real model on a live, non-debug origin; keep Spark with no billing attached.
 - [ ] Complete the real-browser acceptance checklist above before calling the built-in provider production-ready.
 
 Verification run after the last code change:
 
 - `npm ci` — succeeded; 338 packages installed and zero vulnerabilities reported.
-- `npm test` — passed; 221 tests, 0 failures.
+- `npm test` — passed; 224 tests, 0 failures.
 - `npm run lint` — passed.
 - `npm run format:check` — passed.
 - `git diff --check` — passed.

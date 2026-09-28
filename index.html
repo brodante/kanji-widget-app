@@ -65,7 +65,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css?v=ai-free-v1" />
+        <link rel="stylesheet" href="styles.css?v=ai-free-v2" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -1674,6 +1674,7 @@ filter: blur(10px) brightness(1) saturate(1);
                                     <i class="fas fa-circle-exclamation"></i> Common Pitfalls
                                 </button>
                             </div>
+                            <p id="aiSenseiKanjiContext" class="ai-kanji-context" hidden></p>
                             <div id="aiChatLog" class="ai-chat-log">
                                 <div class="ai-chat-msg ai-msg-bot">
                                     <div class="ai-msg-avatar"><i class="fas fa-brain"></i></div>
@@ -1784,19 +1785,15 @@ filter: blur(10px) brightness(1) saturate(1);
                 </div>
             </div>
 
-            <!-- FLOATING AI SENSEI FAB (Bottom-Left) -->
+            <!-- Draggable AI Sensei assistive button -->
             <button
                 id="aiSenseiFab"
                 class="ai-sensei-fab"
-                title="AI Sensei & Spaced Repetition Hub"
-                aria-label="Open AI Sensei Hub"
+                type="button"
+                title="Open AI Sensei"
+                aria-label="Open AI Sensei hub"
             >
-                <div class="ai-fab-glow"></div>
-                <div class="ai-fab-icon-box">
-                    <i class="fas fa-brain"></i>
-                    <span class="ai-fab-pulse-dot"></span>
-                </div>
-                <span class="ai-fab-text">AI Sensei</span>
+                <i class="fas fa-brain" aria-hidden="true"></i>
             </button>
 
             <!-- Notification Toast -->
@@ -2684,7 +2681,7 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="storage-manager.js"></script>
         <script src="srs-engine.js"></script>
         <script src="ai-manager.js?v=ai-free-v1"></script>
-        <script src="ai-tutor-modal.js?v=ai-free-v1"></script>
+        <script src="ai-tutor-modal.js?v=ai-free-v2"></script>
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
         <script src="drawing-pad.js?v=practice-merge-v1"></script>
@@ -2693,12 +2690,12 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="backup-manager.js?v=practice-merge-v1"></script>
         <script src="profile-page.js?v=practice-merge-v1"></script>
         <script src="avatar-crop.js?v=avatar-v1"></script>
-        <script src="firebase-config.js?v=ai-free-v1"></script>
+        <script src="firebase-config.js?v=ai-free-v2"></script>
         <script src="username-policy.js?v=login-v1"></script>
         <script src="app-auth.js?v=ai-free-v1"></script>
         <script src="username-directory.js?v=login-v1"></script>
         <script src="auth-dialog.js?v=login-v1"></script>
         <script src="cloud-sync.js?v=practice-merge-v1"></script>
-        <script src="script.js?v=ai-free-v1"></script>
+        <script src="script.js?v=ai-free-v2"></script>
     </body>
 </html>
