@@ -1,0 +1,12 @@
+node_modules/
+assets/audio/
+assets/icons/
+*.mp3
+*.wav
+*.ogg
+*.m4a
+*.webm
+deploy/
+dist/
+coverage/
+package-lock.json

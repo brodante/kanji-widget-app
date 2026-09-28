@@ -11,7 +11,7 @@ class AudioManager {
             this.synth = window.speechSynthesis;
             this.isSupported = true;
             if (this.synth && typeof this.synth.onvoiceschanged === 'undefined') {
-                this.synth.onvoiceschanged = () => { };
+                this.synth.onvoiceschanged = () => {};
             }
         } else {
             console.warn('Speech synthesis not supported');
@@ -55,7 +55,9 @@ class AudioManager {
                     }
                 }
             }
-            console.log(`Audio Engine: Switched to [${level}]. Loaded ${this.localAudioMap.size} embedded MP3 paths.`);
+            console.log(
+                `Audio Engine: Switched to [${level}]. Loaded ${this.localAudioMap.size} embedded MP3 paths.`
+            );
         } else {
             console.warn('Audio Engine: kanjiPool was empty or not provided!');
         }
@@ -96,13 +98,16 @@ class AudioManager {
                 audio.currentTime = 0;
                 this.isPlaying = true;
 
-                audio.play().then(() => resolve(true)).catch(err => {
-                    if (err.name === 'NotAllowedError') {
-                        resolve(true);
-                    } else {
-                        resolve(false);
-                    }
-                });
+                audio
+                    .play()
+                    .then(() => resolve(true))
+                    .catch((err) => {
+                        if (err.name === 'NotAllowedError') {
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    });
                 audio.onended = () => {
                     this.isPlaying = false;
                 };
@@ -113,24 +118,29 @@ class AudioManager {
             const timeoutId = setTimeout(() => resolve(false), 2000);
 
             audio.onended = () => {
-                this.isPlaying = false; resolve(true);
+                this.isPlaying = false;
+                resolve(true);
             };
             audio.onerror = () => {
-                clearTimeout(timeoutId); resolve(false);
+                clearTimeout(timeoutId);
+                resolve(false);
             };
 
             this.isPlaying = true;
-            audio.play().then(() => {
-                clearTimeout(timeoutId);
-                this.audioCache.set(cacheKey, audio);
-            }).catch(err => {
-                clearTimeout(timeoutId);
-                if (err.name === 'NotAllowedError') {
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            });
+            audio
+                .play()
+                .then(() => {
+                    clearTimeout(timeoutId);
+                    this.audioCache.set(cacheKey, audio);
+                })
+                .catch((err) => {
+                    clearTimeout(timeoutId);
+                    if (err.name === 'NotAllowedError') {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                });
         });
     }
 
@@ -145,8 +155,13 @@ class AudioManager {
             utterance.lang = lang;
             utterance.rate = 0.95;
 
-            const jpVoices = voices.filter(v => v.lang.startsWith('ja'));
-            const bestVoice = jpVoices.find(v => v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Siri'));
+            const jpVoices = voices.filter((v) => v.lang.startsWith('ja'));
+            const bestVoice = jpVoices.find(
+                (v) =>
+                    v.name.includes('Google') ||
+                    v.name.includes('Natural') ||
+                    v.name.includes('Siri')
+            );
             if (bestVoice || jpVoices[0]) {
                 utterance.voice = bestVoice || jpVoices[0];
             }
@@ -187,7 +202,7 @@ class AudioManager {
         this.isPlaying = false;
     }
 
-    static setApiKey(_key) { }
+    static setApiKey(_key) {}
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,3 +1,4 @@
+/* global BackupManager */
 // ==========================================
 // GLOBAL ANIMATION TRACKERS
 // ==========================================
@@ -23,7 +24,7 @@ function katakanaToHiragana(str) {
 
 // Small greedy romaji -> hiragana converter. Covers standard mora,
 // youon (kya/sha/etc.), and sokuon (doubled consonant -> っ). Not a
-// full IME — good enough for matching search queries against readings.
+// full IME - good enough for matching search queries against readings.
 const ROMAJI_TO_HIRAGANA = {
     kya: 'きゃ',
     kyu: 'きゅ',
@@ -181,7 +182,7 @@ function readingMatches(reading, lowerQuery, romajiHiragana) {
 // ==========================================
 // CUSTOM THEME IMAGE STORAGE (IndexedDB)
 // ==========================================
-// Images can easily be several MB — localStorage's ~5-10MB *text-only*
+// Images can easily be several MB - localStorage's ~5-10MB *text-only*
 // quota is shared with all saved progress, so storing images there risks
 // corrupting unrelated data. IndexedDB has no such practical limit and
 // stores binary Blobs natively (no base64 bloat).
@@ -223,7 +224,7 @@ async function getCustomThemeImage(slot) {
 // DEV'S FAVORITE THEMES (curated preset backgrounds)
 // ==========================================
 // Static files live in assets/dev-themes/ (landscape, for desktop) and
-// assets/dev-themes/mobile/ (portrait, for phones) — auto-swapped based on
+// assets/dev-themes/mobile/ (portrait, for phones) - auto-swapped based on
 // screen size so nobody sees a wallpaper cropped for the wrong orientation.
 // To add one: drop the image/gif in the right folder AND add its filename
 // to that folder's manifest.json. Display name is derived from the filename.
@@ -244,7 +245,7 @@ async function loadDevFavoritesManifest() {
         const files = await res.json();
         return { folder, files: Array.isArray(files) ? files : [] };
     } catch (err) {
-        return { folder, files: [] }; // manifest missing or unreadable — just show no dev picks, not an error state
+        return { folder, files: [] }; // manifest missing or unreadable - just show no dev picks, not an error state
     }
 }
 
@@ -322,7 +323,11 @@ class KanjiLearningApp {
             defaultAudio: 'kunyomi',
             localBackupFreq: 'daily',
             onlineBackupFreq: 'never',
-            kanjiAliveKey: ''
+            kanjiAliveKey: '',
+            // Which stroke-order tab the user last had open ('animate' or
+            // 'practice'). Remembered so hopping to the next kanji reopens
+            // the practice board exactly as they left it.
+            strokeOrderMode: 'animate'
         };
 
         // Cache frequently-used DOM elements once instead of re-querying repeatedly
@@ -482,7 +487,7 @@ class KanjiLearningApp {
 
         // Re-check the mobile/desktop blur compensation whenever the window
         // is resized (e.g. a PC window maximized after picking a mobile theme
-        // while narrow) — debounced so it doesn't run on every pixel of a drag.
+        // while narrow) - debounced so it doesn't run on every pixel of a drag.
         let resizeDebounceTimer = null;
         window.addEventListener('resize', () => {
             clearTimeout(resizeDebounceTimer);
@@ -510,7 +515,15 @@ class KanjiLearningApp {
         // AI Sensei Modal triggers
         const aiSenseiFab = document.getElementById('aiSenseiFab');
         if (aiSenseiFab) {
-            aiSenseiFab.addEventListener('click', () => {
+            this.initDraggableFab(aiSenseiFab);
+            aiSenseiFab.addEventListener('click', (e) => {
+                // Don't open the modal if the user just finished dragging
+                const lastDragEnd = parseInt(aiSenseiFab.dataset.lastDragEnd || '0', 10);
+                if (Date.now() - lastDragEnd < 250) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return;
+                }
                 this.openAISenseiModal();
             });
         }
@@ -731,7 +744,7 @@ class KanjiLearningApp {
                 return;
             }
 
-            // Use the File's actual MIME type, not the URL — a blob: URL has
+            // Use the File's actual MIME type, not the URL - a blob: URL has
             // no file extension, so extension-sniffing wouldn't work here.
             const isVideo = file.type.startsWith('video/');
             const url = URL.createObjectURL(file);
@@ -740,11 +753,11 @@ class KanjiLearningApp {
             if (isVideo) {
                 const sizeMB = file.size / (1024 * 1024);
                 if (sizeMB > 20) {
-                    this.showToast(
-                        `That clip is ${sizeMB.toFixed(1)}MB — quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`
+                    this.showWarning(
+                        `That clip is ${sizeMB.toFixed(1)}MB, which is quite large for a background. Try trimming to 8-15s at 720p-1080p for a lighter result.`
                     );
                 } else if (sizeMB > 8) {
-                    this.showToast(
+                    this.showWarning(
                         `This clip is ${sizeMB.toFixed(1)}MB. For best performance, aim for 720p-1080p and 8-15 seconds.`
                     );
                 }
@@ -763,7 +776,7 @@ class KanjiLearningApp {
                 .querySelectorAll('.dev-favorite-thumb')
                 .forEach((t) => t.classList.remove('selected'));
 
-            // Default to checked on upload — most people uploading their own
+            // Default to checked on upload - most people uploading their own
             // image/video want a matching accent without an extra click.
             document.getElementById('autoAccentToggle').checked = true;
 
@@ -787,7 +800,7 @@ class KanjiLearningApp {
             const isVideo = isVideoFile(file);
             const previewEl = document.getElementById('customThemePreview');
 
-            // Videos can't be a CSS background-image — clear it so a stale
+            // Videos can't be a CSS background-image - clear it so a stale
             // image doesn't show through behind the small preview box.
             previewEl.style.backgroundImage = isVideo ? 'none' : `url(${file})`;
             previewEl.dataset.imageUrl = file;
@@ -799,7 +812,7 @@ class KanjiLearningApp {
                 .forEach((t) => t.classList.remove('selected'));
             thumb.classList.add('selected');
 
-            // Dev's picks are curated to already look good — apply instantly
+            // Dev's picks are curated to already look good - apply instantly
             // with a light blur, no manual tweaking needed.
             document.getElementById('customThemeBlur').value = 2;
             document.getElementById('customThemeBlurValue').textContent = '2px';
@@ -833,7 +846,7 @@ class KanjiLearningApp {
             }
         });
 
-        // Accent color presets — quick picks, still fully overridable
+        // Accent color presets - quick picks, still fully overridable
         document.querySelectorAll('.accent-swatch').forEach((swatch) => {
             swatch.addEventListener('click', () => {
                 document.getElementById('customThemeAccent').value = swatch.dataset.color;
@@ -987,6 +1000,150 @@ class KanjiLearningApp {
             }
         });
     }
+    initDraggableFab(fab) {
+        const STORAGE_KEY = 'aiSenseiFabPos';
+        const MARGIN = 8;
+        const DRAG_THRESHOLD = 4;
+
+        const computed = getComputedStyle(fab);
+        const baseLeft = parseFloat(computed.left) || 26;
+        const baseTop = parseFloat(computed.top) || 26;
+
+        let pos = { x: 0, y: 0 };
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+                    pos = parsed;
+                }
+            }
+        } catch (e) {
+            /* ignore corrupt storage */
+        }
+
+        const clampY = (y) => {
+            const h = fab.offsetHeight;
+            const minY = MARGIN - baseTop;
+            const maxY = window.innerHeight - MARGIN - baseTop - h;
+            return Math.min(Math.max(y, minY), maxY);
+        };
+
+        const clampXY = (x, y) => {
+            const w = fab.offsetWidth;
+            const minX = MARGIN - baseLeft;
+            const maxX = window.innerWidth - MARGIN - baseLeft - w;
+            return {
+                x: Math.min(Math.max(x, minX), maxX),
+                y: clampY(y)
+            };
+        };
+
+        // Decide which edge to snap to based on where the FAB's center is
+        const computeSnapX = (currentX) => {
+            const w = fab.offsetWidth;
+            const centerX = baseLeft + currentX + w / 2;
+            if (centerX < window.innerWidth / 2) {
+                return MARGIN - baseLeft; // left edge
+            }
+            return window.innerWidth - MARGIN - baseLeft - w; // right edge
+        };
+
+        // Apply restored position (clamp first in case viewport shrank)
+        pos = clampXY(pos.x, pos.y);
+        // Then snap to nearest edge on load so it always looks "docked"
+        pos = { x: computeSnapX(pos.x), y: pos.y };
+        fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+
+        let activePointerId = null;
+        let startPointer = { x: 0, y: 0 };
+        let startPos = { x: 0, y: 0 };
+        let moved = false;
+
+        fab.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'mouse' && e.button !== 0) {
+                return;
+            }
+            activePointerId = e.pointerId;
+            startPointer = { x: e.clientX, y: e.clientY };
+            startPos = { x: pos.x, y: pos.y };
+            moved = false;
+            try {
+                fab.setPointerCapture(activePointerId);
+            } catch (err) {
+                /* ignore */
+            }
+            fab.classList.add('dragging');
+        });
+
+        fab.addEventListener('pointermove', (e) => {
+            if (e.pointerId !== activePointerId) {
+                return;
+            }
+            const dx = e.clientX - startPointer.x;
+            const dy = e.clientY - startPointer.y;
+            if (!moved && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+                moved = true;
+            }
+            if (!moved) {
+                return;
+            }
+            pos = clampXY(startPos.x + dx, startPos.y + dy);
+            fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+        });
+
+        const endDrag = (e) => {
+            if (e.pointerId !== activePointerId) {
+                return;
+            }
+            try {
+                fab.releasePointerCapture(activePointerId);
+            } catch (err) {
+                /* ignore */
+            }
+            activePointerId = null;
+
+            if (!moved) {
+                fab.classList.remove('dragging');
+                return;
+            }
+
+            // Compute final snap target
+            const targetX = computeSnapX(pos.x);
+            const targetY = clampY(pos.y);
+            pos = { x: targetX, y: targetY };
+
+            // Mark the drag so the click handler swallows the trailing click
+            fab.dataset.lastDragEnd = Date.now().toString();
+
+            // Remove .dragging FIRST so the transition is active, then set the
+            // new transform on the next frame so the browser actually animates.
+            fab.classList.remove('dragging');
+            requestAnimationFrame(() => {
+                fab.style.transform = `translate(${targetX}px, ${targetY}px)`;
+            });
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+            } catch (err) {
+                /* ignore */
+            }
+        };
+
+        fab.addEventListener('pointerup', endDrag);
+        fab.addEventListener('pointercancel', endDrag);
+
+        // On resize / rotate, re-snap to the nearest edge
+        window.addEventListener('resize', () => {
+            pos = { x: computeSnapX(pos.x), y: clampY(pos.y) };
+            fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+            } catch (err) {
+                /* ignore */
+            }
+        });
+    }
 
     updateLevelIcon() {
         const btn = document.getElementById('levelToggleBtn');
@@ -1127,49 +1284,49 @@ class KanjiLearningApp {
                 ${isMastered ? '<button class="unmark-badge" onclick="app.unmarkCurrentKanji()" title="Unmark as mastered"><i class="fas fa-times"></i></button>' : ''}
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>                <div class="kanji-readings">
                     ${
-    this.currentKanji.onyomi.length > 0
-        ? `
+                        this.currentKanji.onyomi.length > 0
+                            ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">On'yomi</div>
                             <div class="reading-value japanese-text">
                                 ${this.currentKanji.onyomi
-        .map(
-            (reading) =>
-                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
-        )
-        .join(', ')}
+                                    .map(
+                                        (reading) =>
+                                            `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+                                    )
+                                    .join(', ')}
                             </div>
                         </div>
                     `
-        : ''
-}
+                            : ''
+                    }
                     ${
-    this.currentKanji.kunyomi.length > 0
-        ? `
+                        this.currentKanji.kunyomi.length > 0
+                            ? `
                         <div class="reading-group">
                             <div class="reading-label japanese-text">Kun'yomi</div>
                             <div class="reading-value japanese-text">
                                 ${this.currentKanji.kunyomi
-        .map(
-            (reading) =>
-                `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
-        )
-        .join(', ')}
+                                    .map(
+                                        (reading) =>
+                                            `<span class="clickable-reading japanese-text" onclick="app.playSpecificReading('${reading}')">${reading}</span>`
+                                    )
+                                    .join(', ')}
                             </div>
                         </div>
                     `
-        : ''
-}
+                            : ''
+                    }
                 </div>
                 ${
-    this.currentKanji.examples && this.currentKanji.examples.length > 0
-        ? `
+                    this.currentKanji.examples && this.currentKanji.examples.length > 0
+                        ? `
                     <div class="kanji-examples">
                         <h4>Examples</h4>
                         ${this.currentKanji.examples
-        .slice(0, 3)
-        .map(
-            (example) => `
+                            .slice(0, 3)
+                            .map(
+                                (example) => `
                             <div class="example-item">
                                 <span class="example-word japanese-text" onclick="app.playSpecificReading('${example.word}')" title="Click to pronounce">
                                     ${example.word}
@@ -1178,18 +1335,67 @@ class KanjiLearningApp {
                                 <span class="example-meaning">${example.meaning}</span>
                             </div>
                         `
-        )
-        .join('')}
+                            )
+                            .join('')}
                     </div>
                 `
-        : ''
-}
+                        : ''
+                }
                 <div class="stroke-order-section">
-                    <div class="stroke-order-header">Stroke order</div>
-                    <div class="stroke-order-toolbar">
-                        <button class="stroke-order-play" onclick="app.playStrokeOrderAnimation()" type="button">Animate</button>
+                    <div class="stroke-order-header-row">
+                        <div class="stroke-order-header">Stroke order</div>
+                        <div class="stroke-order-toolbar" id="strokeOrderToolbar">
+                            <button id="strokeOrderAnimateBtn" class="stroke-order-mode-btn stroke-order-play active" onclick="app.showStrokeOrderMode('animate')" type="button">Animate</button>
+                            <button id="strokeOrderPracticeBtn" class="stroke-order-mode-btn stroke-order-practice" onclick="app.showStrokeOrderMode('practice')" type="button">Practice</button>
+                        </div>
                     </div>
-                    <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()"></div>
+                    <div class="stroke-order-flip-card" id="strokeOrderFlipCard">
+                        <div class="stroke-order-flip-inner">
+                            <div class="stroke-order-flip-front" id="strokeOrderFront">
+                                <div id="strokeOrderContainer" class="stroke-order-container" onclick="app.playStrokeOrderAnimation()"></div>
+                            </div>
+                            <div class="stroke-order-flip-back" id="strokeOrderBack">
+                                <div class="drawing-pad-guide" id="drawingPadInlineGuide" aria-hidden="true"></div>
+                                <div class="drawing-pad-canvas-wrap">
+                                    <canvas id="drawingPadCanvas" width="300" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="drawing-pad-inline-controls" id="drawingPadInlineControls" style="display: none;">
+                        <div class="drawing-pad-toolbar">
+                            <button type="button" id="drawingPadInlineGuideBtn" class="drawing-pad-btn" title="Show reference beside the pad">
+                                <i class="fas fa-table-columns"></i> Guide
+                            </button>
+                            <button type="button" id="drawingPadInlineGridBtn" class="drawing-pad-btn" title="Toggle Grid">
+                                <i class="fas fa-th"></i> Grid
+                            </button>
+                            <button type="button" id="drawingPadInlineRefBtn" class="drawing-pad-btn" title="Toggle Reference">
+                                <i class="fas fa-eye"></i> Trace
+                            </button>
+                            <button type="button" id="drawingPadInlineSnapBtn" class="drawing-pad-btn" title="Snap strokes perfectly onto the reference">
+                                <i class="fas fa-magnet"></i> Snap
+                            </button>
+                            <button type="button" id="drawingPadInlineUndoBtn" class="drawing-pad-btn" title="Undo Stroke">
+                                <i class="fas fa-undo"></i> Undo
+                            </button>
+                            <button type="button" id="drawingPadInlineRedoBtn" class="drawing-pad-btn" title="Redo Stroke">
+                                <i class="fas fa-rotate-right"></i> Redo
+                            </button>
+                            <button type="button" id="drawingPadInlineClearBtn" class="drawing-pad-btn danger-action" title="Clear Canvas">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                        </div>
+                        <div class="drawing-pad-width-row">
+                            <span class="drawing-pad-width-label"><i class="fas fa-pen-nib"></i> Thickness</span>
+                            <div class="drawing-pad-slider-wrap">
+                                <input type="range" id="drawingPadInlineWidthSlider" min="2" max="8" step="1" value="4" class="drawing-pad-slider" title="Adjust stroke thickness">
+                            </div>
+                            <span id="drawingPadInlineWidthVal" class="drawing-pad-width-val">4px</span>
+                        </div>
+                        <div id="drawingPadInlineFeedback" class="drawing-pad-feedback"></div>
+                        <div id="drawingPadInlineScore" class="drawing-pad-score"></div>
+                    </div>
                 </div>
                 <div class="widget-actions">
                     <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
@@ -1204,6 +1410,13 @@ class KanjiLearningApp {
         widget.innerHTML = content;
         if (this.widgetSize !== 'small') {
             this.loadStrokeOrder();
+            // The markup above always renders with the Animate tab active.
+            // If the user was practising, reopen the practice board for the
+            // new kanji right away, with all their toggles (guide, grid,
+            // trace, snap, thickness) carried over from the saved settings.
+            if (this.settings.strokeOrderMode === 'practice') {
+                this.showStrokeOrderMode('practice');
+            }
         }
     }
 
@@ -1288,7 +1501,7 @@ class KanjiLearningApp {
             }
         }
 
-        // Nothing unmastered left anywhere in the level — reuse the existing
+        // Nothing unmastered left anywhere in the level - reuse the existing
         // "level complete" flow (congrats toast + reset to the start).
         this.loadCurrentKanji();
     }
@@ -1313,7 +1526,7 @@ class KanjiLearningApp {
         const MAX_RESULTS = 30;
 
         // Only attempt romaji conversion when the query looks like plain
-        // latin letters (e.g. "ima") — never run it on kanji/kana input.
+        // latin letters (e.g. "ima") - never run it on kanji/kana input.
         const romajiHiragana = /^[a-z]+$/i.test(trimmed) ? romajiToHiragana(lowerQuery) : null;
 
         for (const level of levels) {
@@ -1326,7 +1539,7 @@ class KanjiLearningApp {
 
                 const isMatch =
                     trimmed.includes(kanji.character) || // handles single AND compound queries, e.g. "今夜" matches both 今 and 夜
-                    examples.some((ex) => ex.word === trimmed) || // exact compound-word match only — avoids flooding results for common single kanji
+                    examples.some((ex) => ex.word === trimmed) || // exact compound-word match only - avoids flooding results for common single kanji
                     meanings.some((m) => m.toLowerCase().includes(lowerQuery)) ||
                     onyomi.some((r) => readingMatches(r, lowerQuery, romajiHiragana)) ||
                     kunyomi.some((r) => readingMatches(r, lowerQuery, romajiHiragana));
@@ -1455,7 +1668,7 @@ class KanjiLearningApp {
         progress.mastered = progress.mastered.filter((char) => char !== character);
         StorageManager.saveProgress(progress);
 
-        this.showToast(`"${character}" unmarked — moved back to pending.`);
+        this.showToast(`"${character}" unmarked and moved back to pending.`);
 
         this.renderKanji(); // refresh so the ✕ button hides again
         this.updateProgress();
@@ -1470,28 +1683,28 @@ class KanjiLearningApp {
         let readingToPlay = '';
 
         switch (this.settings.defaultAudio) {
-        case 'kunyomi':
-            readingToPlay =
+            case 'kunyomi':
+                readingToPlay =
                     this.currentKanji.kunyomi.length > 0
                         ? this.currentKanji.kunyomi[0]
                         : this.currentKanji.onyomi.length > 0
-                            ? this.currentKanji.onyomi[0]
-                            : '';
-            break;
-        case 'onyomi':
-            readingToPlay =
+                          ? this.currentKanji.onyomi[0]
+                          : '';
+                break;
+            case 'onyomi':
+                readingToPlay =
                     this.currentKanji.onyomi.length > 0
                         ? this.currentKanji.onyomi[0]
                         : this.currentKanji.kunyomi.length > 0
-                            ? this.currentKanji.kunyomi[0]
-                            : '';
-            break;
-        case 'first':
-        default: {
-            const allReadings = [...this.currentKanji.onyomi, ...this.currentKanji.kunyomi];
-            readingToPlay = allReadings.length > 0 ? allReadings[0] : '';
-            break;
-        }
+                          ? this.currentKanji.kunyomi[0]
+                          : '';
+                break;
+            case 'first':
+            default: {
+                const allReadings = [...this.currentKanji.onyomi, ...this.currentKanji.kunyomi];
+                readingToPlay = allReadings.length > 0 ? allReadings[0] : '';
+                break;
+            }
         }
 
         if (readingToPlay) {
@@ -2221,11 +2434,11 @@ class KanjiLearningApp {
                     setTimeout(() => this.playPronunciation(), 800);
                 }
             } else {
-                this.showToast(`Could not find details for "${character}"`);
+                this.showWarning(`Could not find details for "${character}"`);
             }
         } catch (error) {
             console.error('Error showing kanji from recent:', error);
-            this.showToast(`Error loading "${character}"`);
+            this.showWarning(`Error loading "${character}"`);
         }
     }
 
@@ -2255,6 +2468,78 @@ class KanjiLearningApp {
         modal.classList.remove('show');
     }
 
+    showStrokeOrderMode(mode) {
+        // Remember the tab choice so the next kanji lands on the same one
+        // instead of always kicking the user back to the Animate tab.
+        if (this.settings.strokeOrderMode !== mode) {
+            this.settings.strokeOrderMode = mode;
+            this.saveSettings();
+        }
+
+        const flipCard = document.getElementById('strokeOrderFlipCard');
+        const controls = document.getElementById('drawingPadInlineControls');
+        const animateBtn = document.getElementById('strokeOrderAnimateBtn');
+        const practiceBtn = document.getElementById('strokeOrderPracticeBtn');
+
+        if (mode === 'practice') {
+            if (flipCard) {
+                flipCard.classList.add('flipped');
+            }
+            if (controls) {
+                controls.style.display = 'flex';
+            }
+            if (animateBtn) {
+                animateBtn.classList.remove('active');
+            }
+            if (practiceBtn) {
+                practiceBtn.classList.add('active');
+            }
+
+            if (window.DrawingPad) {
+                if (!this.drawingPadInstance) {
+                    this.drawingPadInstance = new window.DrawingPad();
+                }
+                // Scope the pad to the inline controls so it never collides with
+                // the identically-purposed modal controls.
+                this.drawingPadInstance.init(this._drawingPadScope());
+                if (this.currentKanji?.character) {
+                    this.drawingPadInstance.setKanji(this.currentKanji.character);
+                }
+            }
+        } else {
+            if (flipCard) {
+                flipCard.classList.remove('flipped');
+            }
+            if (controls) {
+                controls.style.display = 'none';
+            }
+            if (animateBtn) {
+                animateBtn.classList.add('active');
+            }
+            if (practiceBtn) {
+                practiceBtn.classList.remove('active');
+            }
+        }
+    }
+
+    // The practice canvas lives in the flip-card back of the stroke-order
+    // section while the toolbar lives in the inline controls div, so the
+    // drawing pad must be scoped to an element containing BOTH. Returning
+    // just the controls div forced the canvas lookup to fall back to a
+    // document-wide getElementById, which only worked because of document
+    // ordering. Scoping to the whole stroke-order section keeps every pad
+    // lookup unambiguous.
+    _drawingPadScope() {
+        const controls = document.getElementById('drawingPadInlineControls');
+        return (controls && controls.closest('.stroke-order-section')) || document;
+    }
+
+    // NOTE: the drawing pad toolbar (Grid / Trace / Undo / Clear / thickness
+    // slider) is wired entirely by DrawingPad._bindEvents(). There are
+    // deliberately no app.toggleDrawingPad*() wrapper methods or inline
+    // onclick attributes for it - the pad must have exactly one wiring per
+    // control, or every tap toggles twice and cancels itself out.
+
     syncAISettingsUI() {
         if (!window.StorageManager) {
             return;
@@ -2267,7 +2552,17 @@ class KanjiLearningApp {
         const personaEl = document.getElementById('aiPersona');
         const apiKeyGroup = document.getElementById('aiApiKeyGroup');
         const endpointGroup = document.getElementById('aiEndpointGroup');
-
+        // Update the "Get your API key" link based on the selected provider
+        const keyLinkEl = document.getElementById('aiProviderKeyLink');
+        if (keyLinkEl && window.AIManager && AIManager.PROVIDER_DEFAULTS) {
+            const providerInfo = AIManager.PROVIDER_DEFAULTS[aiSettings.provider];
+            if (providerInfo && providerInfo.keyUrl) {
+                keyLinkEl.href = providerInfo.keyUrl;
+                keyLinkEl.style.display = 'inline';
+            } else {
+                keyLinkEl.style.display = 'none';
+            }
+        }
         if (providerEl) {
             providerEl.value = aiSettings.provider || 'gemini';
         }
@@ -2685,9 +2980,9 @@ class KanjiLearningApp {
         }
     }
 
-    createLocalBackup() {
+    async createLocalBackup() {
         try {
-            const backupData = StorageManager.exportData();
+            const backupData = JSON.stringify(await BackupManager.snapshot(), null, 2);
             const blob = new Blob([backupData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
@@ -2704,7 +2999,7 @@ class KanjiLearningApp {
             this.showToast('Local backup created successfully!');
         } catch (error) {
             console.error('Error creating backup:', error);
-            this.showToast('Error creating backup. Please try again.');
+            this.showWarning('Error creating backup. Please try again.');
         }
     }
 
@@ -2714,20 +3009,28 @@ class KanjiLearningApp {
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
-                const success = StorageManager.importData(e.target.result);
-                if (success) {
-                    this.showToast('Backup restored successfully! Reloading...');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                } else {
-                    this.showToast('Error restoring backup. Invalid file format.');
+                const source = JSON.parse(e.target.result);
+                const data = await BackupManager.normalizeImport(source);
+                const notice = data.migratedFrom
+                    ? 'Import this older backup? Included progress/settings will be restored. Current photos, uploaded themes and sections missing from the file will be kept. A recovery copy is saved first.'
+                    : 'Replace this device’s saved progress and settings with this backup? A recovery copy is saved first.';
+                if (!confirm(notice)) {
+                    return;
                 }
+                await BackupManager.restore(data);
+                const backupConfig = JSON.parse(localStorage.getItem('kanji_drive_backup') || '{}');
+                backupConfig.dataOwner = '__imported_local_data__';
+                backupConfig.syncStates = {};
+                localStorage.setItem('kanji_drive_backup', JSON.stringify(backupConfig));
+                this.showToast('Backup restored successfully! Reloading...');
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
             } catch (error) {
                 console.error('Error restoring backup:', error);
-                this.showToast('Error restoring backup. Please check the file.');
+                this.showWarning(error.message || 'Error restoring backup. Please check the file.');
             }
         };
         reader.readAsText(file);
@@ -2761,10 +3064,7 @@ class KanjiLearningApp {
             }
         }
 
-        // Online backup would be implemented here with cloud storage API
-        if (this.settings.onlineBackupFreq !== 'never') {
-            this.showToast('Online backup feature coming soon!');
-        }
+        // Google Drive scheduling is managed independently by BackupManager.
     }
 
     checkBackupDue() {
@@ -2789,9 +3089,9 @@ class KanjiLearningApp {
         }
     }
 
-    autoCreateBackup() {
+    async autoCreateBackup() {
         try {
-            const backupData = StorageManager.exportData();
+            const backupData = JSON.stringify(await BackupManager.snapshot());
             localStorage.setItem(`autoBackup_${Date.now()}`, backupData);
             localStorage.setItem('lastLocalBackup', Date.now().toString());
 
@@ -2808,6 +3108,14 @@ class KanjiLearningApp {
             console.log('Auto backup created');
         } catch (error) {
             console.error('Error creating auto backup:', error);
+        }
+    }
+
+    showWarning(message) {
+        if (window.KanjiFeedback) {
+            window.KanjiFeedback.show(message);
+        } else {
+            this.showToast(message);
         }
     }
 
@@ -3372,15 +3680,15 @@ const hexToHsl = (hex) => {
         const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
-        case rn:
-            h = (gn - bn) / d + (gn < bn ? 6 : 0);
-            break;
-        case gn:
-            h = (bn - rn) / d + 2;
-            break;
-        case bn:
-            h = (rn - gn) / d + 4;
-            break;
+            case rn:
+                h = (gn - bn) / d + (gn < bn ? 6 : 0);
+                break;
+            case gn:
+                h = (bn - rn) / d + 2;
+                break;
+            case bn:
+                h = (rn - gn) / d + 4;
+                break;
         }
         h /= 6;
     }
@@ -3431,7 +3739,7 @@ function sanitizeAccentColor(hex, mode) {
 // (high saturation, avoiding near-black/near-white) to use as an accent color.
 function extractVibrantColor(imgElement) {
     const canvas = document.createElement('canvas');
-    const size = 40; // small on purpose — this is a rough pick, not precision color science
+    const size = 40; // small on purpose - this is a rough pick, not precision color science
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext('2d');
@@ -3490,7 +3798,7 @@ function loadVideoFrame(url) {
         video.playsInline = true;
         video.preload = 'auto';
         // Detached video elements can fail to reliably decode frames or fire
-        // seek events in some browsers — keep it in the DOM, just off-screen
+        // seek events in some browsers - keep it in the DOM, just off-screen
         // and invisible. The caller removes it after drawing from it.
         video.style.position = 'fixed';
         video.style.left = '-9999px';
@@ -3535,7 +3843,7 @@ function loadVideoFrame(url) {
 }
 
 // Ties extraction + the existing contrast safety net together. Works for
-// both still images and videos — reads dataset.isVideo itself, so every
+// both still images and videos - reads dataset.isVideo itself, so every
 // call site can use this the same way regardless of media type.
 // Returns a safe hex string, or null if there's no usable media.
 async function autoPickAccentFromMedia(mode) {
@@ -3550,7 +3858,7 @@ async function autoPickAccentFromMedia(mode) {
     try {
         mediaEl = isVideo ? await loadVideoFrame(url) : await loadImageElement(url);
     } catch (err) {
-        return null; // failed to load/decode — fail safely instead of throwing into the caller
+        return null; // failed to load/decode - fail safely instead of throwing into the caller
     }
 
     const extracted = extractVibrantColor(mediaEl);

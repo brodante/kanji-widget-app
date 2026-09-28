@@ -6,39 +6,44 @@ class AIManager {
     static PROVIDER_DEFAULTS = {
         gemini: {
             name: 'Google Gemini',
-            defaultModel: 'gemini-1.5-flash',
-            models: ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'],
-            requiresKey: true
+            defaultModel: 'gemini-3.1-flash-lite',
+            models: ['gemini-3.1-flash-lite', 'gemini-3.1-pro-preview'],
+            requiresKey: true,
+            keyUrl: 'https://aistudio.google.com/api-keys'
         },
         openai: {
             name: 'OpenAI',
             defaultModel: 'gpt-4o-mini',
             models: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
-            requiresKey: true
+            requiresKey: true,
+            keyUrl: 'https://platform.openai.com/api-keys'
         },
         claude: {
             name: 'Anthropic Claude',
             defaultModel: 'claude-3-5-haiku-20241022',
             models: ['claude-3-5-haiku-20241022', 'claude-3-5-sonnet-20241022'],
-            requiresKey: true
+            requiresKey: true,
+            keyUrl: 'https://console.anthropic.com/settings/keys'
         },
         openrouter: {
             name: 'OpenRouter',
-            defaultModel: 'google/gemini-flash-1.5',
+            defaultModel: 'google/gemini-3.5-flash',
             models: [
-                'google/gemini-flash-1.5',
+                'google/gemini-3.5-flash',
                 'openai/gpt-4o-mini',
                 'anthropic/claude-3.5-haiku',
                 'meta-llama/llama-3.2-3b-instruct:free'
             ],
-            requiresKey: true
+            requiresKey: true,
+            keyUrl: 'https://openrouter.ai/keys'
         },
         ollama: {
             name: 'Ollama (Local)',
             defaultModel: 'llama3.2',
             models: ['llama3.2', 'mistral', 'qwen2.5'],
             requiresKey: false,
-            defaultEndpoint: 'http://localhost:11434/api/generate'
+            defaultEndpoint: 'http://localhost:11434/api/generate',
+            keyUrl: 'https://ollama.com/download'
         }
     };
 
@@ -55,6 +60,14 @@ class AIManager {
      * Tests connectivity to the configured AI provider.
      */
     static async testConnection(customSettings = null) {
+        const now = Date.now();
+        if (this._lastTestAt && now - this._lastTestAt < 10000) {
+            return {
+                success: false,
+                message: 'Please wait a few seconds before testing again.'
+            };
+        }
+        this._lastTestAt = now;
         const settings = customSettings || StorageManager.getAISettings();
         const testPrompt = 'Respond with exactly one word: "Connected"';
 
@@ -84,7 +97,9 @@ class AIManager {
         const provider = settings.provider || 'gemini';
         const apiKey = settings.apiKey ? settings.apiKey.trim() : '';
         const model =
-            settings.model || this.PROVIDER_DEFAULTS[provider]?.defaultModel || 'gemini-1.5-flash';
+            settings.model ||
+            this.PROVIDER_DEFAULTS[provider]?.defaultModel ||
+            'gemini-3.1-flash-lite';
 
         if (this.PROVIDER_DEFAULTS[provider]?.requiresKey && !apiKey) {
             throw new Error(
@@ -93,47 +108,47 @@ class AIManager {
         }
 
         switch (provider) {
-        case 'gemini':
-            return this.callGemini(
-                prompt,
-                systemInstruction,
-                apiKey,
-                model,
-                settings.temperature
-            );
-        case 'openai':
-            return this.callOpenAI(
-                prompt,
-                systemInstruction,
-                apiKey,
-                model,
-                settings.temperature
-            );
-        case 'claude':
-            return this.callClaude(
-                prompt,
-                systemInstruction,
-                apiKey,
-                model,
-                settings.temperature
-            );
-        case 'openrouter':
-            return this.callOpenRouter(
-                prompt,
-                systemInstruction,
-                apiKey,
-                model,
-                settings.temperature
-            );
-        case 'ollama':
-            return this.callOllama(
-                prompt,
-                systemInstruction,
-                settings.customEndpoint || 'http://localhost:11434/api/generate',
-                model
-            );
-        default:
-            throw new Error(`Unsupported provider: ${provider}`);
+            case 'gemini':
+                return this.callGemini(
+                    prompt,
+                    systemInstruction,
+                    apiKey,
+                    model,
+                    settings.temperature
+                );
+            case 'openai':
+                return this.callOpenAI(
+                    prompt,
+                    systemInstruction,
+                    apiKey,
+                    model,
+                    settings.temperature
+                );
+            case 'claude':
+                return this.callClaude(
+                    prompt,
+                    systemInstruction,
+                    apiKey,
+                    model,
+                    settings.temperature
+                );
+            case 'openrouter':
+                return this.callOpenRouter(
+                    prompt,
+                    systemInstruction,
+                    apiKey,
+                    model,
+                    settings.temperature
+                );
+            case 'ollama':
+                return this.callOllama(
+                    prompt,
+                    systemInstruction,
+                    settings.customEndpoint || 'http://localhost:11434/api/generate',
+                    model
+                );
+            default:
+                throw new Error(`Unsupported provider: ${provider}`);
         }
     }
 
@@ -164,7 +179,7 @@ class AIManager {
             contents: contents,
             generationConfig: {
                 temperature: temperature,
-                maxOutputTokens: 1200
+                maxOutputTokens: 8192
             }
         };
 
@@ -201,7 +216,7 @@ class AIManager {
             model: model,
             messages: messages,
             temperature: temperature,
-            max_tokens: 1200
+            max_tokens: 4096
         };
 
         const response = await fetch(url, {
@@ -231,7 +246,7 @@ class AIManager {
         const url = 'https://api.anthropic.com/v1/messages';
         const body = {
             model: model,
-            max_tokens: 1200,
+            max_tokens: 4096,
             temperature: temperature,
             system: systemInstruction || undefined,
             messages: [{ role: 'user', content: prompt }]
@@ -242,7 +257,7 @@ class AIManager {
             headers: {
                 'x-api-key': apiKey,
                 'anthropic-version': '2023-06-01',
-                'dangerously-allow-browser': 'true',
+                'anthropic-dangerous-direct-browser-access': 'true',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(body)
@@ -274,7 +289,8 @@ class AIManager {
         const body = {
             model: model,
             messages: messages,
-            temperature: temperature
+            temperature: temperature,
+            max_tokens: 4096
         };
 
         const response = await fetch(url, {
@@ -414,12 +430,11 @@ A short inspirational or coaching signoff tailored to your persona.`;
         const personaPrompt =
             this.PERSONA_PROMPTS[settings.persona] || this.PERSONA_PROMPTS.mnemonic;
 
-        const jlptContext = (kanjiData.level || kanjiData.jlpt)
-            ? `\nJLPT Level: ${kanjiData.level || kanjiData.jlpt}`
-            : '';
-        const strokeContext = kanjiData.strokes
-            ? `\nStroke count: ${kanjiData.strokes}`
-            : '';
+        const jlptContext =
+            kanjiData.level || kanjiData.jlpt
+                ? `\nJLPT Level: ${kanjiData.level || kanjiData.jlpt}`
+                : '';
+        const strokeContext = kanjiData.strokes ? `\nStroke count: ${kanjiData.strokes}` : '';
 
         const prompt = `Create an unforgettable, vivid visual mnemonic for the kanji "${kanjiData.character}".
 Meanings: ${(kanjiData.meanings || []).join(', ')}
@@ -451,9 +466,10 @@ ${kanjiData.strokes && kanjiData.strokes > 12 ? '- **Stroke Order Tip**: This is
         const personaPrompt =
             'You are a Japanese linguistics scholar and etymologist. Explain historical origins, oracle bone script evolution, and semantic radicals concisely.';
 
-        const jlptContext = (kanjiData.level || kanjiData.jlpt)
-            ? `\nJLPT Level: ${kanjiData.level || kanjiData.jlpt}`
-            : '';
+        const jlptContext =
+            kanjiData.level || kanjiData.jlpt
+                ? `\nJLPT Level: ${kanjiData.level || kanjiData.jlpt}`
+                : '';
 
         const prompt = `Explain the historical etymology and radical composition of the kanji "${kanjiData.character}" (${(kanjiData.meanings || []).join(', ')}).
 Include:
@@ -488,4 +504,8 @@ ${kanjiData.strokes && kanjiData.strokes > 12 ? `5. **Stroke Warning**: This com
 // Export for module/browser environments
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AIManager;
+}
+
+if (typeof window !== 'undefined') {
+    window.AIManager = AIManager;
 }

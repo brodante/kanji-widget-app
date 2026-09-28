@@ -126,12 +126,12 @@ class SRSEngine {
         const clampedGrade = Math.max(1, Math.min(4, Math.round(grade)));
 
         if (clampedGrade === 1) {
-            // True failure (Again) — resets the streak, same as before
+            // True failure (Again) - resets the streak, same as before
             card.repetition = 0;
             card.interval = 0.5; // Review again in 12h
             card.lapses += 1;
         } else {
-            // Success (Hard / Good / Easy) — streak continues, matching Anki:
+            // Success (Hard / Good / Easy) - streak continues, matching Anki:
             // "Hard" still means you recalled it, just with difficulty, so it
             // shouldn't be punished as harshly as a true lapse.
             card.correctReviews += 1;
@@ -140,7 +140,7 @@ class SRSEngine {
             } else if (card.repetition === 1) {
                 card.interval = clampedGrade === 4 ? 6 : clampedGrade === 2 ? 2 : 3;
             } else if (clampedGrade === 2) {
-                // Hard: small, conservative growth — deliberately NOT using
+                // Hard: small, conservative growth - deliberately NOT using
                 // the full ease factor, so difficult cards don't run away
                 // to long intervals the way a "Good" review would.
                 card.interval = Math.max(1, Math.round(card.interval * 1.2));
@@ -324,8 +324,8 @@ class SRSEngine {
                         firstMastered && secondMastered
                             ? 'Both Studied'
                             : firstMastered || secondMastered
-                                ? 'One Studied'
-                                : 'Pending'
+                              ? 'One Studied'
+                              : 'Pending'
                 });
             }
         });
@@ -371,8 +371,8 @@ class SRSEngine {
                 srsStats.dueCount > 10
                     ? 'You have a backlog of reviews due! Clear your review queue first before learning new kanji to prevent memory decay.'
                     : srsStats.retentionRate < 80
-                        ? 'Retention is below 80%. Consider spending extra time visualizing radicals and stroke sequences for tricky kanji.'
-                        : 'Pacing looks healthy! Keep up daily consistency to maintain your retention momentum.'
+                      ? 'Retention is below 80%. Consider spending extra time visualizing radicals and stroke sequences for tricky kanji.'
+                      : 'Pacing looks healthy! Keep up daily consistency to maintain your retention momentum.'
         };
     }
 }
@@ -380,4 +380,8 @@ class SRSEngine {
 // Export for module/browser environments
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = SRSEngine;
+}
+
+if (typeof window !== 'undefined') {
+    window.SRSEngine = SRSEngine;
 }

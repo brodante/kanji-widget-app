@@ -17,6 +17,33 @@
     --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
     --elevation-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    /* Google's mark has four fixed colours, so its buttons get a neutral surface instead
+       of a themed one: white with dark text on light themes, Google's dark surface on the
+       dark ones. See .backup-btn.google-btn. */
+    --google-surface: #ffffff;
+    --google-surface-hover: #f1f3f4;
+    --google-on-surface: #3c4043;
+    --google-border: #dadce0;
+    --google-border-hover: #c6c9cd;
+}
+
+/* Themes whose own text is light: Google's mark sits on Google's dark surface there, so the
+   four brand colours never land on a tint that fights them. Kept in step with the theme
+   list by a test that reads every [data-theme] block for a light --on-surface. */
+[data-theme='dark'],
+[data-theme='dracula'],
+[data-theme='nord'],
+[data-theme='midnight'],
+[data-theme='forest'],
+[data-theme='nami'],
+[data-theme='lumen'],
+[data-theme='obake'],
+[data-theme='ito'] {
+    --google-surface: #202124;
+    --google-surface-hover: #2a2b2f;
+    --google-on-surface: #e8eaed;
+    --google-border: #5f6368;
+    --google-border-hover: #80868b;
 }
 
 [data-theme='dark'] {
@@ -1609,10 +1636,11 @@ body {
 /* ========================================== */
 
 /* 1. THE PREMIUM FROSTED GLASS EFFECT */
-/* Targeted specifically to your Kanji, Progress, and Journey widgets */
+/* Targeted specifically to your Kanji, Progress, Journey, and Recent widgets */
 [data-theme='midnight'] .kanji-widget,
 [data-theme='midnight'] .progress-section,
-[data-theme='midnight'] .journey-section {
+[data-theme='midnight'] .journey-section,
+[data-theme='midnight'] .recent-section {
     /* Changes solid color to a semi-transparent deep space blue */
     background-color: rgba(15, 20, 35, 0.65) !important;
 
@@ -2078,9 +2106,17 @@ body {
 }
 
 /* Recent Section */
+.recent-section {
+    background-color: var(--surface);
+    padding: 1.25rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--elevation-1);
+}
+
 .recent-section h3 {
     color: var(--primary-color);
     margin-bottom: 1rem;
+    margin-top: 0;
 }
 
 .recent-grid {
@@ -2334,6 +2370,158 @@ body {
     flex-wrap: wrap;
 }
 
+/* Avatars are editable: hovering or focusing one washes it out and shows the pencil. */
+.avatar-editable {
+    position: relative;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+}
+
+/* The whole photo washes out to a translucent white with a pencil over it: it reads as
+   "click me to change this picture" without hiding whose face it is. The pencil is a quiet
+   grey, because it sits on the white wash in every theme, and it is sized per surface. */
+.avatar-edit-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.68);
+    color: #5f6368;
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+/* The profile hero is the biggest avatar, so its pencil leads; the popup avatar is small. */
+.profile-page-avatar .avatar-edit-cover {
+    font-size: 2.1rem;
+}
+
+.account-avatar-large .avatar-edit-cover {
+    font-size: 1.35rem;
+}
+
+.avatar-editable:hover .avatar-edit-cover,
+.avatar-editable:focus-visible .avatar-edit-cover {
+    opacity: 1;
+}
+
+/* No hover means no way to uncover the photo, so touch gets a small corner pencil in the
+   theme's own surface colours instead of a permanent white wash over the picture. */
+@media (hover: none) {
+    .avatar-edit-cover {
+        inset: auto 0 0 auto;
+        width: 24px;
+        height: 24px;
+        font-size: 0.72rem;
+        border-radius: 50%;
+        background: var(--surface, #fff);
+        color: var(--on-surface, #202124);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+        opacity: 1;
+    }
+}
+
+/* Mark layout only. The mark keeps its own colours: never recolour or theme it. */
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.google-icon {
+    flex: none;
+    width: 1.15em;
+    height: 1.15em;
+}
+
+/* The shared-device erase is a full-width line under its sign-out button. */
+.backup-signout-option {
+    flex-basis: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    opacity: 0.85;
+    cursor: pointer;
+}
+
+.backup-signout-option input {
+    flex: none;
+    margin: 0.15rem 0 0;
+}
+
+/* First-contact comparison: this device's progress beside the cloud copy. */
+.cloud-choice {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.6rem 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 10px;
+    background: var(--surface-color, transparent);
+}
+
+.cloud-choice-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.cloud-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+}
+
+.cloud-choice-grid h4 {
+    margin: 0 0 0.15rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.75;
+}
+
+.cloud-choice-grid p {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.cloud-choice-note {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    opacity: 0.75;
+}
+
+/* Sign-out disclosure: a full-width line inside the button row. */
+.backup-signout-note {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    opacity: 0.75;
+}
+
+.auth-signout-note {
+    flex-basis: 100%;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.7;
+}
+
 .backup-btn {
     background-color: var(--primary-color);
     color: var(--on-primary);
@@ -2352,6 +2540,20 @@ body {
     transform: translateY(-1px);
 }
 
+/* A Google action is a neutral button with Google's mark on it, not a themed button: the
+   mark's four colours are fixed, and on a coloured surface they read as a clash. Same
+   specificity as .backup-btn:hover, so this has to stay after it. */
+.backup-btn.google-btn {
+    background-color: var(--google-surface, #ffffff);
+    color: var(--google-on-surface, #3c4043);
+    border: 1px solid var(--google-border, #dadce0);
+}
+
+.backup-btn.google-btn:hover {
+    background-color: var(--google-surface-hover, #f1f3f4);
+    border-color: var(--google-border-hover, #c6c9cd);
+}
+
 /* Stroke Order */
 .stroke-order-section {
     margin-top: 1rem;
@@ -2359,27 +2561,275 @@ body {
     padding-top: 0.85rem;
 }
 
+.stroke-order-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
 .stroke-order-header {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--primary-color);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
 }
 
 .stroke-order-toolbar {
     display: flex;
+    gap: 0.35rem;
     justify-content: flex-end;
-    margin-bottom: 0.45rem;
 }
 
-.stroke-order-play {
+.stroke-order-mode-btn {
     border: none;
     border-radius: 999px;
-    padding: 0.35rem 0.7rem;
+    padding: 0.35rem 0.75rem;
     font-size: 0.8rem;
+    font-weight: 600;
     background: rgba(var(--primary-color-rgb), 0.12);
     color: var(--primary-color);
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.stroke-order-mode-btn:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+}
+
+.stroke-order-mode-btn.active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+
+/* Card Flip Animation for Stroke Order & Practice Drawing Pad */
+.stroke-order-flip-card {
+    perspective: 1000px;
+    width: 100%;
+}
+
+.stroke-order-flip-inner {
+    position: relative;
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.stroke-order-flip-card.flipped .stroke-order-flip-inner {
+    transform: rotateY(180deg);
+}
+
+.stroke-order-flip-front,
+.stroke-order-flip-back {
+    width: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 12px;
+}
+
+.stroke-order-flip-front {
+    position: relative;
+    z-index: 2;
+    transform: rotateY(0deg);
+}
+
+.stroke-order-flip-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    transform: rotateY(180deg);
+    background: rgba(var(--primary-color-rgb), 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stroke-order-flip-back .drawing-pad-canvas-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.stroke-order-flip-back #drawingPadCanvas {
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    touch-action: none;
+    border-radius: 12px;
+}
+
+/* Guide panel: side-by-side reference beside the practice canvas.
+   Toggled by the Guide toolbar button (adds .guide-on to the flip back). */
+.stroke-order-flip-back.guide-on {
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+}
+
+.stroke-order-flip-back.guide-on .drawing-pad-canvas-wrap {
+    width: auto;
+    flex: 1 1 auto;
+}
+
+.drawing-pad-guide {
+    display: none;
+    color: var(--primary-color);
+}
+
+.stroke-order-flip-back.guide-on .drawing-pad-guide {
+    display: flex;
+    flex: 0 0 42%;
+    aspect-ratio: 1 / 1;
+    align-items: center;
+    justify-content: center;
+    /* KanjiVG paths can touch the viewBox edges; without this padding the
+       topmost stroke gets clipped by the flip-card's overflow:hidden. */
+    box-sizing: border-box;
+    padding: 0.4rem;
+}
+
+.drawing-pad-guide svg {
+    width: 100%;
+    height: 100%;
+}
+
+.drawing-pad-guide path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.18;
+    transition:
+        opacity 0.2s ease,
+        stroke-width 0.2s ease;
+}
+
+.drawing-pad-guide path.guide-stroke-done {
+    opacity: 0.85;
+}
+
+.drawing-pad-guide path.guide-stroke-next {
+    opacity: 1;
+    stroke-width: 4.5;
+}
+
+.drawing-pad-guide text {
+    font-size: 8px !important;
+    font-family: sans-serif !important;
+    fill: rgba(255, 255, 255, 0.4) !important;
+}
+
+.drawing-pad-guide-fallback {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.drawing-pad-inline-controls {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.drawing-pad-width-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(var(--primary-color-rgb), 0.06);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.drawing-pad-width-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+    font-size: 0.78rem;
+    opacity: 0.9;
+}
+
+.drawing-pad-slider-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.drawing-pad-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(var(--primary-color-rgb), 0.2);
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.drawing-pad-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition:
+        transform 0.15s ease,
+        background 0.2s ease;
+}
+
+.drawing-pad-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.drawing-pad-slider:active::-webkit-slider-thumb {
+    transform: scale(1.3);
+}
+
+.drawing-pad-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition:
+        transform 0.15s ease,
+        background 0.2s ease;
+}
+
+.drawing-pad-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+.drawing-pad-slider:active::-moz-range-thumb {
+    transform: scale(1.3);
+}
+
+.drawing-pad-width-val {
+    min-width: 32px;
+    text-align: right;
+    font-family: var(--mono-font, monospace);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary-color);
 }
 
 .stroke-order-container {
@@ -3162,7 +3612,7 @@ input:focus {
     transform: scale(1.15);
 }
 
-/* Only one of these shows at a time — toggled explicitly via JS, since a
+/* Only one of these shows at a time. toggled explicitly via JS, since a
    custom theme's background is either a still image or a video, never both. */
 [data-theme='custom-1'] .custom-theme-background.active {
     display: block;
@@ -3665,7 +4115,8 @@ input:focus {
 /* 3. Apply Frosted Glass to Nami */
 [data-theme='nami'] .kanji-widget,
 [data-theme='nami'] .progress-section,
-[data-theme='nami'] .journey-section {
+[data-theme='nami'] .journey-section,
+[data-theme='nami'] .recent-section {
     background-color: rgba(10, 10, 10, 0.65) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -3732,7 +4183,8 @@ input:focus {
 /* 3. Apply Premium Frosted Glass */
 [data-theme='lumen'] .kanji-widget,
 [data-theme='lumen'] .progress-section,
-[data-theme='lumen'] .journey-section {
+[data-theme='lumen'] .journey-section,
+[data-theme='lumen'] .recent-section {
     background-color: rgba(10, 10, 10, 0.5) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -3835,7 +4287,8 @@ input:focus {
 
 [data-theme='obake'] .kanji-widget,
 [data-theme='obake'] .progress-section,
-[data-theme='obake'] .journey-section {
+[data-theme='obake'] .journey-section,
+[data-theme='obake'] .recent-section {
     background-color: rgba(10, 10, 15, 0.6) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -3957,7 +4410,8 @@ input:focus {
 [data-theme='ito'] .kanji-widget,
 [data-theme='ito'] .progress-section,
 [data-theme='ito'] .journey-section,
-[data-theme='ito'] .app-header {
+[data-theme='ito'] .app-header,
+[data-theme='ito'] .recent-section {
     background-color: rgba(10, 10, 15, 0.5) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -4004,7 +4458,7 @@ input:focus {
 /* Floating Action Button (FAB) for AI Sensei */
 .ai-sensei-fab {
     position: fixed;
-    bottom: 26px;
+    top: 26px;
     left: 26px;
     z-index: 950;
     display: inline-flex;
@@ -4015,23 +4469,42 @@ input:focus {
     border: 1px solid rgba(187, 134, 252, 0.5);
     border-radius: 50px;
     color: #ffffff;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(187, 134, 252, 0.3);
+    cursor: grab;
+    touch-action: none;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        0 0 16px rgba(187, 134, 252, 0.3);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        opacity 0.25s ease;
     user-select: none;
+    will-change: transform;
 }
 
 .ai-sensei-fab:hover {
-    transform: translateY(-3px) scale(1.04);
     background: rgba(32, 27, 52, 0.95);
     border-color: rgba(187, 134, 252, 0.85);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 24px rgba(187, 134, 252, 0.5);
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.5),
+        0 0 24px rgba(187, 134, 252, 0.5);
 }
 
-.ai-sensei-fab:active {
-    transform: translateY(0) scale(0.97);
+.ai-sensei-fab.dragging {
+    cursor: grabbing;
+    transition: none;
+    box-shadow:
+        0 16px 36px rgba(0, 0, 0, 0.55),
+        0 0 28px rgba(187, 134, 252, 0.6);
+}
+
+body:has(#aiSenseiModal.show) .ai-sensei-fab {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .ai-fab-icon-box {
@@ -4155,14 +4628,19 @@ input:focus {
 
 /* Tabs */
 .ai-tabs {
+    flex-shrink: 0;
     display: flex;
     gap: 0.5rem;
     border-bottom: 1px solid rgba(150, 150, 150, 0.15);
-    padding-bottom: 0.8rem;
+    padding: 0.3rem 0.2rem 0.8rem;
     overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
 }
 
 .ai-tab {
+    flex-shrink: 0;
     background: rgba(150, 150, 150, 0.08);
     border: 1px solid transparent;
     color: var(--on-surface);
@@ -4491,6 +4969,124 @@ input:focus {
     opacity: 0.5;
     font-family: inherit;
 }
+.ai-trap-reason {
+    font-size: 0.72rem;
+}
+
+/* Drawing Pad Styles (inline practice panel in the widget card) */
+.drawing-pad-canvas-wrap {
+    flex: 1;
+    position: relative;
+    border-radius: 12px;
+    background: var(--surface-variant);
+    overflow: hidden;
+}
+
+#drawingPadCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.drawing-pad-feedback {
+    text-align: center;
+    font-weight: 600;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    min-height: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.drawing-pad-feedback.feedback-good {
+    background: rgba(46, 204, 113, 0.15);
+    color: var(--success-color);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.drawing-pad-feedback.feedback-ok {
+    background: rgba(241, 196, 15, 0.15);
+    color: var(--warning-color);
+    border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.drawing-pad-feedback.feedback-warn {
+    background: rgba(231, 76, 60, 0.15);
+    color: var(--error-color);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.drawing-pad-score {
+    text-align: center;
+    font-weight: 600;
+    font-family: var(--mono-font);
+    padding: 0.5rem;
+    background: rgba(var(--primary-color-rgb), 0.08);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.drawing-pad-toolbar {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.drawing-pad-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(var(--primary-color-rgb), 0.12);
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.drawing-pad-btn:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+    transform: translateY(-1px);
+}
+
+.drawing-pad-btn:active {
+    transform: translateY(0);
+}
+
+.drawing-pad-btn.active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+
+.drawing-pad-btn:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* Toolbar button icon sizes */
+.drawing-pad-btn i {
+    font-size: 1rem;
+}
+
+/* Stroke order practice button */
+.stroke-order-practice {
+    margin-left: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    background: rgba(var(--primary-color-rgb), 0.12);
+}
+
+.stroke-order-practice:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+}
 
 .ai-trap-reason {
     font-size: 0.72rem;
@@ -4707,7 +5303,7 @@ input:focus {
 /* Mobile Responsiveness for AI Sensei FAB and Modal */
 @media (max-width: 768px) {
     .ai-sensei-fab {
-        bottom: 18px;
+        top: 18px;
         left: 18px;
         padding: 6px 14px 6px 8px;
     }
@@ -4750,14 +5346,18 @@ input:focus {
     pointer-events: none;
     visibility: hidden;
     opacity: 0;
-    transition: visibility 0s 0.35s, opacity 0.35s ease;
+    transition:
+        visibility 0s 0.35s,
+        opacity 0.35s ease;
 }
 
 .kanji-drawer.open {
     pointer-events: auto;
     visibility: visible;
     opacity: 1;
-    transition: visibility 0s 0s, opacity 0.3s ease;
+    transition:
+        visibility 0s 0s,
+        opacity 0.3s ease;
 }
 
 .kanji-drawer-backdrop {
@@ -4960,8 +5560,14 @@ input:focus {
 }
 
 @keyframes drawerContentFadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .kanji-drawer-content h3 {
@@ -5099,4 +5705,1479 @@ input:focus {
     color: var(--on-primary, #fff);
     transform: translateY(-2px) scale(1.1);
     box-shadow: 0 4px 14px rgba(0, 229, 255, 0.25);
+}
+.ai-provider-key-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.82rem;
+    margin-top: 0.3rem;
+    transition: opacity 0.2s ease;
+}
+
+.ai-provider-key-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.ai-provider-key-link i {
+    font-size: 0.7rem;
+}
+
+/* Cloud backups use existing Settings controls and theme colors. */
+#driveBackup {
+    padding: 16px 0;
+    border-top: 1px solid var(--border-color, #8885);
+    border-bottom: 1px solid var(--border-color, #8885);
+    margin-bottom: 20px;
+}
+#driveBackup p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 12px 0;
+}
+#driveBackup input {
+    max-width: 100%;
+    min-width: 0;
+}
+#driveBackup .backup-buttons {
+    flex-wrap: wrap;
+}
+#driveFiles {
+    padding: 0;
+    list-style: none;
+    max-height: 360px;
+    overflow: auto;
+}
+#driveFiles li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color, #8885);
+}
+#driveFiles span {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+#driveFiles button {
+    margin: 3px;
+    padding: 7px 10px;
+}
+#driveStatus {
+    overflow-wrap: anywhere;
+}
+#driveBackup button:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+/* Keep all header actions inside the phone viewport, including safe areas. */
+.app-header {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+}
+.app-header h1 {
+    min-width: 0;
+}
+.header-controls {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    margin-left: auto;
+}
+.header-controls > .icon-btn {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+}
+#accountBtn[data-connected='true'] {
+    background: none;
+    box-shadow: none;
+}
+#accountBtn {
+    display: grid;
+    place-items: center;
+}
+#accountBtn:hover {
+    background: rgba(127, 127, 127, 0.12);
+}
+#accountBtn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+.account-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+.account-avatar[hidden],
+#accountBtn i[hidden],
+.account-avatar-large i[hidden] {
+    display: none;
+}
+.account-avatar-large {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+    display: grid;
+    place-items: center;
+    font-size: 48px;
+}
+
+#accountPanel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 12px;
+    width: min(390px, calc(100% - 24px));
+    box-sizing: border-box;
+    max-height: min(75vh, 680px);
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px;
+    background: var(--surface, #fff);
+    color: var(--on-surface, #222);
+    border: 1px solid var(--border-color, #8885);
+    box-shadow: 0 12px 40px #0004;
+    z-index: 110;
+}
+#accountPanel[hidden],
+#syncConflict[hidden],
+#accountDisconnect[hidden] {
+    display: none;
+}
+.account-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.account-panel-heading h2 {
+    font-size: 1.15rem;
+    margin: 0;
+}
+#accountClose {
+    background: none;
+    color: inherit;
+    border: 0;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+#accountPanel p {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin: 12px 0;
+    overflow-wrap: anywhere;
+}
+#accountPanel small {
+    display: block;
+    line-height: 1.5;
+    opacity: 0.8;
+}
+#accountPanel .backup-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-block: 12px;
+}
+#accountPanel .backup-btn {
+    flex: 1 1 auto;
+}
+.account-sync-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+.account-sync-toggle input {
+    margin-top: 5px;
+}
+#syncConflict {
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    padding: 12px;
+}
+@media (max-width: 520px) {
+    .app-header h1 {
+        flex-basis: 100%;
+        font-size: 1.3rem;
+    }
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+        gap: 4px;
+    }
+}
+
+#saveHealth {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    padding: 10px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 8px;
+}
+#saveComparison {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+#saveComparison > div {
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 8px;
+}
+#saveComparison > p {
+    grid-column: 1 / -1;
+}
+#backupSafety {
+    margin-block: 16px;
+    padding: 12px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 8px;
+}
+#backupSafety summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Compact account popover: essentials first, secondary controls disclosed on demand. */
+#accountPanel {
+    width: min(448px, calc(100% - 24px));
+    max-height: min(720px, var(--account-panel-room, 75vh));
+    padding: 16px;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    color-scheme: normal;
+}
+#accountPanel .account-panel-heading {
+    gap: 12px;
+}
+#accountPanel .account-avatar-large {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+    font-size: 36px;
+}
+.account-heading-copy {
+    flex: 1;
+    min-width: 0;
+}
+#accountPanel #accountHeading {
+    overflow-wrap: anywhere;
+}
+#accountPanel #accountIdentity {
+    font-size: 0.77rem;
+    line-height: 1.4;
+    margin: 3px 0 0;
+    opacity: 0.75;
+}
+#accountPanel .account-primary-actions {
+    margin: 14px 0 10px;
+}
+#accountPanel #saveHealth {
+    font-size: 0.76rem;
+    line-height: 1.5;
+    margin: 8px 0;
+}
+#accountPanel #accountStatus {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin: 8px 0 12px;
+}
+#accountPanel p:empty {
+    display: none;
+}
+.account-details {
+    border-top: 1px solid var(--border-color, #8884);
+}
+.account-details > summary {
+    cursor: pointer;
+    padding: 12px 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    list-style-position: inside;
+}
+.account-details > summary::marker {
+    color: currentColor;
+    font-size: 0.7em;
+}
+.account-details[open] {
+    padding-bottom: 12px;
+}
+.account-details small {
+    font-size: 0.75rem;
+    margin-block: 8px;
+}
+#accountPanel .account-sync-toggle {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+}
+#accountPanel .account-settings-link {
+    width: 100%;
+    margin-top: 10px;
+    background: transparent;
+    color: inherit;
+    border: 1px solid var(--border-color, #8885);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Minimal scrollbars follow the current theme; keep scroll affordance and keyboard access. */
+#accountPanel,
+.modal-content,
+#driveFiles {
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+    scrollbar-color: color-mix(in srgb, var(--on-surface) 25%, transparent) transparent;
+}
+:is(#accountPanel, .modal-content, #driveFiles)::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+:is(#accountPanel, .modal-content, #driveFiles)::-webkit-scrollbar-track {
+    background: transparent;
+}
+:is(#accountPanel, .modal-content, #driveFiles)::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--on-surface) 25%, transparent);
+    border-radius: 100px;
+}
+:is(#accountPanel, .modal-content, #driveFiles)::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--on-surface) 45%, transparent);
+}
+@media (max-width: 520px) {
+    #accountPanel {
+        position: fixed;
+        top: auto;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        right: 12px;
+        width: calc(100vw - 24px);
+        max-height: 82vh;
+        max-height: 82dvh;
+        padding: 14px;
+        border-radius: 20px;
+    }
+}
+@media (forced-colors: active) {
+    #accountPanel,
+    .modal-content,
+    #driveFiles {
+        scrollbar-color: auto;
+    }
+}
+
+.account-onboarding {
+    padding: 12px;
+    margin-block: 12px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 10px;
+}
+.account-onboarding[hidden] {
+    display: none;
+}
+#driveFiles .backup-preview {
+    padding: 12px;
+    margin: 10px 0;
+    background: var(--background);
+    border-radius: 8px;
+    line-height: 1.6;
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;
+}
+
+/* Dedicated profile view, presented in the top layer without losing Google access. */
+.profile-page-open {
+    overflow: hidden;
+}
+.profile-page {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--background);
+    color: var(--on-background);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+}
+.profile-page:not([open]) {
+    display: none;
+}
+.profile-page::backdrop {
+    background: var(--background);
+}
+.profile-page-shell {
+    max-width: 1000px;
+    margin-inline: auto;
+    padding: max(20px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+}
+.profile-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 32px;
+}
+.profile-page-header > span,
+.profile-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    opacity: 0.65;
+}
+.profile-subtle-btn {
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+    min-height: 44px;
+}
+.profile-subtle-btn:hover {
+    background: color-mix(in srgb, currentColor 7%, transparent);
+}
+.profile-page :is(button, input):focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+}
+.profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 18px 0 32px;
+}
+.profile-hero h1 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    margin: 8px 0;
+    overflow-wrap: anywhere;
+}
+.profile-hero p {
+    line-height: 1.5;
+    opacity: 0.8;
+    overflow-wrap: anywhere;
+}
+.profile-page-avatar {
+    width: 96px;
+    height: 96px;
+    flex: 0 0 96px;
+    display: grid;
+    place-items: center;
+    font-size: 72px;
+}
+.profile-page-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.profile-page [hidden] {
+    display: none !important;
+}
+.profile-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.profile-stat-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 14px;
+}
+.profile-stat-grid strong {
+    font-size: 1.8rem;
+    font-variant-numeric: tabular-nums;
+}
+.profile-stat-grid span {
+    font-size: 0.8rem;
+    opacity: 0.75;
+}
+.profile-page-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.profile-card {
+    min-width: 0;
+    background: var(--surface);
+    padding: 24px;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 16px;
+}
+.profile-card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 18px;
+}
+.profile-card p {
+    font-size: 0.86rem;
+    line-height: 1.65;
+    margin-block: 12px;
+    overflow-wrap: anywhere;
+}
+.profile-card p:empty {
+    display: none;
+}
+#profilePageForm {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+#profilePageForm label {
+    font-size: 0.82rem;
+}
+#profilePageForm input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border-radius: 9px;
+    border: 1px solid var(--border-color, #8886);
+    background: var(--background);
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+}
+.profile-hint {
+    opacity: 0.65;
+}
+.profile-save-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.profile-save-actions > :first-child {
+    grid-column: 1 / -1;
+}
+.profile-page-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    opacity: 0.65;
+    margin-top: 28px;
+}
+.profile-page button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+@media (max-width: 640px) {
+    .profile-page-shell {
+        padding-inline: 16px;
+    }
+    .profile-page-header {
+        padding-bottom: 14px;
+    }
+    .profile-page-header > span {
+        display: none;
+    }
+    .profile-hero {
+        gap: 16px;
+    }
+    .profile-page-avatar {
+        width: 72px;
+        height: 72px;
+        flex-basis: 72px;
+        font-size: 56px;
+    }
+    .profile-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .profile-page-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .profile-card {
+        padding: 18px;
+    }
+}
+#driveDiagnosticBuild {
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+    opacity: 0.75;
+}
+
+/* Always-visible shortcuts for the existing settings sidebar. */
+.settings-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 12px 16px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-color, #8884);
+}
+.settings-shortcuts button {
+    min-width: 0;
+    min-height: 36px;
+    padding: 7px 6px;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--on-surface);
+    font: inherit;
+    font-size: 0.74rem;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+.settings-shortcuts button:hover {
+    background: color-mix(in srgb, var(--on-surface) 7%, transparent);
+}
+.settings-shortcuts button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+.settings-shortcuts .settings-profile-shortcut {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-inline: 12px;
+    font-size: 0.88rem;
+    text-align: left;
+}
+.settings-profile-shortcut span {
+    margin-left: auto;
+}
+#settingsModal :is(.settings-section-header, #driveBackup, #backupSafety) {
+    scroll-margin-block-start: 12px;
+}
+#settingsModal .modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+}
+
+/* App identity and Drive permissions have separate lifecycles. */
+.app-auth-section {
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+}
+.app-auth-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0.4rem 0;
+}
+[data-app-auth-status] {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    margin: 0.4rem 0 0.65rem;
+}
+
+.cloud-progress {
+    padding: 0.8rem 0;
+}
+.cloud-progress p,
+.cloud-progress small {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.cloud-progress .backup-buttons {
+    flex-wrap: wrap;
+    margin: 0.6rem 0;
+}
+#driveBackup > summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.8rem 0;
+}
+
+/* Vermilion actions with a quiet seigaiha-inspired wave pattern. */
+button.danger-action {
+    color: #fff;
+    background-color: #a62639;
+    background-image: repeating-radial-gradient(
+        ellipse at 50% 100%,
+        transparent 0 5px,
+        rgba(255, 255, 255, 0.08) 6px 7px,
+        transparent 8px 12px
+    );
+    background-size: 28px 18px;
+    border: 1px solid #8f2031;
+}
+button.danger-action:hover:not(:disabled) {
+    color: #fff;
+    background-color: #871d2d;
+    border-color: #871d2d;
+}
+button.danger-action:focus-visible {
+    outline: 3px solid var(--error);
+    outline-offset: 3px;
+}
+button.danger-action:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.profile-photo-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+}
+.remove-photo-button {
+    position: relative;
+    min-width: 44px;
+    min-height: 44px;
+}
+.remove-photo-button::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 9px;
+    border-radius: 6px;
+    background: #871d2d;
+    color: white;
+    white-space: nowrap;
+    font:
+        500 0.75rem/1.5 system-ui,
+        sans-serif;
+    pointer-events: none;
+    opacity: 0;
+}
+.remove-photo-button:hover::after,
+.remove-photo-button:focus-visible::after {
+    opacity: 1;
+}
+.attention-notice {
+    position: fixed;
+    z-index: 100000;
+    top: max(20px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: min(460px, calc(100vw - 32px));
+    max-height: min(50vh, 320px);
+    overflow: auto;
+    padding: 16px;
+    border: 2px solid var(--primary-color);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--on-surface);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    text-align: left;
+}
+.attention-notice--error {
+    border-color: var(--error);
+    animation: attention-nudge 280ms ease-out;
+}
+.attention-notice p {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+.attention-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: var(--on-primary);
+    font-weight: 800;
+}
+.attention-notice--error .attention-icon {
+    background: #a62639;
+    color: #fff;
+}
+.attention-close {
+    flex: 0 0 40px;
+    min-height: 40px;
+    margin: -8px -8px 0 auto;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.attention-close:hover {
+    background: var(--shadow);
+}
+.attention-close:focus-visible {
+    outline: 2px solid var(--primary-color);
+}
+@keyframes attention-nudge {
+    0%,
+    100% {
+        transform: translateX(-50%);
+    }
+    25% {
+        transform: translateX(calc(-50% - 6px));
+    }
+    75% {
+        transform: translateX(calc(-50% + 6px));
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .attention-notice--error {
+        animation: none;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Sign-in dialog: email/username + password, account creation and username
+   availability. Theme-aware, using the same surface variables as the profile
+   page. The Google button keeps the normal sign-in styling; only destructive
+   actions use the vermilion danger treatment.
+--------------------------------------------------------------------------- */
+body.auth-dialog-open {
+    overflow: hidden;
+}
+.auth-dialog {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--on-background);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+}
+.auth-dialog:not([open]) {
+    display: none;
+}
+.auth-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+}
+.auth-dialog-shell {
+    width: min(560px, calc(100vw - 24px));
+    margin: max(24px, env(safe-area-inset-top)) auto 48px;
+    padding: 24px;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 18px;
+    background: var(--surface);
+    color: var(--on-surface);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+}
+.auth-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+.auth-dialog-eyebrow {
+    margin: 0 0 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+.auth-dialog-header h2 {
+    margin: 0 0 6px;
+    font-size: 1.35rem;
+}
+.auth-dialog-intro {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+.auth-dialog-close {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.auth-dialog-close:hover {
+    background: var(--shadow);
+}
+.auth-dialog :is(button, input, a):focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+.auth-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 18px 0 12px;
+    padding: 4px;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 12px;
+    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 85%, var(--primary-color) 15%);
+}
+.auth-tabs button {
+    flex: 1;
+    min-height: 44px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.auth-tabs button.is-active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+.auth-feedback {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color, #8884);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 92%, var(--primary-color) 8%);
+}
+.auth-feedback--error {
+    border-left-color: var(--error, #b00020);
+    color: var(--error, #b00020);
+}
+.auth-feedback--success {
+    border-left-color: var(--secondary-color, #03dac6);
+}
+.auth-pane {
+    display: block;
+}
+.auth-pane[hidden] {
+    display: none;
+}
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.auth-form label {
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+.auth-form label span {
+    font-weight: 400;
+    opacity: 0.7;
+}
+.auth-form input[type='text'],
+.auth-form input[type='email'],
+.auth-form input[type='password'] {
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 10px;
+    background: var(--background);
+    color: var(--on-background);
+    font: inherit;
+}
+.auth-password-row,
+.auth-inline-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+.auth-password-row input {
+    flex: 1;
+    min-width: 0;
+}
+.auth-inline-row input {
+    flex: 1;
+    min-width: 0;
+}
+.auth-reveal {
+    flex: 0 0 auto;
+    min-width: 64px;
+    min-height: 44px;
+    border: 1px solid var(--border-color, #8885);
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.auth-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+.auth-form-actions .backup-btn {
+    flex: 0 1 auto;
+}
+.auth-link {
+    border: 0;
+    background: transparent;
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 0.88rem;
+    text-decoration: underline;
+    cursor: pointer;
+    min-height: 44px;
+}
+.auth-hint {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    opacity: 0.7;
+}
+.auth-username-status {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.auth-username-status--checking {
+    opacity: 0.75;
+    font-weight: 400;
+}
+.auth-username-status--free {
+    color: var(--secondary-color, #03dac6);
+}
+.auth-username-status--taken,
+.auth-username-status--reserved,
+.auth-username-status--format,
+.auth-username-status--short,
+.auth-username-status--long,
+.auth-username-status--start,
+.auth-username-status--underscore,
+.auth-username-status--empty {
+    color: var(--error, #b00020);
+}
+.auth-username-status--yours,
+.auth-username-status--released {
+    color: var(--primary-color);
+}
+.auth-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.82rem;
+    opacity: 0.85;
+}
+.auth-suggestion {
+    min-height: 34px;
+    padding: 4px 10px;
+    border: 1px dashed var(--border-color, #8886);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.auth-suggestion:hover {
+    border-style: solid;
+    border-color: var(--primary-color);
+}
+.auth-card {
+    margin: 12px 0;
+    padding: 16px;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 14px;
+}
+.auth-card[hidden] {
+    display: none;
+}
+.auth-card h3 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+}
+.auth-card .auth-form {
+    margin: 12px 0 0;
+}
+.auth-identity {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    word-break: break-word;
+}
+.auth-identity:empty {
+    display: none;
+}
+.auth-account-actions {
+    margin-top: 8px;
+}
+.auth-dialog-footer {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color, #8884);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.auth-dialog-footer small {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.7;
+}
+.auth-google-btn {
+    flex: 0 1 auto;
+    align-self: flex-start;
+}
+.app-auth-identities {
+    margin: 0.35rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0.85;
+    word-break: break-word;
+}
+.app-auth-identities:empty {
+    display: none;
+}
+.app-auth-help {
+    margin: 0.5rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.65;
+}
+@media (max-width: 620px) {
+    .auth-dialog-shell {
+        width: 100%;
+        margin: 0;
+        min-height: 100%;
+        border: 0;
+        border-radius: 0;
+        padding: max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+    }
+    .auth-tabs {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--surface);
+    }
+    .auth-google-btn,
+    .auth-form-actions .backup-btn {
+        flex: 1 1 100%;
+    }
+}
+
+/* Password strength meter: red → orange → yellow → green, readable on light and
+   dark themes while still using each theme's surface for the empty tracks. */
+.auth-strength {
+    --auth-strength-weak: #d32f2f;
+    --auth-strength-fair: #ef6c00;
+    --auth-strength-good: #c8a200;
+    --auth-strength-strong: #2e7d32;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+[data-theme='dark'] .auth-strength {
+    --auth-strength-weak: #ff6b5e;
+    --auth-strength-fair: #ffa94d;
+    --auth-strength-good: #ffd54f;
+    --auth-strength-strong: #6ddc7f;
+}
+.auth-strength-meter {
+    display: flex;
+    gap: 6px;
+}
+.auth-strength-meter span {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--border-color, #8884);
+    transition: background-color 160ms ease;
+}
+.auth-strength-meter[data-level='weak'] span:nth-child(-n + 1) {
+    background: var(--auth-strength-weak);
+}
+.auth-strength-meter[data-level='fair'] span:nth-child(-n + 2) {
+    background: var(--auth-strength-fair);
+}
+.auth-strength-meter[data-level='good'] span:nth-child(-n + 3) {
+    background: var(--auth-strength-good);
+}
+.auth-strength-meter[data-level='strong'] span:nth-child(-n + 4) {
+    background: var(--auth-strength-strong);
+}
+.auth-strength-meter[data-level='weak'] + #authCreatePasswordStrength {
+    color: var(--auth-strength-weak);
+    opacity: 1;
+}
+.auth-strength-meter[data-level='fair'] + #authCreatePasswordStrength {
+    color: var(--auth-strength-fair);
+    opacity: 1;
+}
+.auth-strength-meter[data-level='good'] + #authCreatePasswordStrength {
+    color: var(--auth-strength-good);
+    opacity: 1;
+}
+.auth-strength-meter[data-level='strong'] + #authCreatePasswordStrength {
+    color: var(--auth-strength-strong);
+    opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+    .auth-strength-meter span {
+        transition: none;
+    }
+}
+
+.auth-verify-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 8px;
+}
+.auth-verify-row .auth-hint {
+    flex: 1 1 100%;
+}
+
+/* ---------------------------------------------------------------------------
+   Avatar frames: every avatar is a square that crops its photo, so a tall or wide
+   upload can never be stretched into an oval. The crop itself is CSS only, which
+   keeps animated GIFs animating.
+--------------------------------------------------------------------------- */
+/* Avatars that change the photo carry a see-through cover, not a corner badge. */
+.account-avatar-frame {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+}
+.avatar-frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+}
+.avatar-frame > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transform: translate(var(--avatar-tx, 0%), var(--avatar-ty, 0%)) scale(var(--avatar-zoom, 1));
+    transform-origin: center;
+    will-change: transform;
+}
+
+/* Crop dialog */
+.avatar-crop {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--on-surface);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #8887 transparent;
+}
+.avatar-crop:not([open]) {
+    display: none;
+}
+.avatar-crop::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+}
+.avatar-crop-shell {
+    width: min(520px, calc(100vw - 24px));
+    margin: max(20px, env(safe-area-inset-top)) auto 40px;
+    padding: 22px;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color, #8884);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.4);
+}
+.avatar-crop-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+.avatar-crop-eyebrow {
+    margin: 0 0 4px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+.avatar-crop-header h2 {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+}
+.avatar-crop-intro {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.75;
+    word-break: break-word;
+}
+.avatar-crop-close {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.avatar-crop-close:hover {
+    background: var(--shadow);
+}
+.avatar-crop-body {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 18px 0 14px;
+    flex-wrap: wrap;
+}
+.avatar-crop-stage {
+    position: relative;
+    flex: 0 0 auto;
+    width: 224px;
+    height: 224px;
+    box-sizing: content-box;
+    border-radius: 50%;
+    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 70%, var(--primary-color) 30%);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+.avatar-crop-stage:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 4px;
+}
+.avatar-crop-stage.is-dragging {
+    cursor: grabbing;
+}
+.avatar-crop-frame {
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary-color);
+}
+.avatar-crop-frame > img {
+    background: color-mix(in srgb, var(--surface) 80%, #000 20%);
+}
+.avatar-crop-frame[data-zoomed='true'] > img {
+    /* A hairline helps see the crop boundary once the photo is magnified. */
+    outline: 1px solid rgba(127, 127, 127, 0.35);
+    outline-offset: -1px;
+}
+.avatar-crop-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 9999px rgba(0, 0, 0, 0.08);
+}
+.avatar-crop-original {
+    margin: 0;
+    flex: 1 1 140px;
+    min-width: 120px;
+    text-align: center;
+}
+.avatar-crop-original img {
+    width: 100%;
+    max-height: 140px;
+    object-fit: contain;
+    border: 1px dashed var(--border-color, #8886);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface) 88%, #000 12%);
+}
+.avatar-crop-original figcaption {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+.avatar-crop-zoomrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.avatar-crop-zoomrow input {
+    flex: 1;
+    accent-color: var(--primary-color);
+    min-height: 32px;
+}
+.avatar-crop-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+.avatar-crop-actions .backup-btn {
+    flex: 0 1 auto;
+    margin-left: auto;
+}
+.avatar-crop :is(button, input, [tabindex]):focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+@media (max-width: 620px) {
+    .avatar-crop-shell {
+        width: 100%;
+        margin: 0;
+        min-height: 100%;
+        border: 0;
+        border-radius: 0;
+        padding: max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+    }
+    .avatar-crop-stage {
+        width: min(72vw, 240px);
+        height: min(72vw, 240px);
+        margin: 0 auto;
+    }
+    .avatar-crop-body {
+        justify-content: center;
+    }
+    .avatar-crop-actions .backup-btn {
+        flex: 1 1 100%;
+        margin-left: 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .avatar-frame > img {
+        will-change: auto;
+    }
 }
