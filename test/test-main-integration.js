@@ -87,7 +87,7 @@ test('offline precache and static deployment include both practice and account b
         ['script.js', 'ai-floating-v1'],
         ['firebase-config.js', 'ai-free-v3'],
         ['app-auth.js', 'ai-free-v1'],
-        ['ai-manager.js', 'ai-free-v1'],
+        ['ai-manager.js', 'ai-model-lite-v1'],
         ['ai-tutor-modal.js', 'ai-free-v3']
     ];
     for (const [file, version] of assets) {
@@ -224,7 +224,7 @@ test('username login assets are versioned, precached and deployed together', () 
         assert.ok(worker.includes(`'/${versioned}'`), `precache: ${versioned}`);
         assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
     }
-    assert.match(worker, /kanji-widgets-v31/, 'the offline cache version must be bumped');
+    assert.match(worker, /kanji-widgets-v32/, 'the offline cache version must be bumped');
     assert.ok(html.indexOf('username-policy.js') < html.indexOf('app-auth.js'));
     assert.ok(html.indexOf('app-auth.js') < html.indexOf('username-directory.js'));
     assert.ok(html.indexOf('username-directory.js') < html.indexOf('auth-dialog.js'));

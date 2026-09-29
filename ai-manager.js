@@ -6,8 +6,8 @@ class AIManager {
     static PROVIDER_DEFAULTS = {
         firebase: {
             name: 'Free AI Sensei (no key)',
-            defaultModel: 'gemini-3.8-flash',
-            models: ['gemini-3.8-flash'],
+            defaultModel: 'gemini-3.5-flash-lite',
+            models: ['gemini-3.5-flash-lite'],
             requiresKey: false,
             fixedModel: true
         },

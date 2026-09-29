@@ -208,7 +208,7 @@ class StorageManager {
         const defaultSettings = {
             provider: 'firebase', // Built-in key-free AI; BYOK providers remain optional.
             apiKey: '',
-            model: 'gemini-3.8-flash',
+            model: 'gemini-3.5-flash-lite',
             persona: 'encouraging', // 'encouraging', 'strict', 'mnemonic', 'anime'
             enableFloatingAssistant: true,
             customEndpoint: 'http://localhost:11434/api/generate',
