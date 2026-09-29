@@ -1,7 +1,7 @@
 # AI Sensei: free access and rate-limit fallback
 
-**Status:** Client implementation and automated checks complete; the owner has confirmed a localhost live AI smoke test and reports the Web app is registered in App Check. Production origin/key validation and live deployment remain pending.
-**Last reviewed:** 2026-09-29
+**Status:** Client implementation and automated checks complete; the owner has confirmed a localhost live AI smoke test and reports the Web app is registered in App Check. The built-in Firebase model was changed to Gemini 3.5 Flash-Lite in this branch; production-origin validation and performance comparison remain pending.
+**Last reviewed:** 2026-09-30
 
 This document tracks the no-key default, the free-tier quota response, and the production steps needed to enable the built-in service. The approved scope is deliberately no-backend: keep the project on Firebase Spark, do not link Cloud Billing, and do not add Cloud Functions, Cloud Run, a trial, or a paywall.
 
@@ -16,7 +16,7 @@ This document tracks the no-key default, the free-tier quota response, and the p
 
 ## Implemented in this branch
 
-- `firebase` is the new default provider. It uses Firebase AI Logic's Google AI backend and the fixed model `gemini-3.8-flash`; learners do not choose a model or enter a key for it.
+- `firebase` is the default provider. It uses Firebase AI Logic's Google AI backend and the fixed model `gemini-3.5-flash-lite`; learners do not choose a model or enter a key for it. The model is configured to use its model-default thinking behavior; no thinking-level override or provider fallback is added.
 - On the first AI-settings read after page load, saved key-requiring provider settings with an empty key migrate to Firebase. This migration runs once per page session, so a learner can deliberately select a BYOK provider and enter a key without being switched back mid-form. Configured BYOK settings remain selected with their existing key and model. The existing legacy Gemini-model migration is retained. AI response caches are not cleared.
 - Firebase Web/App Check SDK modules are loaded lazily. When the owner supplies a reCAPTCHA Enterprise site key, App Check is initialized before Firebase Auth services and shared with AI Logic. Local learning/auth startup is not blocked by an App Check initialization error.
 - Only rate/quota errors from the built-in provider receive the `ai/free-tier-quota-exceeded` code. Setup, App Check, network, model, and ordinary provider errors remain distinct.
@@ -25,13 +25,36 @@ This document tracks the no-key default, the free-tier quota response, and the p
 - The floating AI Sensei control is an icon-only circular, draggable assistive button. AI Settings includes a default-on, persisted “Show floating AI Sensei button” toggle; turning it off hides only this shortcut and leaves other AI Sensei entry points enabled. After five seconds without interaction, the button docks with about 55% of its width off the nearest screen edge; hover and keyboard focus restore the full button, and drag/touch wakes it.
 - Free Firebase chat applies a five-second per-tab pacing cooldown after each chat attempt (success or failure). A rate-limit response starts an escalating backoff (5, 10, 20 seconds, up to two minutes); the composer, send button, quick prompts, and chat retry are locked while a countdown is shown. BYOK is not subject to this app-side cooldown.
 - Settings explain the key-free provider, optional BYOK risks, and that credentials stay in local storage and go directly to the selected provider. The AI modal discloses that relevant questions/kanji/study details are sent to the selected provider and that Google's free-tier prompts may be used to improve its products.
-- The AI modal and Firebase config use `ai-free-v3`; the main script and stylesheet use `ai-floating-v1` for the floating-shortcut settings and dock behavior. The service-worker cache is `kanji-widgets-v31`.
+- The AI modal and Firebase config use `ai-free-v3`; the AI manager uses `ai-model-lite-v1`; the main script and stylesheet use `ai-floating-v1` for the floating-shortcut settings and dock behavior. The service-worker cache is `kanji-widgets-v32`.
 
 ## How the shared quota works
 
 Firebase AI Logic calls the Gemini Developer API through the Firebase project. Quotas and capacity are shared at the project/service level; they are not a named learner's daily allowance. Firebase documents a configurable per-user request rate (currently 100 requests/minute by default), but that setting is shared across users and does not create an individual daily entitlement. A browser-only counter would be bypassable and is intentionally not used as a security or cost control.
 
 The app responds to actual built-in-provider rate/quota errors. A 429 may mean a project quota/rate limit or temporarily exhausted model capacity; the UI says the free limit is reached “for now” and keeps the local diagnostic available. Free Firebase chat now adds a short, best-effort pacing cooldown after every chat attempt and an escalating pause after repeated 429s. This is a per-tab UI guard—not a Firebase quota setting—and can be bypassed by another tab, device, or page reload; shared project/provider quotas still apply. Firebase quota/model eligibility and free-tier terms can change. BYOK removes the app's shared Firebase quota for those requests, but the selected provider may rate-limit usage or charge the learner.
+
+## Built-in model change record (2026-09-30)
+
+### Current branch change
+
+- **Previous built-in model:** `gemini-3.8-flash`.
+- **Current built-in model:** `gemini-3.5-flash-lite`.
+- **Reason:** Firebase AI Logic monitoring for Sep 28–29 showed 32 requests, 40.6% success, 45.9s p95 latency, 1.2K input tokens, 3.2K output tokens, and 7.6K thinking tokens. The aggregate dashboard suggested high latency and substantial thinking-token use, but did not expose the individual failure reasons. This is a controlled model-only change intended to test a high-volume Flash-Lite model; it does not add an explicit thinking-level override, new provider, backend, paid service, or billing requirement.
+- **Existing learners:** On the next AI-settings read, a saved Firebase model other than the fixed default is replaced with `gemini-3.5-flash-lite`. BYOK provider/model/key settings are left untouched. Existing AI response caches are preserved.
+- **Assets:** `ai-manager.js` now uses the query version `ai-model-lite-v1`; the service-worker cache was bumped from `kanji-widgets-v31` to `kanji-widgets-v32` so installed clients pick up the model-selection change.
+- **Validation status:** Automated tests cover the new default, migration from the former Firebase model, Firebase dispatch, settings behavior, and asset cache versions. They do not contact Firebase. No live model request or production deployment has been made from this branch; compare Firebase AI Logic monitoring after an authorized deployment before concluding whether latency/success improved.
+
+### Rollback to the prior built-in model
+
+To restore the previous model while retaining a safe cache bust for devices that have already received `v32`:
+
+1. In `ai-manager.js`, set Firebase `defaultModel` and its sole `models` entry back to `gemini-3.8-flash`.
+2. In `storage-manager.js`, set the Firebase default `model` back to `gemini-3.8-flash`. The existing fixed-model normalization will migrate current Firebase users back on their next settings read; BYOK settings remain unaffected.
+3. Bump the `ai-manager.js` query version in `index.html` and `sw.js` to a fresh rollback identifier, for example `ai-model-rollback-v1`, and bump `CACHE_NAME` in `sw.js` to the next unused cache version (for example `kanji-widgets-v33`). Do not reuse the `v32` cache for different source contents.
+4. Update the model expectations and cache-version checks in `test/test-srs-ai.js`, `test/test-ai-sensei-free.js`, `test/test-main-integration.js`, and `test/test-avatar-crop.js`; update this record to note the rollback and its date. Run `npm test`, `npm run lint`, and `npm run format:check`.
+5. Only deploy after production approval. Keep the Firebase project on Spark and do not link Cloud Billing.
+
+The monitoring summary is a small aggregate sample; inspect the Firebase error details and compare equivalent live periods before attributing failures to model capacity. The new model selection alone cannot guarantee lower latency or eliminate 429/5xx failures.
 
 ## Owner setup required before production AI is ready
 
@@ -41,7 +64,7 @@ The owner has supplied a public reCAPTCHA Enterprise site key, now configured in
 
 1. Use the existing Firebase project `kanji-widgets` and its registered Web app; the public Web configuration is already in `firebase-config.js`.
 2. Keep the project on **Spark** and verify that no Cloud Billing account is linked. Do not accept trial credits or enable a paid fallback.
-3. In Firebase Console, enable/configure **Firebase AI Logic** with the **Gemini Developer API** backend. Do not switch to Vertex AI or a feature that requires billing. Confirm that `gemini-3.8-flash` is available to this project on its current plan before release.
+3. In Firebase Console, enable/configure **Firebase AI Logic** with the **Gemini Developer API** backend. Do not switch to Vertex AI or a feature that requires billing. Confirm that `gemini-3.5-flash-lite` is available to this project on its current plan before release.
 4. Review Firebase AI Logic quotas and monitoring. Do not raise limits in a way that requires billing. If the free allowance or model availability is insufficient, leave the built-in provider unavailable and ask the owner before changing scope.
 
 ### 2. Check the Firebase browser API key restrictions
@@ -122,7 +145,8 @@ Automated tests mock the SDK; they do not contact Firebase or a model. Before de
 - [x] Pace Free Firebase chat with an accessible five-second cooldown and escalating 429 backoff; leave BYOK chat unthrottled.
 - [x] Add the persisted, default-on floating AI Sensei visibility toggle without disabling other AI entry points; dock the shortcut about 55% offscreen while idle and restore it on hover/focus.
 - [x] Add App Check initialization before Auth when the owner configures the public site key, with tests for success, ordering, and failure isolation.
-- [x] Add/update mocked tests for storage defaults/migration, BYOK preservation, key-free dispatch, quota classification, UI choices, asset cache/deploy versions, and existing regressions.
+- [x] Add/update mocked tests for storage defaults/migration, BYOK preservation, key-free dispatch, quota classification, UI choices, Firebase model selection/migration, asset cache/deploy versions, and existing regressions.
+- [x] Switch the built-in Firebase model from `gemini-3.8-flash` to `gemini-3.5-flash-lite`, preserve BYOK selections/caches, and document rollback steps. Automated checks do not verify live latency or capacity.
 - [x] Owner supplied the public reCAPTCHA Enterprise site key; it is configured in the browser config (no debug token or debug flag is committed).
 - [x] Owner confirmed a real localhost AI Sensei response using a registered App Check debug token; the shared project quota was used for that request.
 - [x] Owner reports Firebase AI Logic App Check is Basic/Enforced with Replay/Monitoring.
@@ -134,7 +158,7 @@ Automated tests mock the SDK; they do not contact Firebase or a model. Before de
 Verification run after the last code change:
 
 - `npm ci` — succeeded; 338 packages installed and zero vulnerabilities reported.
-- `npm test` — passed; 22 SRS/AI checks, 227 Node test cases, and 64 drawing-pad checks (0 failures).
+- `npm test` — passed; 23 SRS/AI checks, 227 Node test cases, and 64 drawing-pad checks (0 failures).
 - `npm run lint` — passed.
 - `npm run format:check` — passed.
 - `git diff --check` — passed.
@@ -149,4 +173,6 @@ These automated checks use mocked Firebase behavior. They do not replace the own
 - [Firebase AI Logic production checklist](https://firebase.google.com/docs/ai-logic/production-checklist)
 - [Firebase AI Logic API-key error troubleshooting](https://firebase.google.com/docs/ai-logic/error-codes)
 - [Firebase App Check with reCAPTCHA Enterprise for Web](https://firebase.google.com/docs/app-check/web/recaptcha-enterprise-provider)
+- [Firebase AI Logic thinking configuration](https://firebase.google.com/docs/ai-logic/thinking)
+- [Firebase AI Logic supported models](https://firebase.google.com/docs/ai-logic/models)
 - [Gemini API pricing and data-use terms](https://ai.google.dev/gemini-api/docs/pricing)

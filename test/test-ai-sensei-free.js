@@ -86,7 +86,7 @@ test('Settings default to keyless Firebase AI and keep existing BYOK models visi
             firebase: {
                 requiresKey: false,
                 fixedModel: true,
-                models: ['gemini-3.8-flash']
+                models: ['gemini-3.5-flash-lite']
             },
             gemini: {
                 requiresKey: true,
@@ -117,7 +117,7 @@ test('Settings default to keyless Firebase AI and keep existing BYOK models visi
         settings = {
             provider: 'firebase',
             apiKey: '',
-            model: 'gemini-3.8-flash',
+            model: 'gemini-3.5-flash-lite',
             persona: 'encouraging',
             enableFloatingAssistant: false
         };
@@ -129,7 +129,7 @@ test('Settings default to keyless Firebase AI and keep existing BYOK models visi
         assert.equal(doc.getElementById('aiModelGroup').style.display, 'none');
         assert.equal(doc.getElementById('aiFixedModelNote').hidden, false);
         assert.equal(doc.getElementById('aiModel').disabled, true);
-        assert.equal(doc.getElementById('aiModel').value, 'gemini-3.8-flash');
+        assert.equal(doc.getElementById('aiModel').value, 'gemini-3.5-flash-lite');
     } finally {
         dom.window.close();
     }

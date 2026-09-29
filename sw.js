@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanji-widgets-v31';
+const CACHE_NAME = 'kanji-widgets-v32';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -25,7 +25,7 @@ const urlsToCache = [
     '/audio-manager.js',
     '/storage-manager.js',
     '/srs-engine.js',
-    '/ai-manager.js?v=ai-free-v1',
+    '/ai-manager.js?v=ai-model-lite-v1',
     '/ai-tutor-modal.js?v=ai-free-v3'
 ];
 

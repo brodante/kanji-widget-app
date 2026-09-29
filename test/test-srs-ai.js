@@ -56,9 +56,26 @@ async function runTests() {
     await test('StorageManager default AI settings are initialized properly', () => {
         const settings = StorageManager.getAISettings();
         assert.strictEqual(settings.provider, 'firebase');
-        assert.strictEqual(settings.model, 'gemini-3.8-flash');
+        assert.strictEqual(settings.model, 'gemini-3.5-flash-lite');
         assert.strictEqual(settings.persona, 'encouraging');
         assert.strictEqual(settings.enableFloatingAssistant, true);
+    });
+
+    await test('StorageManager migrates the former Firebase model to the current fixed model', () => {
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'firebase',
+            apiKey: '',
+            model: 'gemini-3.8-flash',
+            persona: 'encouraging'
+        });
+
+        const migrated = StorageManager.getAISettings();
+        assert.strictEqual(migrated.provider, 'firebase');
+        assert.strictEqual(migrated.model, 'gemini-3.5-flash-lite');
+        assert.strictEqual(
+            StorageManager.getItem(StorageManager.keys.AI_SETTINGS, {}).model,
+            'gemini-3.5-flash-lite'
+        );
     });
 
     await test('StorageManager persists the floating AI assistant visibility preference', () => {
@@ -78,7 +95,7 @@ async function runTests() {
         });
         const migrated = StorageManager.getAISettings();
         assert.strictEqual(migrated.provider, 'firebase');
-        assert.strictEqual(migrated.model, 'gemini-3.8-flash');
+        assert.strictEqual(migrated.model, 'gemini-3.5-flash-lite');
 
         StorageManager.aiSettingsDefaultMigrationCompleted = false;
         StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
@@ -90,7 +107,7 @@ async function runTests() {
         const unconfiguredOpenAI = StorageManager.getAISettings();
         assert.strictEqual(unconfiguredOpenAI.provider, 'firebase');
         assert.strictEqual(unconfiguredOpenAI.apiKey, '');
-        assert.strictEqual(unconfiguredOpenAI.model, 'gemini-3.8-flash');
+        assert.strictEqual(unconfiguredOpenAI.model, 'gemini-3.5-flash-lite');
 
         StorageManager.updateAISetting('provider', 'openai');
         StorageManager.updateAISetting('model', 'gpt-4o');
@@ -319,7 +336,7 @@ async function runTests() {
         const settings = {
             provider: 'firebase',
             apiKey: '',
-            model: 'gemini-3.8-flash',
+            model: 'gemini-3.5-flash-lite',
             temperature: 0.4
         };
         try {
@@ -335,7 +352,7 @@ async function runTests() {
             assert.deepStrictEqual(request, [
                 'Question',
                 'Teacher prompt',
-                'gemini-3.8-flash',
+                'gemini-3.5-flash-lite',
                 0.4
             ]);
 
