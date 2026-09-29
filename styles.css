@@ -4455,43 +4455,73 @@ input:focus {
 /* AI SENSEI & SRS INTEGRATION STYLES         */
 /* ========================================== */
 
-/* Floating Action Button (FAB) for AI Sensei */
+/* Circular, draggable AI Sensei assistive button */
 .ai-sensei-fab {
     position: fixed;
     top: 26px;
     left: 26px;
     z-index: 950;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 18px 8px 10px;
-    background: rgba(22, 20, 36, 0.88);
-    border: 1px solid rgba(187, 134, 252, 0.5);
-    border-radius: 50px;
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    overflow: visible;
+    border: 1px solid rgba(219, 197, 255, 0.72);
+    border-radius: 50%;
+    background: linear-gradient(145deg, rgba(107, 68, 171, 0.97), rgba(37, 47, 91, 0.97));
     color: #ffffff;
+    font: inherit;
     cursor: grab;
     touch-action: none;
     box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.4),
-        0 0 16px rgba(187, 134, 252, 0.3);
+        0 8px 24px rgba(0, 0, 0, 0.38),
+        0 0 18px rgba(187, 134, 252, 0.3);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     transition:
         transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        translate 0.35s cubic-bezier(0.22, 1, 0.36, 1),
         background 0.25s ease,
         border-color 0.25s ease,
         box-shadow 0.25s ease,
-        opacity 0.25s ease;
+        opacity 0.3s ease;
     user-select: none;
-    will-change: transform;
+    will-change: transform, translate;
+}
+
+.ai-sensei-fab[hidden] {
+    display: none !important;
+}
+
+.ai-sensei-fab::before {
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: inherit;
+    content: '';
+    pointer-events: none;
+}
+
+.ai-sensei-fab > i {
+    position: relative;
+    z-index: 1;
+    font-size: 1.55rem;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.28));
+    pointer-events: none;
 }
 
 .ai-sensei-fab:hover {
-    background: rgba(32, 27, 52, 0.95);
-    border-color: rgba(187, 134, 252, 0.85);
+    border-color: rgba(255, 255, 255, 0.92);
+    background: linear-gradient(145deg, rgba(125, 79, 197, 0.99), rgba(44, 58, 111, 0.99));
     box-shadow:
-        0 12px 30px rgba(0, 0, 0, 0.5),
-        0 0 24px rgba(187, 134, 252, 0.5);
+        0 10px 28px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(187, 134, 252, 0.45);
+}
+
+.ai-sensei-fab:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.95);
+    outline-offset: 4px;
 }
 
 .ai-sensei-fab.dragging {
@@ -4502,60 +4532,30 @@ input:focus {
         0 0 28px rgba(187, 134, 252, 0.6);
 }
 
+.ai-sensei-fab.is-idle[data-dock-edge='left'] {
+    translate: calc(-55% - 8px) 0;
+    opacity: 0.7;
+}
+
+.ai-sensei-fab.is-idle[data-dock-edge='right'] {
+    translate: calc(55% + 8px) 0;
+    opacity: 0.7;
+}
+
+.ai-sensei-fab.is-idle:hover,
+.ai-sensei-fab.is-idle:focus-visible {
+    translate: 0 0;
+    opacity: 1;
+}
+
 body:has(#aiSenseiModal.show) .ai-sensei-fab {
     opacity: 0;
     pointer-events: none;
 }
 
-.ai-fab-icon-box {
-    position: relative;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #bb86fc, #00e5ff);
-    color: #121212;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    box-shadow: 0 2px 8px rgba(187, 134, 252, 0.4);
-}
-
-.ai-fab-pulse-dot {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 9px;
-    height: 9px;
-    background: #00ff88;
-    border: 2px solid #1a1a2e;
-    border-radius: 50%;
-    box-shadow: 0 0 6px #00ff88;
-    animation: fab-pulse 2s infinite ease-in-out;
-}
-
-.ai-fab-text {
-    font-size: 0.92rem;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    background: linear-gradient(135deg, #ffffff, #e0d0ff);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-@keyframes fab-pulse {
-    0% {
-        transform: scale(0.9);
-        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
-    }
-    70% {
-        transform: scale(1.15);
-        box-shadow: 0 0 0 8px rgba(0, 255, 136, 0);
-    }
-    100% {
-        transform: scale(0.9);
-        box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+@media (prefers-reduced-motion: reduce) {
+    .ai-sensei-fab {
+        transition: none;
     }
 }
 
@@ -4665,6 +4665,97 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     background: var(--primary-color);
     color: var(--on-primary);
     box-shadow: 0 4px 12px rgba(var(--primary-color-rgb, 98, 0, 238), 0.3);
+}
+
+.ai-privacy-note {
+    margin: -0.6rem 0 0;
+    padding: 0.55rem 0.75rem;
+    border-left: 3px solid var(--primary-color);
+    background: rgba(150, 150, 150, 0.08);
+    border-radius: 0 8px 8px 0;
+    color: var(--on-surface);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.ai-kanji-context {
+    align-self: flex-start;
+    margin: -0.45rem 0 0;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid rgba(var(--primary-color-rgb, 98, 0, 238), 0.28);
+    border-radius: 999px;
+    background: rgba(var(--primary-color-rgb, 98, 0, 238), 0.08);
+    color: var(--on-surface);
+    font-size: 0.76rem;
+    line-height: 1.4;
+}
+
+.ai-kanji-context[hidden] {
+    display: none;
+}
+
+.ai-request-error {
+    color: var(--error, #b00020);
+}
+
+.ai-limit-notice {
+    margin-top: 0.55rem;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 193, 7, 0.36);
+    border-radius: 10px;
+    background: rgba(255, 193, 7, 0.09);
+    color: var(--on-surface);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.ai-limit-notice p {
+    margin: 0 0 0.5rem;
+}
+
+.ai-limit-notice__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.55rem;
+}
+
+.ai-limit-notice__actions button,
+.ai-limit-notice__actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid rgba(150, 150, 150, 0.35);
+    border-radius: 8px;
+    background: rgba(150, 150, 150, 0.12);
+    color: var(--on-surface);
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ai-limit-notice__actions button:hover,
+.ai-limit-notice__actions a:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.ai-limit-notice__actions button:disabled,
+.ai-limit-notice__actions button:disabled:hover {
+    border-color: rgba(150, 150, 150, 0.35);
+    color: var(--on-surface);
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.ai-limit-notice__email {
+    display: inline-block;
+    margin-top: 0.4rem;
+    overflow-wrap: anywhere;
+    color: var(--primary-color);
+    user-select: text;
 }
 
 /* Telemetry Stats Grid */
@@ -4955,6 +5046,11 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     color: var(--primary-color);
 }
 
+.ai-quick-prompt:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .ai-trap-chars {
     display: flex;
     align-items: center;
@@ -4969,6 +5065,125 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     opacity: 0.5;
     font-family: inherit;
 }
+.ai-trap-reason {
+    font-size: 0.72rem;
+}
+
+/* Drawing Pad Styles (inline practice panel in the widget card) */
+.drawing-pad-canvas-wrap {
+    flex: 1;
+    position: relative;
+    border-radius: 12px;
+    background: var(--surface-variant);
+    overflow: hidden;
+}
+
+#drawingPadCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.drawing-pad-feedback {
+    text-align: center;
+    font-weight: 600;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    min-height: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.drawing-pad-feedback.feedback-good {
+    background: rgba(46, 204, 113, 0.15);
+    color: var(--success-color);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.drawing-pad-feedback.feedback-ok {
+    background: rgba(241, 196, 15, 0.15);
+    color: var(--warning-color);
+    border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.drawing-pad-feedback.feedback-warn {
+    background: rgba(231, 76, 60, 0.15);
+    color: var(--error-color);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.drawing-pad-score {
+    text-align: center;
+    font-weight: 600;
+    font-family: var(--mono-font);
+    padding: 0.5rem;
+    background: rgba(var(--primary-color-rgb), 0.08);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.drawing-pad-toolbar {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.drawing-pad-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(var(--primary-color-rgb), 0.12);
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.drawing-pad-btn:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+    transform: translateY(-1px);
+}
+
+.drawing-pad-btn:active {
+    transform: translateY(0);
+}
+
+.drawing-pad-btn.active {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+
+.drawing-pad-btn:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* Toolbar button icon sizes */
+.drawing-pad-btn i {
+    font-size: 1rem;
+}
+
+/* Stroke order practice button */
+.stroke-order-practice {
+    margin-left: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    background: rgba(var(--primary-color-rgb), 0.12);
+}
+
+.stroke-order-practice:hover {
+    background: rgba(var(--primary-color-rgb), 0.18);
+}
+
 .ai-trap-reason {
     font-size: 0.72rem;
 }
@@ -5200,6 +5415,66 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     transform: scale(1.05);
 }
 
+.ai-chat-input-bar input:disabled {
+    cursor: not-allowed;
+    opacity: 0.68;
+}
+
+.ai-send-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+
+.ai-chat-cooldown-status {
+    margin: 0.45rem 0.1rem 0;
+    color: var(--on-surface);
+    font-size: 0.76rem;
+    line-height: 1.4;
+    opacity: 0.78;
+}
+
+.ai-chat-cooldown-status[hidden] {
+    display: none;
+}
+
+.ai-chat-cooldown-status.is-rate-limited {
+    padding-left: 0.55rem;
+    border-left: 2px solid var(--warning-color, #d6a42f);
+    font-weight: 600;
+    opacity: 1;
+}
+
+.ai-visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Supporting text for the AI provider and floating-assistant settings */
+.ai-default-provider-note,
+#aiFloatingAssistantHelp {
+    color: var(--on-surface);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    opacity: 0.8;
+}
+
+.ai-default-provider-note {
+    margin: 0 0 0.9rem;
+}
+
+#aiFloatingAssistantHelp {
+    display: block;
+    margin: -1rem 0 1.25rem;
+}
+
 /* Settings AI Key Box */
 .api-key-input-wrapper {
     display: flex;
@@ -5305,17 +5580,12 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     .ai-sensei-fab {
         top: 18px;
         left: 18px;
-        padding: 6px 14px 6px 8px;
+        width: 56px;
+        height: 56px;
     }
 
-    .ai-fab-icon-box {
-        width: 32px;
-        height: 32px;
-        font-size: 0.95rem;
-    }
-
-    .ai-fab-text {
-        font-size: 0.85rem;
+    .ai-sensei-fab > i {
+        font-size: 1.4rem;
     }
 
     .ai-stats-grid {

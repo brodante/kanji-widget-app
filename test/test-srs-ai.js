@@ -55,9 +55,86 @@ async function runTests() {
 
     await test('StorageManager default AI settings are initialized properly', () => {
         const settings = StorageManager.getAISettings();
-        assert.strictEqual(settings.provider, 'gemini');
-        assert.strictEqual(settings.model, 'gemini-3.6-flash');
+        assert.strictEqual(settings.provider, 'firebase');
+        assert.strictEqual(settings.model, 'gemini-3.8-flash');
         assert.strictEqual(settings.persona, 'encouraging');
+        assert.strictEqual(settings.enableFloatingAssistant, true);
+    });
+
+    await test('StorageManager persists the floating AI assistant visibility preference', () => {
+        StorageManager.updateAISetting('enableFloatingAssistant', false);
+        assert.strictEqual(StorageManager.getAISettings().enableFloatingAssistant, false);
+        StorageManager.updateAISetting('enableFloatingAssistant', true);
+        assert.strictEqual(StorageManager.getAISettings().enableFloatingAssistant, true);
+    });
+
+    await test('StorageManager migrates unconfigured key providers but preserves BYOK settings', () => {
+        StorageManager.aiSettingsDefaultMigrationCompleted = false;
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'gemini',
+            apiKey: '',
+            model: 'gemini-3.1-flash-lite',
+            persona: 'encouraging'
+        });
+        const migrated = StorageManager.getAISettings();
+        assert.strictEqual(migrated.provider, 'firebase');
+        assert.strictEqual(migrated.model, 'gemini-3.8-flash');
+
+        StorageManager.aiSettingsDefaultMigrationCompleted = false;
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'openai',
+            apiKey: '',
+            model: 'gpt-4o',
+            persona: 'strict'
+        });
+        const unconfiguredOpenAI = StorageManager.getAISettings();
+        assert.strictEqual(unconfiguredOpenAI.provider, 'firebase');
+        assert.strictEqual(unconfiguredOpenAI.apiKey, '');
+        assert.strictEqual(unconfiguredOpenAI.model, 'gemini-3.8-flash');
+
+        StorageManager.updateAISetting('provider', 'openai');
+        StorageManager.updateAISetting('model', 'gpt-4o');
+        const pendingBYOK = StorageManager.getAISettings();
+        assert.strictEqual(pendingBYOK.provider, 'openai');
+        assert.strictEqual(pendingBYOK.apiKey, '');
+        assert.strictEqual(pendingBYOK.model, 'gpt-4o');
+
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'gemini',
+            apiKey: 'learner-owned-key',
+            model: 'gemini-3.1-pro-preview',
+            persona: 'strict'
+        });
+        const byok = StorageManager.getAISettings();
+        assert.strictEqual(byok.provider, 'gemini');
+        assert.strictEqual(byok.apiKey, 'learner-owned-key');
+        assert.strictEqual(byok.model, 'gemini-3.1-pro-preview');
+        assert.strictEqual(byok.persona, 'strict');
+
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'gemini',
+            apiKey: 'legacy-model-key',
+            model: 'gemini-3.6-flash',
+            persona: 'mnemonic'
+        });
+        const legacyByok = StorageManager.getAISettings();
+        assert.strictEqual(legacyByok.provider, 'gemini');
+        assert.strictEqual(legacyByok.apiKey, 'legacy-model-key');
+        assert.strictEqual(legacyByok.model, 'gemini-3.6-flash');
+
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'openai',
+            apiKey: 'openai-key',
+            model: 'gpt-4o',
+            persona: 'strict'
+        });
+        const openaiByok = StorageManager.getAISettings();
+        assert.strictEqual(openaiByok.provider, 'openai');
+        assert.strictEqual(openaiByok.apiKey, 'openai-key');
+        assert.strictEqual(openaiByok.model, 'gpt-4o');
+
+        StorageManager.updateAISetting('apiKey', '');
+        StorageManager.updateAISetting('provider', 'openai');
     });
 
     await test('StorageManager AI settings update correctly', () => {
@@ -217,13 +294,72 @@ async function runTests() {
     // --- SECTION 3: AIManager Tests ---
     console.log('\n--- 3. AI Manager Architecture & Multi-Provider Specs ---');
 
-    await test('AIManager has defaults configured for all 5 providers', () => {
-        const providers = ['gemini', 'openai', 'claude', 'openrouter', 'ollama'];
+    await test('AIManager has defaults configured for the built-in and BYOK providers', () => {
+        const providers = ['firebase', 'gemini', 'openai', 'claude', 'openrouter', 'ollama'];
         providers.forEach((p) => {
             assert(AIManager.PROVIDER_DEFAULTS[p] !== undefined, `Missing provider ${p}`);
             assert(Array.isArray(AIManager.PROVIDER_DEFAULTS[p].models));
             assert(AIManager.PROVIDER_DEFAULTS[p].models.length > 0);
         });
+    });
+
+    await test('Free Firebase AI Logic provider needs no learner key', () => {
+        assert.strictEqual(
+            AIManager.isProviderConfigured({ provider: 'firebase', apiKey: '' }),
+            true
+        );
+        assert.strictEqual(
+            AIManager.isProviderConfigured({ provider: 'gemini', apiKey: '' }),
+            false
+        );
+    });
+
+    await test('Firebase provider dispatches without a key and wraps only rate-limit errors', async () => {
+        const originalCall = AIManager.callFirebaseAI;
+        const settings = {
+            provider: 'firebase',
+            apiKey: '',
+            model: 'gemini-3.8-flash',
+            temperature: 0.4
+        };
+        try {
+            let request;
+            AIManager.callFirebaseAI = async (...args) => {
+                request = args;
+                return 'Sensei answer';
+            };
+            assert.strictEqual(
+                await AIManager.callProvider('Question', 'Teacher prompt', settings),
+                'Sensei answer'
+            );
+            assert.deepStrictEqual(request, [
+                'Question',
+                'Teacher prompt',
+                'gemini-3.8-flash',
+                0.4
+            ]);
+
+            AIManager.callFirebaseAI = async () => {
+                const error = new Error('429 RESOURCE_EXHAUSTED: quota exceeded');
+                error.status = 429;
+                throw error;
+            };
+            await assert.rejects(AIManager.callProvider('Question', '', settings), (error) =>
+                AIManager.isFreeTierLimitError(error)
+            );
+
+            AIManager.callFirebaseAI = async () => {
+                throw new Error('App Check setup is incomplete');
+            };
+            await assert.rejects(
+                AIManager.callProvider('Question', '', settings),
+                (error) =>
+                    error.message === 'App Check setup is incomplete' &&
+                    !AIManager.isFreeTierLimitError(error)
+            );
+        } finally {
+            AIManager.callFirebaseAI = originalCall;
+        }
     });
 
     await test('AIManager throws expected error when API Key is missing for required providers', async () => {

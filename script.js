@@ -579,7 +579,7 @@ class KanjiLearningApp {
         if (aiSenseiSendBtn && aiSenseiInput) {
             aiSenseiSendBtn.addEventListener('click', () => {
                 const text = aiSenseiInput.value.trim();
-                if (text) {
+                if (text && !this.isAISenseiChatLocked?.()) {
                     this.askAISensei(text);
                     aiSenseiInput.value = '';
                 }
@@ -589,7 +589,7 @@ class KanjiLearningApp {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     const text = aiSenseiInput.value.trim();
-                    if (text) {
+                    if (text && !this.isAISenseiChatLocked?.()) {
                         this.askAISensei(text);
                         aiSenseiInput.value = '';
                     }
@@ -608,12 +608,28 @@ class KanjiLearningApp {
         });
 
         // AI Settings UI events
+        const aiFloatingAssistantToggle = document.getElementById('aiFloatingAssistantEnabled');
+        if (aiFloatingAssistantToggle) {
+            aiFloatingAssistantToggle.addEventListener('change', () => {
+                this.setFloatingAISenseiEnabled(aiFloatingAssistantToggle.checked);
+            });
+        }
+
         const aiProvider = document.getElementById('aiProvider');
         if (aiProvider) {
             aiProvider.addEventListener('change', (e) => {
                 const provider = e.target.value;
+                const providerInfo = AIManager.PROVIDER_DEFAULTS[provider];
+                const currentSettings = StorageManager.getAISettings();
                 StorageManager.updateAISetting('provider', provider);
+                if (
+                    providerInfo?.fixedModel ||
+                    (providerInfo?.models && !providerInfo.models.includes(currentSettings.model))
+                ) {
+                    StorageManager.updateAISetting('model', providerInfo.defaultModel);
+                }
                 this.syncAISettingsUI();
+                this.updateAISenseiChatControls?.();
             });
         }
 
@@ -1004,10 +1020,11 @@ class KanjiLearningApp {
         const STORAGE_KEY = 'aiSenseiFabPos';
         const MARGIN = 8;
         const DRAG_THRESHOLD = 4;
+        const IDLE_TIMEOUT_MS = 5000;
 
         const computed = getComputedStyle(fab);
-        const baseLeft = parseFloat(computed.left) || 26;
-        const baseTop = parseFloat(computed.top) || 26;
+        let baseLeft = parseFloat(computed.left) || 26;
+        let baseTop = parseFloat(computed.top) || 26;
 
         let pos = { x: 0, y: 0 };
         try {
@@ -1049,11 +1066,86 @@ class KanjiLearningApp {
             return window.innerWidth - MARGIN - baseLeft - w; // right edge
         };
 
+        const getDockEdge = (currentX) => {
+            const centerX = baseLeft + currentX + fab.offsetWidth / 2;
+            return centerX < window.innerWidth / 2 ? 'left' : 'right';
+        };
+
         // Apply restored position (clamp first in case viewport shrank)
         pos = clampXY(pos.x, pos.y);
         // Then snap to nearest edge on load so it always looks "docked"
         pos = { x: computeSnapX(pos.x), y: pos.y };
+        fab.dataset.dockEdge = getDockEdge(pos.x);
         fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+
+        let idleTimer = null;
+        const clearIdleTimer = () => {
+            if (idleTimer !== null) {
+                window.clearTimeout(idleTimer);
+                idleTimer = null;
+            }
+        };
+        const scheduleIdleState = () => {
+            clearIdleTimer();
+            if (fab.hidden) {
+                return;
+            }
+            idleTimer = window.setTimeout(() => {
+                idleTimer = null;
+                const modal = document.getElementById('aiSenseiModal');
+                if (
+                    fab.classList.contains('dragging') ||
+                    fab.matches(':hover') ||
+                    modal?.classList.contains('show')
+                ) {
+                    return;
+                }
+                fab.classList.add('is-idle');
+            }, IDLE_TIMEOUT_MS);
+        };
+        const wakeFab = () => {
+            clearIdleTimer();
+            fab.classList.remove('is-idle');
+            scheduleIdleState();
+        };
+        this.resetAISenseiFabIdleTimer = wakeFab;
+        this.setAISenseiFabEnabled = (enabled) => {
+            clearIdleTimer();
+            if (!enabled) {
+                fab.classList.remove('is-idle', 'dragging');
+                fab.hidden = true;
+                return;
+            }
+
+            const wasHidden = fab.hidden;
+            fab.hidden = false;
+            if (wasHidden) {
+                const enabledStyle = getComputedStyle(fab);
+                baseLeft = parseFloat(enabledStyle.left) || 26;
+                baseTop = parseFloat(enabledStyle.top) || 26;
+                pos = clampXY(pos.x, pos.y);
+                pos = { x: computeSnapX(pos.x), y: pos.y };
+                fab.dataset.dockEdge = getDockEdge(pos.x);
+                fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+                } catch (err) {
+                    /* ignore */
+                }
+            }
+            wakeFab();
+        };
+
+        fab.addEventListener('mouseenter', () => {
+            clearIdleTimer();
+            fab.classList.remove('is-idle');
+        });
+        fab.addEventListener('mouseleave', scheduleIdleState);
+        fab.addEventListener('focus', () => {
+            clearIdleTimer();
+            fab.classList.remove('is-idle');
+        });
+        fab.addEventListener('blur', scheduleIdleState);
 
         let activePointerId = null;
         let startPointer = { x: 0, y: 0 };
@@ -1064,6 +1156,8 @@ class KanjiLearningApp {
             if (e.pointerType === 'mouse' && e.button !== 0) {
                 return;
             }
+            clearIdleTimer();
+            fab.classList.remove('is-idle');
             activePointerId = e.pointerId;
             startPointer = { x: e.clientX, y: e.clientY };
             startPos = { x: pos.x, y: pos.y };
@@ -1105,6 +1199,7 @@ class KanjiLearningApp {
 
             if (!moved) {
                 fab.classList.remove('dragging');
+                scheduleIdleState();
                 return;
             }
 
@@ -1112,6 +1207,7 @@ class KanjiLearningApp {
             const targetX = computeSnapX(pos.x);
             const targetY = clampY(pos.y);
             pos = { x: targetX, y: targetY };
+            fab.dataset.dockEdge = getDockEdge(targetX);
 
             // Mark the drag so the click handler swallows the trailing click
             fab.dataset.lastDragEnd = Date.now().toString();
@@ -1128,21 +1224,38 @@ class KanjiLearningApp {
             } catch (err) {
                 /* ignore */
             }
+            scheduleIdleState();
         };
 
         fab.addEventListener('pointerup', endDrag);
         fab.addEventListener('pointercancel', endDrag);
 
-        // On resize / rotate, re-snap to the nearest edge
+        // On resize / rotate, re-snap to the nearest edge using the active breakpoint.
         window.addEventListener('resize', () => {
+            const resizedStyle = getComputedStyle(fab);
+            baseLeft = parseFloat(resizedStyle.left) || 26;
+            baseTop = parseFloat(resizedStyle.top) || 26;
+            if (fab.hidden) {
+                return;
+            }
             pos = { x: computeSnapX(pos.x), y: clampY(pos.y) };
+            fab.dataset.dockEdge = getDockEdge(pos.x);
             fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+            wakeFab();
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
             } catch (err) {
                 /* ignore */
             }
         });
+
+        let isEnabled = true;
+        try {
+            isEnabled = StorageManager.getAISettings().enableFloatingAssistant !== false;
+        } catch (err) {
+            /* Keep the assistant visible if settings are temporarily unavailable. */
+        }
+        this.setAISenseiFabEnabled(isEnabled);
     }
 
     updateLevelIcon() {
@@ -2540,11 +2653,22 @@ class KanjiLearningApp {
     // onclick attributes for it - the pad must have exactly one wiring per
     // control, or every tap toggles twice and cancels itself out.
 
+    setFloatingAISenseiEnabled(enabled) {
+        const shouldShow = Boolean(enabled);
+        StorageManager.updateAISetting('enableFloatingAssistant', shouldShow);
+        this.setAISenseiFabEnabled?.(shouldShow);
+    }
+
     syncAISettingsUI() {
-        if (!window.StorageManager) {
+        if (!window.StorageManager || !window.AIManager?.PROVIDER_DEFAULTS) {
             return;
         }
         const aiSettings = StorageManager.getAISettings();
+        const providerDefaults = AIManager.PROVIDER_DEFAULTS;
+        const selectedProvider = providerDefaults[aiSettings.provider]
+            ? aiSettings.provider
+            : 'firebase';
+        const providerInfo = providerDefaults[selectedProvider];
         const providerEl = document.getElementById('aiProvider');
         const apiKeyEl = document.getElementById('aiApiKey');
         const endpointEl = document.getElementById('aiCustomEndpoint');
@@ -2552,11 +2676,18 @@ class KanjiLearningApp {
         const personaEl = document.getElementById('aiPersona');
         const apiKeyGroup = document.getElementById('aiApiKeyGroup');
         const endpointGroup = document.getElementById('aiEndpointGroup');
-        // Update the "Get your API key" link based on the selected provider
+        const modelGroup = document.getElementById('aiModelGroup');
+        const fixedModelNote = document.getElementById('aiFixedModelNote');
         const keyLinkEl = document.getElementById('aiProviderKeyLink');
-        if (keyLinkEl && window.AIManager && AIManager.PROVIDER_DEFAULTS) {
-            const providerInfo = AIManager.PROVIDER_DEFAULTS[aiSettings.provider];
-            if (providerInfo && providerInfo.keyUrl) {
+        const floatingAssistantToggle = document.getElementById('aiFloatingAssistantEnabled');
+
+        if (floatingAssistantToggle) {
+            floatingAssistantToggle.checked = aiSettings.enableFloatingAssistant !== false;
+            this.setAISenseiFabEnabled?.(floatingAssistantToggle.checked);
+        }
+
+        if (keyLinkEl) {
+            if (providerInfo.keyUrl) {
                 keyLinkEl.href = providerInfo.keyUrl;
                 keyLinkEl.style.display = 'inline';
             } else {
@@ -2564,7 +2695,7 @@ class KanjiLearningApp {
             }
         }
         if (providerEl) {
-            providerEl.value = aiSettings.provider || 'gemini';
+            providerEl.value = selectedProvider;
         }
         if (apiKeyEl) {
             apiKeyEl.value = aiSettings.apiKey || '';
@@ -2576,25 +2707,41 @@ class KanjiLearningApp {
             personaEl.value = aiSettings.persona || 'encouraging';
         }
 
-        const isOllama = aiSettings.provider === 'ollama';
+        const isOllama = selectedProvider === 'ollama';
         if (apiKeyGroup) {
-            apiKeyGroup.style.display = isOllama ? 'none' : 'block';
+            apiKeyGroup.style.display = providerInfo.requiresKey ? 'block' : 'none';
         }
         if (endpointGroup) {
             endpointGroup.style.display = isOllama ? 'block' : 'none';
         }
+        if (modelGroup) {
+            modelGroup.style.display = providerInfo.fixedModel ? 'none' : 'block';
+        }
+        if (fixedModelNote) {
+            fixedModelNote.hidden = !providerInfo.fixedModel;
+        }
 
-        // Populate models dropdown
-        if (modelEl && window.AIManager && AIManager.PROVIDER_DEFAULTS) {
-            const providerInfo =
-                AIManager.PROVIDER_DEFAULTS[aiSettings.provider] ||
-                AIManager.PROVIDER_DEFAULTS.gemini;
-            modelEl.innerHTML = providerInfo.models
-                .map(
-                    (m) =>
-                        `<option value="${m}" ${m === aiSettings.model ? 'selected' : ''}>${m}</option>`
-                )
-                .join('');
+        if (modelEl) {
+            const models = [...providerInfo.models];
+            if (
+                typeof aiSettings.model === 'string' &&
+                aiSettings.model &&
+                !models.includes(aiSettings.model)
+            ) {
+                // Keep an existing BYOK model visible even if it is no longer in the
+                // provider's current suggestions; don't silently replace saved settings.
+                models.unshift(aiSettings.model);
+            }
+            modelEl.replaceChildren(
+                ...models.map((model) => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    option.selected = model === aiSettings.model;
+                    return option;
+                })
+            );
+            modelEl.disabled = Boolean(providerInfo.fixedModel);
         }
     }
 
@@ -2620,16 +2767,15 @@ class KanjiLearningApp {
         }
 
         statusEl.className = 'ai-conn-status';
-        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+        const loadingIcon = document.createElement('i');
+        loadingIcon.className = 'fas fa-spinner fa-spin';
+        statusEl.replaceChildren(loadingIcon, document.createTextNode(' Connecting...'));
 
         const result = await AIManager.testConnection();
-        if (result.success) {
-            statusEl.className = 'ai-conn-status success';
-            statusEl.innerHTML = `<i class="fas fa-check-circle"></i> ${result.message}`;
-        } else {
-            statusEl.className = 'ai-conn-status error';
-            statusEl.innerHTML = `<i class="fas fa-times-circle"></i> ${result.message}`;
-        }
+        statusEl.className = result.success ? 'ai-conn-status success' : 'ai-conn-status error';
+        const resultIcon = document.createElement('i');
+        resultIcon.className = result.success ? 'fas fa-check-circle' : 'fas fa-times-circle';
+        statusEl.replaceChildren(resultIcon, document.createTextNode(` ${result.message}`));
     }
 
     resetProgress() {
