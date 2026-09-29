@@ -99,14 +99,19 @@ Expected: render-blocking ≈ 0 (only `styles.css`, which is needed for the firs
 
 ## Verification
 
-- `npm test` – 236 tests, including the new guards in `test/test-performance-budget.js`
-  (deferred scripts, lazy three.js, single non-blocking font request, zoomable viewport,
-  accessible names, opaque footer, caching service worker, deferred Firebase).
-- `npm run lint` and `npm run format:check` are clean.
-- A jsdom boot check (deferred script order, real `index.html`) confirms: the app object is
-  created, the kanji widget renders, the default theme applies, the account stack stays
-  un-started until a tap or idle, and every theme switch still works.
+- `npm run verify` – lint + format:check + **246 tests**, 0 failures.
+- `test/test-performance-budget.js` guards the optimisations themselves (deferred scripts,
+  lazy three.js, one non-blocking font request, zoomable viewport, accessible names, opaque
+  footer, caching service worker, deferred Firebase). Mutation-tested: reverting any one of
+  them fails the suite.
+- `test/test-app-boot.js` boots the real `index.html` with the real scripts in document order
+  and walks the learner journeys: render the daily kanji, walk the deck, master + undo,
+  practice mode, every theme (including the four WebGL ones, with three.js loaded exactly
+  once), the drawer, settings, the offline stroke-order fallback, service worker
+  registration, and the account stack staying un-started until a tap.
 - `npm run build:min` reproduces the deploy-time minification locally.
+- Human walkthrough: `docs/regression-checklist.md` — automated gate, browser checklist, and
+  a visual A/B against the previous commit via `git worktree`.
 - Re-run PageSpeed Insights on the deployed URL after each phase to confirm the FCP/LCP drop.
 
 ## Notes for the next session
