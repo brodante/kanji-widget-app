@@ -11,6 +11,9 @@
  * so they share the same `this` context as the rest of the app.
  */
 
+const FREE_AI_CHAT_COOLDOWN_MS = 5000;
+const MAX_FREE_AI_RATE_LIMIT_COOLDOWN_MS = 120000;
+
 const AISenseiModule = {
     /** Call once after KanjiApp is constructed to graft all AI-Sensei methods onto it. */
     applyTo(app) {
@@ -27,8 +30,10 @@ const AISenseiModule = {
             if (!modal) {
                 return;
             }
+            this.resetAISenseiFabIdleTimer?.();
             modal.classList.add('show');
             this.switchAISenseiTab(initialTab);
+            this.updateAISenseiChatControls();
             this.updateAISenseiTelemetry();
             this.updatePersonaTag();
         },
@@ -38,6 +43,7 @@ const AISenseiModule = {
             if (modal) {
                 modal.classList.remove('show');
             }
+            this.resetAISenseiFabIdleTimer?.();
         },
 
         switchAISenseiTab(tabName) {
@@ -58,7 +64,25 @@ const AISenseiModule = {
             }
             if (tabName === 'study-path') {
                 this.renderAIPriorityStudyPlan();
+            } else if (tabName === 'ask-sensei') {
+                this.updateAISenseiKanjiContext();
+                this.updateAISenseiChatControls();
             }
+        },
+
+        updateAISenseiKanjiContext() {
+            const contextEl = document.getElementById('aiSenseiKanjiContext');
+            if (!contextEl) {
+                return;
+            }
+            const character = this.currentKanji?.character;
+            if (!character) {
+                contextEl.hidden = true;
+                contextEl.textContent = '';
+                return;
+            }
+            contextEl.textContent = `Current kanji context: ${character} · included when you send a message`;
+            contextEl.hidden = false;
         },
 
         updateAISenseiTelemetry() {
@@ -142,10 +166,13 @@ const AISenseiModule = {
                         }
                         contentEl.innerHTML = html;
                     }
+                    if (result.limitReached) {
+                        this.renderAIQuotaNotice(contentEl, () => this.runAIDiagnosticAnalysis());
+                    }
                 }
             } catch (error) {
                 if (contentEl) {
-                    contentEl.innerHTML = `<p class="ai-conn-status error"><i class="fas fa-exclamation-triangle"></i> Failed to run analysis: ${error.message}</p>`;
+                    contentEl.textContent = `Failed to run analysis: ${error?.message || 'Please try again.'}`;
                 }
             } finally {
                 if (loadingEl) {
@@ -216,10 +243,264 @@ const AISenseiModule = {
             }
         },
 
+        renderAIQuotaNotice(containerEl, retryAction = null) {
+            if (!containerEl) {
+                return;
+            }
+            const card = document.createElement('section');
+            card.className = 'ai-limit-notice';
+            card.setAttribute('role', 'group');
+            card.setAttribute('aria-label', 'AI Sensei free-limit options');
+
+            const message = document.createElement('p');
+            message.setAttribute('role', 'status');
+            message.setAttribute('aria-live', 'polite');
+            message.textContent =
+                'You’ve reached the free AI Sensei limit for now. You can continue with your own provider API key in Settings, or contact the developer. Your provider may have its own limits or charges.';
+            card.appendChild(message);
+
+            const actions = document.createElement('div');
+            actions.className = 'ai-limit-notice__actions';
+            const keyButton = document.createElement('button');
+            keyButton.type = 'button';
+            keyButton.textContent = 'Use my own API key';
+            keyButton.addEventListener('click', () => this.openAISettingsForBYOK());
+            actions.appendChild(keyButton);
+
+            if (typeof retryAction === 'function') {
+                const retryButton = document.createElement('button');
+                retryButton.type = 'button';
+                retryButton.textContent = 'Try again after setup';
+                retryButton.addEventListener('click', retryAction);
+                actions.appendChild(retryButton);
+            }
+
+            const contactLink = document.createElement('a');
+            contactLink.href =
+                'mailto:spsc.mizu@gmail.com?subject=KanjiWidgets%20AI%20Sensei%20limit%20support';
+            contactLink.textContent = 'Email the developer';
+            actions.appendChild(contactLink);
+            card.appendChild(actions);
+
+            const email = document.createElement('a');
+            email.className = 'ai-limit-notice__email';
+            email.href = 'mailto:spsc.mizu@gmail.com';
+            email.textContent = 'spsc.mizu@gmail.com';
+            email.setAttribute('aria-label', 'Email address: spsc.mizu@gmail.com');
+            card.appendChild(email);
+            containerEl.appendChild(card);
+        },
+
+        openAISettingsForBYOK() {
+            this.closeAISenseiModal();
+            this.closeKanjiDrawer();
+            if (typeof this.openSettings === 'function') {
+                this.openSettings();
+            }
+            const settingsTarget = document.getElementById('settingsAI');
+            settingsTarget?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+            document.getElementById('aiProvider')?.focus?.({ preventScroll: true });
+        },
+
+        isAISenseiUsingFreeProvider() {
+            try {
+                const storageManager =
+                    typeof StorageManager !== 'undefined' ? StorageManager : window.StorageManager;
+                const provider = storageManager?.getAISettings?.()?.provider;
+                return !provider || provider === 'firebase';
+            } catch {
+                return true;
+            }
+        },
+
+        isAISenseiChatLocked() {
+            const cooldownUntil = Number(this._aiSenseiCooldownUntil || 0);
+            const coolingDown = this.isAISenseiUsingFreeProvider() && cooldownUntil > Date.now();
+            return Boolean(this._aiSenseiRequestPending || coolingDown);
+        },
+
+        updateAISenseiChatControls(announce = false) {
+            const input = document.getElementById('aiSenseiInput');
+            const sendButton = document.getElementById('aiSenseiSendBtn');
+            const status = document.getElementById('aiSenseiCooldownStatus');
+            const announcement = document.getElementById('aiSenseiCooldownAnnouncement');
+            const usingFreeProvider = this.isAISenseiUsingFreeProvider();
+            const cooldownUntil = Number(this._aiSenseiCooldownUntil || 0);
+            const timeRemaining = Math.max(0, cooldownUntil - Date.now());
+            const cooldownExpired = usingFreeProvider && cooldownUntil > 0 && timeRemaining === 0;
+            const cooldownRemaining = usingFreeProvider ? timeRemaining : 0;
+            const secondsRemaining = Math.ceil(cooldownRemaining / 1000);
+            const isPending = Boolean(this._aiSenseiRequestPending);
+            const isCoolingDown = cooldownRemaining > 0;
+            const isLocked = isPending || isCoolingDown;
+
+            if (
+                timeRemaining === 0 &&
+                this._aiSenseiCooldownTimer !== null &&
+                this._aiSenseiCooldownTimer !== undefined
+            ) {
+                window.clearInterval(this._aiSenseiCooldownTimer);
+                this._aiSenseiCooldownTimer = null;
+                this._aiSenseiCooldownUntil = 0;
+                this._aiSenseiCooldownReason = '';
+            }
+
+            if (input) {
+                if (this._aiSenseiOriginalPlaceholder === undefined) {
+                    this._aiSenseiOriginalPlaceholder = input.getAttribute('placeholder') || '';
+                }
+                input.disabled = isLocked;
+                if (isPending) {
+                    input.placeholder = usingFreeProvider
+                        ? 'Free AI is preparing your reply…'
+                        : 'Sensei is preparing your reply…';
+                } else if (isCoolingDown) {
+                    input.placeholder = `Free AI cooldown — send in ${secondsRemaining} second${secondsRemaining === 1 ? '' : 's'}`;
+                } else {
+                    input.placeholder = this._aiSenseiOriginalPlaceholder;
+                }
+            }
+
+            if (sendButton) {
+                sendButton.disabled = isLocked;
+            }
+            document.querySelectorAll('.ai-quick-prompt').forEach((button) => {
+                button.disabled = isLocked;
+            });
+
+            document.querySelectorAll('.ai-chat-quota-retry').forEach((button) => {
+                if (button.dataset.readyText === undefined) {
+                    button.dataset.readyText = button.textContent;
+                }
+                button.disabled = isLocked;
+                if (isCoolingDown) {
+                    button.textContent = `Retry in ${secondsRemaining}s`;
+                } else if (isPending) {
+                    button.textContent = 'Sending…';
+                } else {
+                    button.textContent = button.dataset.readyText;
+                }
+            });
+
+            let statusMessage = '';
+            if (isPending) {
+                statusMessage = usingFreeProvider
+                    ? 'Free AI is preparing your reply. Please wait.'
+                    : 'Sensei is preparing your reply. Please wait.';
+            } else if (isCoolingDown && this._aiSenseiCooldownReason === 'rate-limit') {
+                statusMessage = `Free AI rate-limit cooldown active. Try again in ${secondsRemaining} second${secondsRemaining === 1 ? '' : 's'}.`;
+            } else if (isCoolingDown) {
+                statusMessage = `Free AI message cooldown enabled. You can send again in ${secondsRemaining} second${secondsRemaining === 1 ? '' : 's'}.`;
+            }
+
+            if (status) {
+                status.hidden = !isLocked;
+                status.classList.toggle(
+                    'is-rate-limited',
+                    isCoolingDown && this._aiSenseiCooldownReason === 'rate-limit'
+                );
+                status.textContent = statusMessage;
+            }
+            if (announcement && announce) {
+                announcement.textContent = statusMessage;
+            } else if (announcement && cooldownExpired && !isPending) {
+                announcement.textContent = 'Free AI cooldown ended. You can send a message now.';
+            }
+        },
+
+        startAISenseiChatCooldown(durationMs, reason = 'message') {
+            if (this._aiSenseiCooldownTimer !== null && this._aiSenseiCooldownTimer !== undefined) {
+                window.clearInterval(this._aiSenseiCooldownTimer);
+            }
+            const duration = Math.min(
+                MAX_FREE_AI_RATE_LIMIT_COOLDOWN_MS,
+                Math.max(0, Number(durationMs) || 0)
+            );
+            this._aiSenseiCooldownUntil = Date.now() + duration;
+            this._aiSenseiCooldownReason = reason;
+            this._aiSenseiCooldownTimer = null;
+            this.updateAISenseiChatControls(true);
+            if (duration > 0) {
+                this._aiSenseiCooldownTimer = window.setInterval(
+                    () => this.updateAISenseiChatControls(),
+                    1000
+                );
+            }
+        },
+
+        getAISenseiRateLimitCooldownMs() {
+            this._aiSenseiRateLimitStreak = (this._aiSenseiRateLimitStreak || 0) + 1;
+            const multiplier = 2 ** Math.min(this._aiSenseiRateLimitStreak - 1, 5);
+            return Math.min(
+                MAX_FREE_AI_RATE_LIMIT_COOLDOWN_MS,
+                FREE_AI_CHAT_COOLDOWN_MS * multiplier
+            );
+        },
+
+        async requestAISenseiAnswer(question, outputEl, kanjiContext = null) {
+            if (!outputEl || !window.AIManager) {
+                return false;
+            }
+            if (this.isAISenseiChatLocked()) {
+                this.updateAISenseiChatControls();
+                return false;
+            }
+
+            const usingFreeProvider = this.isAISenseiUsingFreeProvider();
+            let cooldownMs = FREE_AI_CHAT_COOLDOWN_MS;
+            let cooldownReason = 'message';
+            this._aiSenseiRequestPending = true;
+            this.updateAISenseiChatControls(true);
+            outputEl.replaceChildren();
+            const loading = document.createElement('span');
+            loading.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sensei is thinking...';
+            outputEl.appendChild(loading);
+            try {
+                const answer = await AIManager.askSenseiQuestion(question, kanjiContext);
+                outputEl.innerHTML = this.formatMarkdownToHtml(answer);
+                this._aiSenseiRateLimitStreak = 0;
+                return true;
+            } catch (error) {
+                outputEl.replaceChildren();
+                if (AIManager.isFreeTierLimitError?.(error)) {
+                    cooldownReason = 'rate-limit';
+                    cooldownMs = this.getAISenseiRateLimitCooldownMs();
+                    this.renderAIQuotaNotice(outputEl, () =>
+                        this.requestAISenseiAnswer(question, outputEl, kanjiContext)
+                    );
+                    const retryButton = outputEl.querySelector(
+                        '.ai-limit-notice__actions button:nth-child(2)'
+                    );
+                    if (retryButton) {
+                        retryButton.classList.add('ai-chat-quota-retry');
+                        retryButton.dataset.readyText = 'Retry this question';
+                    }
+                } else {
+                    const errorText = document.createElement('span');
+                    errorText.className = 'ai-request-error';
+                    errorText.textContent =
+                        error?.message || 'Sensei could not reply right now. Please try again.';
+                    outputEl.appendChild(errorText);
+                }
+                return false;
+            } finally {
+                this._aiSenseiRequestPending = false;
+                if (usingFreeProvider) {
+                    this.startAISenseiChatCooldown(cooldownMs, cooldownReason);
+                } else {
+                    this.updateAISenseiChatControls();
+                }
+            }
+        },
+
         async askAISensei(question) {
             const chatLog = document.getElementById('aiChatLog');
             if (!chatLog || !window.AIManager) {
-                return;
+                return false;
+            }
+            if (this.isAISenseiChatLocked()) {
+                this.updateAISenseiChatControls();
+                return false;
             }
             const userMsg = document.createElement('div');
             userMsg.className = 'ai-chat-msg ai-msg-user';
@@ -228,26 +509,21 @@ const AISenseiModule = {
             const botMsg = document.createElement('div');
             botMsg.className = 'ai-chat-msg ai-msg-bot';
             botMsg.innerHTML =
-                '<div class="ai-msg-avatar"><i class="fas fa-brain"></i></div><div class="ai-msg-text"><i class="fas fa-spinner fa-spin"></i> Sensei is thinking...</div>';
+                '<div class="ai-msg-avatar"><i class="fas fa-brain"></i></div><div class="ai-msg-text"></div>';
             chatLog.appendChild(botMsg);
             chatLog.scrollTop = chatLog.scrollHeight;
-            try {
-                const answer = await AIManager.askSenseiQuestion(question, this.currentKanji);
-                botMsg.querySelector('.ai-msg-text').innerHTML = this.formatMarkdownToHtml(answer);
-            } catch (error) {
-                botMsg.querySelector('.ai-msg-text').innerHTML =
-                    `<span style="color:#FF5252;"><i class="fas fa-circle-exclamation"></i> ${error.message}</span>`;
-            }
+            await this.requestAISenseiAnswer(
+                question,
+                botMsg.querySelector('.ai-msg-text'),
+                this.currentKanji
+            );
             chatLog.scrollTop = chatLog.scrollHeight;
+            return true;
         },
 
         openAISenseiForCurrentKanji() {
             this.openAISenseiModal('ask-sensei');
-            if (this.currentKanji) {
-                this.askAISensei(
-                    `Explain the radicals and visual mnemonic for "${this.currentKanji.character}"`
-                );
-            }
+            document.getElementById('aiSenseiInput')?.focus();
         },
         // ==========================================
         // KANJI MNEMONIC & ETYMOLOGY DRAWER
@@ -331,7 +607,7 @@ const AISenseiModule = {
                 return;
             }
             const settings = StorageManager.getAISettings();
-            if (!settings.apiKey && settings.provider !== 'ollama') {
+            if (!AIManager.isProviderConfigured(settings)) {
                 contentEl.innerHTML = this._drawerNoAIMessage();
                 this._drawerMnemonicInFlight = null;
                 return;
@@ -362,7 +638,13 @@ const AISenseiModule = {
                 }
                 this._drawerMnemonicInFlight = null;
             } catch (error) {
-                contentEl.innerHTML = `<div class="kanji-drawer-content"><div class="kanji-drawer-stroke-warning"><i class="fas fa-circle-exclamation"></i><span>${this.escapeHtml(error.message)}</span></div></div>`;
+                if (AIManager.isFreeTierLimitError?.(error)) {
+                    contentEl.replaceChildren();
+                    this.renderAIQuotaNotice(contentEl, () => this.loadDrawerMnemonic());
+                } else {
+                    contentEl.textContent =
+                        error?.message || 'AI Sensei could not make a mnemonic right now.';
+                }
                 this._drawerMnemonicInFlight = null;
             }
         },
@@ -384,8 +666,9 @@ const AISenseiModule = {
                 return;
             }
             const settings = StorageManager.getAISettings();
-            if (!settings.apiKey && settings.provider !== 'ollama') {
+            if (!AIManager.isProviderConfigured(settings)) {
                 contentEl.innerHTML = this._drawerNoAIMessage();
+                this._drawerEtymologyInFlight = null;
                 return;
             }
             const cacheKey = `etymology_${this.currentKanji.character}`;
@@ -413,7 +696,13 @@ const AISenseiModule = {
                 }
                 this._drawerEtymologyInFlight = null;
             } catch (error) {
-                contentEl.innerHTML = `<div class="kanji-drawer-content"><div class="kanji-drawer-stroke-warning"><i class="fas fa-circle-exclamation"></i><span>${this.escapeHtml(error.message)}</span></div></div>`;
+                if (AIManager.isFreeTierLimitError?.(error)) {
+                    contentEl.replaceChildren();
+                    this.renderAIQuotaNotice(contentEl, () => this.loadDrawerEtymology());
+                } else {
+                    contentEl.textContent =
+                        error?.message || 'AI Sensei could not explain this kanji right now.';
+                }
                 this._drawerEtymologyInFlight = null;
             }
         },
@@ -455,7 +744,7 @@ const AISenseiModule = {
         },
 
         _drawerNoAIMessage() {
-            return '<div class="kanji-drawer-no-ai"><i class="fas fa-key"></i><p><strong>AI not configured</strong></p><p>Set up your API key in Settings to unlock AI-powered mnemonics and etymology.</p><button onclick="app.closeKanjiDrawer(); app.openSettings();">Open Settings</button></div>';
+            return '<div class="kanji-drawer-no-ai"><i class="fas fa-key"></i><p><strong>AI provider needs setup</strong></p><p>Choose Free AI Sensei or add a provider API key in Settings to use AI-powered mnemonics and etymology.</p><button onclick="app.closeKanjiDrawer(); app.openSettings();">Open AI Settings</button></div>';
         },
         /**
          * Derives the kanji stroke count from KanjiVG SVG paths.

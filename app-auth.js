@@ -26,6 +26,8 @@ class AppAuth {
         this.busy = false;
         this.message = '';
         this.app = null;
+        this.appCheck = null;
+        this.appCheckError = null;
         this.lastRefreshAt = 0;
     }
 
@@ -649,6 +651,49 @@ class AppAuth {
         return this.start();
     }
 
+    async loadAppCheckSDK() {
+        return import('https://www.gstatic.com/firebasejs/12.3.0/firebase-app-check.js');
+    }
+
+    async initializeAppCheckIfConfigured() {
+        const siteKey = window.KANJI_APP_CHECK_CONFIG?.recaptchaEnterpriseSiteKey?.trim();
+        if (!siteKey || !this.app) {
+            return null;
+        }
+
+        try {
+            if (window.KANJI_APP_CHECK_INSTANCE) {
+                this.appCheck = window.KANJI_APP_CHECK_INSTANCE;
+                return this.appCheck;
+            }
+            const appCheckSDK = await this.loadAppCheckSDK();
+            try {
+                this.appCheck = appCheckSDK.initializeAppCheck(this.app, {
+                    provider: new appCheckSDK.ReCaptchaEnterpriseProvider(siteKey),
+                    isTokenAutoRefreshEnabled: true
+                });
+            } catch (error) {
+                if (error?.code !== 'app-check/already-initialized') {
+                    throw error;
+                }
+                this.appCheck = window.KANJI_APP_CHECK_INSTANCE || null;
+                if (!this.appCheck) {
+                    throw error;
+                }
+            }
+            window.KANJI_APP_CHECK_INSTANCE = this.appCheck;
+            this.appCheckError = null;
+            return this.appCheck;
+        } catch (error) {
+            // Authentication and local learning should continue to work even if the
+            // optional AI/App Check setup is incomplete. AIManager reports that setup
+            // error only when the learner actually requests built-in AI.
+            this.appCheckError = error;
+            console.warn('Firebase App Check could not be initialized:', error);
+            return null;
+        }
+    }
+
     async start() {
         if (this.busy || this.ready) {
             return;
@@ -668,6 +713,9 @@ class AppAuth {
                 this.sdk.getApps().find((item) => item.name === 'kanji-auth') ||
                 this.sdk.initializeApp(this.config, 'kanji-auth');
             this.app = app;
+            // App Check must be initialized before Firebase services when a production
+            // site key has been configured. It remains optional until owner setup is done.
+            await this.initializeAppCheckIfConfigured();
             this.auth = this.sdk.getAuth(app);
             await this.sdk.setPersistence(this.auth, this.sdk.browserLocalPersistence);
             // Wait for restored identity before enabling account actions.
@@ -1138,5 +1186,5 @@ class AppAuth {
 window.AppAuth = AppAuth;
 window.addEventListener('DOMContentLoaded', () => {
     window.kanjiAuth = new AppAuth();
-    window.kanjiAuth.init();
+    window.kanjiAuth.readyPromise = window.kanjiAuth.init();
 });

@@ -1,4 +1,6 @@
 class StorageManager {
+    static aiSettingsDefaultMigrationCompleted = false;
+
     static keys = {
         PROGRESS: 'kanji_progress',
         RECENT: 'kanji_recent',
@@ -204,16 +206,52 @@ class StorageManager {
     // AI Settings management
     static getAISettings() {
         const defaultSettings = {
-            provider: 'gemini', // 'gemini', 'openai', 'claude', 'openrouter', 'ollama'
+            provider: 'firebase', // Built-in key-free AI; BYOK providers remain optional.
             apiKey: '',
-            model: 'gemini-3.6-flash',
+            model: 'gemini-3.8-flash',
             persona: 'encouraging', // 'encouraging', 'strict', 'mnemonic', 'anime'
+            enableFloatingAssistant: true,
             customEndpoint: 'http://localhost:11434/api/generate',
             temperature: 0.7,
             enableCache: true
         };
 
-        const settings = this.getItem(this.keys.AI_SETTINGS, defaultSettings);
+        const storedSettings = this.getItem(this.keys.AI_SETTINGS, null);
+        const storedApiKey =
+            typeof storedSettings?.apiKey === 'string' ? storedSettings.apiKey.trim() : '';
+        const shouldMigrateUnconfiguredProvider = !this.aiSettingsDefaultMigrationCompleted;
+        this.aiSettingsDefaultMigrationCompleted = true;
+        const settings = {
+            ...defaultSettings,
+            ...(storedSettings && typeof storedSettings === 'object' ? storedSettings : {})
+        };
+
+        // On the first read after page load, move a saved key-required provider with no
+        // key back to the built-in default. Run this migration only once per page session:
+        // after that, a learner can select a BYOK provider and enter its key without this
+        // getter switching the UI back to Firebase between form changes.
+        const keyRequiredProviders = ['gemini', 'openai', 'claude', 'openrouter'];
+        if (
+            shouldMigrateUnconfiguredProvider &&
+            keyRequiredProviders.includes(storedSettings?.provider) &&
+            !storedApiKey
+        ) {
+            settings.provider = 'firebase';
+            settings.apiKey = '';
+            settings.model = defaultSettings.model;
+            this.saveAISettings(settings);
+        } else if (!storedSettings?.provider && storedApiKey) {
+            // Preserve older key-only settings by keeping the key attached to Gemini.
+            settings.provider = 'gemini';
+        }
+
+        // The built-in provider has one app-selected model; never trust a stale or edited
+        // local model value for this provider.
+        if (settings.provider === 'firebase' && settings.model !== defaultSettings.model) {
+            settings.model = defaultSettings.model;
+            this.saveAISettings(settings);
+        }
+
         // Migrate obsolete Gemini models saved by older versions.
         if (
             settings.provider === 'gemini' &&
@@ -223,10 +261,7 @@ class StorageManager {
             this.saveAISettings(settings);
         }
 
-        return {
-            ...defaultSettings,
-            ...settings
-        };
+        return settings;
     }
 
     static saveAISettings(settings) {
