@@ -67,14 +67,17 @@
     box-sizing: border-box;
 }
 
+/* --accent-text is the accent colour used for text (links, small headings) that
+   sits directly on a surface. Themes whose accent is too light for text (candy,
+   sunrise, yotsuba) override it with a darker tone so contrast stays >= 4.5:1. */
 a,
 a:visited {
-    color: var(--primary-color);
+    color: var(--accent-text, var(--primary-color));
 }
 
 a:hover,
 a:focus-visible {
-    color: var(--primary-variant);
+    color: var(--accent-text-strong, var(--primary-variant));
 }
 
 body {
@@ -202,10 +205,12 @@ body {
     padding: 1rem 1.25rem;
     border: 1px solid rgba(var(--primary-color-rgb), 0.15);
     border-radius: 16px;
-    /* iOS Translucent Light Background Blur */
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    /* Opaque themed surface with a faint tint on top. The previous translucent
+       rgba(255, 255, 255, 0.4) wash landed mid-grey on dark themes and left the
+       footer text near 3.4:1, which fails WCAG AA. Dropping backdrop-filter also
+       removes a per-frame compositing cost from every page. */
+    background-color: var(--surface);
+    background-image: linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06));
     color: var(--on-surface);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
 }
@@ -217,7 +222,8 @@ body {
 .footer-jp {
     font-size: 0.95rem;
     margin-top: 0.2rem;
-    opacity: 0.75;
+    /* Full contrast: the old opacity: 0.75 faded this line below 4.5:1 on dark themes. */
+    color: var(--on-surface);
 }
 
 .footer-actions {
@@ -254,7 +260,7 @@ body {
     border-radius: 999px !important;
     padding: 0.6rem 1rem !important;
     font-size: 0.95rem !important;
-    color: var(--primary-color) !important;
+    color: var(--accent-text, var(--primary-color)) !important;
     background-color: rgba(var(--primary-color-rgb), 0.12) !important;
     transition:
         transform 0.2s ease,
@@ -268,10 +274,12 @@ body {
 }
 
 [data-theme='dark'] .footer-content {
-    /* iOS Translucent Dark Background Blur */
-    background: rgba(30, 30, 30, 0.55) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    /* Same opaque surface rule as the light default: contrast stays measurable. */
+    background-color: var(--surface) !important;
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.06),
+        rgba(255, 255, 255, 0.06)
+    ) !important;
     box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.3) !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
@@ -411,9 +419,9 @@ body {
     text-align: left;
 }
 
-.kanji-examples h4 {
+.kanji-examples :is(h3, h4) {
     font-size: 1.05rem;
-    color: var(--primary-color);
+    color: var(--accent-text, var(--primary-color));
     margin-bottom: 0.5rem;
     text-align: center;
 }
@@ -2490,7 +2498,8 @@ body {
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    opacity: 0.75;
+    /* Full contrast: opacity faded these labels below 4.5:1 on dark themes. */
+    color: var(--on-surface);
 }
 
 .cloud-choice-grid p {
@@ -3692,6 +3701,9 @@ input:focus {
     --background: #f0ead6;
     --surface: #ffffff;
     --on-surface: #333;
+    /* Pale accent: darker tones for text so it stays above 4.5:1 on white. */
+    --accent-text: #4f6b15;
+    --accent-text-strong: #3b5110;
 }
 
 [data-theme='paper'] {
@@ -3706,6 +3718,9 @@ input:focus {
     --background: #fff5f7;
     --surface: #ffffff;
     --on-surface: #4a148c;
+    /* Pale accent: darker tones for text so it stays above 4.5:1 on white. */
+    --accent-text: #ad1457;
+    --accent-text-strong: #880e4f;
 }
 
 [data-theme='sunrise'] {
@@ -3713,6 +3728,9 @@ input:focus {
     --background: #fffde7;
     --surface: #ffffff;
     --on-surface: #5d4037;
+    /* Pale accent: darker tones for text so it stays above 4.5:1 on white. */
+    --accent-text: #a15200;
+    --accent-text-strong: #7a3d00;
 }
 
 /* --- Dark Themes --- */
@@ -4908,7 +4926,6 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
 .ai-lookalikes-section h4 {
     font-size: 0.9rem;
     margin: 0 0 0.6rem 0;
-    opacity: 0.85;
     display: flex;
     align-items: center;
     gap: 0.4rem;

@@ -624,6 +624,11 @@ class AppAuth {
     }
 
     init() {
+        // The bootstrap may fire this from idle time and from a click at once: binding the
+        // controls twice would open two dialogs per tap.
+        if (this.initPromise) {
+            return this.initPromise;
+        }
         document.querySelectorAll('[data-app-sign-in]').forEach((button) => {
             button.onclick = () => {
                 if (window.kanjiAuthDialog?.open) {
@@ -648,7 +653,8 @@ class AppAuth {
                 this.refreshUser();
             }
         });
-        return this.start();
+        this.initPromise = this.start();
+        return this.initPromise;
     }
 
     async loadAppCheckSDK() {
@@ -1186,5 +1192,20 @@ class AppAuth {
 window.AppAuth = AppAuth;
 window.addEventListener('DOMContentLoaded', () => {
     window.kanjiAuth = new AppAuth();
-    window.kanjiAuth.readyPromise = window.kanjiAuth.init();
+    // Local learning never needs Firebase. The auth SDK plus the reCAPTCHA bundle that App
+    // Check pulls in is ~800 KiB of third-party JavaScript, and PageSpeed measured it on the
+    // startup path: ~900 ms of main-thread work competing with the first kanji render. Start
+    // the stack once the page is idle, or the moment the learner touches an account control,
+    // whichever comes first. AI Sensei already awaits readyPromise before it needs App Check,
+    // and every other consumer reads `kanjiAuth.user`, which stays null until sign-in anyway.
+    window.kanjiAuth.readyPromise = new Promise((resolve) => {
+        const start = () => resolve(window.kanjiAuth.init());
+        const schedule = window.requestIdleCallback || ((callback) => setTimeout(callback, 1000));
+        schedule(start, { timeout: 5000 });
+        document
+            .querySelectorAll(
+                '[data-app-sign-in], [data-app-sign-out], [data-app-auth-retry], [data-cancel-deletion]'
+            )
+            .forEach((button) => button.addEventListener('pointerdown', start, { once: true }));
+    });
 });

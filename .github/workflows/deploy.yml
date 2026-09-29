@@ -25,6 +25,11 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
+            - name: Set up Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+
             - name: Create deployment directory
               run: |
                   mkdir -p deploy
@@ -62,6 +67,14 @@ jobs:
                   cp README.md deploy/
                   # Copy docs if they exist
                   if [ -d "docs" ]; then cp -r docs deploy/; fi
+
+            # Minify first-party JS/CSS in place (same filenames, so index.html and the
+            # service worker precache list need no rewriting). See tools/minify.js.
+            - name: Install dev dependencies (minifier)
+              run: npm ci --no-audit --no-fund
+
+            - name: Minify assets
+              run: node tools/minify.js deploy
 
             - name: Setup Pages
               uses: actions/configure-pages@v4

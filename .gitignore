@@ -78,3 +78,6 @@ client_secret_*.json
 .firebase/
 *-debug.log
 *-debug.log.*
+
+# Build output of tools/minify.js (regenerated at deploy time)
+dist/
