@@ -60,8 +60,44 @@ class AIManager {
         strict: 'You are Master Kenji, a disciplined and razor-sharp traditional Japanese calligraphy master. You deliver concise, pinpoint-accurate critiques, identify precise error patterns, and demand total mastery of stroke nuances.',
         mnemonic:
             'You are the Memory Magician, an expert in vivid visual mnemonics and radical etymology. You break down complex kanji into striking, hilarious, or unforgettable mental movies so students never forget them.',
-        anime: 'You are your cheerful anime senpai study partner! You use energetic and friendly language, peppered with natural Japanese conversational encouragement like よし！, 頑張って！, and すごい！.'
+        anime: 'You are your cheerful anime senpai study partner! You use energetic and friendly English, peppered with brief signature Japanese encouragements like よし！, 頑張って！, and すごい！ — but your explanations themselves always stay in English.'
     };
+
+    /**
+     * Flash-Lite class models mirror the dominant script of the prompt: kanji, readings,
+     * and "Japanese teacher" personas reliably trick them into answering fully in Japanese,
+     * which English-speaking learners cannot read. Pin every response to English while
+     * still allowing Japanese as quoted example material.
+     */
+    static RESPONSE_LANGUAGE_RULE =
+        'Respond in English only. This overrides every other language cue: even if the prompt, ' +
+        'the student question, the kanji data (readings, meanings), or your assigned persona ' +
+        'contains Japanese, every sentence, heading, explanation, and note you write must be in ' +
+        'English. Japanese may appear only as short quoted examples (kanji, kana, readings, or ' +
+        'vocabulary shown together with an English gloss) — never as the language of your own ' +
+        'sentences.';
+
+    static ENGLISH_ONLY_PROMPT_REMINDER =
+        '\n\n(Important: write your entire reply in English. Quote Japanese kanji, kana, and readings where needed, but every explanation and sentence must be English.)';
+
+    /**
+     * Combines the caller's system instruction with the mandatory English-only rule so all
+     * providers (Firebase AI Logic, Gemini, OpenAI, Claude, OpenRouter, Ollama) stay in English.
+     */
+    static withResponseLanguageRule(systemInstruction = '') {
+        const base = typeof systemInstruction === 'string' ? systemInstruction.trim() : '';
+        return base ? `${base}\n\n${this.RESPONSE_LANGUAGE_RULE}` : this.RESPONSE_LANGUAGE_RULE;
+    }
+
+    /**
+     * Appends a closing English-only reminder to the user prompt. Small models weight the
+     * end of the input heavily, so repeating the constraint here catches replies that
+     * ignore the system instruction.
+     */
+    static pinPromptLanguage(prompt = '') {
+        const base = typeof prompt === 'string' ? prompt : '';
+        return `${base}${this.ENGLISH_ONLY_PROMPT_REMINDER}`;
+    }
 
     static FREE_TIER_LIMIT_ERROR_CODE = 'ai/free-tier-quota-exceeded';
     static FIREBASE_SDK_VERSION = '12.3.0';
@@ -259,6 +295,11 @@ class AIManager {
             settings.model ||
             this.PROVIDER_DEFAULTS[provider]?.defaultModel ||
             this.PROVIDER_DEFAULTS.firebase.defaultModel;
+
+        // Pin responses to English at both ends of the request so smaller models
+        // (gemini-3.5-flash-lite) do not mirror the kanji-heavy prompts into Japanese.
+        systemInstruction = this.withResponseLanguageRule(systemInstruction);
+        prompt = this.pinPromptLanguage(prompt);
 
         if (this.PROVIDER_DEFAULTS[provider]?.requiresKey && !apiKey) {
             throw new Error(

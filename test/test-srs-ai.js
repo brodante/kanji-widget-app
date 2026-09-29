@@ -350,11 +350,24 @@ async function runTests() {
                 'Sensei answer'
             );
             assert.deepStrictEqual(request, [
-                'Question',
-                'Teacher prompt',
+                AIManager.pinPromptLanguage('Question'),
+                AIManager.withResponseLanguageRule('Teacher prompt'),
                 'gemini-3.5-flash-lite',
                 0.4
             ]);
+
+            assert.ok(
+                request[0].includes(AIManager.ENGLISH_ONLY_PROMPT_REMINDER.trim().slice(0, 40)),
+                'user prompt should carry the English-only reminder'
+            );
+            assert.ok(
+                request[1].includes('Teacher prompt'),
+                'original persona/system instruction must be preserved'
+            );
+            assert.ok(
+                request[1].includes('Respond in English only'),
+                'system instruction must carry the English-only rule'
+            );
 
             AIManager.callFirebaseAI = async () => {
                 const error = new Error('429 RESOURCE_EXHAUSTED: quota exceeded');
@@ -376,6 +389,64 @@ async function runTests() {
             );
         } finally {
             AIManager.callFirebaseAI = originalCall;
+        }
+    });
+
+    await test('AIManager pins every request to English so Flash-Lite does not reply in Japanese', async () => {
+        // Helpers are pure: persona text must survive and the rule must always be present,
+        // even when the caller passes no system instruction at all.
+        const merged = AIManager.withResponseLanguageRule('You are Master Kenji.');
+        assert.ok(merged.startsWith('You are Master Kenji.'));
+        assert.ok(merged.includes(AIManager.RESPONSE_LANGUAGE_RULE));
+
+        const ruleOnly = AIManager.withResponseLanguageRule('');
+        assert.strictEqual(ruleOnly, AIManager.RESPONSE_LANGUAGE_RULE);
+
+        const pinned = AIManager.pinPromptLanguage('Explain the kanji 木');
+        assert.ok(pinned.startsWith('Explain the kanji 木'));
+        assert.ok(pinned.includes('write your entire reply in English'));
+
+        // The anime persona previously told the model to use Japanese freely; it must now
+        // explicitly keep explanations in English so it cannot contradict the language rule.
+        assert.ok(AIManager.PERSONA_PROMPTS.anime.includes('always stay in English'));
+
+        // Every provider branch of callProvider must receive the pinned prompt + rule.
+        const captured = {};
+        const providers = {
+            gemini: 'callGemini',
+            openai: 'callOpenAI',
+            claude: 'callClaude',
+            openrouter: 'callOpenRouter',
+            ollama: 'callOllama'
+        };
+        const originals = {};
+        try {
+            for (const [provider, method] of Object.entries(providers)) {
+                originals[method] = AIManager[method];
+                AIManager[method] = async (promptArg, systemArg) => {
+                    captured[provider] = { promptArg, systemArg };
+                    return 'ok';
+                };
+                await AIManager.callProvider('Question', 'Persona', {
+                    provider,
+                    apiKey: 'test-key',
+                    model: 'test-model'
+                });
+            }
+        } finally {
+            for (const [method, fn] of Object.entries(originals)) {
+                AIManager[method] = fn;
+            }
+        }
+        for (const provider of Object.keys(providers)) {
+            assert.ok(
+                captured[provider].systemArg.includes(AIManager.RESPONSE_LANGUAGE_RULE),
+                `${provider} system instruction should include the English-only rule`
+            );
+            assert.ok(
+                captured[provider].promptArg.includes('write your entire reply in English'),
+                `${provider} prompt should include the English-only reminder`
+            );
         }
     });
 
