@@ -419,7 +419,7 @@ body {
     text-align: left;
 }
 
-.kanji-examples :is(h3, h4) {
+.kanji-examples :is(h2, h3, h4) {
     font-size: 1.05rem;
     color: var(--accent-text, var(--primary-color));
     margin-bottom: 0.5rem;

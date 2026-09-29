@@ -132,9 +132,12 @@ test('icon-only widget buttons carry an accessible name', () => {
     for (const button of buttons) {
         assert.match(button, /aria-label="[^"]+"/, `missing aria-label: ${button}`);
     }
-    // The generated "Examples" heading must not skip a level (h2 -> h4 failed axe).
+    // The widget is the first visible content after the header <h1> (the account panel,
+    // settings dialog and AI modal are all closed at load, so axe skips their headings),
+    // which makes h1 -> h2 the only jump axe's heading-order rule accepts.
     assert.equal(script.includes('<h4>Examples</h4>'), false);
-    assert.ok(script.includes('<h3>Examples</h3>'));
+    assert.equal(script.includes('<h3>Examples</h3>'), false);
+    assert.ok(script.includes('<h2>Examples</h2>'));
 });
 
 test('the footer uses an opaque surface instead of a translucent wash', () => {

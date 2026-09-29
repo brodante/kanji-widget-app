@@ -74,7 +74,17 @@ jobs:
               run: npm ci --no-audit --no-fund
 
             - name: Minify assets
-              run: node tools/minify.js deploy
+              run: |
+                  node tools/minify.js deploy
+                  # A minified file is 1-2 lines. If it is still multi-line the step above did
+                  # not work and we must not ship it silently (this has happened once already).
+                  for f in script.js styles.css kanji-data.js; do
+                      lines=$(wc -l < "deploy/$f")
+                      if [ "$lines" -gt 5 ]; then
+                          echo "::error::deploy/$f still has $lines lines - minification did not run"
+                          exit 1
+                      fi
+                  done
 
             - name: Setup Pages
               uses: actions/configure-pages@v4

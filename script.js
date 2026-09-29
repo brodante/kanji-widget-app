@@ -1539,7 +1539,7 @@ class KanjiLearningApp {
                     this.currentKanji.examples && this.currentKanji.examples.length > 0
                         ? `
                     <div class="kanji-examples">
-                        <h3>Examples</h3>
+                        <h2>Examples</h2>
                         ${this.currentKanji.examples
                             .slice(0, 3)
                             .map(
