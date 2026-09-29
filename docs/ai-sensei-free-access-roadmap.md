@@ -1,6 +1,6 @@
 # AI Sensei: free access and rate-limit fallback
 
-**Status:** Client implementation and automated checks complete; the owner has confirmed a localhost live AI smoke test and reports the Web app is registered in App Check. The built-in Firebase model was changed to Gemini 3.5 Flash-Lite in this branch; production-origin validation and performance comparison remain pending.
+**Status:** Client implementation and automated checks complete; the owner has confirmed the AI works and feels faster after the Gemini 3.5 Flash-Lite change, with no issues noticed so far. The test environment and before/after measurements were not specified, so a controlled performance comparison and production-origin validation status remain unconfirmed.
 **Last reviewed:** 2026-09-30
 
 This document tracks the no-key default, the free-tier quota response, and the production steps needed to enable the built-in service. The approved scope is deliberately no-backend: keep the project on Firebase Spark, do not link Cloud Billing, and do not add Cloud Functions, Cloud Run, a trial, or a paywall.
@@ -42,7 +42,7 @@ The app responds to actual built-in-provider rate/quota errors. A 429 may mean a
 - **Reason:** Firebase AI Logic monitoring for Sep 28–29 showed 32 requests, 40.6% success, 45.9s p95 latency, 1.2K input tokens, 3.2K output tokens, and 7.6K thinking tokens. The aggregate dashboard suggested high latency and substantial thinking-token use, but did not expose the individual failure reasons. This is a controlled model-only change intended to test a high-volume Flash-Lite model; it does not add an explicit thinking-level override, new provider, backend, paid service, or billing requirement.
 - **Existing learners:** On the next AI-settings read, a saved Firebase model other than the fixed default is replaced with `gemini-3.5-flash-lite`. BYOK provider/model/key settings are left untouched. Existing AI response caches are preserved.
 - **Assets:** `ai-manager.js` now uses the query version `ai-model-lite-v1`; the service-worker cache was bumped from `kanji-widgets-v31` to `kanji-widgets-v32` so installed clients pick up the model-selection change.
-- **Validation status:** Automated tests cover the new default, migration from the former Firebase model, Firebase dispatch, settings behavior, and asset cache versions. They do not contact Firebase. No live model request or production deployment has been made from this branch; compare Firebase AI Logic monitoring after an authorized deployment before concluding whether latency/success improved.
+- **Validation status:** Automated tests cover the new default, migration from the former Firebase model, Firebase dispatch, settings behavior, and asset cache versions. They do not contact Firebase. On 2026-09-30, the owner reported that the AI works, feels faster than before, and has shown no issues in their test. This is a qualitative owner report; the environment, model shown in monitoring, and numerical before/after measurements were not provided. The agent did not make a live model request or deploy the branch. Compare Firebase AI Logic monitoring when available before making a quantified latency/success claim.
 
 ### Rollback to the prior built-in model
 
