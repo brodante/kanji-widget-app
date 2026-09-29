@@ -210,6 +210,7 @@ class StorageManager {
             apiKey: '',
             model: 'gemini-3.8-flash',
             persona: 'encouraging', // 'encouraging', 'strict', 'mnemonic', 'anime'
+            enableFloatingAssistant: true,
             customEndpoint: 'http://localhost:11434/api/generate',
             temperature: 0.7,
             enableCache: true

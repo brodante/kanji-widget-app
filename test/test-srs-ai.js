@@ -58,6 +58,14 @@ async function runTests() {
         assert.strictEqual(settings.provider, 'firebase');
         assert.strictEqual(settings.model, 'gemini-3.8-flash');
         assert.strictEqual(settings.persona, 'encouraging');
+        assert.strictEqual(settings.enableFloatingAssistant, true);
+    });
+
+    await test('StorageManager persists the floating AI assistant visibility preference', () => {
+        StorageManager.updateAISetting('enableFloatingAssistant', false);
+        assert.strictEqual(StorageManager.getAISettings().enableFloatingAssistant, false);
+        StorageManager.updateAISetting('enableFloatingAssistant', true);
+        assert.strictEqual(StorageManager.getAISettings().enableFloatingAssistant, true);
     });
 
     await test('StorageManager migrates unconfigured key providers but preserves BYOK settings', () => {

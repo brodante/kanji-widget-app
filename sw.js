@@ -1,12 +1,12 @@
-const CACHE_NAME = 'kanji-widgets-v29';
+const CACHE_NAME = 'kanji-widgets-v30';
 const urlsToCache = [
     '/',
     '/index.html',
     '/analytics.js?v=analytics-v1',
     '/styles.css',
-    '/styles.css?v=ai-free-v3',
+    '/styles.css?v=ai-floating-v1',
     '/script.js',
-    '/script.js?v=ai-free-v3',
+    '/script.js?v=ai-floating-v1',
     '/drawing-pad.js',
     '/drawing-pad.js?v=practice-merge-v1',
     '/backup-config.js',

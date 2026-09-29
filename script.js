@@ -608,6 +608,13 @@ class KanjiLearningApp {
         });
 
         // AI Settings UI events
+        const aiFloatingAssistantToggle = document.getElementById('aiFloatingAssistantEnabled');
+        if (aiFloatingAssistantToggle) {
+            aiFloatingAssistantToggle.addEventListener('change', () => {
+                this.setFloatingAISenseiEnabled(aiFloatingAssistantToggle.checked);
+            });
+        }
+
         const aiProvider = document.getElementById('aiProvider');
         if (aiProvider) {
             aiProvider.addEventListener('change', (e) => {
@@ -1080,6 +1087,9 @@ class KanjiLearningApp {
         };
         const scheduleIdleState = () => {
             clearIdleTimer();
+            if (fab.hidden) {
+                return;
+            }
             idleTimer = window.setTimeout(() => {
                 idleTimer = null;
                 const modal = document.getElementById('aiSenseiModal');
@@ -1099,6 +1109,32 @@ class KanjiLearningApp {
             scheduleIdleState();
         };
         this.resetAISenseiFabIdleTimer = wakeFab;
+        this.setAISenseiFabEnabled = (enabled) => {
+            clearIdleTimer();
+            if (!enabled) {
+                fab.classList.remove('is-idle', 'dragging');
+                fab.hidden = true;
+                return;
+            }
+
+            const wasHidden = fab.hidden;
+            fab.hidden = false;
+            if (wasHidden) {
+                const enabledStyle = getComputedStyle(fab);
+                baseLeft = parseFloat(enabledStyle.left) || 26;
+                baseTop = parseFloat(enabledStyle.top) || 26;
+                pos = clampXY(pos.x, pos.y);
+                pos = { x: computeSnapX(pos.x), y: pos.y };
+                fab.dataset.dockEdge = getDockEdge(pos.x);
+                fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
+                } catch (err) {
+                    /* ignore */
+                }
+            }
+            wakeFab();
+        };
 
         fab.addEventListener('mouseenter', () => {
             clearIdleTimer();
@@ -1199,6 +1235,9 @@ class KanjiLearningApp {
             const resizedStyle = getComputedStyle(fab);
             baseLeft = parseFloat(resizedStyle.left) || 26;
             baseTop = parseFloat(resizedStyle.top) || 26;
+            if (fab.hidden) {
+                return;
+            }
             pos = { x: computeSnapX(pos.x), y: clampY(pos.y) };
             fab.dataset.dockEdge = getDockEdge(pos.x);
             fab.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
@@ -1209,7 +1248,14 @@ class KanjiLearningApp {
                 /* ignore */
             }
         });
-        scheduleIdleState();
+
+        let isEnabled = true;
+        try {
+            isEnabled = StorageManager.getAISettings().enableFloatingAssistant !== false;
+        } catch (err) {
+            /* Keep the assistant visible if settings are temporarily unavailable. */
+        }
+        this.setAISenseiFabEnabled(isEnabled);
     }
 
     updateLevelIcon() {
@@ -2607,6 +2653,12 @@ class KanjiLearningApp {
     // onclick attributes for it - the pad must have exactly one wiring per
     // control, or every tap toggles twice and cancels itself out.
 
+    setFloatingAISenseiEnabled(enabled) {
+        const shouldShow = Boolean(enabled);
+        StorageManager.updateAISetting('enableFloatingAssistant', shouldShow);
+        this.setAISenseiFabEnabled?.(shouldShow);
+    }
+
     syncAISettingsUI() {
         if (!window.StorageManager || !window.AIManager?.PROVIDER_DEFAULTS) {
             return;
@@ -2627,6 +2679,12 @@ class KanjiLearningApp {
         const modelGroup = document.getElementById('aiModelGroup');
         const fixedModelNote = document.getElementById('aiFixedModelNote');
         const keyLinkEl = document.getElementById('aiProviderKeyLink');
+        const floatingAssistantToggle = document.getElementById('aiFloatingAssistantEnabled');
+
+        if (floatingAssistantToggle) {
+            floatingAssistantToggle.checked = aiSettings.enableFloatingAssistant !== false;
+            this.setAISenseiFabEnabled?.(floatingAssistantToggle.checked);
+        }
 
         if (keyLinkEl) {
             if (providerInfo.keyUrl) {

@@ -65,7 +65,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css?v=ai-free-v3" />
+        <link rel="stylesheet" href="styles.css?v=ai-floating-v1" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -690,6 +690,21 @@
                             Bring-your-own-key providers are optional; their own limits or charges
                             may apply.
                         </p>
+                        <div class="setting-group setting-row">
+                            <label for="aiFloatingAssistantEnabled"
+                                >Show floating AI Sensei button</label
+                            >
+                            <input
+                                type="checkbox"
+                                id="aiFloatingAssistantEnabled"
+                                aria-describedby="aiFloatingAssistantHelp"
+                                checked
+                            />
+                        </div>
+                        <small id="aiFloatingAssistantHelp" class="setting-help-text">
+                            Turn this off to hide the draggable shortcut. AI Sensei remains
+                            available from other in-app entry points.
+                        </small>
                         <div class="setting-group">
                             <label for="aiProvider">AI Provider:</label>
                             <select id="aiProvider">
@@ -2714,6 +2729,6 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="username-directory.js?v=login-v1"></script>
         <script src="auth-dialog.js?v=login-v1"></script>
         <script src="cloud-sync.js?v=practice-merge-v1"></script>
-        <script src="script.js?v=ai-free-v3"></script>
+        <script src="script.js?v=ai-floating-v1"></script>
     </body>
 </html>

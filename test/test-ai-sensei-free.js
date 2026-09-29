@@ -101,8 +101,14 @@ test('Settings default to keyless Firebase AI and keep existing BYOK models visi
         window.eval(
             `${script}\nwindow.__syncAISettingsUI = KanjiLearningApp.prototype.syncAISettingsUI;`
         );
-        window.__syncAISettingsUI.call({});
+        const appliedVisibility = [];
+        const settingsApp = {
+            setAISenseiFabEnabled: (enabled) => appliedVisibility.push(enabled)
+        };
+        window.__syncAISettingsUI.call(settingsApp);
         const doc = window.document;
+        assert.equal(doc.getElementById('aiFloatingAssistantEnabled').checked, true);
+        assert.deepEqual(appliedVisibility, [true]);
         assert.equal(doc.getElementById('aiProvider').value, 'gemini');
         assert.equal(doc.getElementById('aiApiKeyGroup').style.display, 'block');
         assert.equal(doc.getElementById('aiApiKey').value, 'learner-key');
@@ -112,15 +118,56 @@ test('Settings default to keyless Firebase AI and keep existing BYOK models visi
             provider: 'firebase',
             apiKey: '',
             model: 'gemini-3.8-flash',
-            persona: 'encouraging'
+            persona: 'encouraging',
+            enableFloatingAssistant: false
         };
-        window.__syncAISettingsUI.call({});
+        window.__syncAISettingsUI.call(settingsApp);
+        assert.equal(doc.getElementById('aiFloatingAssistantEnabled').checked, false);
+        assert.deepEqual(appliedVisibility, [true, false]);
         assert.equal(doc.getElementById('aiProvider').value, 'firebase');
         assert.equal(doc.getElementById('aiApiKeyGroup').style.display, 'none');
         assert.equal(doc.getElementById('aiModelGroup').style.display, 'none');
         assert.equal(doc.getElementById('aiFixedModelNote').hidden, false);
         assert.equal(doc.getElementById('aiModel').disabled, true);
         assert.equal(doc.getElementById('aiModel').value, 'gemini-3.8-flash');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('Floating AI button preference persists without changing AI provider settings', async () => {
+    const { dom, window } = await setup();
+    let settings = {
+        provider: 'firebase',
+        apiKey: '',
+        enableFloatingAssistant: true
+    };
+    const visibilityUpdates = [];
+    window.StorageManager = {
+        getAISettings: () => settings,
+        updateAISetting: (key, value) => {
+            settings = { ...settings, [key]: value };
+        }
+    };
+
+    try {
+        const script = fs.readFileSync(require.resolve('../script.js'), 'utf8');
+        window.eval(
+            `${script}\nwindow.__setFloatingAISenseiEnabled = KanjiLearningApp.prototype.setFloatingAISenseiEnabled;`
+        );
+        const app = {
+            setAISenseiFabEnabled: (enabled) => visibilityUpdates.push(enabled)
+        };
+        window.__setFloatingAISenseiEnabled.call(app, false);
+        assert.equal(settings.enableFloatingAssistant, false);
+        assert.equal(settings.provider, 'firebase');
+        assert.equal(settings.apiKey, '');
+        assert.deepEqual(visibilityUpdates, [false]);
+        assert.ok(window.document.getElementById('aiSenseiModal'));
+
+        window.__setFloatingAISenseiEnabled.call(app, true);
+        assert.equal(settings.enableFloatingAssistant, true);
+        assert.deepEqual(visibilityUpdates, [false, true]);
     } finally {
         dom.window.close();
     }

@@ -4490,6 +4490,10 @@ input:focus {
     will-change: transform, translate;
 }
 
+.ai-sensei-fab[hidden] {
+    display: none !important;
+}
+
 .ai-sensei-fab::before {
     position: absolute;
     inset: 4px;
@@ -4529,12 +4533,12 @@ input:focus {
 }
 
 .ai-sensei-fab.is-idle[data-dock-edge='left'] {
-    translate: -38% 0;
+    translate: calc(-55% - 8px) 0;
     opacity: 0.7;
 }
 
 .ai-sensei-fab.is-idle[data-dock-edge='right'] {
-    translate: 38% 0;
+    translate: calc(55% + 8px) 0;
     opacity: 0.7;
 }
 
@@ -5332,6 +5336,24 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* Supporting text for the AI provider and floating-assistant settings */
+.ai-default-provider-note,
+#aiFloatingAssistantHelp {
+    color: var(--on-surface);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    opacity: 0.8;
+}
+
+.ai-default-provider-note {
+    margin: 0 0 0.9rem;
+}
+
+#aiFloatingAssistantHelp {
+    display: block;
+    margin: -1rem 0 1.25rem;
 }
 
 /* Settings AI Key Box */

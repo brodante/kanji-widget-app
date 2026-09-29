@@ -22,10 +22,10 @@ This document tracks the no-key default, the free-tier quota response, and the p
 - Only rate/quota errors from the built-in provider receive the `ai/free-tier-quota-exceeded` code. Setup, App Check, network, model, and ordinary provider errors remain distinct.
 - Ask Sensei, diagnostics, and kanji-drawer mnemonic/etymology flows show the quota choices. Diagnostics retain the local fallback. Chat and connection-test errors are rendered as text rather than interpolated HTML.
 - Opening Ask Sensei from a kanji card now opens the Ask tab and focuses the composer without submitting a default prompt. Only a learner's explicit message or selected quick-prompt button makes a chat request; the current kanji is shown as context and accompanies a message they choose to send.
-- The floating AI Sensei control is now an icon-only circular, draggable assistive button. After five seconds without interaction it docks partway off the nearest screen edge; hover, focus, drag, or touch wakes it.
+- The floating AI Sensei control is an icon-only circular, draggable assistive button. AI Settings includes a default-on, persisted “Show floating AI Sensei button” toggle; turning it off hides only this shortcut and leaves other AI Sensei entry points enabled. After five seconds without interaction, the button docks with about 55% of its width off the nearest screen edge; hover and keyboard focus restore the full button, and drag/touch wakes it.
 - Free Firebase chat applies a five-second per-tab pacing cooldown after each chat attempt (success or failure). A rate-limit response starts an escalating backoff (5, 10, 20 seconds, up to two minutes); the composer, send button, quick prompts, and chat retry are locked while a countdown is shown. BYOK is not subject to this app-side cooldown.
 - Settings explain the key-free provider, optional BYOK risks, and that credentials stay in local storage and go directly to the selected provider. The AI modal discloses that relevant questions/kanji/study details are sent to the selected provider and that Google's free-tier prompts may be used to improve its products.
-- AI modal, main script, and stylesheet assets use `ai-free-v3`; the unchanged Firebase config remains `ai-free-v2`. The service-worker cache is `kanji-widgets-v29`.
+- The AI modal remains `ai-free-v3`; the main script and stylesheet use `ai-floating-v1` for the floating-shortcut settings and dock behavior. The unchanged Firebase config remains `ai-free-v2`. The service-worker cache is `kanji-widgets-v30`.
 
 ## How the shared quota works
 
@@ -120,6 +120,7 @@ Automated tests mock the SDK; they do not contact Firebase or a model. Before de
 - [x] Implement the key-free Firebase provider, BYOK-preserving settings migration, Settings guidance, and provider privacy notice.
 - [x] Add quota-specific choices across Ask Sensei, diagnostics, and drawer mnemonic/etymology flows; keep non-quota errors distinct and safe.
 - [x] Pace Free Firebase chat with an accessible five-second cooldown and escalating 429 backoff; leave BYOK chat unthrottled.
+- [x] Add the persisted, default-on floating AI Sensei visibility toggle without disabling other AI entry points; dock the shortcut about 55% offscreen while idle and restore it on hover/focus.
 - [x] Add App Check initialization before Auth when the owner configures the public site key, with tests for success, ordering, and failure isolation.
 - [x] Add/update mocked tests for storage defaults/migration, BYOK preservation, key-free dispatch, quota classification, UI choices, asset cache/deploy versions, and existing regressions.
 - [x] Owner supplied the public reCAPTCHA Enterprise site key; it is configured in the browser config (no debug token or debug flag is committed).
@@ -133,7 +134,7 @@ Automated tests mock the SDK; they do not contact Firebase or a model. Before de
 Verification run after the last code change:
 
 - `npm ci` — succeeded; 338 packages installed and zero vulnerabilities reported.
-- `npm test` — passed; 226 tests, 0 failures.
+- `npm test` — passed; 22 SRS/AI checks, 227 Node test cases, and 64 drawing-pad checks (0 failures).
 - `npm run lint` — passed.
 - `npm run format:check` — passed.
 - `git diff --check` — passed.
