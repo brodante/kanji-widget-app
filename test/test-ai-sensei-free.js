@@ -157,6 +157,16 @@ test('free-tier quota in Ask Sensei offers BYOK and a privacy-safe developer con
         assert.match(notice.textContent, /free AI Sensei limit/i);
         assert.match(notice.textContent, /provider may have its own limits or charges/i);
 
+        assert.equal(window.document.getElementById('aiSenseiInput').disabled, true);
+        assert.match(
+            window.document.getElementById('aiSenseiCooldownStatus').textContent,
+            /rate-limit cooldown active.*in [1-5] seconds/i
+        );
+        const chatRetry = notice.querySelector('.ai-chat-quota-retry');
+        assert.ok(chatRetry);
+        assert.equal(chatRetry.disabled, true);
+        assert.match(chatRetry.textContent, /^Retry in [1-5]s$/);
+
         const contact = notice.querySelector('a[href^="mailto:"]');
         assert.ok(contact);
         assert.match(contact.href, /^mailto:spsc\.mizu@gmail\.com\?subject=/);
@@ -178,13 +188,134 @@ test('free-tier quota in Ask Sensei offers BYOK and a privacy-safe developer con
         );
 
         configuredOwnKey = true;
-        const retryButton = chatLog.querySelector('.ai-limit-notice__actions button:nth-child(2)');
+        const retryButton = chatLog.querySelector('.ai-chat-quota-retry');
+        app._aiSenseiCooldownUntil = Date.now() - 1;
+        app.updateAISenseiChatControls();
+        assert.equal(retryButton.disabled, false);
+        assert.equal(retryButton.textContent, 'Retry this question');
         retryButton.click();
         await new Promise((resolve) => setImmediate(resolve));
         assert.equal(requests, 2);
         assert.match(chatLog.textContent, /日 can mean sun or day/);
         assert.equal(chatLog.querySelector('.ai-limit-notice'), null);
     } finally {
+        dom.window.close();
+    }
+});
+
+test('Free Firebase chat applies a visible five-second message cooldown', async () => {
+    const { dom, window, app } = await setup();
+    window.StorageManager = { getAISettings: () => ({ provider: 'firebase' }) };
+    let requests = 0;
+    window.AIManager = {
+        askSenseiQuestion: async () => `Reply ${++requests}`
+    };
+
+    try {
+        const input = window.document.getElementById('aiSenseiInput');
+        const sendButton = window.document.getElementById('aiSenseiSendBtn');
+        const status = window.document.getElementById('aiSenseiCooldownStatus');
+        const quickPrompts = [...window.document.querySelectorAll('.ai-quick-prompt')];
+        await app.askAISensei('What does 日 mean?');
+
+        assert.equal(requests, 1);
+        assert.equal(input.disabled, true);
+        assert.equal(sendButton.disabled, true);
+        assert.ok(quickPrompts.every((button) => button.disabled));
+        assert.match(status.textContent, /message cooldown enabled/i);
+        assert.match(status.textContent, /send again in [1-5] seconds/i);
+        assert.equal(status.hidden, false);
+        assert.match(input.placeholder, /Free AI cooldown — send in [1-5] seconds/);
+
+        const userMessageCount = window.document.querySelectorAll('#aiChatLog .ai-msg-user').length;
+        await app.askAISensei('Do not send during cooldown');
+        assert.equal(requests, 1);
+        assert.equal(
+            window.document.querySelectorAll('#aiChatLog .ai-msg-user').length,
+            userMessageCount
+        );
+
+        app._aiSenseiCooldownUntil = Date.now() + 2000;
+        app.updateAISenseiChatControls();
+        assert.match(status.textContent, /send again in 2 seconds/i);
+        assert.match(input.placeholder, /send in 2 seconds/);
+
+        app._aiSenseiCooldownUntil = Date.now() - 1;
+        app.updateAISenseiChatControls();
+        assert.equal(input.disabled, false);
+        assert.equal(sendButton.disabled, false);
+        assert.ok(quickPrompts.every((button) => button.disabled === false));
+        assert.equal(status.hidden, true);
+        assert.equal(
+            input.placeholder,
+            'Ask Sensei a question (e.g., How do I remember 待 vs 持?)...'
+        );
+
+        await app.askAISensei('A second question after the cooldown');
+        assert.equal(requests, 2);
+    } finally {
+        if (app._aiSenseiCooldownTimer !== null && app._aiSenseiCooldownTimer !== undefined) {
+            window.clearInterval(app._aiSenseiCooldownTimer);
+        }
+        dom.window.close();
+    }
+});
+
+test('repeated free-tier limits extend the cooldown while BYOK remains usable', async () => {
+    const { dom, window, app } = await setup();
+    let provider = 'firebase';
+    let requests = 0;
+    window.StorageManager = { getAISettings: () => ({ provider }) };
+    window.AIManager = {
+        isFreeTierLimitError: (error) => error?.code === 'ai/free-tier-quota-exceeded',
+        askSenseiQuestion: async () => {
+            requests++;
+            if (requests < 3) {
+                const error = new Error('shared quota');
+                error.code = 'ai/free-tier-quota-exceeded';
+                throw error;
+            }
+            return 'BYOK reply';
+        }
+    };
+
+    try {
+        const input = window.document.getElementById('aiSenseiInput');
+        const status = window.document.getElementById('aiSenseiCooldownStatus');
+        const chatLog = window.document.getElementById('aiChatLog');
+        await app.askAISensei('First try');
+        assert.equal(app._aiSenseiRateLimitStreak, 1);
+        assert.match(status.textContent, /rate-limit cooldown active.*in [1-5] seconds/i);
+
+        app._aiSenseiCooldownUntil = Date.now() - 1;
+        app.updateAISenseiChatControls();
+        let retryButton = chatLog.querySelector('.ai-chat-quota-retry');
+        assert.equal(retryButton.disabled, false);
+        retryButton.click();
+        await new Promise((resolve) => setImmediate(resolve));
+
+        assert.equal(requests, 2);
+        assert.equal(app._aiSenseiRateLimitStreak, 2);
+        assert.match(status.textContent, /rate-limit cooldown active.*in (9|10) seconds/i);
+        assert.equal(input.disabled, true);
+
+        provider = 'openai';
+        app.updateAISenseiChatControls();
+        assert.equal(input.disabled, false);
+        assert.equal(status.hidden, true);
+        retryButton = chatLog.querySelector('.ai-chat-quota-retry');
+        assert.equal(retryButton.disabled, false);
+        retryButton.click();
+        await new Promise((resolve) => setImmediate(resolve));
+
+        assert.equal(requests, 3);
+        assert.match(chatLog.textContent, /BYOK reply/);
+        assert.equal(input.disabled, false);
+        assert.equal(status.hidden, true);
+    } finally {
+        if (app._aiSenseiCooldownTimer !== null && app._aiSenseiCooldownTimer !== undefined) {
+            window.clearInterval(app._aiSenseiCooldownTimer);
+        }
         dom.window.close();
     }
 });

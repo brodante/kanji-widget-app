@@ -579,7 +579,7 @@ class KanjiLearningApp {
         if (aiSenseiSendBtn && aiSenseiInput) {
             aiSenseiSendBtn.addEventListener('click', () => {
                 const text = aiSenseiInput.value.trim();
-                if (text) {
+                if (text && !this.isAISenseiChatLocked?.()) {
                     this.askAISensei(text);
                     aiSenseiInput.value = '';
                 }
@@ -589,7 +589,7 @@ class KanjiLearningApp {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     const text = aiSenseiInput.value.trim();
-                    if (text) {
+                    if (text && !this.isAISenseiChatLocked?.()) {
                         this.askAISensei(text);
                         aiSenseiInput.value = '';
                     }
@@ -622,6 +622,7 @@ class KanjiLearningApp {
                     StorageManager.updateAISetting('model', providerInfo.defaultModel);
                 }
                 this.syncAISettingsUI();
+                this.updateAISenseiChatControls?.();
             });
         }
 

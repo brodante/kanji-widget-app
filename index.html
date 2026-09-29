@@ -65,7 +65,7 @@
         />
 
         <!-- App Resources -->
-        <link rel="stylesheet" href="styles.css?v=ai-free-v2" />
+        <link rel="stylesheet" href="styles.css?v=ai-free-v3" />
         <link rel="manifest" href="manifest.json" />
 
         <!-- PWA & Mobile Settings -->
@@ -1691,10 +1691,28 @@ filter: blur(10px) brightness(1) saturate(1);
                                     placeholder="Ask Sensei a question (e.g., How do I remember 待 vs 持?)..."
                                     autocomplete="off"
                                 />
-                                <button type="button" id="aiSenseiSendBtn" class="ai-send-btn">
-                                    <i class="fas fa-paper-plane"></i>
+                                <button
+                                    type="button"
+                                    id="aiSenseiSendBtn"
+                                    class="ai-send-btn"
+                                    aria-label="Send message to AI Sensei"
+                                >
+                                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
                                 </button>
                             </div>
+                            <p
+                                id="aiSenseiCooldownStatus"
+                                class="ai-chat-cooldown-status"
+                                aria-hidden="true"
+                                hidden
+                            ></p>
+                            <span
+                                id="aiSenseiCooldownAnnouncement"
+                                class="ai-visually-hidden"
+                                role="status"
+                                aria-live="polite"
+                                aria-atomic="true"
+                            ></span>
                         </div>
                     </div>
                 </div>
@@ -2681,7 +2699,7 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="storage-manager.js"></script>
         <script src="srs-engine.js"></script>
         <script src="ai-manager.js?v=ai-free-v1"></script>
-        <script src="ai-tutor-modal.js?v=ai-free-v2"></script>
+        <script src="ai-tutor-modal.js?v=ai-free-v3"></script>
         <script src="audio-manager.js"></script>
         <script src="kanji-data.js"></script>
         <script src="drawing-pad.js?v=practice-merge-v1"></script>
@@ -2696,6 +2714,6 @@ filter: blur(10px) brightness(1) saturate(1);
         <script src="username-directory.js?v=login-v1"></script>
         <script src="auth-dialog.js?v=login-v1"></script>
         <script src="cloud-sync.js?v=practice-merge-v1"></script>
-        <script src="script.js?v=ai-free-v2"></script>
+        <script src="script.js?v=ai-free-v3"></script>
     </body>
 </html>

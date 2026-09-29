@@ -4738,6 +4738,14 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     color: var(--primary-color);
 }
 
+.ai-limit-notice__actions button:disabled,
+.ai-limit-notice__actions button:disabled:hover {
+    border-color: rgba(150, 150, 150, 0.35);
+    color: var(--on-surface);
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .ai-limit-notice__email {
     display: inline-block;
     margin-top: 0.4rem;
@@ -5034,6 +5042,11 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
     color: var(--primary-color);
 }
 
+.ai-quick-prompt:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .ai-trap-chars {
     display: flex;
     align-items: center;
@@ -5277,6 +5290,48 @@ body:has(#aiSenseiModal.show) .ai-sensei-fab {
 
 .ai-send-btn:hover {
     transform: scale(1.05);
+}
+
+.ai-chat-input-bar input:disabled {
+    cursor: not-allowed;
+    opacity: 0.68;
+}
+
+.ai-send-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+
+.ai-chat-cooldown-status {
+    margin: 0.45rem 0.1rem 0;
+    color: var(--on-surface);
+    font-size: 0.76rem;
+    line-height: 1.4;
+    opacity: 0.78;
+}
+
+.ai-chat-cooldown-status[hidden] {
+    display: none;
+}
+
+.ai-chat-cooldown-status.is-rate-limited {
+    padding-left: 0.55rem;
+    border-left: 2px solid var(--warning-color, #d6a42f);
+    font-weight: 600;
+    opacity: 1;
+}
+
+.ai-visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 /* Settings AI Key Box */

@@ -11,6 +11,9 @@
  * so they share the same `this` context as the rest of the app.
  */
 
+const FREE_AI_CHAT_COOLDOWN_MS = 5000;
+const MAX_FREE_AI_RATE_LIMIT_COOLDOWN_MS = 120000;
+
 const AISenseiModule = {
     /** Call once after KanjiApp is constructed to graft all AI-Sensei methods onto it. */
     applyTo(app) {
@@ -30,6 +33,7 @@ const AISenseiModule = {
             this.resetAISenseiFabIdleTimer?.();
             modal.classList.add('show');
             this.switchAISenseiTab(initialTab);
+            this.updateAISenseiChatControls();
             this.updateAISenseiTelemetry();
             this.updatePersonaTag();
         },
@@ -62,6 +66,7 @@ const AISenseiModule = {
                 this.renderAIPriorityStudyPlan();
             } else if (tabName === 'ask-sensei') {
                 this.updateAISenseiKanjiContext();
+                this.updateAISenseiChatControls();
             }
         },
 
@@ -297,10 +302,155 @@ const AISenseiModule = {
             document.getElementById('aiProvider')?.focus?.({ preventScroll: true });
         },
 
+        isAISenseiUsingFreeProvider() {
+            try {
+                const storageManager =
+                    typeof StorageManager !== 'undefined' ? StorageManager : window.StorageManager;
+                const provider = storageManager?.getAISettings?.()?.provider;
+                return !provider || provider === 'firebase';
+            } catch {
+                return true;
+            }
+        },
+
+        isAISenseiChatLocked() {
+            const cooldownUntil = Number(this._aiSenseiCooldownUntil || 0);
+            const coolingDown = this.isAISenseiUsingFreeProvider() && cooldownUntil > Date.now();
+            return Boolean(this._aiSenseiRequestPending || coolingDown);
+        },
+
+        updateAISenseiChatControls(announce = false) {
+            const input = document.getElementById('aiSenseiInput');
+            const sendButton = document.getElementById('aiSenseiSendBtn');
+            const status = document.getElementById('aiSenseiCooldownStatus');
+            const announcement = document.getElementById('aiSenseiCooldownAnnouncement');
+            const usingFreeProvider = this.isAISenseiUsingFreeProvider();
+            const cooldownUntil = Number(this._aiSenseiCooldownUntil || 0);
+            const timeRemaining = Math.max(0, cooldownUntil - Date.now());
+            const cooldownExpired = usingFreeProvider && cooldownUntil > 0 && timeRemaining === 0;
+            const cooldownRemaining = usingFreeProvider ? timeRemaining : 0;
+            const secondsRemaining = Math.ceil(cooldownRemaining / 1000);
+            const isPending = Boolean(this._aiSenseiRequestPending);
+            const isCoolingDown = cooldownRemaining > 0;
+            const isLocked = isPending || isCoolingDown;
+
+            if (
+                timeRemaining === 0 &&
+                this._aiSenseiCooldownTimer !== null &&
+                this._aiSenseiCooldownTimer !== undefined
+            ) {
+                window.clearInterval(this._aiSenseiCooldownTimer);
+                this._aiSenseiCooldownTimer = null;
+                this._aiSenseiCooldownUntil = 0;
+                this._aiSenseiCooldownReason = '';
+            }
+
+            if (input) {
+                if (this._aiSenseiOriginalPlaceholder === undefined) {
+                    this._aiSenseiOriginalPlaceholder = input.getAttribute('placeholder') || '';
+                }
+                input.disabled = isLocked;
+                if (isPending) {
+                    input.placeholder = usingFreeProvider
+                        ? 'Free AI is preparing your reply…'
+                        : 'Sensei is preparing your reply…';
+                } else if (isCoolingDown) {
+                    input.placeholder = `Free AI cooldown — send in ${secondsRemaining} second${secondsRemaining === 1 ? '' : 's'}`;
+                } else {
+                    input.placeholder = this._aiSenseiOriginalPlaceholder;
+                }
+            }
+
+            if (sendButton) {
+                sendButton.disabled = isLocked;
+            }
+            document.querySelectorAll('.ai-quick-prompt').forEach((button) => {
+                button.disabled = isLocked;
+            });
+
+            document.querySelectorAll('.ai-chat-quota-retry').forEach((button) => {
+                if (button.dataset.readyText === undefined) {
+                    button.dataset.readyText = button.textContent;
+                }
+                button.disabled = isLocked;
+                if (isCoolingDown) {
+                    button.textContent = `Retry in ${secondsRemaining}s`;
+                } else if (isPending) {
+                    button.textContent = 'Sending…';
+                } else {
+                    button.textContent = button.dataset.readyText;
+                }
+            });
+
+            let statusMessage = '';
+            if (isPending) {
+                statusMessage = usingFreeProvider
+                    ? 'Free AI is preparing your reply. Please wait.'
+                    : 'Sensei is preparing your reply. Please wait.';
+            } else if (isCoolingDown && this._aiSenseiCooldownReason === 'rate-limit') {
+                statusMessage = `Free AI rate-limit cooldown active. Try again in ${secondsRemaining} second${secondsRemaining === 1 ? '' : 's'}.`;
+            } else if (isCoolingDown) {
+                statusMessage = `Free AI message cooldown enabled. You can send again in ${secondsRemaining} second${secondsRemaining === 1 ? '' : 's'}.`;
+            }
+
+            if (status) {
+                status.hidden = !isLocked;
+                status.classList.toggle(
+                    'is-rate-limited',
+                    isCoolingDown && this._aiSenseiCooldownReason === 'rate-limit'
+                );
+                status.textContent = statusMessage;
+            }
+            if (announcement && announce) {
+                announcement.textContent = statusMessage;
+            } else if (announcement && cooldownExpired && !isPending) {
+                announcement.textContent = 'Free AI cooldown ended. You can send a message now.';
+            }
+        },
+
+        startAISenseiChatCooldown(durationMs, reason = 'message') {
+            if (this._aiSenseiCooldownTimer !== null && this._aiSenseiCooldownTimer !== undefined) {
+                window.clearInterval(this._aiSenseiCooldownTimer);
+            }
+            const duration = Math.min(
+                MAX_FREE_AI_RATE_LIMIT_COOLDOWN_MS,
+                Math.max(0, Number(durationMs) || 0)
+            );
+            this._aiSenseiCooldownUntil = Date.now() + duration;
+            this._aiSenseiCooldownReason = reason;
+            this._aiSenseiCooldownTimer = null;
+            this.updateAISenseiChatControls(true);
+            if (duration > 0) {
+                this._aiSenseiCooldownTimer = window.setInterval(
+                    () => this.updateAISenseiChatControls(),
+                    1000
+                );
+            }
+        },
+
+        getAISenseiRateLimitCooldownMs() {
+            this._aiSenseiRateLimitStreak = (this._aiSenseiRateLimitStreak || 0) + 1;
+            const multiplier = 2 ** Math.min(this._aiSenseiRateLimitStreak - 1, 5);
+            return Math.min(
+                MAX_FREE_AI_RATE_LIMIT_COOLDOWN_MS,
+                FREE_AI_CHAT_COOLDOWN_MS * multiplier
+            );
+        },
+
         async requestAISenseiAnswer(question, outputEl, kanjiContext = null) {
             if (!outputEl || !window.AIManager) {
-                return;
+                return false;
             }
+            if (this.isAISenseiChatLocked()) {
+                this.updateAISenseiChatControls();
+                return false;
+            }
+
+            const usingFreeProvider = this.isAISenseiUsingFreeProvider();
+            let cooldownMs = FREE_AI_CHAT_COOLDOWN_MS;
+            let cooldownReason = 'message';
+            this._aiSenseiRequestPending = true;
+            this.updateAISenseiChatControls(true);
             outputEl.replaceChildren();
             const loading = document.createElement('span');
             loading.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sensei is thinking...';
@@ -308,12 +458,23 @@ const AISenseiModule = {
             try {
                 const answer = await AIManager.askSenseiQuestion(question, kanjiContext);
                 outputEl.innerHTML = this.formatMarkdownToHtml(answer);
+                this._aiSenseiRateLimitStreak = 0;
+                return true;
             } catch (error) {
                 outputEl.replaceChildren();
                 if (AIManager.isFreeTierLimitError?.(error)) {
+                    cooldownReason = 'rate-limit';
+                    cooldownMs = this.getAISenseiRateLimitCooldownMs();
                     this.renderAIQuotaNotice(outputEl, () =>
                         this.requestAISenseiAnswer(question, outputEl, kanjiContext)
                     );
+                    const retryButton = outputEl.querySelector(
+                        '.ai-limit-notice__actions button:nth-child(2)'
+                    );
+                    if (retryButton) {
+                        retryButton.classList.add('ai-chat-quota-retry');
+                        retryButton.dataset.readyText = 'Retry this question';
+                    }
                 } else {
                     const errorText = document.createElement('span');
                     errorText.className = 'ai-request-error';
@@ -321,13 +482,25 @@ const AISenseiModule = {
                         error?.message || 'Sensei could not reply right now. Please try again.';
                     outputEl.appendChild(errorText);
                 }
+                return false;
+            } finally {
+                this._aiSenseiRequestPending = false;
+                if (usingFreeProvider) {
+                    this.startAISenseiChatCooldown(cooldownMs, cooldownReason);
+                } else {
+                    this.updateAISenseiChatControls();
+                }
             }
         },
 
         async askAISensei(question) {
             const chatLog = document.getElementById('aiChatLog');
             if (!chatLog || !window.AIManager) {
-                return;
+                return false;
+            }
+            if (this.isAISenseiChatLocked()) {
+                this.updateAISenseiChatControls();
+                return false;
             }
             const userMsg = document.createElement('div');
             userMsg.className = 'ai-chat-msg ai-msg-user';
@@ -345,6 +518,7 @@ const AISenseiModule = {
                 this.currentKanji
             );
             chatLog.scrollTop = chatLog.scrollHeight;
+            return true;
         },
 
         openAISenseiForCurrentKanji() {

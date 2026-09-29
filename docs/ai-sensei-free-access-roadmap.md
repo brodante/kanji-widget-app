@@ -23,14 +23,15 @@ This document tracks the no-key default, the free-tier quota response, and the p
 - Ask Sensei, diagnostics, and kanji-drawer mnemonic/etymology flows show the quota choices. Diagnostics retain the local fallback. Chat and connection-test errors are rendered as text rather than interpolated HTML.
 - Opening Ask Sensei from a kanji card now opens the Ask tab and focuses the composer without submitting a default prompt. Only a learner's explicit message or selected quick-prompt button makes a chat request; the current kanji is shown as context and accompanies a message they choose to send.
 - The floating AI Sensei control is now an icon-only circular, draggable assistive button. After five seconds without interaction it docks partway off the nearest screen edge; hover, focus, drag, or touch wakes it.
+- Free Firebase chat applies a five-second per-tab pacing cooldown after each chat attempt (success or failure). A rate-limit response starts an escalating backoff (5, 10, 20 seconds, up to two minutes); the composer, send button, quick prompts, and chat retry are locked while a countdown is shown. BYOK is not subject to this app-side cooldown.
 - Settings explain the key-free provider, optional BYOK risks, and that credentials stay in local storage and go directly to the selected provider. The AI modal discloses that relevant questions/kanji/study details are sent to the selected provider and that Google's free-tier prompts may be used to improve its products.
-- Changed AI modal, app config, main script, and stylesheet assets use `ai-free-v2`; the service-worker cache is `kanji-widgets-v28`.
+- AI modal, main script, and stylesheet assets use `ai-free-v3`; the unchanged Firebase config remains `ai-free-v2`. The service-worker cache is `kanji-widgets-v29`.
 
 ## How the shared quota works
 
 Firebase AI Logic calls the Gemini Developer API through the Firebase project. Quotas and capacity are shared at the project/service level; they are not a named learner's daily allowance. Firebase documents a configurable per-user request rate (currently 100 requests/minute by default), but that setting is shared across users and does not create an individual daily entitlement. A browser-only counter would be bypassable and is intentionally not used as a security or cost control.
 
-The app responds to actual built-in-provider rate/quota errors. A 429 may mean a project quota/rate limit or temporarily exhausted model capacity; the UI says the free limit is reached “for now” and keeps the local diagnostic available. Firebase quota/model eligibility and free-tier terms can change. BYOK removes the app's shared Firebase quota for those requests, but the selected provider may rate-limit usage or charge the learner.
+The app responds to actual built-in-provider rate/quota errors. A 429 may mean a project quota/rate limit or temporarily exhausted model capacity; the UI says the free limit is reached “for now” and keeps the local diagnostic available. Free Firebase chat now adds a short, best-effort pacing cooldown after every chat attempt and an escalating pause after repeated 429s. This is a per-tab UI guard—not a Firebase quota setting—and can be bypassed by another tab, device, or page reload; shared project/provider quotas still apply. Firebase quota/model eligibility and free-tier terms can change. BYOK removes the app's shared Firebase quota for those requests, but the selected provider may rate-limit usage or charge the learner.
 
 ## Owner setup required before production AI is ready
 
@@ -71,7 +72,7 @@ Firebase App Check's reCAPTCHA Enterprise assessments have a no-cost quota, with
 
 ## Test this branch locally
 
-The current Arena session changes are not pushed yet. In this checked-out workspace, run `npm ci`, `npm test`, `npm run lint`, `npm run format:check`, and `npm start` directly. To reproduce in a separate clone after the feature branch is pushed, run:
+In this checked-out workspace, run `npm ci`, `npm test`, `npm run lint`, `npm run format:check`, and `npm start` directly. To reproduce in a separate clone, first ensure the latest feature-branch commit is pushed, then run:
 
 ```sh
 git clone --single-branch --branch arena/01a0e9de-kanji-widget-app \
@@ -108,6 +109,7 @@ Automated tests mock the SDK; they do not contact Firebase or a model. Before de
 - [ ] App Check initializes and returns valid tokens on every supported production origin.
 - [ ] Firebase AI Logic monitoring shows the expected project, request counts, model and error rates.
 - [ ] Simulated/controlled 429 shows the quota notice; App Check/setup/network errors do not.
+- [ ] Free AI composer, send button, quick prompts, and chat retry stay locked during the five-second pacing cooldown and escalating 429 backoff; the countdown is accessible.
 - [ ] “Use my own API key” reaches AI Settings; after choosing a provider and adding a key, retry is explicit and uses only that selection.
 - [ ] The contact link addresses `spsc.mizu@gmail.com` and includes no prompt, profile, Firebase UID, or key.
 - [ ] Ask Sensei, diagnostics, mnemonic and etymology behavior are checked; local diagnostics and other non-AI learning still work offline.
@@ -117,6 +119,7 @@ Automated tests mock the SDK; they do not contact Firebase or a model. Before de
 
 - [x] Implement the key-free Firebase provider, BYOK-preserving settings migration, Settings guidance, and provider privacy notice.
 - [x] Add quota-specific choices across Ask Sensei, diagnostics, and drawer mnemonic/etymology flows; keep non-quota errors distinct and safe.
+- [x] Pace Free Firebase chat with an accessible five-second cooldown and escalating 429 backoff; leave BYOK chat unthrottled.
 - [x] Add App Check initialization before Auth when the owner configures the public site key, with tests for success, ordering, and failure isolation.
 - [x] Add/update mocked tests for storage defaults/migration, BYOK preservation, key-free dispatch, quota classification, UI choices, asset cache/deploy versions, and existing regressions.
 - [x] Owner supplied the public reCAPTCHA Enterprise site key; it is configured in the browser config (no debug token or debug flag is committed).
@@ -130,7 +133,7 @@ Automated tests mock the SDK; they do not contact Firebase or a model. Before de
 Verification run after the last code change:
 
 - `npm ci` — succeeded; 338 packages installed and zero vulnerabilities reported.
-- `npm test` — passed; 224 tests, 0 failures.
+- `npm test` — passed; 226 tests, 0 failures.
 - `npm run lint` — passed.
 - `npm run format:check` — passed.
 - `git diff --check` — passed.
