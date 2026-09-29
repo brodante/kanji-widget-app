@@ -76,12 +76,16 @@ jobs:
             - name: Minify assets
               run: |
                   node tools/minify.js deploy
-                  # A minified file is 1-2 lines. If it is still multi-line the step above did
-                  # not work and we must not ship it silently (this has happened once already).
+                  # Minified output is always smaller than its source. If a deploy/ file is not
+                  # smaller, the step above did not actually run and we must not ship it
+                  # silently (this has already happened once). Line counts are useless here:
+                  # esbuild preserves the newlines inside the app's multi-line HTML templates,
+                  # so a correctly minified script.js is still hundreds of lines long.
                   for f in script.js styles.css kanji-data.js; do
-                      lines=$(wc -l < "deploy/$f")
-                      if [ "$lines" -gt 5 ]; then
-                          echo "::error::deploy/$f still has $lines lines - minification did not run"
+                      src=$(wc -c < "$f")
+                      out=$(wc -c < "deploy/$f")
+                      if [ "$out" -ge "$src" ]; then
+                          echo "::error::deploy/$f is $out bytes, not smaller than the $src byte source - minification did not run"
                           exit 1
                       fi
                   done
