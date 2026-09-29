@@ -25,7 +25,7 @@ This document tracks the no-key default, the free-tier quota response, and the p
 - The floating AI Sensei control is an icon-only circular, draggable assistive button. AI Settings includes a default-on, persisted “Show floating AI Sensei button” toggle; turning it off hides only this shortcut and leaves other AI Sensei entry points enabled. After five seconds without interaction, the button docks with about 55% of its width off the nearest screen edge; hover and keyboard focus restore the full button, and drag/touch wakes it.
 - Free Firebase chat applies a five-second per-tab pacing cooldown after each chat attempt (success or failure). A rate-limit response starts an escalating backoff (5, 10, 20 seconds, up to two minutes); the composer, send button, quick prompts, and chat retry are locked while a countdown is shown. BYOK is not subject to this app-side cooldown.
 - Settings explain the key-free provider, optional BYOK risks, and that credentials stay in local storage and go directly to the selected provider. The AI modal discloses that relevant questions/kanji/study details are sent to the selected provider and that Google's free-tier prompts may be used to improve its products.
-- The AI modal remains `ai-free-v3`; the main script and stylesheet use `ai-floating-v1` for the floating-shortcut settings and dock behavior. The unchanged Firebase config remains `ai-free-v2`. The service-worker cache is `kanji-widgets-v30`.
+- The AI modal and Firebase config use `ai-free-v3`; the main script and stylesheet use `ai-floating-v1` for the floating-shortcut settings and dock behavior. The service-worker cache is `kanji-widgets-v31`.
 
 ## How the shared quota works
 

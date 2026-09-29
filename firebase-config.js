@@ -12,5 +12,5 @@ window.KANJI_FIREBASE_CONFIG = {
 // Register this matching key with the Web app and allow only the real app domains.
 // Never put a reCAPTCHA secret key or an App Check debug token in this browser config.
 window.KANJI_APP_CHECK_CONFIG = {
-    recaptchaEnterpriseSiteKey: '6LcvWdQtAAAAANd_LWYI2R5QWWzblzENzbC4Yrlh'
+    recaptchaEnterpriseSiteKey: '6LedqNUtAAAAAM5yu6ldWRayM-9vYxz1JpYyX25A'
 };

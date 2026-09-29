@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanji-widgets-v30';
+const CACHE_NAME = 'kanji-widgets-v31';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const urlsToCache = [
     '/drawing-pad.js?v=practice-merge-v1',
     '/backup-config.js',
     '/ui-feedback.js?v=practice-merge-v1',
-    '/firebase-config.js?v=ai-free-v2',
+    '/firebase-config.js?v=ai-free-v3',
     '/username-policy.js?v=login-v1',
     '/app-auth.js?v=ai-free-v1',
     '/username-directory.js?v=login-v1',
