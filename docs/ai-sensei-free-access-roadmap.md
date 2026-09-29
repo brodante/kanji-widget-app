@@ -56,6 +56,15 @@ To restore the previous model while retaining a safe cache bust for devices that
 
 The monitoring summary is a small aggregate sample; inspect the Firebase error details and compare equivalent live periods before attributing failures to model capacity. The new model selection alone cannot guarantee lower latency or eliminate 429/5xx failures.
 
+### Manual model evaluation plan
+
+1. Fetch and check out `arena/01a0ee5e-kanji-widget-app` at the model-change commit. Run `npm ci`, `npm test`, `npm run lint`, and `npm run format:check`; then run `npm start` and open the local app. The branch/cache versions are `ai-model-lite-v1` and `kanji-widgets-v32`.
+2. Confirm normal study features still work. In Settings, the built-in Firebase option should remain keyless and its model selector hidden. If you have old Firebase settings, the saved fixed model should normalize to `gemini-3.5-flash-lite`; a BYOK provider/key/model should remain unchanged.
+3. For a real AI check, use the local App Check debug-token procedure below, or an already-authorized production origin. Prefer a separate Spark Firebase project for a test so calls do not consume the community's production quota. Keep billing disconnected; never add localhost to the production reCAPTCHA key or commit a debug flag/token. Local AI requests against the existing `kanji-widgets` project use its shared quota.
+4. Send only a few short, repeatable prompts (for example, one simple Ask Sensei question and one mnemonic for a known kanji). Avoid repeated retries or burst/stress tests. Note start-to-complete time, whether a useful answer arrived, and the exact displayed/console error for failures. Chat's five-second cooldown remains active.
+5. In Firebase AI Logic monitoring, confirm the new model in request details/model breakdown if available. Compare request count, success rate, p95 latency, and thinking/output tokens with the Sep 28–29 baseline: 32 requests, 40.6% success, 45.9s p95, 3.2K output tokens, and 7.6K thinking tokens. Use a comparable time range and traffic; the baseline is too small to make p95 conclusions from a handful of test calls. Do not generate artificial community traffic to inflate the sample.
+6. If results are worse or the model fails, capture the exact error and use the rollback instructions above. Do not deploy this branch to the public site merely to test it without explicit production-deployment approval; the repo currently has no staging site.
+
 ## Owner setup required before production AI is ready
 
 The owner has supplied a public reCAPTCHA Enterprise site key, now configured in `firebase-config.js`, and reports the Web app is **Registered** in App Check. Confirm that the registered provider uses this same key and allows the production hostname. **The built-in Firebase AI provider is not production-ready until a non-debug live-origin test passes.** The normal settings remain usable for BYOK while this work is pending.
