@@ -13,6 +13,110 @@ let itoAnimationId = null;
 let itoIntervalId = null;
 
 // ==========================================
+// WEBGL THEME DEPENDENCIES (loaded on demand)
+// ==========================================
+// three.js and its post-processing addons used to be classic <script> tags in
+// <head>: ~131 KiB of third-party JavaScript on the critical path, competing
+// with the first paint for a decorative background. The four WebGL themes are
+// the only consumers, so the library is now fetched the first time one of them
+// is selected, and warmed during idle time when the saved theme already needs
+// it. Load order matches the old <head> order (the addons extend THREE), so the
+// bloom/VHS effects keep working exactly as before.
+const THREE_CDN_SCRIPTS = [
+    'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js',
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js',
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js',
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js',
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js',
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js'
+];
+
+const WEBGL_THEMES = ['nami', 'lumen', 'obake', 'ito'];
+
+let threeJSLoadPromise = null;
+
+function loadWebGLDependencies() {
+    if (window.THREE && window.THREE.EffectComposer) {
+        return Promise.resolve(window.THREE);
+    }
+    if (threeJSLoadPromise) {
+        return threeJSLoadPromise;
+    }
+    threeJSLoadPromise = new Promise((resolve, reject) => {
+        let pending = THREE_CDN_SCRIPTS.length;
+        let settled = false;
+        const settle = (error) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            if (error) {
+                reject(error);
+            } else {
+                resolve(window.THREE);
+            }
+        };
+        THREE_CDN_SCRIPTS.forEach((src) => {
+            const script = document.createElement('script');
+            script.src = src;
+            // Ordered execution, like the original sequential <head> tags.
+            script.async = false;
+            script.onload = () => {
+                pending -= 1;
+                if (pending === 0) {
+                    settle(null);
+                }
+            };
+            script.onerror = () => settle(new Error(`Could not load ${src}`));
+            document.head.appendChild(script);
+        });
+    }).catch((error) => {
+        // A failed CDN fetch must not stick: switching themes again can retry.
+        threeJSLoadPromise = null;
+        throw error;
+    });
+    return threeJSLoadPromise;
+}
+
+// Boots a WebGL theme as soon as its lazily loaded dependencies are ready.
+function startWebGLTheme(themeName) {
+    const starters = {
+        nami: initNamiWave,
+        lumen: initLumenWave,
+        obake: initObakeGhost,
+        ito: initItoTubes
+    };
+    const start = starters[themeName];
+    if (!start) {
+        return;
+    }
+    if (window.THREE && window.THREE.EffectComposer) {
+        start();
+        return;
+    }
+    loadWebGLDependencies()
+        .then(start)
+        .catch((error) => {
+            // Local learning must never depend on a decorative background.
+            console.warn(`WebGL theme "${themeName}" is unavailable:`, error);
+        });
+}
+
+// Pulls three.js in during idle time so a WebGL theme does not have to wait for
+// the CDN on the first switch (or on a reload that restores that theme).
+function warmWebGLDependencies() {
+    const theme = localStorage.getItem('theme');
+    if (!theme || !WEBGL_THEMES.includes(theme)) {
+        return;
+    }
+    const schedule = window.requestIdleCallback || ((callback) => setTimeout(callback, 200));
+    schedule(() => {
+        loadWebGLDependencies().catch(() => {});
+    });
+}
+
+// ==========================================
 // SEARCH HELPERS (lightweight kana/romaji matching)
 // ==========================================
 
@@ -1372,21 +1476,21 @@ class KanjiLearningApp {
         if (this.widgetSize === 'small') {
             content += `
                 <div class="widget-actions">
-                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
-                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
-                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
-                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
+                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" aria-label="Mnemonic and etymology" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
+                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" aria-label="Ask AI Sensei" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')" aria-label="Search this kanji on Jisho" title="Search on Jisho"><i class="fas fa-book-open"></i></button>
+                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()" aria-label="Mark as mastered" title="Mark as mastered"><i class="fas fa-check"></i></button>
                 </div>
             `;
         } else if (this.widgetSize === 'medium') {
             content += `
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>
                 <div class="widget-actions">
-                    <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
-                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
-                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
-                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
-                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
+                    <button class="action-btn" onclick="app.playPronunciation()" aria-label="Play pronunciation" title="Play pronunciation"><i class="fas fa-volume-up"></i></button>
+                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" aria-label="Mnemonic and etymology" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
+                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" aria-label="Ask AI Sensei" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')" aria-label="Search this kanji on Jisho" title="Search on Jisho"><i class="fas fa-book-open"></i></button>
+                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()" aria-label="Mark as mastered" title="Mark as mastered"><i class="fas fa-check"></i></button>
                 </div>
             `;
         } else {
@@ -1394,7 +1498,7 @@ class KanjiLearningApp {
                 this.currentKanji.character
             );
             content += `
-                ${isMastered ? '<button class="unmark-badge" onclick="app.unmarkCurrentKanji()" title="Unmark as mastered"><i class="fas fa-times"></i></button>' : ''}
+                ${isMastered ? '<button class="unmark-badge" onclick="app.unmarkCurrentKanji()" aria-label="Unmark as mastered" title="Unmark as mastered"><i class="fas fa-times"></i></button>' : ''}
                 <div class="kanji-meaning">${this.currentKanji.meanings.join(', ')}</div>                <div class="kanji-readings">
                     ${
                         this.currentKanji.onyomi.length > 0
@@ -1435,7 +1539,7 @@ class KanjiLearningApp {
                     this.currentKanji.examples && this.currentKanji.examples.length > 0
                         ? `
                     <div class="kanji-examples">
-                        <h4>Examples</h4>
+                        <h3>Examples</h3>
                         ${this.currentKanji.examples
                             .slice(0, 3)
                             .map(
@@ -1511,11 +1615,11 @@ class KanjiLearningApp {
                     </div>
                 </div>
                 <div class="widget-actions">
-                    <button class="action-btn" onclick="app.playPronunciation()"><i class="fas fa-volume-up"></i></button>
-                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
-                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
-                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')"><i class="fas fa-book-open"></i></button>
-                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()"><i class="fas fa-check"></i></button>
+                    <button class="action-btn" onclick="app.playPronunciation()" aria-label="Play pronunciation" title="Play pronunciation"><i class="fas fa-volume-up"></i></button>
+                    <button class="action-btn drawer-action-btn" onclick="app.openKanjiDrawer()" aria-label="Mnemonic and etymology" title="Mnemonic & Etymology"><i class="fas fa-wand-magic-sparkles"></i></button>
+                    <button class="action-btn ai-action-btn" onclick="app.openAISenseiForCurrentKanji()" aria-label="Ask AI Sensei" title="Ask AI Sensei"><i class="fas fa-brain"></i></button>
+                    <button class="action-btn jisho-btn" onclick="window.open('https://jisho.org/search/${encodeURIComponent(this.currentKanji.character)}%20%23kanji', '_blank')" aria-label="Search this kanji on Jisho" title="Search on Jisho"><i class="fas fa-book-open"></i></button>
+                    <button class="action-btn master-action-btn" onclick="app.markAsMastered()" aria-label="Mark as mastered" title="Mark as mastered"><i class="fas fa-check"></i></button>
                 </div>
             `;
         }
@@ -2827,15 +2931,10 @@ class KanjiLearningApp {
             itoIntervalId = null;
         }
 
-        // NEW: Automatically boot the WebGL wave.
-        if (themeName === 'nami') {
-            initNamiWave();
-        } else if (themeName === 'lumen') {
-            initLumenWave();
-        } else if (themeName === 'obake') {
-            initObakeGhost();
-        } else if (themeName === 'ito') {
-            initItoTubes();
+        // NEW: Automatically boot the WebGL wave. three.js is fetched on demand now
+        // instead of blocking the first paint from <head>.
+        if (WEBGL_THEMES.includes(themeName)) {
+            startWebGLTheme(themeName);
         } else if (themeName.startsWith('custom-')) {
             const slot = themeName.replace('custom-', '');
             this.loadCustomTheme(slot);
@@ -3022,6 +3121,8 @@ class KanjiLearningApp {
     applyTheme() {
         const savedTheme = localStorage.getItem('theme') || 'nami';
         this.setTheme(savedTheme);
+        // Warm the (lazily loaded) three.js chain for WebGL themes while idle.
+        warmWebGLDependencies();
     }
 
     loadSettings() {

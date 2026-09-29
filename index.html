@@ -2,10 +2,10 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-        />
+        <!-- Zoom stays enabled: maximum-scale/user-scalable=no fails accessibility audits and
+             blocks magnification. The drawing pad opts out of browser gestures itself with
+             touch-action: none. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <title>KanjiWidgets - Daily Japanese Learning</title>
 
         <!-- SEO & Primary Meta Tags -->
@@ -35,36 +35,61 @@
 
         <!-- Existing GA4 stream, production sites only. No duplicate Firebase Analytics SDK. -->
         <script defer src="analytics.js?v=analytics-v1"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-        <!-- NEW: Post-Processing Addons for Dracula's Glow and VHS Glitch -->
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-        <!-- Fonts & Icons -->
+        <!-- Fonts: one combined request (Material Icons is unused by this app) instead of three.
+             Everything except the app's own stylesheet loads without blocking first paint. -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Material+Icons&display=swap"
+            rel="preload"
+            as="style"
+            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+        />
+        <link
+            media="print"
+            onload="this.media = 'all'"
+            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+            rel="stylesheet"
+        />
+        <noscript>
+            <link
+                href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+                rel="stylesheet"
+            />
+        </noscript>
+        <!-- Extra display faces used by the theme picker: fetched after first paint. -->
+        <link
+            media="print"
+            onload="this.media = 'all'"
+            href="https://fonts.googleapis.com/earlyaccess/hannari.css"
             rel="stylesheet"
         />
         <link
-            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap"
+            media="print"
+            onload="this.media = 'all'"
+            href="https://fonts.googleapis.com/earlyaccess/kokoro.css"
             rel="stylesheet"
         />
+        <noscript>
+            <link href="https://fonts.googleapis.com/earlyaccess/hannari.css" rel="stylesheet" />
+            <link href="https://fonts.googleapis.com/earlyaccess/kokoro.css" rel="stylesheet" />
+        </noscript>
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Zen+Antique&family=Zen+Maru+Gothic:wght@400;700&display=swap"
-            rel="stylesheet"
-        />
-        <link href="https://fonts.googleapis.com/earlyaccess/hannari.css" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/earlyaccess/kokoro.css" rel="stylesheet" />
-        <link
+            media="print"
+            onload="this.media = 'all'"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
             rel="stylesheet"
         />
+        <noscript>
+            <link
+                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+                rel="stylesheet"
+            />
+        </noscript>
 
-        <!-- App Resources -->
+        <!-- App Resources. The only render-blocking stylesheet: the widget cannot be styled
+             correctly without it, and it is small enough to inline in a later phase. -->
         <link rel="stylesheet" href="styles.css?v=ai-floating-v1" />
         <link rel="manifest" href="manifest.json" />
 
@@ -2711,24 +2736,26 @@ filter: blur(10px) brightness(1) saturate(1);
             </div>
         </dialog>
 
-        <script src="storage-manager.js"></script>
-        <script src="srs-engine.js"></script>
-        <script src="ai-manager.js?v=ai-model-lite-v1"></script>
-        <script src="ai-tutor-modal.js?v=ai-free-v3"></script>
-        <script src="audio-manager.js"></script>
-        <script src="kanji-data.js"></script>
-        <script src="drawing-pad.js?v=practice-merge-v1"></script>
-        <script src="ui-feedback.js?v=practice-merge-v1"></script>
-        <script src="backup-config.js"></script>
-        <script src="backup-manager.js?v=practice-merge-v1"></script>
-        <script src="profile-page.js?v=practice-merge-v1"></script>
-        <script src="avatar-crop.js?v=avatar-v1"></script>
-        <script src="firebase-config.js?v=ai-free-v3"></script>
-        <script src="username-policy.js?v=login-v1"></script>
-        <script src="app-auth.js?v=ai-free-v1"></script>
-        <script src="username-directory.js?v=login-v1"></script>
-        <script src="auth-dialog.js?v=login-v1"></script>
-        <script src="cloud-sync.js?v=practice-merge-v1"></script>
-        <script src="script.js?v=ai-floating-v1"></script>
+        <!-- App scripts: `defer` keeps the documented load order while letting the browser
+             download them in parallel instead of blocking the parser one request at a time. -->
+        <script defer src="storage-manager.js"></script>
+        <script defer src="srs-engine.js"></script>
+        <script defer src="ai-manager.js?v=ai-model-lite-v1"></script>
+        <script defer src="ai-tutor-modal.js?v=ai-free-v3"></script>
+        <script defer src="audio-manager.js"></script>
+        <script defer src="kanji-data.js"></script>
+        <script defer src="drawing-pad.js?v=practice-merge-v1"></script>
+        <script defer src="ui-feedback.js?v=practice-merge-v1"></script>
+        <script defer src="backup-config.js"></script>
+        <script defer src="backup-manager.js?v=practice-merge-v1"></script>
+        <script defer src="profile-page.js?v=practice-merge-v1"></script>
+        <script defer src="avatar-crop.js?v=avatar-v1"></script>
+        <script defer src="firebase-config.js?v=ai-free-v3"></script>
+        <script defer src="username-policy.js?v=login-v1"></script>
+        <script defer src="app-auth.js?v=ai-free-v1"></script>
+        <script defer src="username-directory.js?v=login-v1"></script>
+        <script defer src="auth-dialog.js?v=login-v1"></script>
+        <script defer src="cloud-sync.js?v=practice-merge-v1"></script>
+        <script defer src="script.js?v=ai-floating-v1"></script>
     </body>
 </html>

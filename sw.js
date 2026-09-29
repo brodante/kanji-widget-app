@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanji-widgets-v32';
+const CACHE_NAME = 'kanji-widgets-v33';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -56,6 +56,20 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+// Stroke-order references come from these CDNs and are safe to keep for offline use.
+const CROSS_ORIGIN_CACHE_HOSTS = ['raw.githubusercontent.com', 'cdn.jsdelivr.net'];
+
+// Reads a response into the cache without ever rejecting the caller.
+const cachePut = (request, response) => {
+    if (!response || (response.status !== 200 && response.type !== 'opaque')) {
+        return Promise.resolve();
+    }
+    return caches
+        .open(CACHE_NAME)
+        .then((cache) => cache.put(request, response))
+        .catch(() => {});
+};
+
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') {
         return;
@@ -63,29 +77,89 @@ self.addEventListener('fetch', (event) => {
 
     const { request } = event;
     const url = new URL(request.url);
-    const shouldCache =
-        request.destination === 'script' ||
-        request.destination === 'style' ||
-        request.destination === 'document' ||
-        request.mode === 'navigate';
+    const isFirstParty = url.origin === self.location.origin;
 
-    if (
-        shouldCache &&
-        (url.origin === self.location.origin ||
-            url.hostname === 'raw.githubusercontent.com' ||
-            url.hostname === 'cdn.jsdelivr.net')
-    ) {
+    // KanjiVG stroke-order data: cache first, refresh in the background, so the
+    // drawing pad keeps working offline like it did before.
+    if (!isFirstParty && CROSS_ORIGIN_CACHE_HOSTS.includes(url.hostname)) {
         event.respondWith(
-            fetch(request, { cache: 'no-store' })
-                .then((response) => {
-                    const copy = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-                    return response;
-                })
-                .catch(() => caches.match(request))
+            caches.match(request).then((hit) => {
+                const network = fetch(request)
+                    .then((response) => {
+                        void cachePut(request, response);
+                        return response;
+                    })
+                    .catch(() => hit);
+                return hit || network;
+            })
         );
         return;
     }
 
-    event.respondWith(fetch(request));
+    // Other cross-origin requests (Firebase, Google, analytics) are left alone.
+    if (!isFirstParty) {
+        return;
+    }
+
+    // Navigations: fresh shell when online, last known shell when offline.
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    void cachePut(request, response);
+                    return response;
+                })
+                .catch(() =>
+                    caches.match(request).then((hit) => hit || caches.match('/index.html'))
+                )
+        );
+        return;
+    }
+
+    const destination = request.destination;
+
+    // Audio, images and fonts are content-addressed by path: cache first so a
+    // repeat visit never waits on the network for them.
+    if (destination === 'audio' || destination === 'image' || destination === 'font') {
+        event.respondWith(
+            caches.match(request).then(
+                (hit) =>
+                    hit ||
+                    fetch(request).then((response) => {
+                        void cachePut(request, response);
+                        return response;
+                    })
+            )
+        );
+        return;
+    }
+
+    // Scripts and styles: answer from cache immediately, refresh in the background.
+    // The previous handler used cache: 'no-store', which also disabled the browser's
+    // HTTP cache, so every repeat visit re-validated every asset.
+    if (destination === 'script' || destination === 'style') {
+        event.respondWith(
+            caches.match(request).then((hit) => {
+                const network = fetch(request)
+                    .then((response) => {
+                        void cachePut(request, response);
+                        return response;
+                    })
+                    .catch(() => hit);
+                return hit || network;
+            })
+        );
+        return;
+    }
+
+    // Everything else (documents, manifests, JSON data): try the network first and
+    // fall back to the cached copy.
+    event.respondWith(
+        fetch(request)
+            .then((response) => {
+                void cachePut(request, response);
+                return response;
+            })
+            .catch(() => caches.match(request))
+    );
 });
