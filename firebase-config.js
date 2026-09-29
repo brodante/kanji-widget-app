@@ -1,7 +1,6 @@
 // Public Firebase Web app configuration, NOT a service-account key or client secret.
 // See docs/firebase-auth-setup.md. Keep this project on Spark with no billing attached.
 // Authentication, Firestore progress sync, and Firebase AI Logic. No Analytics or Storage.
-// window.FIREBASE_APPCHECK_DEBUG_TOKEN = true
 window.KANJI_FIREBASE_CONFIG = {
     apiKey: 'AIzaSyBcw65nsJHslu5h-pgrZVpMHudosYgIsc4',
     authDomain: 'kanji-widgets.firebaseapp.com',
