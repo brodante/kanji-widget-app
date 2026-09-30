@@ -195,6 +195,12 @@ body {
 .app-footer {
     padding: 0 1.5rem 1.5rem;
     margin-top: auto;
+    /* The footer is a direct child of <body>, outside .app-container. The WebGL
+       theme backgrounds (nami/lumen/obake/ito) are position:fixed; z-index:0, so
+       without this lift the canvas paints over the footer and hides it — that is
+       why it vanished in Lumen and looked washed out in Nami. */
+    position: relative;
+    z-index: 1;
 }
 
 .footer-content {

@@ -202,6 +202,33 @@ test('the footer uses an opaque surface instead of a translucent wash', () => {
     assert.match(linkRule, /color: var\(--accent-text, var\(--primary-color\)\);/);
 });
 
+test('the footer stacks above the full-viewport WebGL theme canvases', () => {
+    // Regression: the footer is a direct child of <body> (outside .app-container),
+    // while the nami/lumen/obake/ito backgrounds are position:fixed; z-index:0.
+    // Static content paints below those, which hid the footer in those themes.
+    const css = read('styles.css');
+    const footerBlock = css.slice(
+        css.indexOf('.app-footer {'),
+        css.indexOf('\n}', css.indexOf('.app-footer {'))
+    );
+    assert.match(footerBlock, /position:\s*relative/);
+    assert.match(footerBlock, /z-index:\s*1/);
+    // The canvases must stay behind the app content layer.
+    for (const cls of [
+        'nami-background',
+        'lumen-background',
+        'obake-background',
+        'ito-background'
+    ]) {
+        const canvasBlock = css.slice(
+            css.indexOf(`.${cls} {`),
+            css.indexOf('\n}', css.indexOf(`.${cls} {`))
+        );
+        assert.match(canvasBlock, /position:\s*fixed/);
+        assert.match(canvasBlock, /z-index:\s*0/);
+    }
+});
+
 test('the service worker caches instead of bypassing the HTTP cache', () => {
     const worker = read('sw.js');
     assert.equal(
