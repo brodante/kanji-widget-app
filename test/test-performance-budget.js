@@ -74,7 +74,7 @@ test('three.js and its addons are no longer render-blocking head scripts', () =>
     assert.doesNotMatch(script, /if \(themeName === 'nami'\) \{\s*initNamiWave\(\);/);
 });
 
-test('fonts ship in one non-blocking request without the unused Material Icons family', () => {
+test('fonts ship in one request: main faces block first paint, extras stay async', () => {
     const html = read('index.html');
     const fontLinks = [
         ...html.matchAll(/<link[^>]*href="(https:\/\/fonts\.googleapis\.com[^"]*)"[^>]*>/g)
@@ -102,7 +102,11 @@ test('fonts ship in one non-blocking request without the unused Material Icons f
     const blockingStyles = [...head.matchAll(/<link[^>]*rel="stylesheet"[^>]*>/g)]
         .map((match) => match[0])
         .filter((tag) => !tag.includes('media="print"'));
+    // The main faces block first paint on purpose: the preload has already started the
+    // download, so first paint finds Klee One ready instead of swapping it in over the
+    // fallback font after the fact. That swap moved the progress line by 0.31 CLS.
     assert.deepEqual(blockingStyles, [
+        `<link\n            href="${combined[0]}"\n            rel="stylesheet"\n        />`,
         '<link rel="stylesheet" href="styles.css?v=ai-floating-v1" />'
     ]);
     // Async stylesheets must have a no-JS fallback.
@@ -197,18 +201,35 @@ test('deploy minifies first-party assets with the same filenames', () => {
 test('the Firebase stack (auth SDK + reCAPTCHA) starts off the critical path', () => {
     const source = read('app-auth.js');
 
-    // Startup must not pull ~800 KiB of third-party JS: it waits for idle or a tap.
+    // Startup must not pull ~800 KiB of third-party JS: the stack waits for the learner's
+    // first tap or keypress. The old 5 s idle timer fired inside every PageSpeed trace,
+    // which is how reCAPTCHA (694 KiB + the App Check exchange) got onto the critical
+    // path. Every consumer is interaction-driven: sign-in taps, AI Sensei questions
+    // (AIManager awaits readyPromise) and the first keypress.
     assert.match(source, /window\.kanjiAuth\.readyPromise = new Promise\(\(resolve\) => \{/);
-    assert.match(source, /schedule\(start, \{ timeout: 5000 \}\)/, 'idle work gets a deadline');
-    assert.match(source, /addEventListener\('pointerdown', start, \{ once: true \}\)/);
+    assert.match(
+        source,
+        /document\.addEventListener\('pointerdown', start, \{ once: true, capture: true \}\)/,
+        'the first tap starts the stack'
+    );
+    assert.match(
+        source,
+        /document\.addEventListener\('keydown', start, \{ once: true, capture: true \}\)/,
+        'the first keypress starts the stack (keyboard-only learners included)'
+    );
+    assert.equal(
+        source.includes('requestIdleCallback'),
+        false,
+        'no idle timer: it fired at ~5 s, inside every lab trace'
+    );
     assert.equal(
         source.includes('window.kanjiAuth.readyPromise = window.kanjiAuth.init();'),
         false,
         'init() must not run on DOMContentLoaded'
     );
 
-    // init() stays idempotent so idle + tap cannot bind the controls twice.
-    assert.match(source, /init\(\) \{\s*\/\/ The bootstrap may fire this from idle time/);
+    // init() stays idempotent so a tap and a keypress cannot bind the controls twice.
+    assert.match(source, /init\(\) \{\s*\/\/ The bootstrap may fire this from the first tap/);
     assert.match(source, /this\.initPromise = this\.start\(\);/);
 
     // App Check still runs before the Firebase services, exactly as before.

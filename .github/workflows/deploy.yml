@@ -101,3 +101,33 @@ jobs:
             - name: Deploy to GitHub Pages
               id: deployment
               uses: actions/deploy-pages@v4
+
+            # The byte guard above only sees deploy/. A Pages misconfiguration once shipped
+            # the unminified branch files while every step here stayed green, so verify what
+            # the live site actually serves. The custom domain picks up a fresh deployment
+            # within a couple of minutes; poll instead of assuming the first response.
+            - name: Verify the live site serves the minified artifact
+              run: |
+                  LIVE="https://kanji.qd.je"
+                  live_size() {
+                      curl -fsSL --compressed "$LIVE/$1" | wc -c
+                  }
+                  # Minified today: script.js 83,121 B, styles.css 108,654 B.
+                  # Unminified: 168,077 B and 174,921 B. The thresholds sit between.
+                  ok=false
+                  for attempt in 1 2 3 4 5 6 7 8; do
+                      script_bytes=$(live_size "script.js?v=ai-floating-v1")
+                      style_bytes=$(live_size "styles.css?v=ai-floating-v1")
+                      if [ "$script_bytes" -gt 0 ] && [ "$script_bytes" -lt 120000 ] \
+                         && [ "$style_bytes" -gt 0 ] && [ "$style_bytes" -lt 150000 ]; then
+                          echo "live site serves the minified artifact (script.js ${script_bytes} B, styles.css ${style_bytes} B)"
+                          ok=true
+                          break
+                      fi
+                      echo "attempt $attempt: live assets still look unminified (script.js ${script_bytes} B, styles.css ${style_bytes} B); waiting 30 s"
+                      sleep 30
+                  done
+                  if [ "$ok" != "true" ]; then
+                      echo "::error::the live site still serves unminified assets after 4 minutes - check the Pages deployment for this commit"
+                      exit 1
+                  fi

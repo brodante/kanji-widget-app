@@ -372,7 +372,7 @@ test('the service worker is still registered and is valid JavaScript', async () 
     }
 });
 
-test('the Firebase stack waits for idle or an account tap', async () => {
+test('the Firebase stack waits for the first interaction, then starts on a tap', async () => {
     const { dom, window, document } = await bootApp();
     try {
         const auth = window.kanjiAuth;
@@ -381,7 +381,7 @@ test('the Firebase stack waits for idle or an account tap', async () => {
         assert.equal(auth.sdk, undefined, 'the Firebase SDK must not be loaded at boot');
         assert.equal(typeof auth.readyPromise?.then, 'function', 'readyPromise must be exposed');
 
-        // A tap on any account control starts it immediately.
+        // A tap (the first interaction) starts it immediately.
         const button = document.querySelector('[data-app-sign-in]');
         assert.ok(button, 'the sign-in control must exist');
         button.dispatchEvent(new window.Event('pointerdown', { bubbles: true }));

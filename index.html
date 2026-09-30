@@ -37,7 +37,12 @@
         <script defer src="analytics.js?v=analytics-v1"></script>
 
         <!-- Fonts: one combined request (Material Icons is unused by this app) instead of three.
-             Everything except the app's own stylesheet loads without blocking first paint. -->
+             The main faces block first paint on purpose. The preload above starts the download
+             before the parser reaches this link, so by the time the first paint is due the CSS
+             is already cached and the woff2 files are downloading in parallel with the app's
+             own scripts. First paint then uses Klee One directly instead of swapping it in over
+             the fallback font after the fact - that swap is what moved the progress line and
+             produced the 0.31 CLS. The extra display faces (theme picker) stay async. -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -46,8 +51,6 @@
             href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
         />
         <link
-            media="print"
-            onload="this.media = 'all'"
             href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
             rel="stylesheet"
         />
