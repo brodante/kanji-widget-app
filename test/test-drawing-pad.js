@@ -883,6 +883,42 @@ async function main() {
         );
     }
 
+    console.log('\n== Guard: a theme switch recolors strokes already on the canvas ==');
+    {
+        const dom = makeDom();
+        const { window } = dom;
+        const document = window.document;
+        const pad = enterPracticeMode(window);
+        // Commit a stroke under the "old" theme: with no theme CSS in jsdom the ink
+        // falls back to the default, exactly like the first paint of any theme.
+        commitStroke(pad, window, [
+            { x: 20, y: 20 },
+            { x: 60, y: 70 },
+            { x: 100, y: 40 }
+        ]);
+        const ctx = pad.canvas.getContext('2d');
+        let clears = 0;
+        ctx.clearRect = () => {
+            clears++;
+        };
+
+        // An empty pad repaints nothing.
+        const emptyPad = new window.DrawingPad();
+        emptyPad.refreshInkColors();
+        check('an empty pad repaints nothing', clears === 0, `clearRect=${clears}`);
+
+        // Simulate the theme switch: the app changes the accent on the root (the
+        // data-theme attribute drives --primary-color in real CSS).
+        document.documentElement.style.setProperty('--primary-color', 'rgb(255, 82, 132)');
+        pad.refreshInkColors();
+        check('a theme switch repaints the existing strokes', clears > 0, `clearRect=${clears}`);
+        check(
+            'the repaint uses the NEW accent, not the old one',
+            String(ctx.strokeStyle).includes('255, 82, 132'),
+            `strokeStyle=${ctx.strokeStyle}`
+        );
+    }
+
     console.log(`\n${pass} passed, ${fail} failed\n`);
     process.exit(fail ? 1 : 0);
 }

@@ -1103,6 +1103,22 @@ class DrawingPad {
         return this._resolveCssColor('--primary-color');
     }
 
+    /**
+     * Repaint the strokes already on the canvas with the current theme accent.
+     *
+     * `_inkColor()` resolves on every paint, but pixels painted under a previous
+     * theme stay on the canvas until something triggers a repaint. The app calls
+     * this when the theme (and therefore the accent) changes, so a quick theme
+     * switch recolors existing strokes immediately instead of on the next tap.
+     * No-op when the pad has nothing painted yet.
+     */
+    refreshInkColors() {
+        if (!this.strokes.length && this.currentStroke.length <= 1) {
+            return;
+        }
+        this._repaint();
+    }
+
     // ==========================================
     // RENDERING
     // ==========================================

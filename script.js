@@ -3000,6 +3000,11 @@ class KanjiLearningApp {
             }
             icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
         }
+
+        // The practice pad paints its ink with the theme accent: repaint any strokes
+        // already down so a quick theme switch recolors them immediately (the custom
+        // theme path repaints again once its accent is applied - that happens later).
+        this.drawingPadInstance?.refreshInkColors();
     }
 
     // Persists whatever's currently in the builder and applies it immediately.
@@ -3127,6 +3132,10 @@ class KanjiLearningApp {
         const rgb = hexToRgb(accentHex);
         root.style.setProperty('--custom-accent', accentHex);
         root.style.setProperty('--custom-accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+
+        // The accent just changed, and this runs after setTheme's repaint (custom theme
+        // styles are applied asynchronously): repaint so pad ink matches the new accent.
+        this.drawingPadInstance?.refreshInkColors();
     }
 
     // A mobile-sourced background is captured at phone resolution. If the
