@@ -3231,9 +3231,13 @@ class KanjiLearningApp {
             'font-size-large',
             'font-size-extra-large'
         );
+        // Zen Maru Gothic and Yu Gothic were retired from the picker, but stay in
+        // this cleanup list so a previously saved choice is removed from the
+        // widget when any other font is applied.
         widget.classList.remove(
             'font-klee-one',
             'font-noto-sans-jp',
+            'font-noto-serif-jp',
             'font-zen-antique',
             'font-zen-maru-gothic',
             'font-hannari',
@@ -3251,12 +3255,11 @@ class KanjiLearningApp {
         const fontClassMap = {
             'Klee One': 'font-klee-one',
             'Noto Sans JP': 'font-noto-sans-jp',
+            'Noto Serif JP': 'font-noto-serif-jp',
             'Zen Antique': 'font-zen-antique',
-            'Zen Maru Gothic': 'font-zen-maru-gothic',
             Hannari: 'font-hannari',
             Kokoro: 'font-kokoro',
             'Hiragino Sans': 'font-hiragino-sans',
-            'Yu Gothic': 'font-yu-gothic',
             Meiryo: 'font-meiryo',
             'MS Gothic': 'font-ms-gothic'
         };

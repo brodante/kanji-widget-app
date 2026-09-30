@@ -95,8 +95,12 @@ test('fonts ship in one request: main faces block first paint, extras stay async
     assert.equal(fontLinks.length >= 3, true, 'combined CSS plus the theme-picker display faces');
     const combined = [...new Set(fontLinks.filter((href) => href.includes('css2')))];
     assert.equal(combined.length, 1, 'one css2 request instead of three');
-    for (const family of ['Klee+One', 'Noto+Sans+JP', 'Zen+Antique', 'Zen+Maru+Gothic']) {
+    for (const family of ['Klee+One', 'Noto+Sans+JP', 'Noto+Serif+JP', 'Zen+Antique']) {
         assert.ok(combined[0].includes(family), family);
+    }
+    // The picker is a curated top-9 (3x3); retired families must not ship.
+    for (const family of ['Zen+Maru+Gothic', 'Yu+Gothic']) {
+        assert.equal(combined[0].includes(family), false, `${family} is no longer picked`);
     }
     assert.equal(combined[0].includes('Material+Icons'), false, 'Material Icons is never used');
     assert.ok(combined[0].includes('display=swap'), 'font-display: swap avoids invisible text');

@@ -109,8 +109,8 @@ body {
 .font-zen-antique {
     --japanese-font: 'Zen Antique', 'Noto Sans JP', serif;
 }
-.font-zen-maru-gothic {
-    --japanese-font: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
+.font-noto-serif-jp {
+    --japanese-font: 'Noto Serif JP', 'Noto Sans JP', serif;
 }
 .font-hannari {
     --japanese-font: 'Hannari', 'Noto Sans JP', serif;
@@ -120,9 +120,6 @@ body {
 }
 .font-hiragino-sans {
     --japanese-font: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
-}
-.font-yu-gothic {
-    --japanese-font: 'Yu Gothic', 'Meiryo', sans-serif;
 }
 .font-meiryo {
     --japanese-font: 'Meiryo', sans-serif;

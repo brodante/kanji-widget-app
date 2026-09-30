@@ -48,15 +48,15 @@
         <link
             rel="preload"
             as="style"
-            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Noto+Serif+JP:wght@400;700&amp;family=Zen+Antique&amp;display=swap"
         />
         <link
-            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Noto+Serif+JP:wght@400;700&amp;family=Zen+Antique&amp;display=swap"
             rel="stylesheet"
         />
         <noscript>
             <link
-                href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+                href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Noto+Serif+JP:wght@400;700&amp;family=Zen+Antique&amp;display=swap"
                 rel="stylesheet"
             />
         </noscript>
@@ -597,43 +597,13 @@
                             <input type="checkbox" id="showFurigana" checked />
                         </div>
                         <div class="setting-group">
-                            <label>Kanji Font:</label>
+                            <label>Fonts:</label>
                             <div class="font-preview-grid" id="fontPreviewGrid">
-                                <div class="font-option" data-font="Klee One">
-                                    <div class="font-sample" style="font-family: 'Klee One'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Klee One</div>
-                                </div>
                                 <div class="font-option" data-font="Noto Sans JP">
                                     <div class="font-sample" style="font-family: 'Noto Sans JP'">
                                         日本
                                     </div>
-                                    <div class="font-name">Noto Sans JP</div>
-                                </div>
-                                <div class="font-option" data-font="Zen Antique">
-                                    <div class="font-sample" style="font-family: 'Zen Antique'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Zen Antique</div>
-                                </div>
-                                <div class="font-option" data-font="Zen Maru Gothic">
-                                    <div class="font-sample" style="font-family: 'Zen Maru Gothic'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Zen Maru</div>
-                                </div>
-                                <div class="font-option" data-font="Hannari">
-                                    <div class="font-sample" style="font-family: 'Hannari'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Hannari</div>
-                                </div>
-                                <div class="font-option" data-font="Kokoro">
-                                    <div class="font-sample" style="font-family: 'Kokoro'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Kokoro</div>
+                                    <div class="font-name">Noto Sans</div>
                                 </div>
                                 <div class="font-option" data-font="Hiragino Sans">
                                     <div class="font-sample" style="font-family: 'Hiragino Sans'">
@@ -641,11 +611,17 @@
                                     </div>
                                     <div class="font-name">Hiragino</div>
                                 </div>
-                                <div class="font-option" data-font="Yu Gothic">
-                                    <div class="font-sample" style="font-family: 'Yu Gothic'">
+                                <div class="font-option" data-font="Klee One">
+                                    <div class="font-sample" style="font-family: 'Klee One'">
                                         日本
                                     </div>
-                                    <div class="font-name">Yu Gothic</div>
+                                    <div class="font-name">Klee One</div>
+                                </div>
+                                <div class="font-option" data-font="Noto Serif JP">
+                                    <div class="font-sample" style="font-family: 'Noto Serif JP'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Noto Serif</div>
                                 </div>
                                 <div class="font-option" data-font="Meiryo">
                                     <div class="font-sample" style="font-family: 'Meiryo'">
@@ -659,18 +635,35 @@
                                     </div>
                                     <div class="font-name">MS Gothic</div>
                                 </div>
+                                <div class="font-option" data-font="Zen Antique">
+                                    <div class="font-sample" style="font-family: 'Zen Antique'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Zen Antique</div>
+                                </div>
+                                <div class="font-option" data-font="Hannari">
+                                    <div class="font-sample" style="font-family: 'Hannari'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Hannari</div>
+                                </div>
+                                <div class="font-option" data-font="Kokoro">
+                                    <div class="font-sample" style="font-family: 'Kokoro'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Kokoro</div>
+                                </div>
                             </div>
                             <select id="kanjiFont" style="display: none">
-                                <option value="Klee One" selected>Klee One (Default)</option>
                                 <option value="Noto Sans JP">Noto Sans JP</option>
-                                <option value="Zen Antique">Zen Antique (Mincho Style)</option>
-                                <option value="Zen Maru Gothic">Zen Maru Gothic</option>
-                                <option value="Hannari">Hannari (Traditional)</option>
-                                <option value="Kokoro">Kokoro (Brush Style)</option>
                                 <option value="Hiragino Sans">Hiragino Sans</option>
-                                <option value="Yu Gothic">Yu Gothic</option>
+                                <option value="Klee One" selected>Klee One (Default)</option>
+                                <option value="Noto Serif JP">Noto Serif JP</option>
                                 <option value="Meiryo">Meiryo</option>
                                 <option value="MS Gothic">MS Gothic</option>
+                                <option value="Zen Antique">Zen Antique (Mincho Style)</option>
+                                <option value="Hannari">Hannari (Traditional)</option>
+                                <option value="Kokoro">Kokoro (Brush Style)</option>
                             </select>
                             <input type="hidden" id="kanjiFont-hidden" value="Klee One" />
                         </div>
