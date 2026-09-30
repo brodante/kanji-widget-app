@@ -493,6 +493,7 @@ class KanjiLearningApp {
         this.renderStreak();
         this.bindEvents();
         this.bindFontGridEvents();
+        this.initFontMoreToggle();
         this.updateLevelIcon();
 
         // BUG FIX: await this so the pool is loaded before we try to filter recent kanji!
@@ -518,6 +519,53 @@ class KanjiLearningApp {
                 this.updateFontPreviewActive();
             });
         });
+    }
+
+    // The font grid shows the curated 3x3 by default; the faded "More fonts"
+    // tile expands it to every available font (and back).
+    initFontMoreToggle() {
+        const more = document.getElementById('fontMoreBtn');
+        if (!more) {
+            return;
+        }
+        const toggle = () => {
+            const grid = document.getElementById('fontPreviewGrid');
+            this.setFontGridExpanded(!grid.classList.contains('expanded'));
+        };
+        more.addEventListener('click', toggle);
+        more.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+            }
+        });
+    }
+
+    // Expand/collapse the font grid, keeping the More tile's icon, label and
+    // aria state in sync. Also keeps the selection visible: if the active font
+    // is one of the extra tiles, the grid reopens to show it.
+    setFontGridExpanded(expanded) {
+        const grid = document.getElementById('fontPreviewGrid');
+        const more = document.getElementById('fontMoreBtn');
+        if (!grid || !more) {
+            return;
+        }
+        if (!expanded) {
+            const activeExtra = document.querySelector('.font-option.active.font-option-extra');
+            if (activeExtra) {
+                return; // never hide the selected font
+            }
+        }
+        grid.classList.toggle('expanded', expanded);
+        const icon = more.querySelector('i');
+        if (icon) {
+            icon.className = expanded ? 'fas fa-minus' : 'fas fa-plus';
+        }
+        const label = more.querySelector('.font-more-label');
+        if (label) {
+            label.textContent = expanded ? 'Show less' : 'More fonts';
+        }
+        more.setAttribute('aria-label', expanded ? 'Hide extra fonts' : 'Show all fonts');
     }
 
     bindEvents() {
@@ -3257,9 +3305,11 @@ class KanjiLearningApp {
             'Noto Sans JP': 'font-noto-sans-jp',
             'Noto Serif JP': 'font-noto-serif-jp',
             'Zen Antique': 'font-zen-antique',
+            'Zen Maru Gothic': 'font-zen-maru-gothic',
             Hannari: 'font-hannari',
             Kokoro: 'font-kokoro',
             'Hiragino Sans': 'font-hiragino-sans',
+            'Yu Gothic': 'font-yu-gothic',
             Meiryo: 'font-meiryo',
             'MS Gothic': 'font-ms-gothic'
         };
@@ -3286,6 +3336,11 @@ class KanjiLearningApp {
                 option.classList.add('active');
             }
         });
+        // If the selected font is one of the hidden "extra" tiles, reopen the
+        // grid so its liquid-glass highlight stays visible.
+        if (document.querySelector('.font-option.active.font-option-extra')) {
+            this.setFontGridExpanded(true);
+        }
         // Also update hidden input
         const hiddenInput = document.getElementById('kanjiFont-hidden');
         if (hiddenInput) {

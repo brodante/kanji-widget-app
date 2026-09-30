@@ -112,6 +112,9 @@ body {
 .font-noto-serif-jp {
     --japanese-font: 'Noto Serif JP', 'Noto Sans JP', serif;
 }
+.font-zen-maru-gothic {
+    --japanese-font: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
+}
 .font-hannari {
     --japanese-font: 'Hannari', 'Noto Sans JP', serif;
 }
@@ -2336,10 +2339,42 @@ body {
     transform: translateY(-2px);
 }
 
+/* Selected font: a translucent liquid-glass disc around the tile, with a
+   primary ring + check badge so it reads on light and dark themes alike. */
 .font-option.active {
-    border-color: var(--primary-color);
-    background-color: rgba(var(--primary-color), 0.1);
-    box-shadow: 0 0 10px rgba(var(--primary-color), 0.3);
+    position: relative;
+    border-color: rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.16);
+    background-image: radial-gradient(
+        130% 90% at 50% -30%,
+        rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0) 65%
+    );
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow:
+        0 0 0 2px rgba(var(--primary-color-rgb), 0.55),
+        0 6px 18px rgba(var(--primary-color-rgb), 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -8px 14px rgba(255, 255, 255, 0.12);
+}
+
+.font-option.active::after {
+    content: '✓';
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--on-primary);
+    background: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .font-sample {
@@ -2357,6 +2392,53 @@ body {
     text-align: center;
     color: var(--on-surface-variant);
     font-weight: 500;
+}
+
+/* Extra fonts are hidden until the grid is expanded (the "More fonts" tile). */
+.font-option-extra {
+    display: none;
+}
+
+.font-preview-grid.expanded .font-option-extra {
+    display: flex;
+}
+
+/* Half-faded expand/collapse tile: keeps the 3x3 shape when collapsed and
+   moves to the very end of the grid when expanded. */
+.font-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.75rem;
+    border: 2px dashed rgba(var(--on-surface), 0.35);
+    border-radius: 8px;
+    background-color: transparent;
+    color: var(--on-surface-variant);
+    opacity: 0.55;
+    cursor: pointer;
+    transition:
+        opacity 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.font-more:hover,
+.font-more:focus-visible {
+    opacity: 1;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.font-more i {
+    font-size: 1.3rem;
+    line-height: 1.8rem;
+}
+
+.font-preview-grid.expanded .font-more {
+    order: 99;
+    opacity: 0.8;
 }
 
 .reset-btn {

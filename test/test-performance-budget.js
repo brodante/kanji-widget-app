@@ -95,13 +95,36 @@ test('fonts ship in one request: main faces block first paint, extras stay async
     assert.equal(fontLinks.length >= 3, true, 'combined CSS plus the theme-picker display faces');
     const combined = [...new Set(fontLinks.filter((href) => href.includes('css2')))];
     assert.equal(combined.length, 1, 'one css2 request instead of three');
-    for (const family of ['Klee+One', 'Noto+Sans+JP', 'Noto+Serif+JP', 'Zen+Antique']) {
+    for (const family of [
+        'Klee+One',
+        'Noto+Sans+JP',
+        'Noto+Serif+JP',
+        'Zen+Antique',
+        'Zen+Maru+Gothic'
+    ]) {
         assert.ok(combined[0].includes(family), family);
     }
-    // The picker is a curated top-9 (3x3); retired families must not ship.
-    for (const family of ['Zen+Maru+Gothic', 'Yu+Gothic']) {
-        assert.equal(combined[0].includes(family), false, `${family} is no longer picked`);
-    }
+    // Yu Gothic is a device font only; it must never load from the CDN.
+    assert.equal(combined[0].includes('Yu+Gothic'), false, 'Yu Gothic is a system font');
+    // The picker is a curated 3x3 that expands to every available font.
+    const gridStart = html.indexOf('id="fontPreviewGrid"');
+    const gridHtml = html.slice(gridStart, html.indexOf('</select>', gridStart));
+    assert.equal(
+        (gridHtml.match(/class="font-option/g) || []).length,
+        11,
+        'eleven font tiles in the expandable grid'
+    );
+    assert.equal(
+        (gridHtml.match(/font-option-extra/g) || []).length,
+        3,
+        'three extra tiles hidden until expanded'
+    );
+    assert.ok(
+        gridHtml.includes('id="fontMoreBtn"') &&
+            gridHtml.includes('class="font-more"') &&
+            gridHtml.includes('role="button"'),
+        'the faded More-fonts tile expands the grid'
+    );
     assert.equal(combined[0].includes('Material+Icons'), false, 'Material Icons is never used');
     assert.ok(combined[0].includes('display=swap'), 'font-display: swap avoids invisible text');
     // The preload and the stylesheet must be the same URL, or the preload is wasted.
