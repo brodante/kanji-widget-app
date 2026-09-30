@@ -72,6 +72,18 @@ test('three.js and its addons are no longer render-blocking head scripts', () =>
         /if \(WEBGL_THEMES\.includes\(themeName\)\) \{\s*startWebGLTheme\(themeName\);/
     );
     assert.doesNotMatch(script, /if \(themeName === 'nami'\) \{\s*initNamiWave\(\);/);
+
+    // Each theme waits only on the three.js parts it uses: obake on the post-processing
+    // chain, ito on nothing (its module bundles its own three.js), the rest on the core.
+    assert.match(
+        script,
+        /themeName === 'obake'[\s\S]{0,80}ensurePostProcessing\(\)[\s\S]{0,120}themeName === 'ito'[\s\S]{0,80}Promise\.resolve\(\)[\s\S]{0,80}ensureThreeCore\(\);/
+    );
+    // The addons chain off the core, so they can never run before it.
+    assert.match(
+        script,
+        /ensureThreeCore\(\)\s*\.then\(\(\) => injectScriptsInOrder\(THREE_POST_PROCESSING_SCRIPTS\)\)/
+    );
 });
 
 test('fonts ship in one request: main faces block first paint, extras stay async', () => {

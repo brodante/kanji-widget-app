@@ -140,6 +140,35 @@ Until then, App Check token exchanges will 403 for interacting users as well
    wave still animates the moment the page opens; visually it is the same
    smooth gradient scene.
 
+5. **Per-theme three.js dependencies** (`script.js` loader). Every WebGL theme
+   used to wait on all seven CDN scripts in order before its first frame — six of
+   which only obake uses, and zero of which ito uses (its `tubes1.min.js` module
+   bundles its own three.js r180). Now: **nami and lumen** wait on the three.js
+   core only (their first frame is one script earlier); **obake** waits on the
+   core plus the six post-processing addons (same URLs, same order, chained after
+   the core); **ito** waits on nothing of ours. The idle warm-up fetches only
+   what the saved theme needs. No rendering changes: same libraries, same
+   versions, same execution order.
+
+## The other themes, looked at and deliberately left alone
+
+- **Lumen** — its full-screen plasma shader renders razor-thin bright lines
+  (`0.05 / abs(...)` singularities); `antialias` is doing real, visible work
+  there, so it stays on. Pixel ratio is already capped; the loop is one pass,
+  one uniform update per frame. Nothing safe to change.
+- **Obake** — its cost is its identity: `UnrealBloomPass` plus the VHS
+  analog-decay pass (grain, scanlines, bleeding, jitter). The per-frame CPU is
+  trivial (ghost lerp + 20 fireflies); pixel ratio is already capped. Turning
+  its `antialias` off would risk visible jaggies on the ghost silhouette and
+  firefly glows for a non-default theme — not worth it.
+- **Ito** — a black-box CDN module; its own render loop is inside the library
+  (nothing to tune from here), and the win was on our side: stop fetching ~630
+  KiB of CDN scripts it never uses, and pre-cache the module during idle time
+  when ito is the saved theme.
+- **All four** already cap `setPixelRatio` at 1 on mobile and at 2 on desktop,
+  and theme switching cancels the other three render loops before starting the
+  new one — so at most one WebGL loop ever runs.
+
 ## TBT decision (made): keep the animated `nami` default, lighten the frame
 
 The product call came back: **`nami` stays the animated default** — the wave
@@ -189,7 +218,7 @@ other three render loops before starting the new one.
 
 ## Verification
 
-- `npm run verify` — lint + format + 246 tests green after every change.
+- `npm run verify` — lint + format + 247 tests green after every change.
 - After merge, re-run the mobile lab analysis and check, in order:
     1. `script.js`/`styles.css` byte sizes on the wire (minified) — the deploy now
        fails if this is not true.

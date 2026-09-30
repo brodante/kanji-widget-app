@@ -267,7 +267,7 @@ test('learning journeys still work: deck, mastery, undo, practice mode', async (
     }
 });
 
-test('every theme still applies, and the WebGL ones load three.js exactly once', async () => {
+test('every theme still applies, and each WebGL theme loads only the three.js parts it needs', async () => {
     const { dom, window, document } = await bootApp();
     try {
         const injected = () =>
@@ -276,11 +276,14 @@ test('every theme still applies, and the WebGL ones load three.js exactly once',
                     'head script[src*="three"], head script[src*="jsdelivr"]'
                 )
             ].map((script) => script.src);
+        const addons = () => document.querySelectorAll('head script[src*="jsdelivr"]').length;
 
         // The HTML ships no three.js at all: it is fetched on demand.
         assert.equal(read('index.html').includes('three.min.js'), false);
-        // The default theme is a WebGL one, so the idle warm-up has already queued it.
-        assert.equal(injected().length, 7, 'seven CDN scripts, once');
+        // The default theme (nami) needs only the three.js core, so the idle warm-up has
+        // queued just that one script - not the post-processing chain it never uses.
+        assert.equal(injected().length, 1, 'nami warm-up queues the three.js core, once');
+        assert.equal(addons(), 0, 'no post-processing addons for a core-only theme');
         assert.equal(
             document.documentElement.getAttribute('data-theme'),
             'nami',
@@ -290,7 +293,7 @@ test('every theme still applies, and the WebGL ones load three.js exactly once',
         for (const theme of ['paper', 'candy', 'yotsuba', 'sunrise', 'nord', 'midnight']) {
             window.app.setTheme(theme);
             assert.equal(document.documentElement.getAttribute('data-theme'), theme);
-            assert.equal(injected().length, 7, `${theme} must not re-fetch three.js`);
+            assert.equal(injected().length, 1, `${theme} must not fetch three.js`);
         }
 
         // Custom themes read from storage and must not throw.
@@ -301,10 +304,60 @@ test('every theme still applies, and the WebGL ones load three.js exactly once',
             window.app.setTheme(theme);
             await settle(window, 50);
             assert.equal(document.documentElement.getAttribute('data-theme'), theme);
-            assert.equal(injected().length, 7, `${theme} must reuse the loaded three.js`);
+            // The core is still downloading (the harness has no network), so nothing else
+            // is queued yet. Each of these themes needs no script of its own beyond that:
+            // lumen the core, obake the core plus addons (proven by the loader test
+            // below), ito nothing at all (its module bundles its own three.js).
+            assert.equal(injected().length, 1, `${theme} must not re-fetch the three.js core`);
         }
 
         assert.equal(window.localStorage.getItem('theme'), 'nami', 'the theme choice persists');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('obake pulls the post-processing addons exactly once, after the core loads', async () => {
+    const { dom, window, document } = await bootApp();
+    try {
+        const coreScript = () =>
+            [...document.querySelectorAll('head script')].find((script) =>
+                script.src.includes('three.min.js')
+            );
+        const addons = () =>
+            [...document.querySelectorAll('head script[src*="jsdelivr"]')].map((s) => s.src);
+
+        assert.ok(coreScript(), 'the idle warm-up queued the three.js core');
+        assert.equal(addons().length, 0, 'the addons wait for the core');
+
+        // Settle the core the way a real browser would: its load event fires.
+        coreScript().dispatchEvent(new window.Event('load'));
+        await settle(window, 50);
+        assert.equal(addons().length, 0, 'a loaded core alone triggers no addons');
+
+        // Obake asks for the full chain: the six addons are queued once, in order, on top
+        // of the already-loaded core. (The promise itself only settles when the addon
+        // scripts finish loading, which the harness's no-network scripts never do - the
+        // injection is what this test checks.)
+        window.ensurePostProcessing();
+        await settle(window, 50);
+        assert.deepEqual(
+            addons(),
+            [
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js'
+            ],
+            'six addons, original order, once'
+        );
+        assert.equal(
+            document.querySelectorAll('head script[src*="three.min.js"]').length,
+            1,
+            'the core is never fetched twice'
+        );
     } finally {
         dom.window.close();
     }

@@ -34,17 +34,19 @@ const THREE_CDN_SCRIPTS = [
 
 const WEBGL_THEMES = ['nami', 'lumen', 'obake', 'ito'];
 
-let threeJSLoadPromise = null;
+// The first entry is the three.js core (defines window.THREE); the rest extend it with the
+// post-processing chain and must run after the core, in this order.
+const THREE_CORE_SCRIPT = THREE_CDN_SCRIPTS[0];
+const THREE_POST_PROCESSING_SCRIPTS = THREE_CDN_SCRIPTS.slice(1);
 
-function loadWebGLDependencies() {
-    if (window.THREE && window.THREE.EffectComposer) {
-        return Promise.resolve(window.THREE);
-    }
-    if (threeJSLoadPromise) {
-        return threeJSLoadPromise;
-    }
-    threeJSLoadPromise = new Promise((resolve, reject) => {
-        let pending = THREE_CDN_SCRIPTS.length;
+// Ito's neon-thread cursor is a self-contained ES module that bundles its own three.js,
+// so ito never needs any of the CDN scripts above.
+const ITO_TUBES_URL =
+    'https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js';
+
+function injectScriptsInOrder(sources) {
+    return new Promise((resolve, reject) => {
+        let pending = sources.length;
         let settled = false;
         const settle = (error) => {
             if (settled) {
@@ -57,7 +59,7 @@ function loadWebGLDependencies() {
                 resolve(window.THREE);
             }
         };
-        THREE_CDN_SCRIPTS.forEach((src) => {
+        sources.forEach((src) => {
             const script = document.createElement('script');
             script.src = src;
             // Ordered execution, like the original sequential <head> tags.
@@ -71,15 +73,46 @@ function loadWebGLDependencies() {
             script.onerror = () => settle(new Error(`Could not load ${src}`));
             document.head.appendChild(script);
         });
-    }).catch((error) => {
-        // A failed CDN fetch must not stick: switching themes again can retry.
-        threeJSLoadPromise = null;
-        throw error;
     });
-    return threeJSLoadPromise;
 }
 
-// Boots a WebGL theme as soon as its lazily loaded dependencies are ready.
+// The three.js core - enough for the nami and lumen scenes.
+let threeCorePromise = null;
+function ensureThreeCore() {
+    if (window.THREE) {
+        return Promise.resolve(window.THREE);
+    }
+    if (!threeCorePromise) {
+        threeCorePromise = injectScriptsInOrder([THREE_CORE_SCRIPT]).catch((error) => {
+            // A failed CDN fetch must not stick: switching themes again can retry.
+            threeCorePromise = null;
+            throw error;
+        });
+    }
+    return threeCorePromise;
+}
+
+// The EffectComposer + bloom chain - only obake uses it, and only after the core.
+let postProcessingPromise = null;
+function ensurePostProcessing() {
+    if (window.THREE && window.THREE.EffectComposer) {
+        return ensureThreeCore();
+    }
+    if (!postProcessingPromise) {
+        postProcessingPromise = ensureThreeCore()
+            .then(() => injectScriptsInOrder(THREE_POST_PROCESSING_SCRIPTS))
+            .catch((error) => {
+                // Same rule as the core: a failed fetch must not stick.
+                postProcessingPromise = null;
+                throw error;
+            });
+    }
+    return postProcessingPromise;
+}
+
+// Boots a WebGL theme as soon as the parts it actually uses are ready: nami and lumen
+// wait on the core only, obake on the core plus the post-processing chain, and ito on
+// nothing (its module bundles its own three.js).
 function startWebGLTheme(themeName) {
     const starters = {
         nami: initNamiWave,
@@ -91,20 +124,20 @@ function startWebGLTheme(themeName) {
     if (!start) {
         return;
     }
-    if (window.THREE && window.THREE.EffectComposer) {
-        start();
-        return;
-    }
-    loadWebGLDependencies()
-        .then(start)
-        .catch((error) => {
-            // Local learning must never depend on a decorative background.
-            console.warn(`WebGL theme "${themeName}" is unavailable:`, error);
-        });
+    const ready =
+        themeName === 'obake'
+            ? ensurePostProcessing()
+            : themeName === 'ito'
+              ? Promise.resolve()
+              : ensureThreeCore();
+    ready.then(start).catch((error) => {
+        // Local learning must never depend on a decorative background.
+        console.warn(`WebGL theme "${themeName}" is unavailable:`, error);
+    });
 }
 
-// Pulls three.js in during idle time so a WebGL theme does not have to wait for
-// the CDN on the first switch (or on a reload that restores that theme).
+// Pulls the theme's own dependencies in during idle time so a WebGL theme does not have
+// to wait for the CDN on the first switch (or on a reload that restores that theme).
 function warmWebGLDependencies() {
     const theme = localStorage.getItem('theme');
     if (!theme || !WEBGL_THEMES.includes(theme)) {
@@ -112,7 +145,18 @@ function warmWebGLDependencies() {
     }
     const schedule = window.requestIdleCallback || ((callback) => setTimeout(callback, 200));
     schedule(() => {
-        loadWebGLDependencies().catch(() => {});
+        if (theme === 'obake') {
+            ensurePostProcessing().catch(() => {});
+        } else if (theme === 'ito') {
+            // Pre-cache the module; initItoTubes' import of the same URL reuses it.
+            try {
+                import(ITO_TUBES_URL).catch(() => {});
+            } catch (err) {
+                // Environments without dynamic import (the test harness) skip the warm-up.
+            }
+        } else {
+            ensureThreeCore().catch(() => {});
+        }
     });
 }
 
@@ -3117,7 +3161,7 @@ class KanjiLearningApp {
         styleTag.textContent = `.custom-theme-background {\n${safeCss}\n}`;
     }
 
-    // Loads the saved theme on startup (Defaulting to 'candy' for new users)
+    // Loads the saved theme on startup (defaulting to 'nami' for new users)
     applyTheme() {
         const savedTheme = localStorage.getItem('theme') || 'nami';
         this.setTheme(savedTheme);
