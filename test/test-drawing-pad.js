@@ -557,9 +557,17 @@ async function main() {
             `score=${stroke.score}, snapRefIndex=${stroke.snapRefIndex}`
         );
 
+        // Snap defaults ON for a fresh browser, so the toggle starts active.
+        check(
+            'snap on by default (fresh browser)',
+            pad.snapEnabled === true &&
+                doc.getElementById('drawingPadInlineSnapBtn').classList.contains('active')
+        );
+
+        doc.getElementById('drawingPadInlineSnapBtn').click(); // snap off
         check('snap off -> raw points rendered', pad._getRenderPoints(stroke) === stroke.points);
 
-        doc.getElementById('drawingPadInlineSnapBtn').click();
+        doc.getElementById('drawingPadInlineSnapBtn').click(); // snap on
         check(
             'snap toggle activates',
             pad.snapEnabled === true &&
@@ -666,14 +674,10 @@ async function main() {
 
         const back = doc.getElementById('strokeOrderBack');
         const guide = doc.getElementById('drawingPadInlineGuide');
+        // Guide defaults ON for a fresh browser: the reference sits beside the
+        // pad from the first kanji.
         check(
-            'guide off by default (pad centred)',
-            !back.classList.contains('guide-on') && guide.innerHTML === ''
-        );
-
-        doc.getElementById('drawingPadInlineGuideBtn').click();
-        check(
-            'guide on shifts layout (guide-on class)',
+            'guide on by default (side-by-side layout)',
             back.classList.contains('guide-on') && pad.guideVisible === true
         );
         check('guide shows the reference SVG', !!guide.querySelector('svg'));
@@ -721,20 +725,25 @@ async function main() {
         const dom = makeDom();
         const { window } = dom;
         const doc = window.document;
-        enterPracticeMode(window);
+        const pad = enterPracticeMode(window);
+        // Fresh browser: snap and the side-by-side guide start enabled.
+        check(
+            'fresh browser gets snap and guide enabled by default',
+            pad.snapEnabled === true && pad.guideVisible === true
+        );
 
         doc.getElementById('drawingPadInlineSnapBtn').click();
         doc.getElementById('drawingPadInlineGuideBtn').click();
         const stored = window.StorageManager.getItem('kw_settings', {});
         check(
             'toggles saved to settings',
-            stored.drawingPadSnap === true && stored.drawingPadGuide === true
+            stored.drawingPadSnap === false && stored.drawingPadGuide === false
         );
 
         const fresh = new window.DrawingPad();
         check(
             'new pad instance restores toggles',
-            fresh.snapEnabled === true && fresh.guideVisible === true
+            fresh.snapEnabled === false && fresh.guideVisible === false
         );
     }
 

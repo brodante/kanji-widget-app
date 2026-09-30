@@ -4155,6 +4155,12 @@ input:focus {
     transform: translate3d(0, 0, 0);
 }
 
+/* The footer holds only credits, so it sits a touch more translucent than
+   the content cards above it. */
+[data-theme='nami'] .footer-content {
+    background-color: rgba(10, 10, 10, 0.55) !important;
+}
+
 /* 4. Nami Progress Bar Colors */
 [data-theme='nami'] .progress-bar {
     background-color: rgba(255, 0, 255, 0.2);
@@ -4224,6 +4230,12 @@ input:focus {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
     will-change: transform;
     transform: translate3d(0, 0, 0);
+}
+
+/* The footer holds only credits, so it sits a touch more translucent than
+   the content cards above it. */
+[data-theme='lumen'] .footer-content {
+    background-color: rgba(10, 10, 10, 0.4) !important;
 }
 
 /* 4. Lumen Progress Bar */
@@ -4331,6 +4343,12 @@ input:focus {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
     will-change: transform;
     transform: translate3d(0, 0, 0);
+}
+
+/* The footer holds only credits, so it sits a touch more translucent than
+   the content cards above it. */
+[data-theme='obake'] .footer-content {
+    background-color: rgba(10, 10, 15, 0.5) !important;
 }
 
 [data-theme='obake'] .progress-bar {
@@ -4454,6 +4472,12 @@ input:focus {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(249, 103, 251, 0.2);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* The footer holds only credits, so it sits a touch more translucent than
+   the content cards above it. */
+[data-theme='ito'] .footer-content {
+    background-color: rgba(10, 10, 15, 0.4) !important;
 }
 
 /* Header Text Glow */

@@ -51,8 +51,10 @@ class DrawingPad {
         this._refPointCache = null; // sampled reference points, per kanji
         this.gridVisible = false;
         this.referenceVisible = true;
-        this.snapEnabled = false; // render completed strokes snapped to the reference shape
-        this.guideVisible = false; // side-by-side reference panel next to the canvas
+        // Enabled by default for fresh browsers: snap and the side-by-side
+        // guide are the helpful starting point for a learner.
+        this.snapEnabled = true; // render completed strokes snapped to the reference shape
+        this.guideVisible = true; // side-by-side reference panel next to the canvas
         this.feedbackTimeout = null;
         this._snapAnimFrame = null; // pending rAF id for snap glides
         this._widthAnimFrame = null; // pending rAF id for stroke-width easing
@@ -86,9 +88,11 @@ class DrawingPad {
         this.gridVisible = settings.drawingPadGrid !== undefined ? settings.drawingPadGrid : false;
         this.referenceVisible =
             settings.drawingPadRef !== undefined ? settings.drawingPadRef : true;
-        this.snapEnabled = settings.drawingPadSnap !== undefined ? settings.drawingPadSnap : false;
+        // Fresh browsers (and saved settings predating a toggle) default snap
+        // and guide ON; an explicit saved choice always wins.
+        this.snapEnabled = settings.drawingPadSnap !== undefined ? settings.drawingPadSnap : true;
         this.guideVisible =
-            settings.drawingPadGuide !== undefined ? settings.drawingPadGuide : false;
+            settings.drawingPadGuide !== undefined ? settings.drawingPadGuide : true;
         this.strokeWidth =
             settings.drawingPadStrokeWidth !== undefined ? settings.drawingPadStrokeWidth : 4;
         // Rendered width eases towards strokeWidth so slider drags feel smooth

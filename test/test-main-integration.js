@@ -44,7 +44,9 @@ test('live practice toolbar coexists with cloud/account UI without duplicate IDs
 
 test('practice mode persistence, feedback and safe backups remain integrated', () => {
     const script = read('script.js');
-    assert.match(script, /strokeOrderMode: 'animate'/);
+    // Fresh browsers start on the practice board; returning users get their
+    // last-open tab back from saved settings.
+    assert.match(script, /strokeOrderMode: 'practice'/);
     assert.match(script, /this\.settings\.strokeOrderMode = mode/);
     assert.match(script, /if \(this\.settings\.strokeOrderMode === 'practice'\)/);
     assert.match(script, /showWarning\(message\)/);

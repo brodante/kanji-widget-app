@@ -474,8 +474,9 @@ class KanjiLearningApp {
             kanjiAliveKey: '',
             // Which stroke-order tab the user last had open ('animate' or
             // 'practice'). Remembered so hopping to the next kanji reopens
-            // the practice board exactly as they left it.
-            strokeOrderMode: 'animate'
+            // the practice board exactly as they left it. Fresh browsers
+            // start on the practice board (the default learning surface).
+            strokeOrderMode: 'practice'
         };
 
         // Cache frequently-used DOM elements once instead of re-querying repeatedly
