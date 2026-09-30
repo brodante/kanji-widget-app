@@ -106,7 +106,8 @@ test('fonts ship in one request: main faces block first paint, extras stay async
     }
     // Yu Gothic is a device font only; it must never load from the CDN.
     assert.equal(combined[0].includes('Yu+Gothic'), false, 'Yu Gothic is a system font');
-    // The picker is a curated 3x3 that expands to every available font.
+    // The picker is a curated 3x2 (five fonts + a "More fonts" tile) that
+    // expands to every available font.
     const gridStart = html.indexOf('id="fontPreviewGrid"');
     const gridHtml = html.slice(gridStart, html.indexOf('</select>', gridStart));
     assert.equal(
@@ -116,8 +117,8 @@ test('fonts ship in one request: main faces block first paint, extras stay async
     );
     assert.equal(
         (gridHtml.match(/font-option-extra/g) || []).length,
-        3,
-        'three extra tiles hidden until expanded'
+        6,
+        'six extra tiles hidden until the 3x2 grid expands'
     );
     assert.ok(
         gridHtml.includes('id="fontMoreBtn"') &&

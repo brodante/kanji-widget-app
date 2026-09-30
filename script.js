@@ -521,8 +521,9 @@ class KanjiLearningApp {
         });
     }
 
-    // The font grid shows the curated 3x3 by default; the faded "More fonts"
-    // tile expands it to every available font (and back).
+    // The font grid shows a curated 3x2 (five fonts + the faded "More fonts"
+    // tile) by default; tapping the tile expands it to every available font
+    // (and back).
     initFontMoreToggle() {
         const more = document.getElementById('fontMoreBtn');
         if (!more) {
