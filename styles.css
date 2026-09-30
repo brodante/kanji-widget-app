@@ -109,6 +109,9 @@ body {
 .font-zen-antique {
     --japanese-font: 'Zen Antique', 'Noto Sans JP', serif;
 }
+.font-noto-serif-jp {
+    --japanese-font: 'Noto Serif JP', 'Noto Sans JP', serif;
+}
 .font-zen-maru-gothic {
     --japanese-font: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
 }
@@ -120,9 +123,6 @@ body {
 }
 .font-hiragino-sans {
     --japanese-font: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
-}
-.font-yu-gothic {
-    --japanese-font: 'Yu Gothic', 'Meiryo', sans-serif;
 }
 .font-meiryo {
     --japanese-font: 'Meiryo', sans-serif;
@@ -138,7 +138,11 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
-    z-index: 1;
+    /* Body-level stacking order: theme canvases (0) < footer (1) < app
+       content (2). The container must sit above the footer — at the same
+       z-index it lost the tie to the footer's later DOM position, which
+       painted the footer over fixed in-container elements like the toast. */
+    z-index: 2;
 }
 
 /* Header Styles */
@@ -195,6 +199,12 @@ body {
 .app-footer {
     padding: 0 1.5rem 1.5rem;
     margin-top: auto;
+    /* The footer is a direct child of <body>, outside .app-container. The WebGL
+       theme backgrounds (nami/lumen/obake/ito) are position:fixed; z-index:0, so
+       without this lift the canvas paints over the footer and hides it — that is
+       why it vanished in Lumen and looked washed out in Nami. */
+    position: relative;
+    z-index: 1;
 }
 
 .footer-content {
@@ -2333,10 +2343,14 @@ body {
     transform: translateY(-2px);
 }
 
+/* Selected font: a simple theme-tinted translucent pill with a soft ring.
+   (An earlier frosted-glass attempt read as flat on the solid settings
+   panel — this stays plain, theme-based and obvious.) */
 .font-option.active {
     border-color: var(--primary-color);
-    background-color: rgba(var(--primary-color), 0.1);
-    box-shadow: 0 0 10px rgba(var(--primary-color), 0.3);
+    background-color: rgba(var(--primary-color-rgb), 0.12);
+    border-radius: 999px;
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.15);
 }
 
 .font-sample {
@@ -2354,6 +2368,53 @@ body {
     text-align: center;
     color: var(--on-surface-variant);
     font-weight: 500;
+}
+
+/* Extra fonts are hidden until the grid is expanded (the "More fonts" tile). */
+.font-option-extra {
+    display: none;
+}
+
+.font-preview-grid.expanded .font-option-extra {
+    display: flex;
+}
+
+/* Half-faded expand/collapse tile: keeps the 3x2 shape when collapsed and
+   moves to the very end of the grid when expanded. */
+.font-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.75rem;
+    border: 2px dashed rgba(var(--on-surface), 0.35);
+    border-radius: 8px;
+    background-color: transparent;
+    color: var(--on-surface-variant);
+    opacity: 0.55;
+    cursor: pointer;
+    transition:
+        opacity 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.font-more:hover,
+.font-more:focus-visible {
+    opacity: 1;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.font-more i {
+    font-size: 1.3rem;
+    line-height: 1.8rem;
+}
+
+.font-preview-grid.expanded .font-more {
+    order: 99;
+    opacity: 0.8;
 }
 
 .reset-btn {
@@ -4134,8 +4195,12 @@ input:focus {
 [data-theme='nami'] .kanji-widget,
 [data-theme='nami'] .progress-section,
 [data-theme='nami'] .journey-section,
-[data-theme='nami'] .recent-section {
+[data-theme='nami'] .recent-section,
+[data-theme='nami'] .footer-content {
     background-color: rgba(10, 10, 10, 0.65) !important;
+    /* The footer's base faint white tint would brighten it above its glass
+       siblings, so it gets the exact same glass as the sections above. */
+    background-image: none;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 229, 255, 0.15);
@@ -4143,6 +4208,12 @@ input:focus {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
     will-change: transform;
     transform: translate3d(0, 0, 0);
+}
+
+/* The footer holds only credits, so it sits a touch more translucent than
+   the content cards above it. */
+[data-theme='nami'] .footer-content {
+    background-color: rgba(10, 10, 10, 0.55) !important;
 }
 
 /* 4. Nami Progress Bar Colors */
@@ -4202,8 +4273,11 @@ input:focus {
 [data-theme='lumen'] .kanji-widget,
 [data-theme='lumen'] .progress-section,
 [data-theme='lumen'] .journey-section,
-[data-theme='lumen'] .recent-section {
+[data-theme='lumen'] .recent-section,
+[data-theme='lumen'] .footer-content {
     background-color: rgba(10, 10, 10, 0.5) !important;
+    /* Same glass as the sections above (no opaque block, no white tint). */
+    background-image: none;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -4211,6 +4285,12 @@ input:focus {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
     will-change: transform;
     transform: translate3d(0, 0, 0);
+}
+
+/* The footer holds only credits, so it sits a touch more translucent than
+   the content cards above it. */
+[data-theme='lumen'] .footer-content {
+    background-color: rgba(10, 10, 10, 0.4) !important;
 }
 
 /* 4. Lumen Progress Bar */
@@ -4306,8 +4386,11 @@ input:focus {
 [data-theme='obake'] .kanji-widget,
 [data-theme='obake'] .progress-section,
 [data-theme='obake'] .journey-section,
-[data-theme='obake'] .recent-section {
+[data-theme='obake'] .recent-section,
+[data-theme='obake'] .footer-content {
     background-color: rgba(10, 10, 15, 0.6) !important;
+    /* Same glass as the sections above (no opaque block, no white tint). */
+    background-image: none;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(187, 134, 252, 0.1);
@@ -4315,6 +4398,12 @@ input:focus {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
     will-change: transform;
     transform: translate3d(0, 0, 0);
+}
+
+/* The footer holds only credits, so it sits a touch more translucent than
+   the content cards above it. */
+[data-theme='obake'] .footer-content {
+    background-color: rgba(10, 10, 15, 0.5) !important;
 }
 
 [data-theme='obake'] .progress-bar {
@@ -4429,12 +4518,21 @@ input:focus {
 [data-theme='ito'] .progress-section,
 [data-theme='ito'] .journey-section,
 [data-theme='ito'] .app-header,
-[data-theme='ito'] .recent-section {
+[data-theme='ito'] .recent-section,
+[data-theme='ito'] .footer-content {
     background-color: rgba(10, 10, 15, 0.5) !important;
+    /* Same glass as the sections above (no opaque block, no white tint). */
+    background-image: none;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(249, 103, 251, 0.2);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* The footer holds only credits, so it sits a touch more translucent than
+   the content cards above it. */
+[data-theme='ito'] .footer-content {
+    background-color: rgba(10, 10, 15, 0.4) !important;
 }
 
 /* Header Text Glow */

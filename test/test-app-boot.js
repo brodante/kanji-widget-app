@@ -267,7 +267,7 @@ test('learning journeys still work: deck, mastery, undo, practice mode', async (
     }
 });
 
-test('every theme still applies, and the WebGL ones load three.js exactly once', async () => {
+test('every theme still applies, and each WebGL theme loads only the three.js parts it needs', async () => {
     const { dom, window, document } = await bootApp();
     try {
         const injected = () =>
@@ -276,11 +276,14 @@ test('every theme still applies, and the WebGL ones load three.js exactly once',
                     'head script[src*="three"], head script[src*="jsdelivr"]'
                 )
             ].map((script) => script.src);
+        const addons = () => document.querySelectorAll('head script[src*="jsdelivr"]').length;
 
         // The HTML ships no three.js at all: it is fetched on demand.
         assert.equal(read('index.html').includes('three.min.js'), false);
-        // The default theme is a WebGL one, so the idle warm-up has already queued it.
-        assert.equal(injected().length, 7, 'seven CDN scripts, once');
+        // The default theme (nami) needs only the three.js core, so the idle warm-up has
+        // queued just that one script - not the post-processing chain it never uses.
+        assert.equal(injected().length, 1, 'nami warm-up queues the three.js core, once');
+        assert.equal(addons(), 0, 'no post-processing addons for a core-only theme');
         assert.equal(
             document.documentElement.getAttribute('data-theme'),
             'nami',
@@ -290,7 +293,7 @@ test('every theme still applies, and the WebGL ones load three.js exactly once',
         for (const theme of ['paper', 'candy', 'yotsuba', 'sunrise', 'nord', 'midnight']) {
             window.app.setTheme(theme);
             assert.equal(document.documentElement.getAttribute('data-theme'), theme);
-            assert.equal(injected().length, 7, `${theme} must not re-fetch three.js`);
+            assert.equal(injected().length, 1, `${theme} must not fetch three.js`);
         }
 
         // Custom themes read from storage and must not throw.
@@ -301,10 +304,103 @@ test('every theme still applies, and the WebGL ones load three.js exactly once',
             window.app.setTheme(theme);
             await settle(window, 50);
             assert.equal(document.documentElement.getAttribute('data-theme'), theme);
-            assert.equal(injected().length, 7, `${theme} must reuse the loaded three.js`);
+            // The core is still downloading (the harness has no network), so nothing else
+            // is queued yet. Each of these themes needs no script of its own beyond that:
+            // lumen the core, obake the core plus addons (proven by the loader test
+            // below), ito nothing at all (its module bundles its own three.js).
+            assert.equal(injected().length, 1, `${theme} must not re-fetch the three.js core`);
         }
 
         assert.equal(window.localStorage.getItem('theme'), 'nami', 'the theme choice persists');
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('obake pulls the post-processing addons exactly once, after the core loads', async () => {
+    const { dom, window, document } = await bootApp();
+    try {
+        const coreScript = () =>
+            [...document.querySelectorAll('head script')].find((script) =>
+                script.src.includes('three.min.js')
+            );
+        const addons = () =>
+            [...document.querySelectorAll('head script[src*="jsdelivr"]')].map((s) => s.src);
+
+        assert.ok(coreScript(), 'the idle warm-up queued the three.js core');
+        assert.equal(addons().length, 0, 'the addons wait for the core');
+
+        // Settle the core the way a real browser would: its load event fires.
+        coreScript().dispatchEvent(new window.Event('load'));
+        await settle(window, 50);
+        assert.equal(addons().length, 0, 'a loaded core alone triggers no addons');
+
+        // Obake asks for the full chain: the six addons are queued once, in order, on top
+        // of the already-loaded core. (The promise itself only settles when the addon
+        // scripts finish loading, which the harness's no-network scripts never do - the
+        // injection is what this test checks.)
+        window.ensurePostProcessing();
+        await settle(window, 50);
+        assert.deepEqual(
+            addons(),
+            [
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js'
+            ],
+            'six addons, original order, once'
+        );
+        assert.equal(
+            document.querySelectorAll('head script[src*="three.min.js"]').length,
+            1,
+            'the core is never fetched twice'
+        );
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('local auto backups are data-only and survive a full localStorage', async () => {
+    const { dom, window } = await bootApp();
+    try {
+        const ls = window.localStorage;
+        // Seed two older auto backups, the way repeated sessions leave them
+        // (timestamps older than now, so string sorting matches age order).
+        ls.setItem('autoBackup_1000000000000', '{"app":"kanji-widgets","version":3}');
+        ls.setItem('autoBackup_1100000000000', '{"app":"kanji-widgets","version":3}');
+
+        // Simulate a full localStorage: the first auto-backup write throws the
+        // exact error real browsers raise, everything after it succeeds.
+        const proto = Object.getPrototypeOf(ls);
+        const originalSet = proto.setItem;
+        let quotaTripped = false;
+        proto.setItem = function (key, value) {
+            if (!quotaTripped && String(key).startsWith('autoBackup_')) {
+                quotaTripped = true;
+                const error = new Error(`Setting the value of '${key}' exceeded the quota.`);
+                error.name = 'QuotaExceededError';
+                throw error;
+            }
+            return originalSet.call(this, key, value);
+        };
+
+        await window.app.autoCreateBackup();
+
+        const keys = Object.keys(ls)
+            .filter((key) => key.startsWith('autoBackup_'))
+            .sort();
+        assert.ok(keys.length >= 2, 'a new backup was written after freeing space');
+        assert.notEqual(keys[0], 'autoBackup_1000000000000', 'the oldest backup made room');
+        assert.ok(ls.getItem('lastLocalBackup'), 'the backup timestamp is recorded');
+
+        // The stored backup is data-only: theme images and the avatar live in
+        // IndexedDB and must not be duplicated here as base64.
+        const backup = JSON.parse(ls.getItem(keys[keys.length - 1]));
+        assert.deepEqual(backup.media, {}, 'auto backups do not duplicate the IndexedDB media');
+        assert.ok(backup.storage, 'the user data is still in the backup');
     } finally {
         dom.window.close();
     }
@@ -372,7 +468,7 @@ test('the service worker is still registered and is valid JavaScript', async () 
     }
 });
 
-test('the Firebase stack waits for idle or an account tap', async () => {
+test('the Firebase stack waits for the first interaction, then starts on a tap', async () => {
     const { dom, window, document } = await bootApp();
     try {
         const auth = window.kanjiAuth;
@@ -381,7 +477,7 @@ test('the Firebase stack waits for idle or an account tap', async () => {
         assert.equal(auth.sdk, undefined, 'the Firebase SDK must not be loaded at boot');
         assert.equal(typeof auth.readyPromise?.then, 'function', 'readyPromise must be exposed');
 
-        // A tap on any account control starts it immediately.
+        // A tap (the first interaction) starts it immediately.
         const button = document.querySelector('[data-app-sign-in]');
         assert.ok(button, 'the sign-in control must exist');
         button.dispatchEvent(new window.Event('pointerdown', { bubbles: true }));

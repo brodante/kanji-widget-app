@@ -72,20 +72,60 @@ test('three.js and its addons are no longer render-blocking head scripts', () =>
         /if \(WEBGL_THEMES\.includes\(themeName\)\) \{\s*startWebGLTheme\(themeName\);/
     );
     assert.doesNotMatch(script, /if \(themeName === 'nami'\) \{\s*initNamiWave\(\);/);
+
+    // Each theme waits only on the three.js parts it uses: obake on the post-processing
+    // chain, ito on nothing (its module bundles its own three.js), the rest on the core.
+    assert.match(
+        script,
+        /themeName === 'obake'[\s\S]{0,80}ensurePostProcessing\(\)[\s\S]{0,120}themeName === 'ito'[\s\S]{0,80}Promise\.resolve\(\)[\s\S]{0,80}ensureThreeCore\(\);/
+    );
+    // The addons chain off the core, so they can never run before it.
+    assert.match(
+        script,
+        /ensureThreeCore\(\)\s*\.then\(\(\) => injectScriptsInOrder\(THREE_POST_PROCESSING_SCRIPTS\)\)/
+    );
 });
 
-test('fonts ship in one non-blocking request without the unused Material Icons family', () => {
+test('fonts ship in one request: main faces block first paint, extras stay async', () => {
     const html = read('index.html');
     const fontLinks = [
         ...html.matchAll(/<link[^>]*href="(https:\/\/fonts\.googleapis\.com[^"]*)"[^>]*>/g)
     ].map((match) => match[1]);
 
-    assert.equal(fontLinks.length >= 3, true, 'combined CSS plus the two earlyaccess faces');
+    assert.equal(fontLinks.length >= 3, true, 'combined CSS plus the theme-picker display faces');
     const combined = [...new Set(fontLinks.filter((href) => href.includes('css2')))];
     assert.equal(combined.length, 1, 'one css2 request instead of three');
-    for (const family of ['Klee+One', 'Noto+Sans+JP', 'Zen+Antique', 'Zen+Maru+Gothic']) {
+    for (const family of [
+        'Klee+One',
+        'Noto+Sans+JP',
+        'Noto+Serif+JP',
+        'Zen+Antique',
+        'Zen+Maru+Gothic'
+    ]) {
         assert.ok(combined[0].includes(family), family);
     }
+    // Yu Gothic is a device font only; it must never load from the CDN.
+    assert.equal(combined[0].includes('Yu+Gothic'), false, 'Yu Gothic is a system font');
+    // The picker is a curated 3x2 (five fonts + a "More fonts" tile) that
+    // expands to every available font.
+    const gridStart = html.indexOf('id="fontPreviewGrid"');
+    const gridHtml = html.slice(gridStart, html.indexOf('</select>', gridStart));
+    assert.equal(
+        (gridHtml.match(/class="font-option/g) || []).length,
+        11,
+        'eleven font tiles in the expandable grid'
+    );
+    assert.equal(
+        (gridHtml.match(/font-option-extra/g) || []).length,
+        6,
+        'six extra tiles hidden until the 3x2 grid expands'
+    );
+    assert.ok(
+        gridHtml.includes('id="fontMoreBtn"') &&
+            gridHtml.includes('class="font-more"') &&
+            gridHtml.includes('role="button"'),
+        'the faded More-fonts tile expands the grid'
+    );
     assert.equal(combined[0].includes('Material+Icons'), false, 'Material Icons is never used');
     assert.ok(combined[0].includes('display=swap'), 'font-display: swap avoids invisible text');
     // The preload and the stylesheet must be the same URL, or the preload is wasted.
@@ -102,7 +142,11 @@ test('fonts ship in one non-blocking request without the unused Material Icons f
     const blockingStyles = [...head.matchAll(/<link[^>]*rel="stylesheet"[^>]*>/g)]
         .map((match) => match[0])
         .filter((tag) => !tag.includes('media="print"'));
+    // The main faces block first paint on purpose: the preload has already started the
+    // download, so first paint finds Klee One ready instead of swapping it in over the
+    // fallback font after the fact. That swap moved the progress line by 0.31 CLS.
     assert.deepEqual(blockingStyles, [
+        `<link\n            href="${combined[0]}"\n            rel="stylesheet"\n        />`,
         '<link rel="stylesheet" href="styles.css?v=ai-floating-v1" />'
     ]);
     // Async stylesheets must have a no-JS fallback.
@@ -112,6 +156,27 @@ test('fonts ship in one non-blocking request without the unused Material Icons f
         head,
         /<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin \/>/
     );
+
+    // The theme-picker display faces (Hannari, Kokoro) are self-hosted. Google's
+    // Early Access endpoint served them without CORS headers, so the browser
+    // blocked every request and the faces never rendered; both are also gone from
+    // the css2 API. They ship as OFL-licensed TTFs next to the other assets.
+    assert.equal(html.includes('earlyaccess'), false, 'no more Early Access endpoints');
+    assert.ok(
+        html.includes(
+            `<link\n            media="print"\n            onload="this.media = 'all'"
+            href="assets/fonts/display-fonts.css?v=display-fonts-v1"\n            rel="stylesheet"\n        />`
+        ),
+        'the display faces stay async (after first paint)'
+    );
+    const displayCss = read('assets/fonts/display-fonts.css');
+    assert.ok(displayCss.includes("font-family: 'Hannari'"), 'Hannari @font-face present');
+    assert.ok(displayCss.includes("font-family: 'Kokoro'"), 'Kokoro @font-face present');
+    for (const file of ['Hannari-Regular.ttf', 'Kokoro-Regular.ttf']) {
+        const buffer = fs.readFileSync(path.join(root, 'assets/fonts', file));
+        assert.equal(buffer.length > 10000, true, `${file} ships with the app`);
+        assert.equal(buffer.readUInt32BE(0), 0x00010000, `${file} is a valid TrueType font`);
+    }
 });
 
 test('the viewport keeps pinch zoom enabled', () => {
@@ -165,6 +230,62 @@ test('the footer uses an opaque surface instead of a translucent wash', () => {
     assert.match(linkRule, /color: var\(--accent-text, var\(--primary-color\)\);/);
 });
 
+test('the footer stacks above the full-viewport WebGL theme canvases', () => {
+    // Regression: the footer is a direct child of <body> (outside .app-container),
+    // while the nami/lumen/obake/ito backgrounds are position:fixed; z-index:0.
+    // Static content paints below those, which hid the footer in those themes.
+    const css = read('styles.css');
+    const footerBlock = css.slice(
+        css.indexOf('.app-footer {'),
+        css.indexOf('\n}', css.indexOf('.app-footer {'))
+    );
+    assert.match(footerBlock, /position:\s*relative/);
+    assert.match(footerBlock, /z-index:\s*1/);
+    // The app container must sit above the footer, or the footer (later in
+    // DOM order) paints over fixed in-container elements such as the toast.
+    // Full body-level order: theme canvases (0) < footer (1) < app content (2).
+    const containerBlock = css.slice(
+        css.indexOf('.app-container {'),
+        css.indexOf('\n}', css.indexOf('.app-container {'))
+    );
+    assert.match(containerBlock, /z-index:\s*2/);
+    // The canvases must stay behind the app content layer.
+    for (const cls of [
+        'nami-background',
+        'lumen-background',
+        'obake-background',
+        'ito-background'
+    ]) {
+        const canvasBlock = css.slice(
+            css.indexOf(`.${cls} {`),
+            css.indexOf('\n}', css.indexOf(`.${cls} {`))
+        );
+        assert.match(canvasBlock, /position:\s*fixed/);
+        assert.match(canvasBlock, /z-index:\s*0/);
+    }
+});
+
+test('the footer shares the frosted-glass treatment of the sections in WebGL themes', () => {
+    // The kanji/progress/journey/recent cards are translucent glass in the four
+    // WebGL themes; the footer must follow them, not be an opaque block.
+    const css = read('styles.css');
+    for (const theme of ['nami', 'lumen', 'obake', 'ito']) {
+        assert.ok(
+            css.includes(`[data-theme='${theme}'] .footer-content`),
+            `${theme}: footer missing from the glass selector list`
+        );
+        const start = css.indexOf(`[data-theme='${theme}'] .kanji-widget,`);
+        const rule = css.slice(start, css.indexOf('\n}', start));
+        assert.match(
+            rule,
+            /background-color: rgba\(\d+,\s*\d+,\s*\d+,\s*0\.\d+\) !important/,
+            `${theme}: glass rule lost its translucent background`
+        );
+        assert.match(rule, /backdrop-filter: blur\(\d+px\)/);
+        assert.match(rule, /background-image: none/);
+    }
+});
+
 test('the service worker caches instead of bypassing the HTTP cache', () => {
     const worker = read('sw.js');
     assert.equal(
@@ -197,18 +318,35 @@ test('deploy minifies first-party assets with the same filenames', () => {
 test('the Firebase stack (auth SDK + reCAPTCHA) starts off the critical path', () => {
     const source = read('app-auth.js');
 
-    // Startup must not pull ~800 KiB of third-party JS: it waits for idle or a tap.
+    // Startup must not pull ~800 KiB of third-party JS: the stack waits for the learner's
+    // first tap or keypress. The old 5 s idle timer fired inside every PageSpeed trace,
+    // which is how reCAPTCHA (694 KiB + the App Check exchange) got onto the critical
+    // path. Every consumer is interaction-driven: sign-in taps, AI Sensei questions
+    // (AIManager awaits readyPromise) and the first keypress.
     assert.match(source, /window\.kanjiAuth\.readyPromise = new Promise\(\(resolve\) => \{/);
-    assert.match(source, /schedule\(start, \{ timeout: 5000 \}\)/, 'idle work gets a deadline');
-    assert.match(source, /addEventListener\('pointerdown', start, \{ once: true \}\)/);
+    assert.match(
+        source,
+        /document\.addEventListener\('pointerdown', start, \{ once: true, capture: true \}\)/,
+        'the first tap starts the stack'
+    );
+    assert.match(
+        source,
+        /document\.addEventListener\('keydown', start, \{ once: true, capture: true \}\)/,
+        'the first keypress starts the stack (keyboard-only learners included)'
+    );
+    assert.equal(
+        source.includes('requestIdleCallback'),
+        false,
+        'no idle timer: it fired at ~5 s, inside every lab trace'
+    );
     assert.equal(
         source.includes('window.kanjiAuth.readyPromise = window.kanjiAuth.init();'),
         false,
         'init() must not run on DOMContentLoaded'
     );
 
-    // init() stays idempotent so idle + tap cannot bind the controls twice.
-    assert.match(source, /init\(\) \{\s*\/\/ The bootstrap may fire this from idle time/);
+    // init() stays idempotent so a tap and a keypress cannot bind the controls twice.
+    assert.match(source, /init\(\) \{\s*\/\/ The bootstrap may fire this from the first tap/);
     assert.match(source, /this\.initPromise = this\.start\(\);/);
 
     // App Check still runs before the Firebase services, exactly as before.

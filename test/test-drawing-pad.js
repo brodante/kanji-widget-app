@@ -557,9 +557,17 @@ async function main() {
             `score=${stroke.score}, snapRefIndex=${stroke.snapRefIndex}`
         );
 
+        // Snap defaults ON for a fresh browser, so the toggle starts active.
+        check(
+            'snap on by default (fresh browser)',
+            pad.snapEnabled === true &&
+                doc.getElementById('drawingPadInlineSnapBtn').classList.contains('active')
+        );
+
+        doc.getElementById('drawingPadInlineSnapBtn').click(); // snap off
         check('snap off -> raw points rendered', pad._getRenderPoints(stroke) === stroke.points);
 
-        doc.getElementById('drawingPadInlineSnapBtn').click();
+        doc.getElementById('drawingPadInlineSnapBtn').click(); // snap on
         check(
             'snap toggle activates',
             pad.snapEnabled === true &&
@@ -666,14 +674,10 @@ async function main() {
 
         const back = doc.getElementById('strokeOrderBack');
         const guide = doc.getElementById('drawingPadInlineGuide');
+        // Guide defaults ON for a fresh browser: the reference sits beside the
+        // pad from the first kanji.
         check(
-            'guide off by default (pad centred)',
-            !back.classList.contains('guide-on') && guide.innerHTML === ''
-        );
-
-        doc.getElementById('drawingPadInlineGuideBtn').click();
-        check(
-            'guide on shifts layout (guide-on class)',
+            'guide on by default (side-by-side layout)',
             back.classList.contains('guide-on') && pad.guideVisible === true
         );
         check('guide shows the reference SVG', !!guide.querySelector('svg'));
@@ -721,20 +725,25 @@ async function main() {
         const dom = makeDom();
         const { window } = dom;
         const doc = window.document;
-        enterPracticeMode(window);
+        const pad = enterPracticeMode(window);
+        // Fresh browser: snap and the side-by-side guide start enabled.
+        check(
+            'fresh browser gets snap and guide enabled by default',
+            pad.snapEnabled === true && pad.guideVisible === true
+        );
 
         doc.getElementById('drawingPadInlineSnapBtn').click();
         doc.getElementById('drawingPadInlineGuideBtn').click();
         const stored = window.StorageManager.getItem('kw_settings', {});
         check(
             'toggles saved to settings',
-            stored.drawingPadSnap === true && stored.drawingPadGuide === true
+            stored.drawingPadSnap === false && stored.drawingPadGuide === false
         );
 
         const fresh = new window.DrawingPad();
         check(
             'new pad instance restores toggles',
-            fresh.snapEnabled === true && fresh.guideVisible === true
+            fresh.snapEnabled === false && fresh.guideVisible === false
         );
     }
 
@@ -880,6 +889,42 @@ async function main() {
             'snap still attaches to the exact reference coordinates',
             Math.abs(rp[0].x - map(5)) < 0.01 && Math.abs(rp[0].y - map(10)) < 0.01,
             `start=(${rp[0].x.toFixed(2)}, ${rp[0].y.toFixed(2)})`
+        );
+    }
+
+    console.log('\n== Guard: a theme switch recolors strokes already on the canvas ==');
+    {
+        const dom = makeDom();
+        const { window } = dom;
+        const document = window.document;
+        const pad = enterPracticeMode(window);
+        // Commit a stroke under the "old" theme: with no theme CSS in jsdom the ink
+        // falls back to the default, exactly like the first paint of any theme.
+        commitStroke(pad, window, [
+            { x: 20, y: 20 },
+            { x: 60, y: 70 },
+            { x: 100, y: 40 }
+        ]);
+        const ctx = pad.canvas.getContext('2d');
+        let clears = 0;
+        ctx.clearRect = () => {
+            clears++;
+        };
+
+        // An empty pad repaints nothing.
+        const emptyPad = new window.DrawingPad();
+        emptyPad.refreshInkColors();
+        check('an empty pad repaints nothing', clears === 0, `clearRect=${clears}`);
+
+        // Simulate the theme switch: the app changes the accent on the root (the
+        // data-theme attribute drives --primary-color in real CSS).
+        document.documentElement.style.setProperty('--primary-color', 'rgb(255, 82, 132)');
+        pad.refreshInkColors();
+        check('a theme switch repaints the existing strokes', clears > 0, `clearRect=${clears}`);
+        check(
+            'the repaint uses the NEW accent, not the old one',
+            String(ctx.strokeStyle).includes('255, 82, 132'),
+            `strokeStyle=${ctx.strokeStyle}`
         );
     }
 

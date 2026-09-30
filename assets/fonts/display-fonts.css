@@ -1,0 +1,27 @@
+/*
+ * Display faces for the theme picker, self-hosted.
+ *
+ * These used to load from Google Fonts' "Early Access" endpoint
+ * (fonts.googleapis.com/earlyaccess/*.css), but the woff2/woff/ttf files that
+ * endpoint serves carry no Access-Control-Allow-Origin header, so every
+ * browser blocked them (CORS console errors on each load) and the faces never
+ * actually rendered. Both fonts are also no longer served by the regular
+ * css2 API. They are therefore vendored here from the google/fonts repository
+ * (OFL-licensed: SIL Open Font License 1.1).
+ */
+
+@font-face {
+    font-family: 'Hannari';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('Hannari-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Kokoro';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('Kokoro-Regular.ttf') format('truetype');
+}

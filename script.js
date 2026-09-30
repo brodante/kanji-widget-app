@@ -34,17 +34,19 @@ const THREE_CDN_SCRIPTS = [
 
 const WEBGL_THEMES = ['nami', 'lumen', 'obake', 'ito'];
 
-let threeJSLoadPromise = null;
+// The first entry is the three.js core (defines window.THREE); the rest extend it with the
+// post-processing chain and must run after the core, in this order.
+const THREE_CORE_SCRIPT = THREE_CDN_SCRIPTS[0];
+const THREE_POST_PROCESSING_SCRIPTS = THREE_CDN_SCRIPTS.slice(1);
 
-function loadWebGLDependencies() {
-    if (window.THREE && window.THREE.EffectComposer) {
-        return Promise.resolve(window.THREE);
-    }
-    if (threeJSLoadPromise) {
-        return threeJSLoadPromise;
-    }
-    threeJSLoadPromise = new Promise((resolve, reject) => {
-        let pending = THREE_CDN_SCRIPTS.length;
+// Ito's neon-thread cursor is a self-contained ES module that bundles its own three.js,
+// so ito never needs any of the CDN scripts above.
+const ITO_TUBES_URL =
+    'https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js';
+
+function injectScriptsInOrder(sources) {
+    return new Promise((resolve, reject) => {
+        let pending = sources.length;
         let settled = false;
         const settle = (error) => {
             if (settled) {
@@ -57,7 +59,7 @@ function loadWebGLDependencies() {
                 resolve(window.THREE);
             }
         };
-        THREE_CDN_SCRIPTS.forEach((src) => {
+        sources.forEach((src) => {
             const script = document.createElement('script');
             script.src = src;
             // Ordered execution, like the original sequential <head> tags.
@@ -71,15 +73,46 @@ function loadWebGLDependencies() {
             script.onerror = () => settle(new Error(`Could not load ${src}`));
             document.head.appendChild(script);
         });
-    }).catch((error) => {
-        // A failed CDN fetch must not stick: switching themes again can retry.
-        threeJSLoadPromise = null;
-        throw error;
     });
-    return threeJSLoadPromise;
 }
 
-// Boots a WebGL theme as soon as its lazily loaded dependencies are ready.
+// The three.js core - enough for the nami and lumen scenes.
+let threeCorePromise = null;
+function ensureThreeCore() {
+    if (window.THREE) {
+        return Promise.resolve(window.THREE);
+    }
+    if (!threeCorePromise) {
+        threeCorePromise = injectScriptsInOrder([THREE_CORE_SCRIPT]).catch((error) => {
+            // A failed CDN fetch must not stick: switching themes again can retry.
+            threeCorePromise = null;
+            throw error;
+        });
+    }
+    return threeCorePromise;
+}
+
+// The EffectComposer + bloom chain - only obake uses it, and only after the core.
+let postProcessingPromise = null;
+function ensurePostProcessing() {
+    if (window.THREE && window.THREE.EffectComposer) {
+        return ensureThreeCore();
+    }
+    if (!postProcessingPromise) {
+        postProcessingPromise = ensureThreeCore()
+            .then(() => injectScriptsInOrder(THREE_POST_PROCESSING_SCRIPTS))
+            .catch((error) => {
+                // Same rule as the core: a failed fetch must not stick.
+                postProcessingPromise = null;
+                throw error;
+            });
+    }
+    return postProcessingPromise;
+}
+
+// Boots a WebGL theme as soon as the parts it actually uses are ready: nami and lumen
+// wait on the core only, obake on the core plus the post-processing chain, and ito on
+// nothing (its module bundles its own three.js).
 function startWebGLTheme(themeName) {
     const starters = {
         nami: initNamiWave,
@@ -91,20 +124,20 @@ function startWebGLTheme(themeName) {
     if (!start) {
         return;
     }
-    if (window.THREE && window.THREE.EffectComposer) {
-        start();
-        return;
-    }
-    loadWebGLDependencies()
-        .then(start)
-        .catch((error) => {
-            // Local learning must never depend on a decorative background.
-            console.warn(`WebGL theme "${themeName}" is unavailable:`, error);
-        });
+    const ready =
+        themeName === 'obake'
+            ? ensurePostProcessing()
+            : themeName === 'ito'
+              ? Promise.resolve()
+              : ensureThreeCore();
+    ready.then(start).catch((error) => {
+        // Local learning must never depend on a decorative background.
+        console.warn(`WebGL theme "${themeName}" is unavailable:`, error);
+    });
 }
 
-// Pulls three.js in during idle time so a WebGL theme does not have to wait for
-// the CDN on the first switch (or on a reload that restores that theme).
+// Pulls the theme's own dependencies in during idle time so a WebGL theme does not have
+// to wait for the CDN on the first switch (or on a reload that restores that theme).
 function warmWebGLDependencies() {
     const theme = localStorage.getItem('theme');
     if (!theme || !WEBGL_THEMES.includes(theme)) {
@@ -112,7 +145,18 @@ function warmWebGLDependencies() {
     }
     const schedule = window.requestIdleCallback || ((callback) => setTimeout(callback, 200));
     schedule(() => {
-        loadWebGLDependencies().catch(() => {});
+        if (theme === 'obake') {
+            ensurePostProcessing().catch(() => {});
+        } else if (theme === 'ito') {
+            // Pre-cache the module; initItoTubes' import of the same URL reuses it.
+            try {
+                import(ITO_TUBES_URL).catch(() => {});
+            } catch (err) {
+                // Environments without dynamic import (the test harness) skip the warm-up.
+            }
+        } else {
+            ensureThreeCore().catch(() => {});
+        }
     });
 }
 
@@ -430,8 +474,9 @@ class KanjiLearningApp {
             kanjiAliveKey: '',
             // Which stroke-order tab the user last had open ('animate' or
             // 'practice'). Remembered so hopping to the next kanji reopens
-            // the practice board exactly as they left it.
-            strokeOrderMode: 'animate'
+            // the practice board exactly as they left it. Fresh browsers
+            // start on the practice board (the default learning surface).
+            strokeOrderMode: 'practice'
         };
 
         // Cache frequently-used DOM elements once instead of re-querying repeatedly
@@ -448,6 +493,7 @@ class KanjiLearningApp {
         this.renderStreak();
         this.bindEvents();
         this.bindFontGridEvents();
+        this.initFontMoreToggle();
         this.updateLevelIcon();
 
         // BUG FIX: await this so the pool is loaded before we try to filter recent kanji!
@@ -473,6 +519,54 @@ class KanjiLearningApp {
                 this.updateFontPreviewActive();
             });
         });
+    }
+
+    // The font grid shows a curated 3x2 (five fonts + the faded "More fonts"
+    // tile) by default; tapping the tile expands it to every available font
+    // (and back).
+    initFontMoreToggle() {
+        const more = document.getElementById('fontMoreBtn');
+        if (!more) {
+            return;
+        }
+        const toggle = () => {
+            const grid = document.getElementById('fontPreviewGrid');
+            this.setFontGridExpanded(!grid.classList.contains('expanded'));
+        };
+        more.addEventListener('click', toggle);
+        more.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+            }
+        });
+    }
+
+    // Expand/collapse the font grid, keeping the More tile's icon, label and
+    // aria state in sync. Also keeps the selection visible: if the active font
+    // is one of the extra tiles, the grid reopens to show it.
+    setFontGridExpanded(expanded) {
+        const grid = document.getElementById('fontPreviewGrid');
+        const more = document.getElementById('fontMoreBtn');
+        if (!grid || !more) {
+            return;
+        }
+        if (!expanded) {
+            const activeExtra = document.querySelector('.font-option.active.font-option-extra');
+            if (activeExtra) {
+                return; // never hide the selected font
+            }
+        }
+        grid.classList.toggle('expanded', expanded);
+        const icon = more.querySelector('i');
+        if (icon) {
+            icon.className = expanded ? 'fas fa-minus' : 'fas fa-plus';
+        }
+        const label = more.querySelector('.font-more-label');
+        if (label) {
+            label.textContent = expanded ? 'Show less' : 'More fonts';
+        }
+        more.setAttribute('aria-label', expanded ? 'Hide extra fonts' : 'Show all fonts');
     }
 
     bindEvents() {
@@ -743,6 +837,13 @@ class KanjiLearningApp {
                 StorageManager.updateAISetting('apiKey', e.target.value.trim());
             });
         }
+
+        // The key field lives in a form (Chrome requires password fields to be in one),
+        // but pressing Enter must not submit it - that would reload the page with the
+        // key in the URL.
+        document.getElementById('aiApiKeyForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
 
         const toggleApiKeyVisibility = document.getElementById('toggleApiKeyVisibility');
         if (toggleApiKeyVisibility && aiApiKey) {
@@ -1353,11 +1454,11 @@ class KanjiLearningApp {
             }
         });
 
-        let isEnabled = true;
+        let isEnabled = false;
         try {
-            isEnabled = StorageManager.getAISettings().enableFloatingAssistant !== false;
+            isEnabled = StorageManager.getEnableFloatingAssistant();
         } catch (err) {
-            /* Keep the assistant visible if settings are temporarily unavailable. */
+            /* Keep the bubble hidden (the new-visitor default) if settings are unavailable. */
         }
         this.setAISenseiFabEnabled(isEnabled);
     }
@@ -2786,7 +2887,9 @@ class KanjiLearningApp {
         const floatingAssistantToggle = document.getElementById('aiFloatingAssistantEnabled');
 
         if (floatingAssistantToggle) {
-            floatingAssistantToggle.checked = aiSettings.enableFloatingAssistant !== false;
+            // Use the effective value (new visitors default to off) rather than the
+            // merged getAISettings() default, so the checkbox and the bubble agree.
+            floatingAssistantToggle.checked = StorageManager.getEnableFloatingAssistant();
             this.setAISenseiFabEnabled?.(floatingAssistantToggle.checked);
         }
 
@@ -2956,6 +3059,11 @@ class KanjiLearningApp {
             }
             icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
         }
+
+        // The practice pad paints its ink with the theme accent: repaint any strokes
+        // already down so a quick theme switch recolors them immediately (the custom
+        // theme path repaints again once its accent is applied - that happens later).
+        this.drawingPadInstance?.refreshInkColors();
     }
 
     // Persists whatever's currently in the builder and applies it immediately.
@@ -3083,6 +3191,10 @@ class KanjiLearningApp {
         const rgb = hexToRgb(accentHex);
         root.style.setProperty('--custom-accent', accentHex);
         root.style.setProperty('--custom-accent-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+
+        // The accent just changed, and this runs after setTheme's repaint (custom theme
+        // styles are applied asynchronously): repaint so pad ink matches the new accent.
+        this.drawingPadInstance?.refreshInkColors();
     }
 
     // A mobile-sourced background is captured at phone resolution. If the
@@ -3117,7 +3229,7 @@ class KanjiLearningApp {
         styleTag.textContent = `.custom-theme-background {\n${safeCss}\n}`;
     }
 
-    // Loads the saved theme on startup (Defaulting to 'candy' for new users)
+    // Loads the saved theme on startup (defaulting to 'nami' for new users)
     applyTheme() {
         const savedTheme = localStorage.getItem('theme') || 'nami';
         this.setTheme(savedTheme);
@@ -3168,9 +3280,13 @@ class KanjiLearningApp {
             'font-size-large',
             'font-size-extra-large'
         );
+        // Zen Maru Gothic and Yu Gothic were retired from the picker, but stay in
+        // this cleanup list so a previously saved choice is removed from the
+        // widget when any other font is applied.
         widget.classList.remove(
             'font-klee-one',
             'font-noto-sans-jp',
+            'font-noto-serif-jp',
             'font-zen-antique',
             'font-zen-maru-gothic',
             'font-hannari',
@@ -3188,6 +3304,7 @@ class KanjiLearningApp {
         const fontClassMap = {
             'Klee One': 'font-klee-one',
             'Noto Sans JP': 'font-noto-sans-jp',
+            'Noto Serif JP': 'font-noto-serif-jp',
             'Zen Antique': 'font-zen-antique',
             'Zen Maru Gothic': 'font-zen-maru-gothic',
             Hannari: 'font-hannari',
@@ -3220,6 +3337,11 @@ class KanjiLearningApp {
                 option.classList.add('active');
             }
         });
+        // If the selected font is one of the hidden "extra" tiles, reopen the
+        // grid so its liquid-glass highlight stays visible.
+        if (document.querySelector('.font-option.active.font-option-extra')) {
+            this.setFontGridExpanded(true);
+        }
         // Also update hidden input
         const hiddenInput = document.getElementById('kanjiFont-hidden');
         if (hiddenInput) {
@@ -3338,8 +3460,39 @@ class KanjiLearningApp {
 
     async autoCreateBackup() {
         try {
-            const backupData = JSON.stringify(await BackupManager.snapshot());
-            localStorage.setItem(`autoBackup_${Date.now()}`, backupData);
+            // Data-only snapshot: theme images and the avatar already persist in
+            // IndexedDB, so duplicating them here (base64) is what exhausted the
+            // ~5 MB localStorage quota and made auto backups fail for heavy users.
+            const backupData = JSON.stringify(
+                await BackupManager.snapshot({ includeMedia: false })
+            );
+
+            // If the write fails because storage is full, drop the oldest auto
+            // backups and retry: the older entries hold the same user data, one
+            // generation behind, so they are the first thing worth freeing.
+            let written = false;
+            let lastError = null;
+            for (let kept = 1; kept >= 0 && !written; kept--) {
+                try {
+                    localStorage.setItem(`autoBackup_${Date.now()}`, backupData);
+                    written = true;
+                } catch (error) {
+                    lastError = error;
+                    const old = Object.keys(localStorage)
+                        .filter((key) => key.startsWith('autoBackup_'))
+                        .sort();
+                    const dropCount = old.length - kept;
+                    if (dropCount <= 0) {
+                        break; // nothing of ours left to free
+                    }
+                    for (const key of old.slice(0, dropCount)) {
+                        localStorage.removeItem(key);
+                    }
+                }
+            }
+            if (!written) {
+                throw lastError || new Error('Auto backup write failed');
+            }
             localStorage.setItem('lastLocalBackup', Date.now().toString());
 
             // Keep only last 5 auto backups
@@ -3430,14 +3583,20 @@ function initNamiWave() {
     camera.position.set(0, 2, 6);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    // antialias stays off: the wave is a smooth additive-blended gradient with an edge fade
+    // and no hard edges, so MSAA adds cost (it is expensive on mid-range GPUs and in software
+    // rendering) without anything to see. If crisp edges are ever added to this scene, put it
+    // back.
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
     // Caps it at 1 for mobile to save battery and GPU, allows up to 2 on Desktop
     const pixelCap = window.innerWidth < 768 ? 1 : Math.min(window.devicePixelRatio, 2);
     renderer.setPixelRatio(pixelCap);
     container.appendChild(renderer.domElement);
 
-    const geometry = new THREE.PlaneGeometry(30, 15, 128, 128);
+    // 64x64 subdivisions is plenty: the wave's wavelengths span the whole 30-unit plane, so
+    // 128 per axis oversampled it four times over and only added vertex work.
+    const geometry = new THREE.PlaneGeometry(30, 15, 64, 64);
     geometry.rotateX(-Math.PI / 2);
 
     const waveMaterial = new THREE.ShaderMaterial({

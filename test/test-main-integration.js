@@ -44,7 +44,9 @@ test('live practice toolbar coexists with cloud/account UI without duplicate IDs
 
 test('practice mode persistence, feedback and safe backups remain integrated', () => {
     const script = read('script.js');
-    assert.match(script, /strokeOrderMode: 'animate'/);
+    // Fresh browsers start on the practice board; returning users get their
+    // last-open tab back from saved settings.
+    assert.match(script, /strokeOrderMode: 'practice'/);
     assert.match(script, /this\.settings\.strokeOrderMode = mode/);
     assert.match(script, /if \(this\.settings\.strokeOrderMode === 'practice'\)/);
     assert.match(script, /showWarning\(message\)/);
@@ -60,7 +62,13 @@ test('all live Recent theme styles and guide styles coexist with warning and dan
         /\.recent-section \{[^}]*background-color:[^}]*padding:[^}]*border-radius:[^}]*box-shadow:/
     );
     for (const theme of ['midnight', 'nami', 'lumen', 'obake', 'ito']) {
-        assert.ok(css.includes(`[data-theme='${theme}'] .recent-section {`), theme);
+        // The selector may sit anywhere inside a grouped rule (e.g. the
+        // frosted-glass list), so match it followed by ',' or '{', not the
+        // last-selector '{' shape only.
+        assert.ok(
+            new RegExp(`\\[data-theme='${theme}'\\] \\.recent-section\\s*[,{]`).test(css),
+            theme
+        );
     }
     for (const selector of [
         '.drawing-pad-guide',
@@ -141,7 +149,9 @@ test('AI Sensei assistive button is icon-only, accessible and docks after idle',
         const floatingAssistantToggle = window.document.getElementById(
             'aiFloatingAssistantEnabled'
         );
-        assert.equal(floatingAssistantToggle.checked, true);
+        // Static default is now unchecked: a brand-new visitor gets no floating
+        // bubble, and syncAISettingsUI() re-checks it for returning users on open.
+        assert.equal(floatingAssistantToggle.checked, false);
         assert.match(
             window.document
                 .getElementById('aiFloatingAssistantHelp')
@@ -152,6 +162,9 @@ test('AI Sensei assistive button is icon-only, accessible and docks after idle',
         let floatingAssistantEnabled = true;
         window.StorageManager = {
             getAISettings: () => ({ enableFloatingAssistant: floatingAssistantEnabled }),
+            // This test simulates a returning visitor with the bubble enabled, so the
+            // effective-value getter returns the stored preference.
+            getEnableFloatingAssistant: () => floatingAssistantEnabled,
             updateAISetting: (key, value) => {
                 assert.equal(key, 'enableFloatingAssistant');
                 floatingAssistantEnabled = value;

@@ -105,6 +105,11 @@ class AuthDialog {
         }
         this.el('authSignInForm')?.addEventListener('submit', (event) => this.submitSignIn(event));
         this.el('authCreateForm')?.addEventListener('submit', (event) => this.submitCreate(event));
+        // These password fields live in forms (Chrome requires it) but have no submit
+        // action: Enter in the field must not submit the page.
+        for (const id of ['authRemovePasswordSection', 'authDeletePasswordForm']) {
+            this.el(id)?.addEventListener('submit', (event) => event.preventDefault());
+        }
         this.el('authSignInForgot')?.addEventListener('click', () => this.resetPassword());
         this.el('authGoogleBtn')?.addEventListener('click', () => this.continueWithGoogle());
         for (const reveal of this.dialog.querySelectorAll('[data-auth-reveal]')) {

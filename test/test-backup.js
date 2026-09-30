@@ -30,7 +30,17 @@ function setup() {
         TextEncoder,
         console,
         setTimeout,
-        clearTimeout
+        clearTimeout,
+        // The snapshot's media branch reads blobs through a FileReader; a stub
+        // that delivers a fixed data URL keeps media-bearing tests hermetic.
+        FileReader: class {
+            readAsDataURL() {
+                setTimeout(() => {
+                    this.result = 'data:image/png;base64,STUB';
+                    this.onload && this.onload();
+                }, 0);
+            }
+        }
     });
     vm.runInContext(fs.readFileSync(require.resolve('../backup-manager.js'), 'utf8'), context);
     const Manager = context.window.BackupManager;
@@ -57,6 +67,29 @@ test('full snapshot includes app state, excludes backups, credentials and unrela
     assert.equal(data.storage.unrelated, undefined);
     assert.equal(JSON.stringify(data).includes('SECRET'), false);
     Manager.validate(data);
+});
+
+test('snapshot can skip media for the data-only local auto backup', async () => {
+    const { Manager, storage } = setup();
+    storage.theme = 'nami';
+    storage.kanjiSettings = JSON.stringify({ kanjiFont: 'serif' });
+    const fakeMedia = { slot1: 'data:image/png;base64,AAAA', avatar: 'data:image/png;base64,BBBB' };
+    Manager.media = async () => fakeMedia;
+
+    const full = await Manager.snapshot();
+    assert.deepEqual(
+        Object.keys(full.media).sort(),
+        Object.keys(fakeMedia).sort(),
+        'the default snapshot still carries the media'
+    );
+
+    const dataOnly = await Manager.snapshot({ includeMedia: false });
+    // Keys, not deepEqual: the snapshot is built in the vm realm, whose empty
+    // object has a different Object.prototype from the test's literal.
+    assert.deepEqual(Object.keys(dataOnly.media), [], 'the data-only snapshot stores no media');
+    assert.deepEqual(dataOnly.storage, full.storage, 'the storage part is unchanged');
+    assert.equal(dataOnly.storage.theme, 'nami');
+    Manager.validate(dataOnly);
 });
 
 test('validation rejects unknown versions, keys, invalid progress and non-media payloads', () => {

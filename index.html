@@ -37,42 +37,40 @@
         <script defer src="analytics.js?v=analytics-v1"></script>
 
         <!-- Fonts: one combined request (Material Icons is unused by this app) instead of three.
-             Everything except the app's own stylesheet loads without blocking first paint. -->
+             The main faces block first paint on purpose. The preload above starts the download
+             before the parser reaches this link, so by the time the first paint is due the CSS
+             is already cached and the woff2 files are downloading in parallel with the app's
+             own scripts. First paint then uses Klee One directly instead of swapping it in over
+             the fallback font after the fact - that swap is what moved the progress line and
+             produced the 0.31 CLS. The extra display faces (theme picker) stay async. -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             rel="preload"
             as="style"
-            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Noto+Serif+JP:wght@400;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
         />
         <link
-            media="print"
-            onload="this.media = 'all'"
-            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+            href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Noto+Serif+JP:wght@400;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
             rel="stylesheet"
         />
         <noscript>
             <link
-                href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
+                href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&amp;family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Noto+Serif+JP:wght@400;700&amp;family=Zen+Antique&amp;family=Zen+Maru+Gothic:wght@400;700&amp;display=swap"
                 rel="stylesheet"
             />
         </noscript>
-        <!-- Extra display faces used by the theme picker: fetched after first paint. -->
+        <!-- Extra display faces used by the theme picker: self-hosted (Google's Early
+             Access endpoint served these fonts without CORS headers, so they never
+             loaded), fetched after first paint. See assets/fonts/display-fonts.css. -->
         <link
             media="print"
             onload="this.media = 'all'"
-            href="https://fonts.googleapis.com/earlyaccess/hannari.css"
-            rel="stylesheet"
-        />
-        <link
-            media="print"
-            onload="this.media = 'all'"
-            href="https://fonts.googleapis.com/earlyaccess/kokoro.css"
+            href="assets/fonts/display-fonts.css?v=display-fonts-v1"
             rel="stylesheet"
         />
         <noscript>
-            <link href="https://fonts.googleapis.com/earlyaccess/hannari.css" rel="stylesheet" />
-            <link href="https://fonts.googleapis.com/earlyaccess/kokoro.css" rel="stylesheet" />
+            <link href="assets/fonts/display-fonts.css?v=display-fonts-v1" rel="stylesheet" />
         </noscript>
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
         <link
@@ -95,7 +93,7 @@
 
         <!-- PWA & Mobile Settings -->
         <meta name="theme-color" content="#6200EE" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="KanjiWidgets" />
         <!-- Browser tab icon. Put favicon.gif in the repository root next to index.html. -->
@@ -599,43 +597,13 @@
                             <input type="checkbox" id="showFurigana" checked />
                         </div>
                         <div class="setting-group">
-                            <label>Kanji Font:</label>
+                            <label>Fonts:</label>
                             <div class="font-preview-grid" id="fontPreviewGrid">
-                                <div class="font-option" data-font="Klee One">
-                                    <div class="font-sample" style="font-family: 'Klee One'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Klee One</div>
-                                </div>
                                 <div class="font-option" data-font="Noto Sans JP">
                                     <div class="font-sample" style="font-family: 'Noto Sans JP'">
                                         日本
                                     </div>
-                                    <div class="font-name">Noto Sans JP</div>
-                                </div>
-                                <div class="font-option" data-font="Zen Antique">
-                                    <div class="font-sample" style="font-family: 'Zen Antique'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Zen Antique</div>
-                                </div>
-                                <div class="font-option" data-font="Zen Maru Gothic">
-                                    <div class="font-sample" style="font-family: 'Zen Maru Gothic'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Zen Maru</div>
-                                </div>
-                                <div class="font-option" data-font="Hannari">
-                                    <div class="font-sample" style="font-family: 'Hannari'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Hannari</div>
-                                </div>
-                                <div class="font-option" data-font="Kokoro">
-                                    <div class="font-sample" style="font-family: 'Kokoro'">
-                                        日本
-                                    </div>
-                                    <div class="font-name">Kokoro</div>
+                                    <div class="font-name">Noto Sans</div>
                                 </div>
                                 <div class="font-option" data-font="Hiragino Sans">
                                     <div class="font-sample" style="font-family: 'Hiragino Sans'">
@@ -643,11 +611,17 @@
                                     </div>
                                     <div class="font-name">Hiragino</div>
                                 </div>
-                                <div class="font-option" data-font="Yu Gothic">
-                                    <div class="font-sample" style="font-family: 'Yu Gothic'">
+                                <div class="font-option" data-font="Klee One">
+                                    <div class="font-sample" style="font-family: 'Klee One'">
                                         日本
                                     </div>
-                                    <div class="font-name">Yu Gothic</div>
+                                    <div class="font-name">Klee One</div>
+                                </div>
+                                <div class="font-option" data-font="Noto Serif JP">
+                                    <div class="font-sample" style="font-family: 'Noto Serif JP'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Noto Serif</div>
                                 </div>
                                 <div class="font-option" data-font="Meiryo">
                                     <div class="font-sample" style="font-family: 'Meiryo'">
@@ -655,24 +629,68 @@
                                     </div>
                                     <div class="font-name">Meiryo</div>
                                 </div>
-                                <div class="font-option" data-font="MS Gothic">
+                                <div
+                                    class="font-more"
+                                    id="fontMoreBtn"
+                                    role="button"
+                                    tabindex="0"
+                                    aria-label="Show all fonts"
+                                >
+                                    <i class="fas fa-plus" aria-hidden="true"></i>
+                                    <span class="font-name font-more-label">More fonts</span>
+                                </div>
+                                <div class="font-option font-option-extra" data-font="MS Gothic">
                                     <div class="font-sample" style="font-family: 'MS Gothic'">
                                         日本
                                     </div>
                                     <div class="font-name">MS Gothic</div>
                                 </div>
+                                <div class="font-option font-option-extra" data-font="Zen Antique">
+                                    <div class="font-sample" style="font-family: 'Zen Antique'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Zen Antique</div>
+                                </div>
+                                <div class="font-option font-option-extra" data-font="Hannari">
+                                    <div class="font-sample" style="font-family: 'Hannari'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Hannari</div>
+                                </div>
+                                <div class="font-option font-option-extra" data-font="Kokoro">
+                                    <div class="font-sample" style="font-family: 'Kokoro'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Kokoro</div>
+                                </div>
+                                <div
+                                    class="font-option font-option-extra"
+                                    data-font="Zen Maru Gothic"
+                                >
+                                    <div class="font-sample" style="font-family: 'Zen Maru Gothic'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Zen Maru</div>
+                                </div>
+                                <div class="font-option font-option-extra" data-font="Yu Gothic">
+                                    <div class="font-sample" style="font-family: 'Yu Gothic'">
+                                        日本
+                                    </div>
+                                    <div class="font-name">Yu Gothic</div>
+                                </div>
                             </div>
                             <select id="kanjiFont" style="display: none">
-                                <option value="Klee One" selected>Klee One (Default)</option>
                                 <option value="Noto Sans JP">Noto Sans JP</option>
-                                <option value="Zen Antique">Zen Antique (Mincho Style)</option>
-                                <option value="Zen Maru Gothic">Zen Maru Gothic</option>
-                                <option value="Hannari">Hannari (Traditional)</option>
-                                <option value="Kokoro">Kokoro (Brush Style)</option>
                                 <option value="Hiragino Sans">Hiragino Sans</option>
-                                <option value="Yu Gothic">Yu Gothic</option>
+                                <option value="Klee One" selected>Klee One (Default)</option>
+                                <option value="Noto Serif JP">Noto Serif JP</option>
                                 <option value="Meiryo">Meiryo</option>
                                 <option value="MS Gothic">MS Gothic</option>
+                                <option value="Zen Antique">Zen Antique (Mincho Style)</option>
+                                <option value="Hannari">Hannari (Traditional)</option>
+                                <option value="Kokoro">Kokoro (Brush Style)</option>
+                                <option value="Zen Maru Gothic">Zen Maru Gothic</option>
+                                <option value="Yu Gothic">Yu Gothic</option>
                             </select>
                             <input type="hidden" id="kanjiFont-hidden" value="Klee One" />
                         </div>
@@ -723,7 +741,6 @@
                                 type="checkbox"
                                 id="aiFloatingAssistantEnabled"
                                 aria-describedby="aiFloatingAssistantHelp"
-                                checked
                             />
                         </div>
                         <small id="aiFloatingAssistantHelp" class="setting-help-text">
@@ -742,23 +759,25 @@
                             </select>
                         </div>
                         <div class="setting-group" id="aiApiKeyGroup">
-                            <label for="aiApiKey">API Key:</label>
-                            <div class="api-key-input-wrapper">
-                                <input
-                                    type="password"
-                                    id="aiApiKey"
-                                    placeholder="Enter API Key..."
-                                    autocomplete="off"
-                                />
-                                <button
-                                    type="button"
-                                    id="toggleApiKeyVisibility"
-                                    class="api-key-toggle-btn"
-                                    title="Show/Hide Key"
-                                >
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
+                            <form id="aiApiKeyForm" novalidate>
+                                <label for="aiApiKey">API Key:</label>
+                                <div class="api-key-input-wrapper">
+                                    <input
+                                        type="password"
+                                        id="aiApiKey"
+                                        placeholder="Enter API Key..."
+                                        autocomplete="off"
+                                    />
+                                    <button
+                                        type="button"
+                                        id="toggleApiKeyVisibility"
+                                        class="api-key-toggle-btn"
+                                        title="Show/Hide Key"
+                                    >
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </form>
                             <small class="setting-help-text" id="aiKeyHelpText">
                                 Stored in this browser only and sent directly to your chosen AI
                                 provider when used; KanjiWidgets does not receive it. Provider
@@ -2522,7 +2541,7 @@ filter: blur(10px) brightness(1) saturate(1);
                                 Unlink Google
                             </button>
                         </div>
-                        <div id="authRemovePasswordSection" class="auth-form" hidden>
+                        <form id="authRemovePasswordSection" class="auth-form" novalidate hidden>
                             <label for="authRemovePasswordValue">Current password</label>
                             <input
                                 id="authRemovePasswordValue"
@@ -2536,7 +2555,7 @@ filter: blur(10px) brightness(1) saturate(1);
                             >
                                 Remove password
                             </button>
-                        </div>
+                        </form>
                     </div>
                     <div class="backup-buttons auth-account-actions">
                         <button id="authLinkGoogle" type="button" class="backup-btn google-btn">
@@ -2591,15 +2610,17 @@ filter: blur(10px) brightness(1) saturate(1);
                             and the username, which becomes claimable again after the usual 30 days.
                             Learning data on this device is kept, so nothing you studied is lost.
                         </p>
-                        <label id="authDeletePasswordLabel" for="authDeletePassword" hidden
-                            >Confirm your password</label
-                        >
-                        <input
-                            id="authDeletePassword"
-                            type="password"
-                            autocomplete="current-password"
-                            hidden
-                        />
+                        <form id="authDeletePasswordForm" class="auth-form" novalidate>
+                            <label id="authDeletePasswordLabel" for="authDeletePassword" hidden
+                                >Confirm your password</label
+                            >
+                            <input
+                                id="authDeletePassword"
+                                type="password"
+                                autocomplete="current-password"
+                                hidden
+                            />
+                        </form>
                         <p id="authDeletionPending" class="auth-hint" hidden></p>
                         <div class="backup-buttons">
                             <button

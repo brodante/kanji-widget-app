@@ -73,7 +73,12 @@ class BackupManager {
             db.close();
         }
     }
-    static async snapshot() {
+    static async snapshot(options = {}) {
+        // { includeMedia: false } stores the user's data only, skipping the theme
+        // images / avatar. Those blobs already live in IndexedDB (their canonical
+        // store); re-embedding them as base64 here is what used to exhaust the
+        // localStorage quota for local auto backups.
+        const includeMedia = options.includeMedia !== false;
         const storage = {};
         for (const key of Object.keys(localStorage).filter((k) => this.allowed(k))) {
             let value = localStorage.getItem(key);
@@ -85,13 +90,15 @@ class BackupManager {
             storage[key] = value;
         }
         const media = {};
-        for (const [slot, blob] of Object.entries(await this.media())) {
-            media[slot] = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(reader.error);
-                reader.readAsDataURL(blob);
-            });
+        if (includeMedia) {
+            for (const [slot, blob] of Object.entries(await this.media())) {
+                media[slot] = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(reader.error);
+                    reader.readAsDataURL(blob);
+                });
+            }
         }
         return {
             app: 'kanji-widgets',
