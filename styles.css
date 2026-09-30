@@ -138,7 +138,11 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
-    z-index: 1;
+    /* Body-level stacking order: theme canvases (0) < footer (1) < app
+       content (2). The container must sit above the footer — at the same
+       z-index it lost the tie to the footer's later DOM position, which
+       painted the footer over fixed in-container elements like the toast. */
+    z-index: 2;
 }
 
 /* Header Styles */

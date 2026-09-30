@@ -241,6 +241,14 @@ test('the footer stacks above the full-viewport WebGL theme canvases', () => {
     );
     assert.match(footerBlock, /position:\s*relative/);
     assert.match(footerBlock, /z-index:\s*1/);
+    // The app container must sit above the footer, or the footer (later in
+    // DOM order) paints over fixed in-container elements such as the toast.
+    // Full body-level order: theme canvases (0) < footer (1) < app content (2).
+    const containerBlock = css.slice(
+        css.indexOf('.app-container {'),
+        css.indexOf('\n}', css.indexOf('.app-container {'))
+    );
+    assert.match(containerBlock, /z-index:\s*2/);
     // The canvases must stay behind the app content layer.
     for (const cls of [
         'nami-background',
