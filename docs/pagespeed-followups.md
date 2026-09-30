@@ -135,24 +135,44 @@ Until then, App Check token exchanges will 403 for interacting users as well
    `https://kanji.qd.je` for up to 4 minutes and fails the run unless
    `script.js`/`styles.css` are served below the minified byte thresholds.
 
-## Open decision: the TBT root cause needs a product call
+4. **Nami renderer micro-opts** (`script.js`, `initNamiWave` only). `antialias`
+   off and the wave mesh 128×128 → 64×64 — see the decision section below. The
+   wave still animates the moment the page opens; visually it is the same
+   smooth gradient scene.
 
-The Nami loop only becomes cheap if it is **not the continuous background work of a
-passive load**. Two feature-safe shapes (both keep every one of the four WebGL
-themes working exactly as today when selected):
+## TBT decision (made): keep the animated `nami` default, lighten the frame
 
-- **A — default theme back to `candy` for new visitors.** One string
-  (`applyTheme()`: `|| 'candy'`). The code comments and the light/dark toggle both
-  treat candy as the default light theme; the `nami` default looks incidental.
-  Existing users (any saved theme) are untouched. The lab's fresh profile never
-  loads three.js at all.
-- **B — keep the `nami` default, animate on first interaction.** The canvas
-  renders one static frame immediately and the rAF loop starts on the first tap /
-  keypress (theme switching still boots the loop instantly). A passive viewer sees
-  a still wave until they touch the page.
+The product call came back: **`nami` stays the animated default** — the wave
+animating the moment the page opens is a feature, not an accident. The static
+first frame (option B) was rejected for the same reason, and moving the default
+back to `candy` (option A) was rejected outright.
 
-Recommendation: **A** — smallest change, restores the measured baseline TBT
-(200 ms) exactly, and no existing user changes anything.
+So the loop stays, and the frame gets cheaper instead. Two changes to the Nami
+scene only (`initNamiWave`, other themes untouched):
+
+- **`antialias: false`** on the WebGLRenderer. The wave is a smooth
+  additive-blended gradient with an edge fade and no hard edges — MSAA adds
+  cost (notably in software rendering, and on mid-range Android GPUs) with
+  nothing to see.
+- **Wave mesh 128×128 → 64×64 subdivisions.** The wavelengths span the whole
+  30-unit plane, so 128 per axis oversampled it four times over; 64 keeps the
+  silhouette and removes the vertex work.
+
+Expected effect: per-frame cost down ~2.5–3× in the lab (70–400 ms → ~25–150
+ms), so TBT should land roughly there too (run 3's 26 s → ~9–11 s); on real
+devices it is the same wave, just cooler and smoother on mid-range hardware.
+
+What remains, by construction: a full-screen animated WebGL canvas in a
+headless, software-rasterised lab is intrinsically expensive — no code change
+removes that while the wave animates on open. Real user GPUs do not pay this
+cost; the lab TBT residual is the environment, not the code. If a future run
+still shows the loop dominating and a lower score matters, the only remaining
+lever is the rejected one (animate on first interaction).
+
+The renderer was already well-optimised otherwise: `setPixelRatio` capped at 1
+on mobile (the lab canvas is 412×823, not 4× that), a 2-sin vertex / 3-smoothstep
+fragment shader, one pass, no post-processing, and theme switching cancels the
+other three render loops before starting the new one.
 
 ## Optional follow-ups (not done, no feature cost)
 
@@ -174,6 +194,6 @@ Recommendation: **A** — smallest change, restores the measured baseline TBT
     1. `script.js`/`styles.css` byte sizes on the wire (minified) — the deploy now
        fails if this is not true.
     2. CLS ≈ 0 and no Klee One woff2 entries in "layout shift culprits".
-    3. TBT and "script.js total CPU" after the default-theme decision is applied.
+    3. TBT and the Nami render-loop tasks (the micro-opts should cut per-frame cost ~2.5–3×; a software-rasterisation residual remains by construction).
     4. Best Practices console errors (expect none on a passive lab run; the 403 for
        interacting users needs the console registration above).

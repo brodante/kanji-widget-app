@@ -3430,14 +3430,20 @@ function initNamiWave() {
     camera.position.set(0, 2, 6);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    // antialias stays off: the wave is a smooth additive-blended gradient with an edge fade
+    // and no hard edges, so MSAA adds cost (it is expensive on mid-range GPUs and in software
+    // rendering) without anything to see. If crisp edges are ever added to this scene, put it
+    // back.
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
     // Caps it at 1 for mobile to save battery and GPU, allows up to 2 on Desktop
     const pixelCap = window.innerWidth < 768 ? 1 : Math.min(window.devicePixelRatio, 2);
     renderer.setPixelRatio(pixelCap);
     container.appendChild(renderer.domElement);
 
-    const geometry = new THREE.PlaneGeometry(30, 15, 128, 128);
+    // 64x64 subdivisions is plenty: the wave's wavelengths span the whole 30-unit plane, so
+    // 128 per axis oversampled it four times over and only added vertex work.
+    const geometry = new THREE.PlaneGeometry(30, 15, 64, 64);
     geometry.rotateX(-Math.PI / 2);
 
     const waveMaterial = new THREE.ShaderMaterial({
