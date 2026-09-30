@@ -4140,8 +4140,12 @@ input:focus {
 [data-theme='nami'] .kanji-widget,
 [data-theme='nami'] .progress-section,
 [data-theme='nami'] .journey-section,
-[data-theme='nami'] .recent-section {
+[data-theme='nami'] .recent-section,
+[data-theme='nami'] .footer-content {
     background-color: rgba(10, 10, 10, 0.65) !important;
+    /* The footer's base faint white tint would brighten it above its glass
+       siblings, so it gets the exact same glass as the sections above. */
+    background-image: none;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(0, 229, 255, 0.15);
@@ -4208,8 +4212,11 @@ input:focus {
 [data-theme='lumen'] .kanji-widget,
 [data-theme='lumen'] .progress-section,
 [data-theme='lumen'] .journey-section,
-[data-theme='lumen'] .recent-section {
+[data-theme='lumen'] .recent-section,
+[data-theme='lumen'] .footer-content {
     background-color: rgba(10, 10, 10, 0.5) !important;
+    /* Same glass as the sections above (no opaque block, no white tint). */
+    background-image: none;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -4312,8 +4319,11 @@ input:focus {
 [data-theme='obake'] .kanji-widget,
 [data-theme='obake'] .progress-section,
 [data-theme='obake'] .journey-section,
-[data-theme='obake'] .recent-section {
+[data-theme='obake'] .recent-section,
+[data-theme='obake'] .footer-content {
     background-color: rgba(10, 10, 15, 0.6) !important;
+    /* Same glass as the sections above (no opaque block, no white tint). */
+    background-image: none;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(187, 134, 252, 0.1);
@@ -4435,8 +4445,11 @@ input:focus {
 [data-theme='ito'] .progress-section,
 [data-theme='ito'] .journey-section,
 [data-theme='ito'] .app-header,
-[data-theme='ito'] .recent-section {
+[data-theme='ito'] .recent-section,
+[data-theme='ito'] .footer-content {
     background-color: rgba(10, 10, 15, 0.5) !important;
+    /* Same glass as the sections above (no opaque block, no white tint). */
+    background-image: none;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(249, 103, 251, 0.2);

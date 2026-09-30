@@ -229,6 +229,27 @@ test('the footer stacks above the full-viewport WebGL theme canvases', () => {
     }
 });
 
+test('the footer shares the frosted-glass treatment of the sections in WebGL themes', () => {
+    // The kanji/progress/journey/recent cards are translucent glass in the four
+    // WebGL themes; the footer must follow them, not be an opaque block.
+    const css = read('styles.css');
+    for (const theme of ['nami', 'lumen', 'obake', 'ito']) {
+        assert.ok(
+            css.includes(`[data-theme='${theme}'] .footer-content`),
+            `${theme}: footer missing from the glass selector list`
+        );
+        const start = css.indexOf(`[data-theme='${theme}'] .kanji-widget,`);
+        const rule = css.slice(start, css.indexOf('\n}', start));
+        assert.match(
+            rule,
+            /background-color: rgba\(\d+,\s*\d+,\s*\d+,\s*0\.\d+\) !important/,
+            `${theme}: glass rule lost its translucent background`
+        );
+        assert.match(rule, /backdrop-filter: blur\(\d+px\)/);
+        assert.match(rule, /background-image: none/);
+    }
+});
+
 test('the service worker caches instead of bypassing the HTTP cache', () => {
     const worker = read('sw.js');
     assert.equal(

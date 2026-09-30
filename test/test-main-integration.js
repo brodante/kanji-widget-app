@@ -60,7 +60,13 @@ test('all live Recent theme styles and guide styles coexist with warning and dan
         /\.recent-section \{[^}]*background-color:[^}]*padding:[^}]*border-radius:[^}]*box-shadow:/
     );
     for (const theme of ['midnight', 'nami', 'lumen', 'obake', 'ito']) {
-        assert.ok(css.includes(`[data-theme='${theme}'] .recent-section {`), theme);
+        // The selector may sit anywhere inside a grouped rule (e.g. the
+        // frosted-glass list), so match it followed by ',' or '{', not the
+        // last-selector '{' shape only.
+        assert.ok(
+            new RegExp(`\\[data-theme='${theme}'\\] \\.recent-section\\s*[,{]`).test(css),
+            theme
+        );
     }
     for (const selector of [
         '.drawing-pad-guide',
