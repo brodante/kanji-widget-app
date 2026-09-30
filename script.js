@@ -3391,8 +3391,39 @@ class KanjiLearningApp {
 
     async autoCreateBackup() {
         try {
-            const backupData = JSON.stringify(await BackupManager.snapshot());
-            localStorage.setItem(`autoBackup_${Date.now()}`, backupData);
+            // Data-only snapshot: theme images and the avatar already persist in
+            // IndexedDB, so duplicating them here (base64) is what exhausted the
+            // ~5 MB localStorage quota and made auto backups fail for heavy users.
+            const backupData = JSON.stringify(
+                await BackupManager.snapshot({ includeMedia: false })
+            );
+
+            // If the write fails because storage is full, drop the oldest auto
+            // backups and retry: the older entries hold the same user data, one
+            // generation behind, so they are the first thing worth freeing.
+            let written = false;
+            let lastError = null;
+            for (let kept = 1; kept >= 0 && !written; kept--) {
+                try {
+                    localStorage.setItem(`autoBackup_${Date.now()}`, backupData);
+                    written = true;
+                } catch (error) {
+                    lastError = error;
+                    const old = Object.keys(localStorage)
+                        .filter((key) => key.startsWith('autoBackup_'))
+                        .sort();
+                    const dropCount = old.length - kept;
+                    if (dropCount <= 0) {
+                        break; // nothing of ours left to free
+                    }
+                    for (const key of old.slice(0, dropCount)) {
+                        localStorage.removeItem(key);
+                    }
+                }
+            }
+            if (!written) {
+                throw lastError || new Error('Auto backup write failed');
+            }
             localStorage.setItem('lastLocalBackup', Date.now().toString());
 
             // Keep only last 5 auto backups

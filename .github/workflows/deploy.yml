@@ -61,6 +61,9 @@ jobs:
                   cp srs-engine.js deploy/
                   cp storage-manager.js deploy/
                   cp manifest.json deploy/
+                  # The manifest's large icons point at this file (data-URI icons are
+                  # rejected by Chrome and log a console error on every load)
+                  if [ -f "icon.svg" ]; then cp icon.svg deploy/; fi
                   # Favicon is optional: skip the copy instead of failing the deploy
                   if [ -f "favicon.gif" ]; then cp favicon.gif deploy/; fi
                   cp sw.js deploy/

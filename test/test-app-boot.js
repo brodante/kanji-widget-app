@@ -363,6 +363,49 @@ test('obake pulls the post-processing addons exactly once, after the core loads'
     }
 });
 
+test('local auto backups are data-only and survive a full localStorage', async () => {
+    const { dom, window } = await bootApp();
+    try {
+        const ls = window.localStorage;
+        // Seed two older auto backups, the way repeated sessions leave them
+        // (timestamps older than now, so string sorting matches age order).
+        ls.setItem('autoBackup_1000000000000', '{"app":"kanji-widgets","version":3}');
+        ls.setItem('autoBackup_1100000000000', '{"app":"kanji-widgets","version":3}');
+
+        // Simulate a full localStorage: the first auto-backup write throws the
+        // exact error real browsers raise, everything after it succeeds.
+        const proto = Object.getPrototypeOf(ls);
+        const originalSet = proto.setItem;
+        let quotaTripped = false;
+        proto.setItem = function (key, value) {
+            if (!quotaTripped && String(key).startsWith('autoBackup_')) {
+                quotaTripped = true;
+                const error = new Error(`Setting the value of '${key}' exceeded the quota.`);
+                error.name = 'QuotaExceededError';
+                throw error;
+            }
+            return originalSet.call(this, key, value);
+        };
+
+        await window.app.autoCreateBackup();
+
+        const keys = Object.keys(ls)
+            .filter((key) => key.startsWith('autoBackup_'))
+            .sort();
+        assert.ok(keys.length >= 2, 'a new backup was written after freeing space');
+        assert.notEqual(keys[0], 'autoBackup_1000000000000', 'the oldest backup made room');
+        assert.ok(ls.getItem('lastLocalBackup'), 'the backup timestamp is recorded');
+
+        // The stored backup is data-only: theme images and the avatar live in
+        // IndexedDB and must not be duplicated here as base64.
+        const backup = JSON.parse(ls.getItem(keys[keys.length - 1]));
+        assert.deepEqual(backup.media, {}, 'auto backups do not duplicate the IndexedDB media');
+        assert.ok(backup.storage, 'the user data is still in the backup');
+    } finally {
+        dom.window.close();
+    }
+});
+
 test('the drawer, the AI mixin and the settings dialog still open', async () => {
     const { dom, window, document } = await bootApp();
     try {

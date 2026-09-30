@@ -150,6 +150,30 @@ Until then, App Check token exchanges will 403 for interacting users as well
    what the saved theme needs. No rendering changes: same libraries, same
    versions, same execution order.
 
+6. **Practice pad recolors existing strokes on theme switch** (`drawing-pad.js`,
+   `script.js`). Ink is resolved from the live theme accent on every paint, but
+   pixels already on the canvas kept the previous theme's colour until the next
+   tap happened to trigger a repaint. `DrawingPad.refreshInkColors()` (no-op on
+   an empty pad) is called where the accent can change: at the end of `setTheme()`
+   and, for custom themes (applied asynchronously), right after
+   `applyCustomThemeStyles()` sets the accent variables.
+
+7. **Local auto backups are data-only and quota-proof** (`script.js`,
+   `backup-manager.js`). Every `autoBackup_*` entry embedded the full snapshot —
+   including the custom-theme photos and avatar as base64, which already persist
+   in IndexedDB — so a few backups exhausted the ~5 MB localStorage quota and
+   `setItem` threw (the `QuotaExceededError` seen in real usage). Auto backups
+   now use `snapshot({ includeMedia: false })` (Drive/JSON exports keep the
+   media), and the write retries after dropping the oldest auto backups when
+   storage is full.
+
+8. **Manifest icons are real files** (`manifest.json`, `icon.svg`,
+   `deploy.yml`). The manifest declared its icons as base64 data-URI SVGs, which
+   Chrome rejects on every load ("Download error or resource isn't a valid
+   image" console error). The manifest now references the existing
+   `apple-touch-icon-180x180.png` plus `icon.svg` (matching the app's 学 icon
+   design, standard-compliant SVG), and the deploy workflow copies `icon.svg`.
+
 ## The other themes, looked at and deliberately left alone
 
 - **Lumen** — its full-screen plasma shader renders razor-thin bright lines
@@ -218,7 +242,7 @@ other three render loops before starting the new one.
 
 ## Verification
 
-- `npm run verify` — lint + format + 247 tests green after every change.
+- `npm run verify` — lint + format + 249 tests green after every change.
 - After merge, re-run the mobile lab analysis and check, in order:
     1. `script.js`/`styles.css` byte sizes on the wire (minified) — the deploy now
        fails if this is not true.
