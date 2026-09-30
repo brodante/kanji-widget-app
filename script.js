@@ -788,6 +788,13 @@ class KanjiLearningApp {
             });
         }
 
+        // The key field lives in a form (Chrome requires password fields to be in one),
+        // but pressing Enter must not submit it - that would reload the page with the
+        // key in the URL.
+        document.getElementById('aiApiKeyForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
+
         const toggleApiKeyVisibility = document.getElementById('toggleApiKeyVisibility');
         if (toggleApiKeyVisibility && aiApiKey) {
             toggleApiKeyVisibility.addEventListener('click', () => {

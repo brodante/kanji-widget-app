@@ -60,22 +60,17 @@
                 rel="stylesheet"
             />
         </noscript>
-        <!-- Extra display faces used by the theme picker: fetched after first paint. -->
+        <!-- Extra display faces used by the theme picker: self-hosted (Google's Early
+             Access endpoint served these fonts without CORS headers, so they never
+             loaded), fetched after first paint. See assets/fonts/display-fonts.css. -->
         <link
             media="print"
             onload="this.media = 'all'"
-            href="https://fonts.googleapis.com/earlyaccess/hannari.css"
-            rel="stylesheet"
-        />
-        <link
-            media="print"
-            onload="this.media = 'all'"
-            href="https://fonts.googleapis.com/earlyaccess/kokoro.css"
+            href="assets/fonts/display-fonts.css?v=display-fonts-v1"
             rel="stylesheet"
         />
         <noscript>
-            <link href="https://fonts.googleapis.com/earlyaccess/hannari.css" rel="stylesheet" />
-            <link href="https://fonts.googleapis.com/earlyaccess/kokoro.css" rel="stylesheet" />
+            <link href="assets/fonts/display-fonts.css?v=display-fonts-v1" rel="stylesheet" />
         </noscript>
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
         <link
@@ -98,7 +93,7 @@
 
         <!-- PWA & Mobile Settings -->
         <meta name="theme-color" content="#6200EE" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="KanjiWidgets" />
         <!-- Browser tab icon. Put favicon.gif in the repository root next to index.html. -->
@@ -745,23 +740,25 @@
                             </select>
                         </div>
                         <div class="setting-group" id="aiApiKeyGroup">
-                            <label for="aiApiKey">API Key:</label>
-                            <div class="api-key-input-wrapper">
-                                <input
-                                    type="password"
-                                    id="aiApiKey"
-                                    placeholder="Enter API Key..."
-                                    autocomplete="off"
-                                />
-                                <button
-                                    type="button"
-                                    id="toggleApiKeyVisibility"
-                                    class="api-key-toggle-btn"
-                                    title="Show/Hide Key"
-                                >
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
+                            <form id="aiApiKeyForm" novalidate>
+                                <label for="aiApiKey">API Key:</label>
+                                <div class="api-key-input-wrapper">
+                                    <input
+                                        type="password"
+                                        id="aiApiKey"
+                                        placeholder="Enter API Key..."
+                                        autocomplete="off"
+                                    />
+                                    <button
+                                        type="button"
+                                        id="toggleApiKeyVisibility"
+                                        class="api-key-toggle-btn"
+                                        title="Show/Hide Key"
+                                    >
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </form>
                             <small class="setting-help-text" id="aiKeyHelpText">
                                 Stored in this browser only and sent directly to your chosen AI
                                 provider when used; KanjiWidgets does not receive it. Provider
@@ -2525,7 +2522,7 @@ filter: blur(10px) brightness(1) saturate(1);
                                 Unlink Google
                             </button>
                         </div>
-                        <div id="authRemovePasswordSection" class="auth-form" hidden>
+                        <form id="authRemovePasswordSection" class="auth-form" novalidate hidden>
                             <label for="authRemovePasswordValue">Current password</label>
                             <input
                                 id="authRemovePasswordValue"
@@ -2539,7 +2536,7 @@ filter: blur(10px) brightness(1) saturate(1);
                             >
                                 Remove password
                             </button>
-                        </div>
+                        </form>
                     </div>
                     <div class="backup-buttons auth-account-actions">
                         <button id="authLinkGoogle" type="button" class="backup-btn google-btn">
@@ -2594,15 +2591,17 @@ filter: blur(10px) brightness(1) saturate(1);
                             and the username, which becomes claimable again after the usual 30 days.
                             Learning data on this device is kept, so nothing you studied is lost.
                         </p>
-                        <label id="authDeletePasswordLabel" for="authDeletePassword" hidden
-                            >Confirm your password</label
-                        >
-                        <input
-                            id="authDeletePassword"
-                            type="password"
-                            autocomplete="current-password"
-                            hidden
-                        />
+                        <form id="authDeletePasswordForm" class="auth-form" novalidate>
+                            <label id="authDeletePasswordLabel" for="authDeletePassword" hidden
+                                >Confirm your password</label
+                            >
+                            <input
+                                id="authDeletePassword"
+                                type="password"
+                                autocomplete="current-password"
+                                hidden
+                            />
+                        </form>
                         <p id="authDeletionPending" class="auth-hint" hidden></p>
                         <div class="backup-buttons">
                             <button

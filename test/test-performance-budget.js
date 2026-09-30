@@ -92,7 +92,7 @@ test('fonts ship in one request: main faces block first paint, extras stay async
         ...html.matchAll(/<link[^>]*href="(https:\/\/fonts\.googleapis\.com[^"]*)"[^>]*>/g)
     ].map((match) => match[1]);
 
-    assert.equal(fontLinks.length >= 3, true, 'combined CSS plus the two earlyaccess faces');
+    assert.equal(fontLinks.length >= 3, true, 'combined CSS plus the theme-picker display faces');
     const combined = [...new Set(fontLinks.filter((href) => href.includes('css2')))];
     assert.equal(combined.length, 1, 'one css2 request instead of three');
     for (const family of ['Klee+One', 'Noto+Sans+JP', 'Zen+Antique', 'Zen+Maru+Gothic']) {
@@ -128,6 +128,27 @@ test('fonts ship in one request: main faces block first paint, extras stay async
         head,
         /<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin \/>/
     );
+
+    // The theme-picker display faces (Hannari, Kokoro) are self-hosted. Google's
+    // Early Access endpoint served them without CORS headers, so the browser
+    // blocked every request and the faces never rendered; both are also gone from
+    // the css2 API. They ship as OFL-licensed TTFs next to the other assets.
+    assert.equal(html.includes('earlyaccess'), false, 'no more Early Access endpoints');
+    assert.ok(
+        html.includes(
+            `<link\n            media="print"\n            onload="this.media = 'all'"
+            href="assets/fonts/display-fonts.css?v=display-fonts-v1"\n            rel="stylesheet"\n        />`
+        ),
+        'the display faces stay async (after first paint)'
+    );
+    const displayCss = read('assets/fonts/display-fonts.css');
+    assert.ok(displayCss.includes("font-family: 'Hannari'"), 'Hannari @font-face present');
+    assert.ok(displayCss.includes("font-family: 'Kokoro'"), 'Kokoro @font-face present');
+    for (const file of ['Hannari-Regular.ttf', 'Kokoro-Regular.ttf']) {
+        const buffer = fs.readFileSync(path.join(root, 'assets/fonts', file));
+        assert.equal(buffer.length > 10000, true, `${file} ships with the app`);
+        assert.equal(buffer.readUInt32BE(0), 0x00010000, `${file} is a valid TrueType font`);
+    }
 });
 
 test('the viewport keeps pinch zoom enabled', () => {
