@@ -1404,11 +1404,11 @@ class KanjiLearningApp {
             }
         });
 
-        let isEnabled = true;
+        let isEnabled = false;
         try {
-            isEnabled = StorageManager.getAISettings().enableFloatingAssistant !== false;
+            isEnabled = StorageManager.getEnableFloatingAssistant();
         } catch (err) {
-            /* Keep the assistant visible if settings are temporarily unavailable. */
+            /* Keep the bubble hidden (the new-visitor default) if settings are unavailable. */
         }
         this.setAISenseiFabEnabled(isEnabled);
     }
@@ -2837,7 +2837,9 @@ class KanjiLearningApp {
         const floatingAssistantToggle = document.getElementById('aiFloatingAssistantEnabled');
 
         if (floatingAssistantToggle) {
-            floatingAssistantToggle.checked = aiSettings.enableFloatingAssistant !== false;
+            // Use the effective value (new visitors default to off) rather than the
+            // merged getAISettings() default, so the checkbox and the bubble agree.
+            floatingAssistantToggle.checked = StorageManager.getEnableFloatingAssistant();
             this.setAISenseiFabEnabled?.(floatingAssistantToggle.checked);
         }
 

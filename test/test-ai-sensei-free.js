@@ -80,7 +80,13 @@ test('Settings default to keyless Firebase AI and keep existing BYOK models visi
         model: 'gemini-3.6-flash',
         persona: 'encouraging'
     };
-    window.StorageManager = { getAISettings: () => settings };
+    window.StorageManager = {
+        getAISettings: () => settings,
+        getEnableFloatingAssistant: () =>
+            settings && typeof settings === 'object'
+                ? settings.enableFloatingAssistant !== false
+                : false
+    };
     window.AIManager = {
         PROVIDER_DEFAULTS: {
             firebase: {

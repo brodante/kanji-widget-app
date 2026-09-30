@@ -264,6 +264,22 @@ class StorageManager {
         return settings;
     }
 
+    // Effective on/off state for the floating AI Sensei bubble. A brand-new
+    // visitor (no AI settings saved yet) gets it OFF by default, so the bubble
+    // does not float over content on a first load. Returning visitors keep the
+    // historical default (on) unless they explicitly chose otherwise, so we only
+    // read the explicit value once some AI settings already exist. This is the
+    // single source of truth for the bubble's default; getAISettings() above
+    // keeps a generic merged object for the other settings fields.
+    static getEnableFloatingAssistant() {
+        const storedSettings = this.getItem(this.keys.AI_SETTINGS, null);
+        const hasStoredSettings = storedSettings && typeof storedSettings === 'object';
+        if (!hasStoredSettings) {
+            return false;
+        }
+        return storedSettings.enableFloatingAssistant !== false;
+    }
+
     static saveAISettings(settings) {
         return this.setItem(this.keys.AI_SETTINGS, settings);
     }

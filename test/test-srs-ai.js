@@ -85,6 +85,37 @@ async function runTests() {
         assert.strictEqual(StorageManager.getAISettings().enableFloatingAssistant, true);
     });
 
+    await test('the floating AI bubble defaults to off for a brand-new visitor', () => {
+        // No AI settings saved yet (first load of the page): the bubble is OFF.
+        StorageManager.removeItem(StorageManager.keys.AI_SETTINGS);
+        assert.strictEqual(StorageManager.getEnableFloatingAssistant(), false);
+    });
+
+    await test('the floating AI bubble keeps its historical default for returning visitors', () => {
+        // A returning visitor who saved AI settings (e.g. a provider/key) but never
+        // touched the bubble toggle keeps the historical default (on).
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'firebase',
+            apiKey: '',
+            model: 'gemini-3.5-flash-lite',
+            persona: 'encouraging'
+        });
+        assert.strictEqual(StorageManager.getEnableFloatingAssistant(), true);
+
+        // An explicit choice always wins, in either direction.
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'firebase',
+            enableFloatingAssistant: false
+        });
+        assert.strictEqual(StorageManager.getEnableFloatingAssistant(), false);
+
+        StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {
+            provider: 'firebase',
+            enableFloatingAssistant: true
+        });
+        assert.strictEqual(StorageManager.getEnableFloatingAssistant(), true);
+    });
+
     await test('StorageManager migrates unconfigured key providers but preserves BYOK settings', () => {
         StorageManager.aiSettingsDefaultMigrationCompleted = false;
         StorageManager.setItem(StorageManager.keys.AI_SETTINGS, {

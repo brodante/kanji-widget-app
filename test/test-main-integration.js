@@ -141,7 +141,9 @@ test('AI Sensei assistive button is icon-only, accessible and docks after idle',
         const floatingAssistantToggle = window.document.getElementById(
             'aiFloatingAssistantEnabled'
         );
-        assert.equal(floatingAssistantToggle.checked, true);
+        // Static default is now unchecked: a brand-new visitor gets no floating
+        // bubble, and syncAISettingsUI() re-checks it for returning users on open.
+        assert.equal(floatingAssistantToggle.checked, false);
         assert.match(
             window.document
                 .getElementById('aiFloatingAssistantHelp')
@@ -152,6 +154,9 @@ test('AI Sensei assistive button is icon-only, accessible and docks after idle',
         let floatingAssistantEnabled = true;
         window.StorageManager = {
             getAISettings: () => ({ enableFloatingAssistant: floatingAssistantEnabled }),
+            // This test simulates a returning visitor with the bubble enabled, so the
+            // effective-value getter returns the stored preference.
+            getEnableFloatingAssistant: () => floatingAssistantEnabled,
             updateAISetting: (key, value) => {
                 assert.equal(key, 'enableFloatingAssistant');
                 floatingAssistantEnabled = value;
