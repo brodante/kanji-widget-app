@@ -375,7 +375,10 @@ async function getCustomThemeImage(slot) {
 // assets/dev-themes/mobile/ (portrait, for phones) - auto-swapped based on
 // screen size so nobody sees a wallpaper cropped for the wrong orientation.
 // To add one: drop the image/gif in the right folder AND add its filename
-// to that folder's manifest.json. Display name is derived from the filename.
+// to that folder's manifest.json. An entry can also be {"file": "...",
+// "thumb": "..."} to give the picker tile a small preview copy instead of
+// loading the full-size wallpaper into the grid. Display name is derived
+// from the filename.
 const DEV_THEMES_FOLDER = 'assets/dev-themes/';
 const DEV_THEMES_MOBILE_FOLDER = 'assets/dev-themes/mobile/';
 
@@ -421,18 +424,29 @@ function renderDevFavorites(manifest, selectedPath) {
         labelEl.textContent = `Dante's Top ${targetTotal} Themes`;
     }
 
+    // Manifest entries are either a plain filename or {file, thumb}. The thumb
+    // is a downscaled copy used for the picker tile only (the full-size GIF
+    // made every settings open re-decode a multi-megabyte animation); the
+    // applied theme and the saved preset path always stay the full file.
+    const entryFilename = (entry) => (typeof entry === 'string' ? entry : entry?.file);
+    const entryThumb = (entry) =>
+        (typeof entry === 'object' && entry !== null && entry.thumb) || entryFilename(entry);
+
     let html = '';
     for (let i = 0; i < targetTotal; i++) {
-        if (i < files.length) {
-            const path = folder + files[i];
-            const name = filenameToThemeName(files[i]);
+        if (i < files.length && entryFilename(files[i])) {
+            const filename = entryFilename(files[i]);
+            const path = folder + filename;
+            const thumbPath = folder + entryThumb(files[i]);
+            const name = filenameToThemeName(filename);
             const isSelected = path === selectedPath;
 
-            if (isVideoFile(files[i])) {
+            if (isVideoFile(filename)) {
+                const poster = thumbPath !== path ? ` poster="${thumbPath}"` : '';
                 html += `
                     <button type="button" class="dev-favorite-thumb dev-favorite-thumb-video${isSelected ? ' selected' : ''}"
                         data-file="${path}" title="${name}">
-                        <video src="${path}" muted preload="metadata" playsinline></video>
+                        <video src="${path}"${poster} muted preload="metadata" playsinline></video>
                         <span class="dev-favorite-thumb-play-badge"><i class="fas fa-play"></i></span>
                         <span class="dev-favorite-thumb-label">${name}</span>
                     </button>
@@ -440,7 +454,7 @@ function renderDevFavorites(manifest, selectedPath) {
             } else {
                 html += `
                     <button type="button" class="dev-favorite-thumb${isSelected ? ' selected' : ''}"
-                        style="background-image: url('${path}')" data-file="${path}" title="${name}">
+                        style="background-image: url('${thumbPath}')" data-file="${path}" title="${name}">
                         <span class="dev-favorite-thumb-label">${name}</span>
                     </button>
                 `;
@@ -1499,12 +1513,24 @@ class KanjiLearningApp {
 
     async loadCurrentKanji() {
         const widget = document.getElementById('kanjiWidget');
-        widget.innerHTML =
-            '<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading Kanji...</p></div>';
+        // The document can ship prerendered with the first-visit screen already
+        // inside the widget (see index.html). While that prerender is live, a
+        // first-time visitor keeps looking at their actual first card instead
+        // of a spinner that would be replaced by the same content anyway.
+        // Returning visitors carry the data-returning mark from the head gate,
+        // and once any render has landed script.js drops data-prerender, so
+        // every later load shows the spinner exactly like before.
+        const prerenderLive =
+            document.documentElement.hasAttribute('data-prerender') &&
+            !document.documentElement.hasAttribute('data-returning');
+        if (!prerenderLive) {
+            widget.innerHTML =
+                '<div class="widget-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading Kanji...</p></div>';
+        }
 
         // FIX 1: Clear the recent list UI immediately so it doesn't show old data during the loading delay
         const recentContainer = document.getElementById('recentKanji');
-        if (recentContainer) {
+        if (recentContainer && !prerenderLive) {
             recentContainer.innerHTML = `<p style="text-align: center; opacity: 0.6;">Loading ${this.settings.jlptLevel}...</p>`;
         }
 
@@ -1550,6 +1576,9 @@ class KanjiLearningApp {
             }
         } catch (error) {
             console.error('Error loading kanji:', error);
+            // The prerendered card describes a load that just failed; drop it
+            // so the error state (a .widget-loading child) is visible again.
+            document.documentElement.removeAttribute('data-prerender');
             widget.innerHTML =
                 '<div class="widget-loading"><p>Error loading data.</p><button onclick="app.loadCurrentKanji()">Retry</button></div>';
         }
@@ -1730,6 +1759,10 @@ class KanjiLearningApp {
         }
 
         widget.innerHTML = content;
+        // The prerendered first screen (if it was still up) has now been
+        // replaced by the real thing. Dropping the attribute re-enables the
+        // normal loading-spinner styling for every later load.
+        document.documentElement.removeAttribute('data-prerender');
         if (this.widgetSize !== 'small') {
             this.loadStrokeOrder();
             // The markup above always renders with the Animate tab active.

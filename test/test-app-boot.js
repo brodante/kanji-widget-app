@@ -45,7 +45,7 @@ const IGNORED_JS_ERRORS = [/Not implemented/i, /speech synthesis/i, /getContext/
 const settle = (window, ms = 250) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 async function bootApp(options = {}) {
-    const { theme, signedInTheme } = options;
+    const { theme, signedInTheme, returning, beforeScripts } = options;
     const errors = [];
     const virtualConsole = new VirtualConsole();
     virtualConsole.on('jsdomError', (error) => {
@@ -121,6 +121,15 @@ async function bootApp(options = {}) {
     }
     if (signedInTheme) {
         window.localStorage.setItem('lastDarkTheme', signedInTheme);
+    }
+    if (returning) {
+        // Simulate the head gate script: this harness never executes inline
+        // scripts, so a returning visitor has to be marked by hand before the
+        // app scripts run.
+        document.documentElement.setAttribute('data-returning', '');
+    }
+    if (beforeScripts) {
+        beforeScripts(window, document);
     }
 
     await new Promise((resolve) => window.addEventListener('load', resolve, { once: true }));
@@ -522,6 +531,284 @@ test('the account panel, profile page and cloud settings render without duplicat
         // The profile page and the account panel both offer sign-in.
         assert.equal(document.querySelectorAll('[data-app-sign-in]').length, 2);
         assert.ok(window.kanjiProfilePage, 'the profile page module booted');
+    } finally {
+        dom.window.close();
+    }
+});
+
+// ---------------------------------------------------------------------------
+// Prerender: index.html ships the first-visit screen as static markup so the
+// LCP character paints without waiting on the scripts. These tests keep the
+// static copy honest: it must be structurally identical to what the app
+// renders for a fresh visitor, it must never flash a spinner at that visitor,
+// and the two inline head scripts (gate + font refinement) must behave.
+// ---------------------------------------------------------------------------
+
+// The stroke-order container and the pad guide are filled asynchronously
+// (KanjiVG fetch, guide render), and the canvas is a leaf jsdom cannot draw
+// on, so the comparison skips their runtime contents and checks only that
+// the skeleton around them matches.
+const PRERENDER_SKIP_IDS = new Set(['strokeOrderContainer', 'drawingPadInlineGuide']);
+
+const snapshotTree = (node) => {
+    if (node.nodeType === 3) {
+        const text = node.textContent.replace(/\s+/g, ' ').trim();
+        return text ? { text } : null;
+    }
+    if (node.nodeType !== 1) {
+        return null;
+    }
+    const attrs = {};
+    for (const attr of node.attributes) {
+        let value = attr.value;
+        if (attr.name === 'class') {
+            // prerender-static only exists in the static copy; the renderer
+            // never emits it.
+            value = value
+                .split(/\s+/)
+                .filter((token) => token && token !== 'prerender-static')
+                .sort()
+                .join(' ');
+        } else if (attr.name === 'style') {
+            value = value.replace(/\s+/g, ' ').replace(/;$/, '').trim();
+        } else if (attr.name === 'onclick') {
+            // Prettier formats the JS inside event-handler attributes, so the
+            // static copy can carry line breaks the template never emits.
+            // Normalize whitespace and punctuation spacing on both sides.
+            value = value
+                .replace(/\s+/g, ' ')
+                .replace(/\s*([(),])\s*/g, '$1')
+                .trim();
+        } else if (attr.name === 'disabled') {
+            value = '';
+        }
+        if (value === '' && attr.name === 'class') {
+            continue;
+        }
+        attrs[attr.name] = value;
+    }
+    const snapshot = { el: node.tagName, attrs };
+    if (PRERENDER_SKIP_IDS.has(node.id)) {
+        snapshot.runtimeContent = true;
+        return snapshot;
+    }
+    if (node.tagName !== 'CANVAS') {
+        snapshot.children = [...node.childNodes].map(snapshotTree).filter(Boolean);
+    }
+    return snapshot;
+};
+
+const widgetChildren = (rootNode) =>
+    [...rootNode.children]
+        .filter((child) => !child.classList.contains('widget-loading'))
+        .map(snapshotTree);
+
+// Pull the inline head script containing `marker` out of index.html. A lazy
+// regex from the first <script> would happily span across markup into the
+// next script, so slice from the nearest boundaries around the marker.
+const inlineScript = (html, marker) => {
+    const at = html.indexOf(marker);
+    assert.ok(at !== -1, `no inline script contains ${marker}`);
+    const start = html.lastIndexOf('<script>', at) + '<script>'.length;
+    const end = html.indexOf('</script>', at);
+    assert.ok(start > 0 && end > at, 'the marker must sit inside a script tag');
+    return html.slice(start, end);
+};
+
+test('the prerendered widget matches what the app renders for a fresh visitor', async () => {
+    // Static side: parse index.html without running anything.
+    const staticDom = new JSDOM(read('index.html'), { url: 'https://kanji.qd.je/' });
+    const staticDoc = staticDom.window.document;
+    const staticWidget = widgetChildren(staticDoc.getElementById('kanjiWidget'));
+    const staticJourney = snapshotTree(staticDoc.getElementById('kanjiJourney'));
+    const staticRecent = snapshotTree(staticDoc.getElementById('recentKanji'));
+    const staticStats = staticDoc.getElementById('progressStats').textContent.trim();
+    const staticSummary = staticDoc.getElementById('journeySummary').textContent.trim();
+    staticDom.window.close();
+
+    // Rendered side: full fresh boot, default settings, no stored progress.
+    const { dom, document, errors } = await bootApp();
+    try {
+        assert.deepEqual(errors, [], 'a fresh boot must not throw');
+        assert.deepEqual(
+            widgetChildren(document.getElementById('kanjiWidget')),
+            staticWidget,
+            'the static widget markup drifted from renderKanji()'
+        );
+        assert.deepEqual(
+            snapshotTree(document.getElementById('kanjiJourney')),
+            staticJourney,
+            'the static journey grid drifted from renderKanjiJourney()'
+        );
+        assert.deepEqual(
+            snapshotTree(document.getElementById('recentKanji')),
+            staticRecent,
+            'the static recent list drifted from loadRecentKanji()'
+        );
+        assert.equal(document.getElementById('progressStats').textContent.trim(), staticStats);
+        assert.equal(document.getElementById('journeySummary').textContent.trim(), staticSummary);
+    } finally {
+        dom.window.close();
+    }
+});
+
+test('a fresh visitor never sees the spinner; a returning visitor sees it first', async () => {
+    const watch = (record) => (window, document) => {
+        const observer = new window.MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                for (const added of mutation.addedNodes) {
+                    if (added.nodeType === 1 && added.classList.contains('widget-loading')) {
+                        record.push(added.textContent);
+                    }
+                }
+            }
+        });
+        observer.observe(document.getElementById('kanjiWidget'), { childList: true });
+    };
+
+    const freshSpinners = [];
+    const fresh = await bootApp({ beforeScripts: watch(freshSpinners) });
+    try {
+        assert.deepEqual(freshSpinners, [], 'the prerender must not be replaced by a spinner');
+        assert.equal(
+            fresh.document.documentElement.hasAttribute('data-prerender'),
+            false,
+            'renderKanji() hands the document back to normal loading states'
+        );
+        assert.ok(fresh.document.querySelector('#kanjiWidget .kanji-character'));
+    } finally {
+        fresh.dom.window.close();
+    }
+
+    const returningSpinners = [];
+    const returning = await bootApp({
+        returning: true,
+        beforeScripts: watch(returningSpinners)
+    });
+    try {
+        assert.equal(
+            returningSpinners.length > 0,
+            true,
+            'returning visitors keep the classic spinner while data loads'
+        );
+        assert.ok(returning.document.querySelector('#kanjiWidget .kanji-character'));
+    } finally {
+        returning.dom.window.close();
+    }
+});
+
+test('the head gate marks the document for returning visitors only', () => {
+    const html = read('index.html');
+    const gate = inlineScript(html, 'var keys');
+
+    const runGate = (stored) => {
+        const dom = new JSDOM(html, { url: 'https://kanji.qd.je/', runScripts: 'outside-only' });
+        for (const [key, value] of Object.entries(stored)) {
+            dom.window.localStorage.setItem(key, value);
+        }
+        dom.window.eval(gate);
+        const marked = dom.window.document.documentElement.hasAttribute('data-returning');
+        dom.window.close();
+        return marked;
+    };
+
+    assert.equal(runGate({}), false, 'a first-time visitor keeps the prerender');
+    assert.equal(runGate({ kanjiSettings: '{"jlptLevel":"N5"}' }), true);
+    assert.equal(runGate({ kanji_settings: '{}' }), true);
+    assert.equal(runGate({ kanji_progress: '{"mastered":["雨"]}' }), true);
+    assert.equal(runGate({ kanji_recent: '[]' }), true);
+    // Unrelated keys (theme, streak) describe a visitor whose first screen is
+    // still the default one, so the prerender stays valid for them.
+    assert.equal(runGate({ theme: 'midnight', dailyStreak: '3' }), false);
+});
+
+test('the font refinement promotes the saved face into the blocking slot', () => {
+    const html = read('index.html');
+    const refine = inlineScript(html, 'var saved');
+
+    const runRefine = (settings) => {
+        const dom = new JSDOM(html, { url: 'https://kanji.qd.je/', runScripts: 'outside-only' });
+        const { window } = dom;
+        if (settings !== null) {
+            window.localStorage.setItem('kanjiSettings', settings);
+        }
+        window.eval(refine);
+        const remote = window.document.getElementById('remoteFontsLink');
+        const display = window.document.getElementById('displayFontsLink');
+        const state = {
+            remoteHref: remote.getAttribute('href'),
+            remoteMedia: remote.media,
+            displayMedia: display.media
+        };
+        window.close();
+        return state;
+    };
+
+    const untouched = runRefine(null);
+    assert.equal(untouched.remoteMedia, 'print', 'no saved settings: everything stays async');
+    assert.equal(untouched.remoteHref.includes('family=Noto+Sans+JP'), true);
+    assert.equal(untouched.remoteHref.includes('family=Klee+One'), false);
+
+    const klee = runRefine('{"kanjiFont":"Klee One"}');
+    assert.deepEqual(klee, untouched, 'the default face needs no promotion');
+
+    const zen = runRefine('{"kanjiFont":"Zen Antique"}');
+    assert.equal(zen.remoteMedia, 'all', 'the chosen face becomes render-blocking');
+    assert.equal(
+        zen.remoteHref,
+        'https://fonts.googleapis.com/css2?family=Zen+Antique&display=swap'
+    );
+
+    const noto = runRefine('{"kanjiFont":"Noto Sans JP"}');
+    assert.equal(noto.remoteMedia, 'all');
+    assert.equal(
+        noto.remoteHref,
+        'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap'
+    );
+
+    const hannari = runRefine('{"kanjiFont":"Hannari"}');
+    assert.equal(hannari.displayMedia, 'all', 'self-hosted display faces promote their own CSS');
+    assert.deepEqual(hannari.remoteMedia, 'print');
+
+    const device = runRefine('{"kanjiFont":"Hiragino Sans"}');
+    assert.deepEqual(device, untouched, 'device fonts need no webfont at all');
+
+    const corrupt = runRefine('{oops');
+    assert.deepEqual(corrupt, untouched, 'corrupt settings fall back to the default path');
+});
+
+test('dev favorites tiles use manifest thumbs but keep full paths for applying', async () => {
+    const { dom, window, document } = await bootApp();
+    try {
+        // Manifest entries are plain filenames or {file, thumb} objects, mixed.
+        window.renderDevFavorites(
+            {
+                folder: 'assets/dev-themes/',
+                files: ['plain.gif', { file: 'big.gif', thumb: 'big.thumb.gif' }]
+            },
+            'assets/dev-themes/big.gif'
+        );
+        const tiles = [...document.querySelectorAll('#devFavoritesGrid .dev-favorite-thumb')];
+        assert.equal(tiles[0].getAttribute('data-file'), 'assets/dev-themes/plain.gif');
+        assert.ok(tiles[0].getAttribute('style').includes("url('assets/dev-themes/plain.gif')"));
+        assert.equal(tiles[1].getAttribute('data-file'), 'assets/dev-themes/big.gif');
+        assert.ok(
+            tiles[1].getAttribute('style').includes("url('assets/dev-themes/big.thumb.gif')"),
+            'the tile shows the downscaled thumb'
+        );
+        assert.ok(
+            tiles[1].classList.contains('selected'),
+            'selection still keys off the full-size path'
+        );
+
+        // Videos keep the full file in <video src>; a thumb becomes the poster.
+        window.renderDevFavorites(
+            { folder: 'f/', files: [{ file: 'a.mp4', thumb: 'a.jpg' }] },
+            null
+        );
+        const video = document.querySelector('#devFavoritesGrid video');
+        assert.equal(video.getAttribute('src'), 'f/a.mp4');
+        assert.equal(video.getAttribute('poster'), 'f/a.jpg');
     } finally {
         dom.window.close();
     }

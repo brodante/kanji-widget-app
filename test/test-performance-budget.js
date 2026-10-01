@@ -86,26 +86,113 @@ test('three.js and its addons are no longer render-blocking head scripts', () =>
     );
 });
 
-test('fonts ship in one request: main faces block first paint, extras stay async', () => {
+test('fonts: self-hosted Klee One blocks, the other Google faces stay async', () => {
     const html = read('index.html');
-    const fontLinks = [
-        ...html.matchAll(/<link[^>]*href="(https:\/\/fonts\.googleapis\.com[^"]*)"[^>]*>/g)
-    ].map((match) => match[1]);
+    const head = html
+        .slice(0, html.indexOf('</head>'))
+        .replace(/<noscript>[\s\S]*?<\/noscript>/g, '');
 
-    assert.equal(fontLinks.length >= 3, true, 'combined CSS plus the theme-picker display faces');
-    const combined = [...new Set(fontLinks.filter((href) => href.includes('css2')))];
-    assert.equal(combined.length, 1, 'one css2 request instead of three');
-    for (const family of [
-        'Klee+One',
-        'Noto+Sans+JP',
-        'Noto+Serif+JP',
-        'Zen+Antique',
-        'Zen+Maru+Gothic'
-    ]) {
-        assert.ok(combined[0].includes(family), family);
+    // The blocking stylesheets: the self-hosted Klee One CSS (the only family
+    // the first screen needs) and the app's own styles.css. The combined css2
+    // request they replace carried five families (~323 KiB) and blocked first
+    // paint for ~3.9 s on mobile.
+    const blockingStyles = [...head.matchAll(/<link[^>]*rel="stylesheet"[^>]*>/g)]
+        .map((match) => match[0])
+        .filter((tag) => !tag.includes('media="print"'));
+    assert.equal(
+        blockingStyles.length,
+        2,
+        `expected exactly two blocking stylesheets, got: ${blockingStyles.join(' | ')}`
+    );
+    assert.ok(
+        blockingStyles[0].includes('assets/fonts/klee-one.css?v=klee-one-v1'),
+        'Klee One CSS is local and blocking'
+    );
+    assert.equal(
+        blockingStyles[1],
+        '<link rel="stylesheet" href="styles.css?v=custom-footer-glass-v1" />'
+    );
+
+    // Klee One must never be requested from Google again; the async css2 keeps
+    // exactly the four families the theme picker and the stroke-guide numbers use.
+    const css2Links = [
+        ...new Set(
+            [...html.matchAll(/href="(https:\/\/fonts\.googleapis\.com\/css2[^"]*)"/g)].map(
+                (match) => match[1]
+            )
+        )
+    ];
+    assert.equal(css2Links.length, 1, 'one css2 URL (async link + noscript twin)');
+    const remote = css2Links[0];
+    assert.equal(remote.includes('Klee+One'), false, 'Klee One is self-hosted now');
+    for (const family of ['Noto+Sans+JP', 'Noto+Serif+JP', 'Zen+Antique', 'Zen+Maru+Gothic']) {
+        assert.ok(remote.includes(family), family);
     }
     // Yu Gothic is a device font only; it must never load from the CDN.
-    assert.equal(combined[0].includes('Yu+Gothic'), false, 'Yu Gothic is a system font');
+    assert.equal(remote.includes('Yu+Gothic'), false, 'Yu Gothic is a system font');
+    assert.equal(remote.includes('Material+Icons'), false, 'Material Icons is never used');
+    assert.ok(remote.includes('display=swap'), 'font-display: swap avoids invisible text');
+    // The remote link loads async, with a no-JS fallback.
+    assert.match(
+        head,
+        /<link[^>]*id="remoteFontsLink"[^>]*media="print"[^>]*onload="this\.media = 'all'"/
+    );
+    assert.ok(html.includes('<noscript>'));
+    // Preconnects stay: the async css2 and its woff2 files still use both origins.
+    assert.match(head, /<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com" \/>/);
+    assert.match(
+        head,
+        /<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin \/>/
+    );
+
+    // The generated CSS is fully local, carries both weights the app uses
+    // (.kanji-character asks for 300, which matches 400 upward; bold kanji use
+    // 600) and keeps fontsource's font-display: swap.
+    const kleeCss = read('assets/fonts/klee-one.css');
+    assert.equal(kleeCss.includes('https://'), false, 'no remote references');
+    const faces = kleeCss.split('@font-face').slice(1);
+    assert.ok(faces.length > 200, 'the full unicode-range subset list ships');
+    for (const face of faces) {
+        assert.ok(face.includes('font-family:Klee One'), 'family name');
+        assert.ok(face.includes('font-display:swap'), 'swap on every face');
+        assert.match(face, /font-weight:(400|600)/);
+        const urls = [...face.matchAll(/url\(([^)]*)\)/g)].map((match) => match[1]);
+        assert.ok(urls.length > 0, 'every face has a src');
+        for (const url of urls) {
+            assert.ok(url.startsWith('klee-one/'), `src must be local: ${url}`);
+        }
+    }
+
+    // The preloads are the subsets whose unicode-range covers あ (U+3042), the
+    // LCP character, for both weights. If fontsource ever renumbers its
+    // subsets, this fails loudly instead of preloading the wrong file.
+    for (const weight of [400, 600]) {
+        const file = `klee-one-119-${weight}-normal.woff2`;
+        assert.ok(
+            head.includes(`href="assets/fonts/klee-one/${file}"`),
+            `${file} is referenced in the head`
+        );
+        const preload = head.match(
+            new RegExp(`<link[^>]*rel="preload"[^>]*href="assets/fonts/klee-one/${file}"[^>]*>`)
+        );
+        assert.ok(preload, `${file} is preloaded`);
+        assert.ok(preload[0].includes('as="font"'), `${file}: as=font`);
+        assert.ok(preload[0].includes('type="font/woff2"'), `${file}: woff2 type`);
+        assert.ok(preload[0].includes('crossorigin'), `${file}: CORS-mode preload`);
+        const buffer = fs.readFileSync(path.join(root, 'assets/fonts/klee-one', file));
+        assert.equal(buffer.toString('ascii', 0, 4), 'wOF2', `${file} is a real woff2`);
+        const face = faces.find((candidate) => candidate.includes(file));
+        assert.ok(face, `${file} has an @font-face rule`);
+        const range = face.match(/unicode-range:([^;}]*)/)[1];
+        const covers = range.split(',').some((token) => {
+            const parts = token.trim().replace(/^U\+/, '').split('-');
+            const start = Number.parseInt(parts[0], 16);
+            const end = parts.length > 1 ? Number.parseInt(parts[1], 16) : start;
+            return start <= 0x3042 && 0x3042 <= end;
+        });
+        assert.ok(covers, `subset 119 (${weight}) must cover U+3042 あ`);
+    }
+
     // The picker is a curated 3x2 (five fonts + a "More fonts" tile) that
     // expands to every available font.
     const gridStart = html.indexOf('id="fontPreviewGrid"');
@@ -126,36 +213,6 @@ test('fonts ship in one request: main faces block first paint, extras stay async
             gridHtml.includes('role="button"'),
         'the faded More-fonts tile expands the grid'
     );
-    assert.equal(combined[0].includes('Material+Icons'), false, 'Material Icons is never used');
-    assert.ok(combined[0].includes('display=swap'), 'font-display: swap avoids invisible text');
-    // The preload and the stylesheet must be the same URL, or the preload is wasted.
-    assert.ok(
-        html.includes(
-            `<link\n            rel="preload"\n            as="style"\n            href="${combined[0]}"\n        />`
-        )
-    );
-
-    // <noscript> fallbacks are inert in every JS-enabled browser, so they never block.
-    const head = html
-        .slice(0, html.indexOf('</head>'))
-        .replace(/<noscript>[\s\S]*?<\/noscript>/g, '');
-    const blockingStyles = [...head.matchAll(/<link[^>]*rel="stylesheet"[^>]*>/g)]
-        .map((match) => match[0])
-        .filter((tag) => !tag.includes('media="print"'));
-    // The main faces block first paint on purpose: the preload has already started the
-    // download, so first paint finds Klee One ready instead of swapping it in over the
-    // fallback font after the fact. That swap moved the progress line by 0.31 CLS.
-    assert.deepEqual(blockingStyles, [
-        `<link\n            href="${combined[0]}"\n            rel="stylesheet"\n        />`,
-        '<link rel="stylesheet" href="styles.css?v=custom-footer-glass-v1" />'
-    ]);
-    // Async stylesheets must have a no-JS fallback.
-    assert.ok(html.includes('<noscript>'));
-    // The font CDN is preconnected, which the report flagged as missing.
-    assert.match(
-        head,
-        /<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin \/>/
-    );
 
     // The theme-picker display faces (Hannari, Kokoro) are self-hosted. Google's
     // Early Access endpoint served them without CORS headers, so the browser
@@ -164,7 +221,7 @@ test('fonts ship in one request: main faces block first paint, extras stay async
     assert.equal(html.includes('earlyaccess'), false, 'no more Early Access endpoints');
     assert.ok(
         html.includes(
-            `<link\n            media="print"\n            onload="this.media = 'all'"\n            href="assets/fonts/display-fonts.css?v=display-fonts-v1"\n            rel="stylesheet"\n        />`
+            `<link\n            id="displayFontsLink"\n            media="print"\n            onload="this.media = 'all'"\n            href="assets/fonts/display-fonts.css?v=display-fonts-v1"\n            rel="stylesheet"\n        />`
         ),
         'the display faces stay async (after first paint)'
     );
@@ -190,6 +247,134 @@ test('fonts ship in one request: main faces block first paint, extras stay async
             `${name}: woff2 must come first in the src list`
         );
     }
+});
+
+test('the font refinement promotes a saved non-Klee face into the blocking slot', () => {
+    const html = read('index.html');
+    // The refinement is an inline head script (no src, so it never counts as a
+    // blocking external script) that runs before first paint.
+    const script = html.match(
+        /<script>\s*\(function \(\) \{\s*try \{\s*var saved[\s\S]*?<\/script>/
+    );
+    assert.ok(script, 'the refinement script lives in the head');
+    const body = script[0];
+    // Every Google-hosted picker family maps to a single-family css2 request...
+    assert.ok(body.includes("'Noto Sans JP': 'Noto+Sans+JP:wght@300;400;500;700'"));
+    assert.ok(body.includes("'Noto Serif JP': 'Noto+Serif+JP:wght@400;700'"));
+    assert.ok(body.includes("'Zen Antique': 'Zen+Antique'"));
+    assert.ok(body.includes("'Zen Maru Gothic': 'Zen+Maru+Gothic:wght@400;700'"));
+    // ...the self-hosted display faces promote display-fonts.css instead...
+    assert.ok(body.includes("font === 'Hannari' || font === 'Kokoro'"));
+    assert.ok(body.includes("document.getElementById('displayFontsLink').media = 'all'"));
+    // ...and promotion means the link becomes blocking.
+    assert.ok(body.includes("remote.media = 'all'"));
+    assert.ok(body.includes("localStorage.getItem('kanjiSettings')"));
+    // Device fonts (Hiragino Sans, Yu Gothic, Meiryo, MS Gothic) and the Klee
+    // default intentionally map to nothing: there is no webfont to fetch.
+    assert.equal(body.includes('Hiragino Sans'), false);
+});
+
+test('the prerender gate marks returning visitors before first paint', () => {
+    const html = read('index.html');
+    const css = read('styles.css');
+    assert.match(html, /<html lang="en" data-prerender="on">/);
+    // The gate runs in the head, before any stylesheet or body markup.
+    const gate = html.match(/<script>\s*\(function \(\) \{\s*try \{\s*var keys[\s\S]*?<\/script>/);
+    assert.ok(gate, 'the gate script lives in the head');
+    assert.ok(
+        html.indexOf(gate[0]) < html.indexOf('<link rel="stylesheet"'),
+        'the gate must run before the first stylesheet'
+    );
+    for (const key of ['kanjiSettings', 'kanji_settings', 'kanji_progress', 'kanji_recent']) {
+        assert.ok(gate[0].includes(`'${key}'`), `the gate checks ${key}`);
+    }
+    assert.ok(gate[0].includes("document.documentElement.setAttribute('data-returning', '')"));
+    // The CSS side: returning visitors lose the prerender and see the spinner,
+    // first-timers keep the prerender and never see a spinner flash.
+    assert.ok(css.includes('html[data-returning] .prerender-static'));
+    assert.ok(
+        css.includes('html[data-prerender]:not([data-returning]) #kanjiWidget > .widget-loading')
+    );
+});
+
+test('the prerendered first screen matches the default-level database', () => {
+    const html = read('index.html');
+    const db = JSON.parse(read('database/Hiragana.json'));
+    const kanji = db.Hiragana;
+    const first = kanji[0];
+    assert.equal(first.character, 'あ');
+
+    // The LCP character, its meanings and its readings come straight from the
+    // default level's data file.
+    assert.ok(
+        html.includes('<div class="kanji-character japanese-text prerender-static">あ</div>')
+    );
+    assert.ok(
+        html.includes(
+            `<div class="kanji-meaning prerender-static">${first.meanings.join(', ')}</div>`
+        )
+    );
+    // あ has no on'yomi; its single kun'yomi reading is a clickable span.
+    const readings = html.slice(
+        html.indexOf('<div class="kanji-readings prerender-static">'),
+        html.indexOf('<div class="kanji-examples prerender-static">')
+    );
+    assert.equal(readings.includes("On'yomi"), false, 'あ has no on-yomi');
+    assert.ok(readings.includes("Kun'yomi"));
+    for (const reading of first.kunyomi) {
+        assert.ok(readings.includes(`onclick="app.playSpecificReading('${reading}')"`));
+    }
+    // Examples mirror the template: the first three, word + reading + meaning.
+    const examples = html.slice(
+        html.indexOf('<div class="kanji-examples prerender-static">'),
+        html.indexOf('<div class="stroke-order-section prerender-static">')
+    );
+    for (const example of first.examples.slice(0, 3)) {
+        assert.ok(examples.includes(example.word), example.word);
+        assert.ok(examples.includes(example.meaning), example.meaning);
+    }
+    // The practice tab is the default surface: flipped card, active Practice
+    // button, visible controls, the loading line loadStrokeOrder() would show.
+    assert.ok(
+        html.includes('<div class="stroke-order-flip-card flipped" id="strokeOrderFlipCard">')
+    );
+    assert.ok(html.includes('class="stroke-order-mode-btn stroke-order-practice active"'));
+    assert.equal(
+        html.includes('class="stroke-order-mode-btn stroke-order-play active"'),
+        false,
+        'the Animate tab must not start active'
+    );
+    assert.match(
+        html,
+        /<div class="stroke-order-loading">\s*Loading stroke order…\s*<\/div>/,
+        'the prerender shows the same loading line loadStrokeOrder() writes'
+    );
+
+    // Progress line and journey grid mirror a fresh visitor on Hiragana.
+    assert.ok(
+        html.includes(`0 mastered | ${kanji.length} total (Hiragana level)`),
+        'progressStats matches the level size'
+    );
+    const gridStart = html.indexOf('<div id="kanjiJourney" class="journey-grid kana-layout">');
+    assert.ok(gridStart !== -1, 'the journey grid is prerendered in kana layout');
+    // Prettier wraps the pill buttons over several lines; compare on the
+    // whitespace-normalized slice.
+    const grid = html.slice(gridStart, html.indexOf('</div>', gridStart)).replace(/\s+/g, ' ');
+    const pills = [
+        ...grid.matchAll(/<button class="([^"]*)" data-character="([^"]+)"[^>]*>([^<]+)<\/button>/g)
+    ];
+    assert.equal(pills.length, kanji.length, 'one pill per character');
+    assert.deepEqual(
+        pills.map((match) => match[2]),
+        kanji.map((k) => k.character),
+        'pills in database order'
+    );
+    assert.ok(pills.every((match) => match[1] === 'journey-pill pending prerender-static'));
+    assert.ok(
+        pills.every((match) => match[3].trim() === match[2]),
+        'pill text is its character'
+    );
+    assert.ok(html.includes('No recently studied items for Hiragana yet.'));
 });
 
 test('the viewport keeps pinch zoom enabled', () => {
@@ -321,7 +506,7 @@ test('the service worker caches instead of bypassing the HTTP cache', () => {
         false,
         'no-store disabled the HTTP cache'
     );
-    assert.match(worker, /CACHE_NAME = 'kanji-widgets-v35'/);
+    assert.match(worker, /CACHE_NAME = 'kanji-widgets-v36'/);
     // Repeat visits are served from the cache and refreshed in the background.
     assert.match(worker, /if \(destination === 'script' \|\| destination === 'style'\)/);
     assert.match(worker, /if \(request\.mode === 'navigate'\)/);
@@ -505,4 +690,30 @@ test('the Firebase stack (auth SDK + reCAPTCHA) starts off the critical path', (
 
     // App Check still runs before the Firebase services, exactly as before.
     assert.match(source, /await this\.initializeAppCheckIfConfigured\(\);/);
+});
+
+test('dev theme manifests ship downscaled thumbs next to the full wallpapers', () => {
+    // The 1920x1080 GIF used to load in full (5.5 MB) just to paint a picker
+    // tile. Manifests now carry {file, thumb} pairs; the tile paints the thumb
+    // and applying the theme still uses the full file.
+    for (const folder of ['assets/dev-themes', 'assets/dev-themes/mobile']) {
+        const manifest = JSON.parse(read(`${folder}/manifest.json`));
+        assert.ok(Array.isArray(manifest) && manifest.length > 0, `${folder} manifest`);
+        for (const entry of manifest) {
+            const file = typeof entry === 'string' ? entry : entry.file;
+            const thumb = (typeof entry === 'object' && entry !== null && entry.thumb) || file;
+            const fullBytes = fs.statSync(path.join(root, folder, file)).size;
+            const thumbBytes = fs.statSync(path.join(root, folder, thumb)).size;
+            assert.ok(file && thumbBytes > 0, `${folder}/${file} and its thumb exist`);
+            assert.ok(
+                thumbBytes < fullBytes / 2,
+                `${folder}/${thumb} (${thumbBytes} B) must be clearly smaller than ${file} (${fullBytes} B)`
+            );
+        }
+    }
+    const desktop = JSON.parse(read('assets/dev-themes/manifest.json'));
+    assert.equal(typeof desktop[0], 'object', 'the shipped manifest uses the thumb form');
+    assert.ok(desktop[0].thumb.endsWith('.thumb.gif'));
+    const gif = fs.readFileSync(path.join(root, 'assets/dev-themes', desktop[0].thumb));
+    assert.equal(gif.toString('ascii', 0, 3), 'GIF', 'the thumb is still an animated GIF');
 });

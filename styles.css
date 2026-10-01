@@ -326,7 +326,16 @@ body {
     padding: 2rem;
     text-align: center;
     position: relative;
-    transition: all 0.3s ease;
+    /* Scoped on purpose: `all` animated backdrop-filter, blur and layout
+       properties too, which shows up in the "non-composited animations"
+       audit and repaints the frosted-glass themes on every hover. These
+       four are everything the widget actually transitions: the theme-switch
+       fade (background, shadow, border) and the hover lift (transform). */
+    transition:
+        background-color 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease,
+        transform 0.3s ease;
     cursor: pointer;
     min-height: 200px;
     display: flex;
@@ -361,6 +370,23 @@ body {
 
 .widget-loading i {
     font-size: 2rem;
+}
+
+/* index.html ships prerendered with the exact first-visit screen (default
+   Hiragana card, gojuon grid, zero progress) so first paint never waits on
+   the scripts. While that prerender is live (data-prerender on <html>, no
+   data-returning mark) the static spinner stays hidden: a first-time visitor
+   looks straight at their first card. The head gate script adds
+   data-returning before first paint for anyone with saved state, which hides
+   every .prerender-static node and lets the normal spinner show from the
+   very first frame. script.js removes data-prerender the moment the real
+   render lands, so later loading states behave exactly like they always did. */
+html[data-prerender]:not([data-returning]) #kanjiWidget > .widget-loading {
+    display: none;
+}
+
+html[data-returning] .prerender-static {
+    display: none !important;
 }
 
 .kanji-character {

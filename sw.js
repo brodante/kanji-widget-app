@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kanji-widgets-v35';
+const CACHE_NAME = 'kanji-widgets-v36';
 // Exactly the URLs the page requests, one entry each. This list used to carry
 // both the bare and the ?v= form of five assets plus '/' and '/index.html',
 // so every install downloaded ~50 KiB twice and stored twin copies that no
@@ -10,6 +10,12 @@ const urlsToCache = [
     '/styles.css?v=custom-footer-glass-v1',
     '/assets/fonts/fa/css/fontawesome-subset.css?v=fa-subset-6.0.0-v1',
     '/assets/fonts/display-fonts.css?v=display-fonts-v1',
+    // Klee One is self-hosted now; the CSS and the two subsets covering あ
+    // (both weights) belong in the precache so an offline first screen still
+    // renders in the right face. Every other subset is cache-first on demand.
+    '/assets/fonts/klee-one.css?v=klee-one-v1',
+    '/assets/fonts/klee-one/klee-one-119-400-normal.woff2',
+    '/assets/fonts/klee-one/klee-one-119-600-normal.woff2',
     '/database/Hiragana.json',
     '/storage-manager.js',
     '/srs-engine.js',

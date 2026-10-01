@@ -12,3 +12,5 @@ deploy/
 dist/
 coverage/
 package-lock.json
+assets/fonts/klee-one/
+assets/fonts/klee-one.css
