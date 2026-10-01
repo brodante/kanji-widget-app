@@ -147,7 +147,7 @@ test('fonts ship in one request: main faces block first paint, extras stay async
     // fallback font after the fact. That swap moved the progress line by 0.31 CLS.
     assert.deepEqual(blockingStyles, [
         `<link\n            href="${combined[0]}"\n            rel="stylesheet"\n        />`,
-        '<link rel="stylesheet" href="styles.css?v=ai-floating-v1" />'
+        '<link rel="stylesheet" href="styles.css?v=custom-footer-glass-v1" />'
     ]);
     // Async stylesheets must have a no-JS fallback.
     assert.ok(html.includes('<noscript>'));
@@ -286,6 +286,21 @@ test('the footer shares the frosted-glass treatment of the sections in WebGL the
     }
 });
 
+test('the custom theme footer matches its translucent cards', () => {
+    // Dante's curated picks and uploaded backgrounds both apply as custom-1.
+    // Keep the footer on the same glass panel as progress and journey, and clear
+    // its base white tint so it does not look like an opaque block.
+    const css = read('styles.css');
+    const start = css.indexOf("[data-theme='custom-1'] .kanji-widget,");
+    assert.notEqual(start, -1, 'custom theme glass rule must exist');
+    const rule = css.slice(start, css.indexOf('}', start));
+
+    assert.ok(rule.includes("[data-theme='custom-1'] .footer-content"));
+    assert.ok(rule.includes('background-color: rgba(var(--custom-panel-rgb, 30, 30, 30), 0.65);'));
+    assert.ok(rule.includes('background-image: none;'));
+    assert.ok(rule.includes('backdrop-filter: blur(10px);'));
+});
+
 test('the service worker caches instead of bypassing the HTTP cache', () => {
     const worker = read('sw.js');
     assert.equal(
@@ -293,7 +308,7 @@ test('the service worker caches instead of bypassing the HTTP cache', () => {
         false,
         'no-store disabled the HTTP cache'
     );
-    assert.match(worker, /CACHE_NAME = 'kanji-widgets-v33'/);
+    assert.match(worker, /CACHE_NAME = 'kanji-widgets-v34'/);
     // Repeat visits are served from the cache and refreshed in the background.
     assert.match(worker, /if \(destination === 'script' \|\| destination === 'style'\)/);
     assert.match(worker, /if \(request\.mode === 'navigate'\)/);

@@ -120,7 +120,7 @@ jobs:
                   ok=false
                   for attempt in 1 2 3 4 5 6 7 8; do
                       script_bytes=$(live_size "script.js?v=ai-floating-v1")
-                      style_bytes=$(live_size "styles.css?v=ai-floating-v1")
+                      style_bytes=$(live_size "styles.css?v=custom-footer-glass-v1")
                       if [ "$script_bytes" -gt 0 ] && [ "$script_bytes" -lt 120000 ] \
                          && [ "$style_bytes" -gt 0 ] && [ "$style_bytes" -lt 150000 ]; then
                           echo "live site serves the minified artifact (script.js ${script_bytes} B, styles.css ${style_bytes} B)"

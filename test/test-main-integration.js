@@ -91,7 +91,7 @@ test('offline precache and static deployment include both practice and account b
         ['backup-manager.js', 'practice-merge-v1'],
         ['profile-page.js', 'practice-merge-v1'],
         ['cloud-sync.js', 'practice-merge-v1'],
-        ['styles.css', 'ai-floating-v1'],
+        ['styles.css', 'custom-footer-glass-v1'],
         ['script.js', 'ai-floating-v1'],
         ['firebase-config.js', 'ai-free-v3'],
         ['app-auth.js', 'ai-free-v1'],
@@ -237,7 +237,7 @@ test('username login assets are versioned, precached and deployed together', () 
         assert.ok(worker.includes(`'/${versioned}'`), `precache: ${versioned}`);
         assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
     }
-    assert.match(worker, /kanji-widgets-v33/, 'the offline cache version must be bumped');
+    assert.match(worker, /kanji-widgets-v34/, 'the offline cache version must be bumped');
     assert.ok(html.indexOf('username-policy.js') < html.indexOf('app-auth.js'));
     assert.ok(html.indexOf('app-auth.js') < html.indexOf('username-directory.js'));
     assert.ok(html.indexOf('username-directory.js') < html.indexOf('auth-dialog.js'));

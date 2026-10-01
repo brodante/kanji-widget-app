@@ -3719,8 +3719,11 @@ input:focus {
 [data-theme='custom-1'] .kanji-widget,
 [data-theme='custom-1'] .progress-section,
 [data-theme='custom-1'] .journey-section,
-[data-theme='custom-1'] .recent-section {
+[data-theme='custom-1'] .recent-section,
+[data-theme='custom-1'] .footer-content {
     background-color: rgba(var(--custom-panel-rgb, 30, 30, 30), 0.65);
+    /* clear the footer default white tint so it matches the custom glass. */
+    background-image: none;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
