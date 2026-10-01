@@ -105,7 +105,10 @@ test('offline precache and static deployment include both practice and account b
         assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
         assert.ok(fs.existsSync(path.join(root, file)));
     }
-    assert.ok(worker.includes("'/drawing-pad.js'"));
+    // The bare '/drawing-pad.js' twin is gone on purpose: the page only ever
+    // requests the ?v= URL, so the unversioned entry was downloaded at every
+    // install and never matched a single fetch.
+    assert.ok(!worker.includes("'/drawing-pad.js'"), 'no bare duplicate in the precache');
     assert.ok(deploy.includes('cp CNAME deploy/'));
     assert.equal(read('CNAME').trim(), 'kanji.qd.je');
 });
@@ -237,7 +240,7 @@ test('username login assets are versioned, precached and deployed together', () 
         assert.ok(worker.includes(`'/${versioned}'`), `precache: ${versioned}`);
         assert.ok(deploy.includes(`cp ${file} deploy/`), `deploy: ${file}`);
     }
-    assert.match(worker, /kanji-widgets-v34/, 'the offline cache version must be bumped');
+    assert.match(worker, /kanji-widgets-v36/, 'the offline cache version must be bumped');
     assert.ok(html.indexOf('username-policy.js') < html.indexOf('app-auth.js'));
     assert.ok(html.indexOf('app-auth.js') < html.indexOf('username-directory.js'));
     assert.ok(html.indexOf('username-directory.js') < html.indexOf('auth-dialog.js'));

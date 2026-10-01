@@ -1,6 +1,7 @@
 node_modules/
 assets/audio/
 assets/icons/
+assets/fonts/fa/
 icon.svg
 *.mp3
 *.wav
@@ -11,3 +12,5 @@ deploy/
 dist/
 coverage/
 package-lock.json
+assets/fonts/klee-one/
+assets/fonts/klee-one.css

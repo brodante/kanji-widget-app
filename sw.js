@@ -1,32 +1,41 @@
-const CACHE_NAME = 'kanji-widgets-v34';
+const CACHE_NAME = 'kanji-widgets-v36';
+// Exactly the URLs the page requests, one entry each. This list used to carry
+// both the bare and the ?v= form of five assets plus '/' and '/index.html',
+// so every install downloaded ~50 KiB twice and stored twin copies that no
+// request ever looked up. The navigation fallback below already serves
+// /index.html for '/', so the bare entry is not needed either.
 const urlsToCache = [
-    '/',
     '/index.html',
     '/analytics.js?v=analytics-v1',
-    '/styles.css',
     '/styles.css?v=custom-footer-glass-v1',
-    '/script.js',
-    '/script.js?v=ai-floating-v1',
-    '/drawing-pad.js',
+    '/assets/fonts/fa/css/fontawesome-subset.css?v=fa-subset-6.0.0-v1',
+    '/assets/fonts/display-fonts.css?v=display-fonts-v1',
+    // Klee One is self-hosted now; the CSS and the two subsets covering あ
+    // (both weights) belong in the precache so an offline first screen still
+    // renders in the right face. Every other subset is cache-first on demand.
+    '/assets/fonts/klee-one.css?v=klee-one-v1',
+    '/assets/fonts/klee-one/klee-one-119-400-normal.woff2',
+    '/assets/fonts/klee-one/klee-one-119-600-normal.woff2',
+    '/database/Hiragana.json',
+    '/storage-manager.js',
+    '/srs-engine.js',
+    '/ai-manager.js?v=ai-model-lite-v1',
+    '/ai-tutor-modal.js?v=ai-free-v3',
+    '/audio-manager.js',
+    '/kanji-data.js',
     '/drawing-pad.js?v=practice-merge-v1',
-    '/backup-config.js',
     '/ui-feedback.js?v=practice-merge-v1',
+    '/backup-config.js',
+    '/backup-manager.js?v=practice-merge-v1',
+    '/profile-page.js?v=practice-merge-v1',
+    '/avatar-crop.js?v=avatar-v1',
     '/firebase-config.js?v=ai-free-v3',
     '/username-policy.js?v=login-v1',
     '/app-auth.js?v=ai-free-v1',
     '/username-directory.js?v=login-v1',
     '/auth-dialog.js?v=login-v1',
     '/cloud-sync.js?v=practice-merge-v1',
-    '/backup-manager.js',
-    '/backup-manager.js?v=practice-merge-v1',
-    '/profile-page.js?v=practice-merge-v1',
-    '/avatar-crop.js?v=avatar-v1',
-    '/kanji-data.js',
-    '/audio-manager.js',
-    '/storage-manager.js',
-    '/srs-engine.js',
-    '/ai-manager.js?v=ai-model-lite-v1',
-    '/ai-tutor-modal.js?v=ai-free-v3'
+    '/script.js?v=ai-floating-v1'
 ];
 
 self.addEventListener('install', (event) => {

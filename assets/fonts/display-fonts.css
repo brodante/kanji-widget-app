@@ -15,7 +15,12 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('Hannari-Regular.ttf') format('truetype');
+    /* woff2 first (56% smaller, identical outlines); the TTF stays as a
+       fallback for the transition window where a service-worker-cached copy
+       of this file may still reference it. */
+    src:
+        url('Hannari-Regular.woff2') format('woff2'),
+        url('Hannari-Regular.ttf') format('truetype');
 }
 
 @font-face {
@@ -23,5 +28,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('Kokoro-Regular.ttf') format('truetype');
+    src:
+        url('Kokoro-Regular.woff2') format('woff2'),
+        url('Kokoro-Regular.ttf') format('truetype');
 }

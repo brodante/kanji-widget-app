@@ -42,6 +42,67 @@ const ASSETS = [
     'username-policy.js'
 ];
 
+// index.html is handled separately: html-minifier-terser with deliberately
+// conservative settings. Whitespace inside <pre>/<textarea> is preserved by
+// the minifier, inline scripts and styles are left alone (minifyJS is off),
+// and only comments plus inter-tag whitespace are removed. The repo source
+// keeps its comments; only the deployed copy is minified.
+const minifyHtml = async (outDir) => {
+    let htmlMinifier;
+    try {
+        htmlMinifier = require('html-minifier-terser');
+    } catch (error) {
+        console.error(
+            'html-minifier-terser is required: run `npm install` (it is a devDependency) ' +
+                'before building.'
+        );
+        process.exit(1);
+    }
+
+    // The deploy workflow copies the source index.html into outDir first, so
+    // prefer that copy; for a local `npm run build:min` fall back to the repo
+    // file and write the result into outDir like every other asset.
+    const outPath = path.join(outDir, 'index.html');
+    const sourcePath = fs.existsSync(outPath) ? outPath : path.join(root, 'index.html');
+    const input = fs.readFileSync(sourcePath, 'utf8');
+    const output = await htmlMinifier.minify(input, {
+        collapseWhitespace: true,
+        removeComments: true,
+        collapseBooleanAttributes: true,
+        minifyCSS: true,
+        minifyJS: false,
+        removeTagWhitespace: false
+    });
+
+    // Cheap sanity gate: the minified document must keep every element id and
+    // the same number of script/link tags, or we refuse to ship it. Ids are
+    // collected from the comment-free source: commented-out markup (like the
+    // old widget size selector) is removed on purpose.
+    const liveInput = input.replace(/<!--[\s\S]*?-->/g, '');
+    const ids = [...liveInput.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]);
+    for (const id of ids) {
+        if (!output.includes(`id=${id}`) && !output.includes(`id="${id}"`)) {
+            console.error(`index.html minification lost element id="${id}"`);
+            process.exit(1);
+        }
+    }
+    for (const tag of ['<script', '<link', '<textarea']) {
+        const countIn = (liveInput.match(new RegExp(tag, 'g')) || []).length;
+        const countOut = (output.match(new RegExp(tag, 'g')) || []).length;
+        if (countIn !== countOut) {
+            console.error(`index.html minification changed the ${tag} count`);
+            process.exit(1);
+        }
+    }
+
+    fs.writeFileSync(outPath, output);
+    const saved = Math.round((1 - Buffer.byteLength(output) / Buffer.byteLength(input)) * 100);
+    console.log(
+        `index.html: ${Buffer.byteLength(input)} -> ${Buffer.byteLength(output)} bytes (-${saved}%)`
+    );
+    return [Buffer.byteLength(input), Buffer.byteLength(output)];
+};
+
 const main = async () => {
     const outDir = path.resolve(process.argv[2] || path.join(root, 'dist'));
     fs.mkdirSync(outDir, { recursive: true });
@@ -80,8 +141,12 @@ const main = async () => {
         console.log(`${asset}: ${input.byteLength} -> ${outputBytes} bytes (-${saved}%)`);
     }
 
+    const [htmlBefore, htmlAfter] = await minifyHtml(outDir);
+    before += htmlBefore;
+    after += htmlAfter;
+
     console.log(
-        `\nminified ${ASSETS.length} assets into ${outDir}: ${before} -> ${after} bytes ` +
+        `\nminified ${ASSETS.length} assets + index.html into ${outDir}: ${before} -> ${after} bytes ` +
             `(-${Math.round((1 - after / before) * 100)}%)`
     );
 };

@@ -147,10 +147,15 @@ async function main() {
             'script.js slider markup has no inline oninput for pad controls',
             !/oninput="app\.setDrawingPadStrokeWidth/.test(scriptSrc)
         );
+        // The pad modal is gone for good; the one drawingPadCanvas index.html
+        // may carry is the prerendered first-visit widget (renderKanji()
+        // replaces it on boot). Anything beyond that single copy means the
+        // modal crept back or the prerender was pasted twice.
+        const canvasCount = (indexHtml.match(/id="drawingPadCanvas"/g) || []).length;
         check(
-            'index.html has no leftover pad modal / duplicate pad ids',
-            !/drawingPadModal|closeDrawingPad|id="drawingPadCanvas"/.test(indexHtml),
-            'index.html still contains removed-modal ids'
+            'index.html has no leftover pad modal and exactly one prerendered pad canvas',
+            !/drawingPadModal|closeDrawingPad/.test(indexHtml) && canvasCount === 1,
+            `modal remnants present, or ${canvasCount} drawingPadCanvas ids in index.html`
         );
         check(
             'index.html has no inline pad onclick handlers',
