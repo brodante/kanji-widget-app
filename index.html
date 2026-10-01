@@ -215,6 +215,32 @@
         <div id="obake-canvas-container" class="obake-background"></div>
         <!-- Midnight Theme Cosmic Background Elements -->
         <div class="midnight-stars"></div>
+        <!-- Underwater (Pool) Theme: sunlit surface overhead, drifting sun
+             shafts, a caustic light net and bubbles that rise and vanish at
+             the top. Pure CSS, hidden unless data-theme="underwater". -->
+        <div class="underwater-scene" aria-hidden="true">
+            <div class="underwater-glow"></div>
+            <div class="underwater-rays"></div>
+            <div class="underwater-caustics"></div>
+            <div class="underwater-bubbles">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
         <!-- Ito Theme WebGL Container -->
         <div id="ito-canvas-container" class="ito-background"></div>
 
@@ -1241,6 +1267,7 @@
                                         <option value="paper">Paper (Minimal)</option>
                                         <option value="candy">Candy (Pastel)</option>
                                         <option value="sunrise">Sunrise (Warm)</option>
+                                        <option value="underwater">Underwater (Pool)</option>
                                     </optgroup>
                                     <optgroup label="Dark Themes">
                                         <option value="dark">Default Dark</option>

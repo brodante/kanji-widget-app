@@ -3823,6 +3823,413 @@ input:focus {
     --accent-text-strong: #7a3d00;
 }
 
+/* ========================================== */
+/* UNDERWATER (POOL) THEME - light mode        */
+/* Looking up from under the water: a bright   */
+/* shimmering surface on top, sun shafts       */
+/* drifting down through the blue, and bubbles */
+/* rising until they vanish at the surface.    */
+/* Pure CSS: the scene is a fixed layer behind */
+/* the content (same slot as the midnight      */
+/* stars) and every animation only touches     */
+/* transform/opacity, so it stays on the       */
+/* compositor and never triggers layout or     */
+/* repaint of the app above it.                */
+/* ========================================== */
+
+[data-theme='underwater'] {
+    --primary-color: #0288d1;
+    --primary-variant: #01579b;
+    --background: #a5e0f4;
+    --surface: #ffffff;
+    --on-surface: #0b3a52;
+    --on-background: #08364a;
+    /* Pale water everywhere: darker accent tones so links stay above 4.5:1. */
+    --accent-text: #01579b;
+    --accent-text-strong: #013a6b;
+}
+
+/* Frosted glass panels, same treatment the dark glass themes give: the water
+   keeps glowing through the cards instead of stopping at an opaque block. */
+[data-theme='underwater'] .kanji-widget,
+[data-theme='underwater'] .progress-section,
+[data-theme='underwater'] .journey-section,
+[data-theme='underwater'] .recent-section,
+[data-theme='underwater'] .footer-content {
+    background-color: rgba(255, 255, 255, 0.42) !important;
+    /* clear any base tint so the water shows through evenly */
+    background-image: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 8px 32px 0 rgba(2, 100, 150, 0.22);
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
+/* The whole scene lives in one fixed layer behind the app. */
+.underwater-scene {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -10;
+    overflow: hidden;
+    /* The water column: bright at the surface, deeper blue toward the floor. */
+    background: linear-gradient(
+        to bottom,
+        #f2fdff 0%,
+        #cdf1fb 16%,
+        #9cddf3 42%,
+        #6cc6e8 72%,
+        #4bb2dc 100%
+    );
+}
+
+[data-theme='underwater'] .underwater-scene {
+    display: block;
+}
+
+/* 1. The sunlit surface: a bright band across the top that breathes slowly,
+      like light rocking on the underside of the water. */
+.underwater-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 34vh;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.55) 30%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    filter: blur(2px);
+    transform-origin: top center;
+    animation: underwater-glow-shimmer 7s ease-in-out infinite;
+}
+
+/* 2. Sun shafts: two wide combed-gradient layers, blurred and masked so they
+      fade out before the bottom of the pool, drifting in opposite phases. */
+.underwater-rays {
+    position: absolute;
+    top: -25%;
+    left: -25%;
+    width: 150%;
+    height: 95%;
+    background: repeating-linear-gradient(
+        76deg,
+        rgba(255, 255, 255, 0.26) 0 18px,
+        rgba(255, 255, 255, 0) 18px 96px
+    );
+    filter: blur(9px);
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.95),
+        rgba(0, 0, 0, 0.25) 55%,
+        transparent 88%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.95),
+        rgba(0, 0, 0, 0.25) 55%,
+        transparent 88%
+    );
+    animation: underwater-rays-drift 13s ease-in-out infinite alternate;
+}
+
+.underwater-rays::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        84deg,
+        rgba(255, 255, 255, 0.2) 0 34px,
+        rgba(255, 255, 255, 0) 34px 160px
+    );
+    filter: blur(14px);
+    animation: underwater-rays-drift 19s ease-in-out infinite alternate-reverse;
+}
+
+/* 3. Caustics: two oversized nets of soft light dots sliding across each
+      other. Each layer translates by exactly its tile size, so the loop is
+      seamless. Plain alpha (no blend mode) keeps the compositing cheap. */
+.underwater-caustics {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.underwater-caustics::before,
+.underwater-caustics::after {
+    content: '';
+    position: absolute;
+    inset: -60%;
+    background-image: radial-gradient(
+        closest-side,
+        rgba(255, 255, 255, 0.38),
+        rgba(255, 255, 255, 0) 72%
+    );
+    background-size: 180px 160px;
+}
+
+.underwater-caustics::before {
+    animation: underwater-caustics-a 26s linear infinite;
+}
+
+.underwater-caustics::after {
+    background-size: 140px 120px;
+    opacity: 0.7;
+    animation: underwater-caustics-b 34s linear infinite;
+}
+
+/* 4. Bubbles: sixteen spans rising from below the floor with a lazy sideways
+      wobble, fading out right before they reach the surface. Sizes, lanes,
+      speeds and (negative) delays come from the nth-child table so the stream
+      is already mid-water on the first frame. */
+.underwater-bubbles {
+    position: absolute;
+    inset: 0;
+}
+
+.underwater-bubbles span {
+    position: absolute;
+    bottom: -8vh;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 32% 28%,
+        rgba(255, 255, 255, 0.95) 0 10%,
+        rgba(255, 255, 255, 0.22) 12% 58%,
+        rgba(255, 255, 255, 0.08) 60% 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+        inset 0 0 8px rgba(255, 255, 255, 0.35),
+        0 0 6px rgba(255, 255, 255, 0.2);
+    animation-name: underwater-bubble-rise;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.underwater-bubbles span:nth-child(1) {
+    width: 10px;
+    height: 10px;
+    left: 6%;
+    animation-duration: 12s;
+    animation-delay: -1s;
+}
+.underwater-bubbles span:nth-child(2) {
+    width: 16px;
+    height: 16px;
+    left: 14%;
+    animation-duration: 15s;
+    animation-delay: -7s;
+}
+.underwater-bubbles span:nth-child(3) {
+    width: 7px;
+    height: 7px;
+    left: 22%;
+    animation-duration: 10s;
+    animation-delay: -4s;
+    filter: blur(0.5px);
+}
+.underwater-bubbles span:nth-child(4) {
+    width: 20px;
+    height: 20px;
+    left: 30%;
+    animation-duration: 17s;
+    animation-delay: -12s;
+}
+.underwater-bubbles span:nth-child(5) {
+    width: 9px;
+    height: 9px;
+    left: 38%;
+    animation-duration: 11s;
+    animation-delay: -2s;
+}
+.underwater-bubbles span:nth-child(6) {
+    width: 13px;
+    height: 13px;
+    left: 46%;
+    animation-duration: 14s;
+    animation-delay: -9s;
+}
+.underwater-bubbles span:nth-child(7) {
+    width: 6px;
+    height: 6px;
+    left: 53%;
+    animation-duration: 9s;
+    animation-delay: -5s;
+    filter: blur(0.5px);
+}
+.underwater-bubbles span:nth-child(8) {
+    width: 18px;
+    height: 18px;
+    left: 60%;
+    animation-duration: 16s;
+    animation-delay: -14s;
+}
+.underwater-bubbles span:nth-child(9) {
+    width: 11px;
+    height: 11px;
+    left: 67%;
+    animation-duration: 13s;
+    animation-delay: -3s;
+}
+.underwater-bubbles span:nth-child(10) {
+    width: 8px;
+    height: 8px;
+    left: 73%;
+    animation-duration: 10.5s;
+    animation-delay: -8s;
+    filter: blur(0.5px);
+}
+.underwater-bubbles span:nth-child(11) {
+    width: 22px;
+    height: 22px;
+    left: 79%;
+    animation-duration: 18s;
+    animation-delay: -16s;
+}
+.underwater-bubbles span:nth-child(12) {
+    width: 12px;
+    height: 12px;
+    left: 85%;
+    animation-duration: 14.5s;
+    animation-delay: -6s;
+}
+.underwater-bubbles span:nth-child(13) {
+    width: 7px;
+    height: 7px;
+    left: 90%;
+    animation-duration: 9.5s;
+    animation-delay: -11s;
+}
+.underwater-bubbles span:nth-child(14) {
+    width: 15px;
+    height: 15px;
+    left: 95%;
+    animation-duration: 15.5s;
+    animation-delay: -13s;
+    filter: blur(0.5px);
+}
+.underwater-bubbles span:nth-child(15) {
+    width: 9px;
+    height: 9px;
+    left: 10%;
+    animation-duration: 11.5s;
+    animation-delay: -15s;
+}
+.underwater-bubbles span:nth-child(16) {
+    width: 17px;
+    height: 17px;
+    left: 50%;
+    animation-duration: 16.5s;
+    animation-delay: -10s;
+}
+
+@keyframes underwater-glow-shimmer {
+    0%,
+    100% {
+        opacity: 0.85;
+        transform: translate3d(0, 0, 0) scaleY(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translate3d(0, 2px, 0) scaleY(1.06);
+    }
+}
+
+@keyframes underwater-rays-drift {
+    0% {
+        opacity: 0.55;
+        transform: translate3d(-4%, 0, 0) skewX(-3deg);
+    }
+    50% {
+        opacity: 0.85;
+    }
+    100% {
+        opacity: 0.6;
+        transform: translate3d(4%, 0, 0) skewX(3deg);
+    }
+}
+
+@keyframes underwater-caustics-a {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        transform: translate3d(180px, 160px, 0);
+    }
+}
+
+@keyframes underwater-caustics-b {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        transform: translate3d(-140px, 120px, 0);
+    }
+}
+
+@keyframes underwater-bubble-rise {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(0.55);
+    }
+    6% {
+        opacity: 0.9;
+    }
+    25% {
+        transform: translate3d(10px, -28vh, 0) scale(0.8);
+    }
+    50% {
+        transform: translate3d(-8px, -56vh, 0) scale(1);
+    }
+    75% {
+        transform: translate3d(8px, -84vh, 0) scale(1.03);
+    }
+    92% {
+        opacity: 0.55;
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(-4px, -114vh, 0) scale(1.06);
+    }
+}
+
+/* Reduced motion: keep the pool (gradient, glow, shafts) but freeze every
+   animation and rest the bubbles mid-water so the scene still reads as
+   underwater without anything moving. */
+@media (prefers-reduced-motion: reduce) {
+    [data-theme='underwater'] .underwater-glow,
+    [data-theme='underwater'] .underwater-rays,
+    [data-theme='underwater'] .underwater-rays::after,
+    [data-theme='underwater'] .underwater-caustics::before,
+    [data-theme='underwater'] .underwater-caustics::after,
+    [data-theme='underwater'] .underwater-bubbles span {
+        animation: none;
+    }
+
+    [data-theme='underwater'] .underwater-bubbles span {
+        opacity: 0.5;
+        bottom: 25vh;
+    }
+    [data-theme='underwater'] .underwater-bubbles span:nth-child(4n) {
+        bottom: 45vh;
+    }
+    [data-theme='underwater'] .underwater-bubbles span:nth-child(4n + 1) {
+        bottom: 62vh;
+    }
+    [data-theme='underwater'] .underwater-bubbles span:nth-child(4n + 2) {
+        bottom: 74vh;
+        opacity: 0.35;
+    }
+}
+
 /* --- Dark Themes --- */
 [data-theme='dracula'] {
     --primary-color: #bd93f9;
