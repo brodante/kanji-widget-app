@@ -824,6 +824,66 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     const dolphin2 = css.slice(css.indexOf('.ocean-dolphin-2 {'));
     assert.ok(dolphin2.includes('animation-delay'), 'the second dolphin trails the first one');
 
+    // Refraction at the waterline: a shimmer band under the surface that
+    // travels exactly one tile per loop, and ripple rings that spread and
+    // fade on the surface.
+    assert.ok(html.includes('<div class="ocean-shimmer"></div>'));
+    const shimmerStart = css.indexOf('.ocean-shimmer {');
+    const shimmer = css.slice(shimmerStart, css.indexOf('\n}', shimmerStart));
+    assert.match(shimmer, /animation: ocean-shimmer-drift/);
+    const shimmerKf = css.slice(
+        css.indexOf('@keyframes ocean-shimmer-drift'),
+        css.indexOf('\n}', css.indexOf('to {', css.indexOf('@keyframes ocean-shimmer-drift')))
+    );
+    assert.match(shimmerKf, /translate3d\(480px, 0, 0\)/, 'shimmer loops by exactly one tile');
+    const rippleStart = css.indexOf('.ocean-ripple {');
+    const ripple = css.slice(rippleStart, css.indexOf('\n}', rippleStart));
+    assert.match(ripple, /border-radius: 50%/);
+    assert.match(ripple, /animation-name: ocean-ripple-ring/);
+    const rippleKf = css.slice(
+        css.indexOf('@keyframes ocean-ripple-ring'),
+        css.indexOf('\n}', css.indexOf('100%', css.indexOf('@keyframes ocean-ripple-ring')))
+    );
+    assert.match(rippleKf, /scale\(0\.1\)/);
+    assert.match(rippleKf, /opacity: 0/, 'rings fade as they spread');
+
+    // The beams are visible: bright enough, sharp enough, and they reach
+    // almost all the way down to the reef.
+    const raysStart = css.indexOf('.ocean-rays {');
+    const rays = css.slice(raysStart, css.indexOf('\n}', raysStart));
+    assert.match(rays, /rgba\(255, 255, 255, 0\.34\)/, 'main beam layer stays bright');
+    assert.match(rays, /transparent 97%/, 'beams reach down to the reef');
+    assert.ok(!rays.includes('blur(14px)'), 'beams are not blurred into mush');
+
+    // Caustic veins on the sea floor: turbulence textures, screen-blended,
+    // translating by whole 240px tiles so the loops are seamless.
+    assert.ok(html.includes('<div class="ocean-floor-light"></div>'));
+    const floorIdx = css.indexOf('.ocean-floor-light {');
+    const floorRule = css.slice(floorIdx, css.indexOf('\n}', floorIdx));
+    assert.match(floorRule, /mask-image/, 'the veins fade out above the floor');
+    const floorLayers = css.slice(
+        css.indexOf('.ocean-floor-light::before,'),
+        css.indexOf('@keyframes ocean-floor-a')
+    );
+    assert.match(floorLayers, /mix-blend-mode: screen/);
+    assert.equal((floorLayers.match(/feTurbulence/g) || []).length, 2, 'two caustic textures');
+    assert.ok(floorLayers.includes("fill='none'"), 'degrades to nothing where filters fail');
+    assert.match(floorLayers, /animation-name: ocean-floor-a/);
+    assert.match(floorLayers, /animation-name: ocean-floor-b/);
+    for (const [kfName, dx, dy] of [
+        ['ocean-floor-a', '240px', '240px'],
+        ['ocean-floor-b', '-240px', '480px']
+    ]) {
+        const kfText = css.slice(
+            css.indexOf(`@keyframes ${kfName}`),
+            css.indexOf('\n}', css.indexOf('to {', css.indexOf(`@keyframes ${kfName}`)))
+        );
+        assert.ok(
+            kfText.includes(`translate3d(${dx}, ${dy}, 0)`),
+            `${kfName} must move by whole tiles to stay seamless`
+        );
+    }
+
     // Dark areas: a static abyss gradient sinking the floor, plus two huge
     // soft current blobs drifting on slow alternate sways (no blur filters,
     // the blobs are radial gradients so the movement stays cheap).
@@ -883,8 +943,8 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     const keyframes = [...css.matchAll(/@keyframes (ocean-[\w-]+) \{([\s\S]*?)\n\}/g)];
     assert.equal(
         keyframes.length,
-        15,
-        'waves, rays, caustics, currents, bubbles, motes, jellies, kelp, swim paths and visitors'
+        19,
+        'waves, shimmer, ripples, rays, caustics, floor light, currents, bubbles, motes, jellies, kelp, swim paths and visitors'
     );
     for (const [, name, body] of keyframes) {
         const props = [...body.matchAll(/^\s+([a-z-]+)\s*:/gm)].map((match) => match[1]);
@@ -907,6 +967,9 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-fish span"));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-life span"));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-kelp span"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-shimmer"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-ripple"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-floor-light::before"));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-jellies span"));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-motes span"));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-depth::before"));

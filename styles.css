@@ -4002,31 +4002,102 @@ input:focus {
     animation-direction: reverse;
 }
 
-/* 2. Sun shafts: two wide combed-gradient layers, blurred and masked so they
-      fade out before the reef, drifting in opposite phases. */
+/* 1b. Refraction at the waterline: a bright ripple band hugging the
+      underside of the surface (the light bending as it enters the water),
+      drifting against the waves, and two ring ripples spreading out on the
+      surface every so often, like something just touched it. */
+.ocean-shimmer {
+    position: absolute;
+    top: 13vh;
+    left: -480px;
+    width: calc(100% + 960px);
+    height: 24px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 56' preserveAspectRatio='none'%3E%3Cpath d='M0 28 C40 12 80 12 120 28 C160 44 200 44 240 28 C280 12 320 12 360 28 C400 44 440 44 480 28 V56 H0 Z' fill='%23ffffff'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 480px 24px;
+    opacity: 0.3;
+    filter: blur(1.5px);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent);
+    animation: ocean-shimmer-drift 11s linear infinite;
+}
+
+@keyframes ocean-shimmer-drift {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        transform: translate3d(480px, 0, 0);
+    }
+}
+
+.ocean-ripple {
+    position: absolute;
+    bottom: 8px;
+    width: 130px;
+    height: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform-origin: center;
+    opacity: 0;
+    animation-name: ocean-ripple-ring;
+    animation-timing-function: ease-out;
+    animation-iteration-count: infinite;
+    animation-duration: 7s;
+}
+
+.ocean-ripple-1 {
+    left: 22%;
+}
+
+.ocean-ripple-2 {
+    left: 64%;
+    width: 96px;
+    height: 22px;
+    animation-duration: 9s;
+    animation-delay: -4.5s;
+}
+
+@keyframes ocean-ripple-ring {
+    0% {
+        transform: scale(0.1);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.55;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* 2. Sun shafts: two wide combed-gradient layers, blurred just enough to
+      glow but sharp enough to read as beams, masked so they stay visible
+      almost all the way down to the reef, drifting in opposite phases. */
 .ocean-rays {
     position: absolute;
     top: 8%;
     left: -25%;
     width: 150%;
-    height: 82%;
+    height: 88%;
     background: repeating-linear-gradient(
         76deg,
-        rgba(255, 255, 255, 0.24) 0 18px,
+        rgba(255, 255, 255, 0.34) 0 18px,
         rgba(255, 255, 255, 0) 18px 96px
     );
-    filter: blur(9px);
+    filter: blur(7px);
     -webkit-mask-image: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0.9),
-        rgba(0, 0, 0, 0.25) 55%,
-        transparent 88%
+        rgba(0, 0, 0, 0.38) 62%,
+        transparent 97%
     );
     mask-image: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0.9),
-        rgba(0, 0, 0, 0.25) 55%,
-        transparent 88%
+        rgba(0, 0, 0, 0.38) 62%,
+        transparent 97%
     );
     animation: ocean-rays-drift 13s ease-in-out infinite alternate;
 }
@@ -4037,10 +4108,10 @@ input:focus {
     inset: 0;
     background: repeating-linear-gradient(
         84deg,
-        rgba(255, 255, 255, 0.18) 0 34px,
+        rgba(255, 255, 255, 0.26) 0 34px,
         rgba(255, 255, 255, 0) 34px 160px
     );
-    filter: blur(14px);
+    filter: blur(10px);
     animation: ocean-rays-drift 19s ease-in-out infinite alternate-reverse;
 }
 
@@ -4452,6 +4523,65 @@ input:focus {
     opacity: 0.85;
 }
 
+/* 6b. The floor drinks the light: two tiled caustic textures sliding over
+      the reef and the abyss, screen-blended so the veins glow where they
+      cross the dark. The textures are feTurbulence noise thresholded into
+      thin bright nets (the same vein structure a refraction pass produces),
+      and each layer translates by whole tiles so the loop is seamless. */
+.ocean-floor-light {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 34vh;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7) 40%, black 100%);
+    mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7) 40%, black 100%);
+}
+
+.ocean-floor-light::before,
+.ocean-floor-light::after {
+    content: '';
+    position: absolute;
+    inset: -240px -480px;
+    background-repeat: repeat;
+    background-size: 240px 240px;
+    mix-blend-mode: screen;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.ocean-floor-light::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.3'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0.5 1 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='240' height='240' fill='none' filter='url(%23c)'/%3E%3C/svg%3E");
+    opacity: 0.3;
+    animation-name: ocean-floor-a;
+    animation-duration: 26s;
+}
+
+.ocean-floor-light::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='d' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.021' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.34'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0.4 0.9 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='240' height='240' fill='none' filter='url(%23d)'/%3E%3C/svg%3E");
+    opacity: 0.22;
+    animation-name: ocean-floor-b;
+    animation-duration: 34s;
+}
+
+@keyframes ocean-floor-a {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        transform: translate3d(240px, 240px, 0);
+    }
+}
+
+@keyframes ocean-floor-b {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        transform: translate3d(-240px, 480px, 0);
+    }
+}
+
 @keyframes ocean-wave-drift {
     from {
         transform: translate3d(0, 0, 0);
@@ -4819,6 +4949,10 @@ input:focus {
     [data-theme='ocean'] .ocean-depth::before,
     [data-theme='ocean'] .ocean-depth::after,
     [data-theme='ocean'] .ocean-wave,
+    [data-theme='ocean'] .ocean-shimmer,
+    [data-theme='ocean'] .ocean-ripple,
+    [data-theme='ocean'] .ocean-floor-light::before,
+    [data-theme='ocean'] .ocean-floor-light::after,
     [data-theme='ocean'] .ocean-rays,
     [data-theme='ocean'] .ocean-rays::after,
     [data-theme='ocean'] .ocean-caustics::before,
