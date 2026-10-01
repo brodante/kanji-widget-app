@@ -217,16 +217,30 @@
         <div class="midnight-stars"></div>
         <!-- Ocean theme: a cross-section of sunlit water. A thin band of air
              and two rolling wave layers at the waterline, sun shafts and a
-             caustic light net through the blue, bubbles that rise and pop at
-             the surface, drifting fish silhouettes and a coral reef resting
-             on the bottom. Pure CSS, hidden unless data-theme="ocean". -->
+             caustic light net through the blue, dark currents drifting in
+             the depths, bubbles that rise and pop at the surface, plankton
+             motes, fish, jellyfish, and big rare visitors (shark, dolphins,
+             turtle, whale), all above a coral reef with a swaying kelp
+             forest and an abyss darkening the floor. Pure CSS, hidden
+             unless data-theme="ocean". -->
         <div class="ocean-scene" aria-hidden="true">
+            <div class="ocean-depth"></div>
             <div class="ocean-surface">
                 <div class="ocean-wave ocean-wave-back"></div>
                 <div class="ocean-wave ocean-wave-front"></div>
             </div>
             <div class="ocean-rays"></div>
             <div class="ocean-caustics"></div>
+            <div class="ocean-motes">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
             <div class="ocean-bubbles">
                 <span></span>
                 <span></span>
@@ -258,8 +272,22 @@
                 <span class="ocean-dolphin"></span>
                 <span class="ocean-dolphin ocean-dolphin-2"></span>
                 <span class="ocean-turtle"></span>
+                <span class="ocean-whale"></span>
+            </div>
+            <div class="ocean-jellies">
+                <span></span>
+                <span></span>
             </div>
             <div class="ocean-reef"></div>
+            <div class="ocean-kelp">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="ocean-vignette"></div>
         </div>
         <!-- Ito Theme WebGL Container -->
         <div id="ito-canvas-container" class="ito-background"></div>

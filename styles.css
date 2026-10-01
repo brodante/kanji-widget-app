@@ -3883,16 +3883,70 @@ input:focus {
     background: linear-gradient(
         to bottom,
         #f4feff 0%,
-        #cdf3fb 13%,
-        #86dcf1 30%,
-        #4cbbe0 58%,
-        #2f9cc4 82%,
-        #2384ad 100%
+        #cdf3fb 12%,
+        #86dcf1 28%,
+        #4cbbe0 46%,
+        #34a6cd 62%,
+        #2288b2 80%,
+        #14658a 100%
     );
 }
 
 [data-theme='ocean'] .ocean-scene {
     display: block;
+}
+
+/* 0b. Dark areas. Water is never one flat blue: three huge soft cold
+      currents drift through the middle of the scene on a slow sway, and a
+      static gradient sinks the floor into an abyss behind the reef. The
+      blobs are radial gradients (soft by nature), so no blur filters and
+      no repaints while they move. */
+.ocean-depth {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+        to bottom,
+        transparent 52%,
+        rgba(8, 58, 84, 0.16) 76%,
+        rgba(5, 44, 66, 0.4) 100%
+    );
+}
+
+.ocean-depth::before,
+.ocean-depth::after {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    animation-name: ocean-current-drift;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+.ocean-depth::before {
+    background-image:
+        radial-gradient(closest-side at 24% 40%, rgba(9, 72, 100, 0.24), transparent 72%),
+        radial-gradient(closest-side at 70% 58%, rgba(7, 60, 88, 0.2), transparent 72%),
+        radial-gradient(closest-side at 92% 28%, rgba(9, 72, 100, 0.14), transparent 72%);
+    animation-duration: 120s;
+}
+
+.ocean-depth::after {
+    background-image:
+        radial-gradient(closest-side at 44% 68%, rgba(6, 52, 78, 0.2), transparent 72%),
+        radial-gradient(closest-side at 12% 74%, rgba(6, 52, 78, 0.18), transparent 72%),
+        radial-gradient(closest-side at 82% 82%, rgba(5, 46, 70, 0.22), transparent 72%);
+    animation-duration: 160s;
+    animation-delay: -60s;
+}
+
+@keyframes ocean-current-drift {
+    from {
+        transform: translate3d(-2vw, -1vh, 0);
+    }
+    to {
+        transform: translate3d(2.5vw, 1.5vh, 0);
+    }
 }
 
 /* 1. The waterline: a thin band of air above rolling waves. Two tiled wave
@@ -4338,6 +4392,32 @@ input:focus {
     }
 }
 
+/* 5c. The whale. The biggest silhouette in the water and the rarest: it
+      takes four minutes between visits, crosses slowly through the deep
+      water and is faded enough to feel far away. */
+.ocean-whale {
+    top: 68vh;
+    width: 300px;
+    aspect-ratio: 240 / 70;
+    opacity: 0.24;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 70'%3E%3Cpath d='M236 36 C226 22 198 12 168 9 C128 5 88 13 64 25 L18 6 L36 30 L18 54 L64 37 C88 49 128 57 168 53 C198 50 226 46 236 36 Z M150 45 L126 63 L156 51 Z' fill='%230e4152'/%3E%3C/svg%3E");
+    animation-name: ocean-whale-pass;
+    animation-duration: 240s;
+    animation-delay: -150s;
+}
+
+@keyframes ocean-whale-pass {
+    0% {
+        transform: translate3d(-45vw, 0, 0);
+    }
+    45% {
+        transform: translate3d(115vw, 0, 0);
+    }
+    100% {
+        transform: translate3d(115vw, 0, 0);
+    }
+}
+
 /* 6. The reef: two silhouette layers of coral heads, branching coral and
       rocks resting on the bottom. One tiled SVG, mirrored and faded for the
       far layer so the two rows never read as the same stamp. Static on
@@ -4475,16 +4555,278 @@ input:focus {
     }
 }
 
+/* 7. Kelp forest: six stalks standing on the reef, each swaying from its
+      base on its own slow rhythm. The rotation origin is the floor, so they
+      lean like plants in a current instead of spinning like signage. */
+.ocean-kelp {
+    position: absolute;
+    inset: 0;
+}
+
+.ocean-kelp span {
+    position: absolute;
+    bottom: 0;
+    width: 26px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 200'%3E%3Cpath d='M13 200 C9 170 17 150 13 120 C9 90 17 70 13 40 C12 28 14 16 16 4 C18 16 20 28 18 40 C22 70 14 90 18 120 C22 150 14 170 17 200 Z M13 150 C4 146 2 138 4 130 C8 136 12 142 14 148 Z M15 110 C24 106 26 98 24 90 C20 96 16 102 14 108 Z M13 70 C4 66 2 58 4 50 C8 56 12 62 14 68 Z M15 34 C22 30 24 24 22 18 C19 23 16 28 14 32 Z' fill='%230e4a44'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    transform-origin: bottom center;
+    animation-name: ocean-kelp-sway;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+.ocean-kelp span:nth-child(1) {
+    left: 4%;
+    height: 30vh;
+    opacity: 0.55;
+    animation-duration: 7s;
+    animation-delay: -1.5s;
+}
+.ocean-kelp span:nth-child(2) {
+    left: 10%;
+    height: 41vh;
+    opacity: 0.65;
+    animation-duration: 9s;
+    animation-delay: -4s;
+}
+.ocean-kelp span:nth-child(3) {
+    left: 29%;
+    height: 23vh;
+    opacity: 0.45;
+    animation-duration: 6.5s;
+    animation-delay: -2.5s;
+}
+.ocean-kelp span:nth-child(4) {
+    left: 61%;
+    height: 36vh;
+    opacity: 0.6;
+    animation-duration: 8.5s;
+    animation-delay: -6s;
+}
+.ocean-kelp span:nth-child(5) {
+    left: 80%;
+    height: 28vh;
+    opacity: 0.5;
+    animation-duration: 10s;
+    animation-delay: -3s;
+}
+.ocean-kelp span:nth-child(6) {
+    left: 92%;
+    height: 44vh;
+    opacity: 0.7;
+    animation-duration: 7.5s;
+    animation-delay: -5.5s;
+}
+
+@keyframes ocean-kelp-sway {
+    from {
+        transform: rotate(-2.5deg);
+    }
+    to {
+        transform: rotate(2.5deg);
+    }
+}
+
+/* 8. Jellyfish: two pale bells pulsing upward through the mid-water, then
+      fading out near the surface and starting again down deep. The pulse is
+      a squash-and-stretch scale in the same transform as the rise, so it
+      stays on the compositor. */
+.ocean-jellies {
+    position: absolute;
+    inset: 0;
+}
+
+.ocean-jellies span {
+    position: absolute;
+    width: 26px;
+    aspect-ratio: 30 / 40;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 40'%3E%3Cpath d='M3 16 C3 6 9 2 15 2 C21 2 27 6 27 16 C27 18 25 19 23 18 C21 20 19 20 17 18 C15 20 13 20 11 18 C9 20 7 20 5 18 C3 19 3 18 3 16 Z' fill='%235fa8c4'/%3E%3Cpath d='M7 20 C7 27 5 32 4 37 M11 21 C11 29 10 34 9 38 M15 21 C15 29 15 34 15 38 M19 21 C19 29 20 34 21 38 M23 20 C23 27 25 32 26 37' stroke='%235fa8c4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    animation-name: ocean-jelly-rise;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+.ocean-jellies span:nth-child(1) {
+    left: 18%;
+    bottom: 30vh;
+    opacity: 0.5;
+    animation-duration: 38s;
+    animation-delay: -12s;
+}
+.ocean-jellies span:nth-child(2) {
+    left: 71%;
+    bottom: 26vh;
+    width: 18px;
+    opacity: 0.42;
+    animation-duration: 46s;
+    animation-delay: -30s;
+}
+
+@keyframes ocean-jelly-rise {
+    0% {
+        transform: translate3d(0, 6vh, 0) scale(1, 1);
+        opacity: 0;
+    }
+    10% {
+        transform: translate3d(1vw, -2vh, 0) scale(1.08, 0.92);
+        opacity: 0.5;
+    }
+    25% {
+        transform: translate3d(-1vw, -10vh, 0) scale(1, 1);
+        opacity: 0.5;
+    }
+    40% {
+        transform: translate3d(1.5vw, -18vh, 0) scale(1.08, 0.92);
+        opacity: 0.5;
+    }
+    55% {
+        transform: translate3d(-1vw, -26vh, 0) scale(1, 1);
+        opacity: 0.5;
+    }
+    70% {
+        transform: translate3d(1vw, -34vh, 0) scale(1.08, 0.92);
+        opacity: 0.45;
+    }
+    85% {
+        transform: translate3d(-0.5vw, -42vh, 0) scale(1, 1);
+        opacity: 0.25;
+    }
+    100% {
+        transform: translate3d(0, -48vh, 0) scale(1.08, 0.92);
+        opacity: 0;
+    }
+}
+
+/* 9. Plankton: eight tiny motes hanging in the water, drifting sideways on
+      long lazy loops and twinkling. They are what makes the blue feel like
+      water instead of paint. */
+.ocean-motes {
+    position: absolute;
+    inset: 0;
+}
+
+.ocean-motes span {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.55);
+    animation-name: ocean-mote-drift;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+.ocean-motes span:nth-child(1) {
+    left: 12%;
+    top: 24vh;
+    width: 3px;
+    height: 3px;
+    animation-duration: 42s;
+}
+.ocean-motes span:nth-child(2) {
+    left: 31%;
+    top: 47vh;
+    width: 2px;
+    height: 2px;
+    animation-duration: 55s;
+    animation-delay: -12s;
+}
+.ocean-motes span:nth-child(3) {
+    left: 47%;
+    top: 33vh;
+    width: 4px;
+    height: 4px;
+    background-color: rgba(220, 244, 252, 0.5);
+    animation-duration: 48s;
+    animation-delay: -25s;
+}
+.ocean-motes span:nth-child(4) {
+    left: 58%;
+    top: 62vh;
+    width: 2px;
+    height: 2px;
+    animation-duration: 60s;
+    animation-delay: -8s;
+}
+.ocean-motes span:nth-child(5) {
+    left: 69%;
+    top: 41vh;
+    width: 3px;
+    height: 3px;
+    animation-duration: 50s;
+    animation-delay: -33s;
+}
+.ocean-motes span:nth-child(6) {
+    left: 84%;
+    top: 55vh;
+    width: 2px;
+    height: 2px;
+    background-color: rgba(220, 244, 252, 0.45);
+    animation-duration: 44s;
+    animation-delay: -19s;
+}
+.ocean-motes span:nth-child(7) {
+    left: 23%;
+    top: 70vh;
+    width: 3px;
+    height: 3px;
+    animation-duration: 58s;
+    animation-delay: -40s;
+}
+.ocean-motes span:nth-child(8) {
+    left: 91%;
+    top: 30vh;
+    width: 2px;
+    height: 2px;
+    animation-duration: 46s;
+    animation-delay: -28s;
+}
+
+@keyframes ocean-mote-drift {
+    from {
+        transform: translate3d(-2.5vw, 1.5vh, 0);
+        opacity: 0.25;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    to {
+        transform: translate3d(3vw, -2vh, 0);
+        opacity: 0.3;
+    }
+}
+
+/* 10. Vignette: the water darkens toward the edges of the viewport, the way
+      it does when you look into the sea from under it. Static, one paint. */
+.ocean-vignette {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+        130% 95% at 50% 28%,
+        transparent 52%,
+        rgba(4, 42, 64, 0.3) 100%
+    );
+}
+
 /* Reduced motion: keep the ocean (gradient, waterline, reef) but freeze every
-   animation, resting bubbles mid-water and fish mid-swim so the scene still
-   reads as a cross-section without anything moving. */
+   animation, resting bubbles mid-water, fish mid-swim, kelp upright and the
+   jellyfish mid-rise so the scene still reads as a cross-section without
+   anything moving. */
 @media (prefers-reduced-motion: reduce) {
+    [data-theme='ocean'] .ocean-depth::before,
+    [data-theme='ocean'] .ocean-depth::after,
     [data-theme='ocean'] .ocean-wave,
     [data-theme='ocean'] .ocean-rays,
     [data-theme='ocean'] .ocean-rays::after,
     [data-theme='ocean'] .ocean-caustics::before,
     [data-theme='ocean'] .ocean-caustics::after,
     [data-theme='ocean'] .ocean-bubbles span,
+    [data-theme='ocean'] .ocean-motes span,
+    [data-theme='ocean'] .ocean-jellies span,
+    [data-theme='ocean'] .ocean-kelp span,
     [data-theme='ocean'] .ocean-fish span,
     [data-theme='ocean'] .ocean-life span {
         animation: none;
@@ -4526,6 +4868,21 @@ input:focus {
     }
     [data-theme='ocean'] .ocean-turtle {
         transform: translate3d(48vw, 0, 0);
+    }
+    [data-theme='ocean'] .ocean-whale {
+        transform: translate3d(24vw, 0, 0);
+    }
+
+    [data-theme='ocean'] .ocean-jellies span:nth-child(1) {
+        transform: translate3d(0, -14vh, 0);
+        opacity: 0.45;
+    }
+    [data-theme='ocean'] .ocean-jellies span:nth-child(2) {
+        transform: translate3d(-2vw, -20vh, 0);
+        opacity: 0.38;
+    }
+    [data-theme='ocean'] .ocean-motes span {
+        opacity: 0.45;
     }
 }
 

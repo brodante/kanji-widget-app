@@ -811,14 +811,62 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     assert.equal((life.match(/class="ocean-shark"/g) || []).length, 1);
     assert.equal((life.match(/ocean-dolphin/g) || []).length, 3, 'two dolphins (one extra class)');
     assert.equal((life.match(/class="ocean-turtle"/g) || []).length, 1);
-    for (const animal of ['.ocean-shark', '.ocean-dolphin', '.ocean-turtle']) {
+    for (const animal of ['.ocean-shark', '.ocean-dolphin', '.ocean-turtle', '.ocean-whale']) {
         const start = css.indexOf(`${animal} {`);
         const rule = css.slice(start, css.indexOf('\n}', start));
         const seconds = Number.parseInt(rule.match(/animation-duration: (\d+)s/)[1], 10);
         assert.ok(seconds >= 60, `${animal} should visit rarely, got a ${seconds}s cycle`);
     }
+    const whaleStart = css.indexOf('.ocean-whale {');
+    const whale = css.slice(whaleStart, css.indexOf('\n}', whaleStart));
+    assert.match(whale, /animation-duration: 240s/, 'the whale is rarer than the shark');
+    assert.match(whale, /opacity: 0\.2\d/, 'the whale stays faded, far away in the deep');
     const dolphin2 = css.slice(css.indexOf('.ocean-dolphin-2 {'));
     assert.ok(dolphin2.includes('animation-delay'), 'the second dolphin trails the first one');
+
+    // Dark areas: a static abyss gradient sinking the floor, plus two huge
+    // soft current blobs drifting on slow alternate sways (no blur filters,
+    // the blobs are radial gradients so the movement stays cheap).
+    const depthStart = css.indexOf('.ocean-depth {');
+    const depthRule = css.slice(depthStart, css.indexOf('\n}', depthStart));
+    assert.match(depthRule, /linear-gradient/, 'the abyss darkens the water column');
+    assert.ok(!/animation/.test(depthRule), 'the abyss itself does not move');
+    const blobStart = css.indexOf('.ocean-depth::before,');
+    const blob = css.slice(blobStart, css.indexOf('@keyframes ocean-current-drift'));
+    assert.match(blob, /animation-name: ocean-current-drift/);
+    assert.ok(!blob.includes('filter:'), 'current blobs are gradient-soft, never blurred');
+
+    // Plankton motes: eight tiny drifting specks.
+    const motesStart = html.indexOf('<div class="ocean-motes">');
+    const motes = html.slice(motesStart, html.indexOf('</div>', motesStart));
+    assert.equal((motes.match(/<span><\/span>/g) || []).length, 8);
+    const moteLanes = css.match(/\.ocean-motes span:nth-child\(\d+\) \{/g) || [];
+    assert.equal(new Set(moteLanes).size, 8);
+
+    // Jellyfish: two bells pulsing upward, the pulse folded into the rise
+    // keyframe as a squash-and-stretch scale.
+    const jelliesStart = html.indexOf('<div class="ocean-jellies">');
+    const jellies = html.slice(jelliesStart, html.indexOf('</div>', jelliesStart));
+    assert.equal((jellies.match(/<span><\/span>/g) || []).length, 2);
+    const jellyStart = css.indexOf('@keyframes ocean-jelly-rise');
+    const jellyKf = css.slice(jellyStart, css.indexOf('\n}', css.indexOf('100%', jellyStart)));
+    assert.match(jellyKf, /scale\(1\.08, 0\.92\)/, 'jellyfish pulse as they rise');
+
+    // Kelp: six stalks on the reef, swaying from their bases.
+    const kelpStart = html.indexOf('<div class="ocean-kelp">');
+    const kelp = html.slice(kelpStart, html.indexOf('</div>', kelpStart));
+    assert.equal((kelp.match(/<span><\/span>/g) || []).length, 6);
+    const kelpBaseStart = css.indexOf('.ocean-kelp span {');
+    const kelpBase = css.slice(kelpBaseStart, css.indexOf('\n}', kelpBaseStart));
+    assert.match(kelpBase, /transform-origin: bottom center/, 'kelp leans from the floor');
+    const kelpLanes = css.match(/\.ocean-kelp span:nth-child\(\d+\) \{/g) || [];
+    assert.equal(new Set(kelpLanes).size, 6);
+
+    // Vignette: static framing, no animation allowed.
+    const vigStart = css.indexOf('.ocean-vignette {');
+    const vig = css.slice(vigStart, css.indexOf('\n}', vigStart));
+    assert.match(vig, /radial-gradient/);
+    assert.ok(!/animation/.test(vig), 'the vignette is one static paint');
 
     // The reef rests on the bottom in two silhouette layers, mirrored so the
     // same tile never reads twice, and never animates (the floor is static).
@@ -835,8 +883,8 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     const keyframes = [...css.matchAll(/@keyframes (ocean-[\w-]+) \{([\s\S]*?)\n\}/g)];
     assert.equal(
         keyframes.length,
-        10,
-        'waves, rays, two caustic nets, bubbles, two swim paths, shark, dolphins, turtle'
+        15,
+        'waves, rays, caustics, currents, bubbles, motes, jellies, kelp, swim paths and visitors'
     );
     for (const [, name, body] of keyframes) {
         const props = [...body.matchAll(/^\s+([a-z-]+)\s*:/gm)].map((match) => match[1]);
@@ -858,10 +906,16 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-bubbles span"));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-fish span"));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-life span"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-kelp span"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-jellies span"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-motes span"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-depth::before"));
     assert.match(reduced, /animation: none/);
     // The visitors hold a still pose instead of vanishing mid-swim.
     assert.ok(reduced.includes('translate3d(66vw, 0, 0) scaleX(-1)'), 'shark rests in frame');
     assert.ok(reduced.includes('.ocean-turtle {'), 'turtle rests in frame');
+    assert.ok(reduced.includes('.ocean-whale {'), 'whale rests in frame');
+    assert.ok(reduced.includes('.ocean-jellies span:nth-child(1)'), 'jellyfish rest mid-rise');
 
     // The glass panels carry the footer too, so the theme reads as one body of
     // water instead of an opaque block at the bottom.
