@@ -9,7 +9,7 @@
         "build:min": "node tools/minify.js dist",
         "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore",
         "format:check": "prettier --check . --ignore-path .gitignore --ignore-path .prettierignore",
-        "test": "node test/test-srs-ai.js && node --test test/test-app-boot.js test/test-performance-budget.js test/test-backup.js test/test-account-ui.js test/test-profile-page.js test/test-app-auth.js test/test-cloud-sync.js test/test-username-login.js test/test-avatar-crop.js test/test-main-integration.js test/test-ai-sensei-free.js test/test-analytics.js && npm run test:drawing-pad",
+        "test": "node test/test-srs-ai.js && node --test test/test-app-boot.js test/test-performance-budget.js test/test-build-output.js test/test-backup.js test/test-account-ui.js test/test-profile-page.js test/test-app-auth.js test/test-cloud-sync.js test/test-username-login.js test/test-avatar-crop.js test/test-main-integration.js test/test-ai-sensei-free.js test/test-analytics.js && npm run test:drawing-pad",
         "prepare": "husky install",
         "test:rules": "npx --yes firebase-tools@15 emulators:exec --only firestore --project demo-kanji-widget \"node --test test/test-firestore-rules.js\"",
         "test:drawing-pad": "node test/test-drawing-pad.js",
@@ -38,9 +38,12 @@
         "eslint-config-prettier": "^10.1.8",
         "fake-indexeddb": "^6.2.5",
         "firebase": "^12.3.0",
+        "html-minifier-terser": "^7.2.0",
         "husky": "^8.0.3",
         "jsdom": "^30.1.0",
         "lint-staged": "^15.5.2",
-        "prettier": "^3.1.0"
+        "prettier": "^3.1.0",
+        "subset-font": "^2.9.0",
+        "wawoff2": "^2.0.1"
     }
 }

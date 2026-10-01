@@ -41,7 +41,13 @@ jobs:
                   cp analytics.js deploy/
                   cp drawing-pad.js deploy/
                   cp -r assets deploy/
-                  cp -r database deploy/
+                  # Only the level files are fetched at runtime (kanji-data.js loads
+                  # database/{level}.json and 'all' merges N5-N1 in code). The 1.8 MB
+                  # complete_kanji_db.json, vocab.json and sort-json.py are source
+                  # material for the tools/ scripts and stay out of the Pages artifact.
+                  mkdir -p deploy/database
+                  cp database/Hiragana.json database/Katakana.json deploy/database/
+                  cp database/N1.json database/N2.json database/N3.json database/N4.json database/N5.json deploy/database/
                   cp backup-config.js deploy/
                   cp firebase-config.js deploy/
                   cp username-policy.js deploy/
@@ -50,7 +56,6 @@ jobs:
                   cp auth-dialog.js deploy/
                   cp cloud-sync.js deploy/
                   cp ui-feedback.js deploy/
-                  cp firestore.rules deploy/
                   cp backup-manager.js deploy/
                   cp profile-page.js deploy/
                   cp avatar-crop.js deploy/
@@ -66,9 +71,15 @@ jobs:
                   if [ -f "icon.svg" ]; then cp icon.svg deploy/; fi
                   # Favicon is optional: skip the copy instead of failing the deploy
                   if [ -f "favicon.gif" ]; then cp favicon.gif deploy/; fi
+                  # Social share card. The og:image URL is https://kanji.qd.je/preview.png;
+                  # the source lives under assets/social so the repo root keeps the
+                  # README's preview.PNG untouched.
+                  mv deploy/assets/social/preview-card.png deploy/preview.png
+                  rmdir deploy/assets/social
+                  # Dead weight: referenced nowhere in the shipped app.
+                  rm -f deploy/assets/icons/clover-badge.png
                   cp sw.js deploy/
-                  cp README.md deploy/
-                  # Copy docs if they exist
+                  # Copy docs if they exist (the app links docs/google-drive-backup.md)
                   if [ -d "docs" ]; then cp -r docs deploy/; fi
 
             # Minify first-party JS/CSS in place (same filenames, so index.html and the
@@ -84,7 +95,9 @@ jobs:
                   # silently (this has already happened once). Line counts are useless here:
                   # esbuild preserves the newlines inside the app's multi-line HTML templates,
                   # so a correctly minified script.js is still hundreds of lines long.
-                  for f in script.js styles.css kanji-data.js; do
+                  # index.html is minified too now (comments + inter-tag whitespace,
+                  # roughly -55%), with the same source-vs-output byte guard.
+                  for f in script.js styles.css kanji-data.js index.html; do
                       src=$(wc -c < "$f")
                       out=$(wc -c < "deploy/$f")
                       if [ "$out" -ge "$src" ]; then

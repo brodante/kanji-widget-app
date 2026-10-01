@@ -164,8 +164,7 @@ test('fonts ship in one request: main faces block first paint, extras stay async
     assert.equal(html.includes('earlyaccess'), false, 'no more Early Access endpoints');
     assert.ok(
         html.includes(
-            `<link\n            media="print"\n            onload="this.media = 'all'"
-            href="assets/fonts/display-fonts.css?v=display-fonts-v1"\n            rel="stylesheet"\n        />`
+            `<link\n            media="print"\n            onload="this.media = 'all'"\n            href="assets/fonts/display-fonts.css?v=display-fonts-v1"\n            rel="stylesheet"\n        />`
         ),
         'the display faces stay async (after first paint)'
     );
@@ -176,6 +175,20 @@ test('fonts ship in one request: main faces block first paint, extras stay async
         const buffer = fs.readFileSync(path.join(root, 'assets/fonts', file));
         assert.equal(buffer.length > 10000, true, `${file} ships with the app`);
         assert.equal(buffer.readUInt32BE(0), 0x00010000, `${file} is a valid TrueType font`);
+    }
+    // woff2 carries the same outlines at roughly half the weight and is what
+    // browsers pick; the TTF src stays as a fallback during the transition
+    // window where an SW-cached copy of this CSS may still reference it.
+    for (const name of ['Hannari-Regular', 'Kokoro-Regular']) {
+        const woff2 = fs.readFileSync(path.join(root, `assets/fonts/${name}.woff2`));
+        const ttf = fs.readFileSync(path.join(root, `assets/fonts/${name}.ttf`));
+        assert.equal(woff2.toString('ascii', 0, 4), 'wOF2', `${name}.woff2 signature`);
+        assert.ok(woff2.length < ttf.length * 0.7, `${name}.woff2 must be clearly smaller`);
+        const face = displayCss.slice(displayCss.indexOf(name));
+        assert.ok(
+            face.indexOf(`${name}.woff2`) < face.indexOf(`${name}.ttf`),
+            `${name}: woff2 must come first in the src list`
+        );
     }
 });
 
@@ -308,13 +321,39 @@ test('the service worker caches instead of bypassing the HTTP cache', () => {
         false,
         'no-store disabled the HTTP cache'
     );
-    assert.match(worker, /CACHE_NAME = 'kanji-widgets-v34'/);
+    assert.match(worker, /CACHE_NAME = 'kanji-widgets-v35'/);
     // Repeat visits are served from the cache and refreshed in the background.
     assert.match(worker, /if \(destination === 'script' \|\| destination === 'style'\)/);
     assert.match(worker, /if \(request\.mode === 'navigate'\)/);
     // Stroke-order data from the CDNs is still available offline.
     assert.ok(worker.includes("'raw.githubusercontent.com'"));
     assert.ok(worker.includes("'cdn.jsdelivr.net'"));
+
+    // The precache list holds exactly the URLs the page requests, once each.
+    // It used to carry bare and ?v= twins of five assets plus both '/' and
+    // '/index.html', so every install downloaded ~50 KiB twice.
+    const listSource = worker.slice(
+        worker.indexOf('const urlsToCache = ['),
+        worker.indexOf('];', worker.indexOf('const urlsToCache = ['))
+    );
+    const entries = [...listSource.matchAll(/'([^']+)'/g)].map((match) => match[1]);
+    assert.equal(new Set(entries).size, entries.length, 'precache entries must be unique');
+    assert.equal(entries.includes('/'), false, 'the navigation fallback covers /');
+    for (const bare of ['/styles.css', '/script.js', '/drawing-pad.js', '/backup-manager.js']) {
+        assert.equal(entries.includes(bare), false, `${bare} is only requested with its ?v=`);
+    }
+    // Every versioned script/style URL in index.html must be precached, or the
+    // offline shell breaks the moment the network drops.
+    const html = read('index.html');
+    const requested = [
+        ...html.matchAll(/<script[^>]*src="([^"?]+(?:\?[^"]+)?)"[^>]*>/g),
+        ...html.matchAll(/<link[^>]*href="((?:styles\.css|assets\/fonts\/[^"]+\.css)[^"]*)"[^>]*>/g)
+    ].map((match) => `/${match[1].replace(/^\//, '')}`);
+    for (const url of new Set(requested)) {
+        assert.ok(entries.includes(url), `precache is missing ${url}`);
+    }
+    // The default level data is precached so the first screen works offline.
+    assert.ok(entries.includes('/database/Hiragana.json'));
 });
 
 test('deploy minifies first-party assets with the same filenames', () => {
@@ -328,6 +367,106 @@ test('deploy minifies first-party assets with the same filenames', () => {
     // Same filenames: index.html and the precache list keep working untouched.
     assert.match(tool, /fs\.writeFileSync\(path\.join\(outDir, asset\), result\.code\)/);
     assert.equal(read('.gitignore').includes('dist/'), true, 'build output stays out of git');
+    // index.html is minified as well (comments + inter-tag whitespace, about -55%),
+    // behind a sanity gate that refuses to ship a document which lost ids or tags.
+    assert.match(tool, /html-minifier-terser/);
+    assert.match(tool, /collapseWhitespace: true/);
+    assert.match(tool, /minification lost element id/);
+    assert.match(deploy, /for f in script\.js styles\.css kanji-data\.js index\.html; do/);
+});
+
+test('Font Awesome ships as a self-hosted subset, not the full cdnjs bundle', () => {
+    const html = read('index.html');
+    // The cdnjs bundle cost 344 KiB (16 KiB CSS + 125 KiB solid + 103 KiB brands
+    // woff2 for the single GitHub icon). The subset keeps every glyph the app uses.
+    assert.equal(
+        html.includes('cdnjs.cloudflare.com/ajax/libs/font-awesome'),
+        false,
+        'no Font Awesome from cdnjs'
+    );
+    assert.ok(
+        html.includes('assets/fonts/fa/css/fontawesome-subset.css?v=fa-subset-6.0.0-v1'),
+        'the subset CSS loads from the same origin'
+    );
+    // Still async with a no-JS fallback, exactly like the CDN link was.
+    const faLink = html.match(/<link[^>]*fontawesome-subset\.css[^>]*>/)[0];
+    assert.match(faLink, /media="print"/);
+    assert.match(faLink, /onload="this\.media = 'all'"/);
+    assert.ok(html.includes('<noscript>'));
+
+    const css = read('assets/fonts/fa/css/fontawesome-subset.css');
+    assert.match(css, /@font-face/);
+    assert.ok(css.includes("font-family: 'Font Awesome 6 Free'"));
+    assert.ok(css.includes("font-family: 'Font Awesome 6 Brands'"));
+    assert.match(css, /@keyframes fa-spin/);
+
+    // Every fa-* class in the shipped files must have a glyph rule in the subset,
+    // or ship nothing (fa-sparkles has no glyph in Font Awesome 6.0.0 and renders
+    // empty both before and after the subset).
+    const knownEmpty = new Set(['fa-sparkles']);
+    const shipped = ['index.html'].concat(
+        fs
+            .readdirSync(root)
+            .filter((f) => f.endsWith('.js') && !['server.js', 'firebase-config.js'].includes(f))
+    );
+    const used = new Set();
+    for (const file of shipped) {
+        // Strip ?v= cache-buster values: they contain fa-looking tokens
+        // (like ?v=fa-subset-...) that are not icon classes.
+        const text = read(file).replace(/\?v=[^"')\s]*/g, '');
+        for (const match of text.matchAll(/(?<![-\w])fa-[a-z0-9]+(?:-[a-z0-9]+)*\b/g)) {
+            used.add(match[0]);
+        }
+    }
+    for (const cls of used) {
+        if (knownEmpty.has(cls) || ['fa-spin', 'fa-pulse', 'fa-fw', 'fa-border'].includes(cls)) {
+            continue;
+        }
+        assert.ok(
+            css.includes(`.${cls}:before`) || css.includes(`.${cls}::before`),
+            `${cls} is used by the app but missing from the subset: rerun tools/build-fa-subset.js`
+        );
+    }
+
+    const solid = fs.statSync(
+        path.join(root, 'assets/fonts/fa/webfonts/fa-solid-900-subset.woff2')
+    );
+    const brands = fs.statSync(
+        path.join(root, 'assets/fonts/fa/webfonts/fa-brands-400-subset.woff2')
+    );
+    assert.ok(solid.size < 20000, `solid subset is ${solid.size} bytes, expected under 20 KiB`);
+    assert.ok(brands.size < 5000, `brands subset is ${brands.size} bytes, expected under 5 KiB`);
+    // The cdnjs preconnect stays for three.js.
+    assert.match(
+        html,
+        /<link rel="preconnect" href="https:\/\/cdnjs\.cloudflare\.com" crossorigin \/>/
+    );
+});
+
+test('the default level data is preloaded so the LCP character does not wait on JS', () => {
+    const html = read('index.html');
+    // kanji-data.js fetches database/{level}.json, but only after every deferred
+    // script has executed. The preload starts the same request at parse time.
+    // as="fetch" + crossorigin must match the CORS-mode fetch() or Chrome
+    // downloads the file twice.
+    assert.match(
+        html,
+        /<link rel="preload" href="database\/Hiragana\.json" as="fetch" crossorigin \/>/
+    );
+});
+
+test('the theme toggle and applyTheme agree on the default theme', () => {
+    const script = read('script.js');
+    // A first-time visitor has no saved theme; applyTheme shows nami. The toggle
+    // used to fall back to 'candy' here, believed the visitor was in light mode
+    // and "switched to dark" by selecting nami again: a no-op click.
+    const fallbacks = [...script.matchAll(/localStorage\.getItem\('theme'\) \|\| '(\w+)'/g)].map(
+        (match) => match[1]
+    );
+    assert.ok(fallbacks.length >= 2, 'both applyTheme and the toggle read the saved theme');
+    for (const fallback of fallbacks) {
+        assert.equal(fallback, 'nami', `theme fallback must be nami everywhere, found ${fallback}`);
+    }
 });
 
 test('the Firebase stack (auth SDK + reCAPTCHA) starts off the critical path', () => {

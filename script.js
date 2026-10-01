@@ -582,7 +582,11 @@ class KanjiLearningApp {
         // Theme toggle button (The "Quick Switcher")
         // This flips between your default light (candy) and default dark (lumen)
         document.getElementById('themeToggle').addEventListener('click', () => {
-            const current = localStorage.getItem('theme') || 'candy';
+            // Same fallback as applyTheme ('nami'). With the old 'candy' here, a
+            // first-time visitor was "in light mode" as far as the toggle knew
+            // while actually looking at nami, so the first click switched to
+            // lastDarkTheme || 'nami' and did nothing.
+            const current = localStorage.getItem('theme') || 'nami';
 
             // NEW: Added 'lumen' to the end of this list!
             const darkThemes = [
@@ -2338,7 +2342,36 @@ class KanjiLearningApp {
         }
     }
 
+    // On first render three callers want the same character's stroke data at
+    // the same moment: loadStrokeOrder, the drawing pad's reference guide and
+    // the AI Sensei panel. The HTTP cache absorbed the duplicate requests, but
+    // the fetch, sanitize and parse work still ran twice per load. The memo
+    // keeps one in-flight (and recently resolved) promise per character.
+    static strokeOrderMemo = new Map();
+
     async fetchStrokeOrderSvg(character) {
+        const memo = KanjiLearningApp.strokeOrderMemo;
+        if (memo.has(character)) {
+            return memo.get(character);
+        }
+        const pending = this.fetchStrokeOrderSvgUncached(character);
+        memo.set(character, pending);
+        // Drop failures so a later visit retries instead of caching the miss,
+        // and keep the memo from growing forever across long study sessions.
+        pending.then(
+            (markup) => {
+                if (!markup) {
+                    memo.delete(character);
+                } else if (memo.size > 60) {
+                    memo.delete(memo.keys().next().value);
+                }
+            },
+            () => memo.delete(character)
+        );
+        return pending;
+    }
+
+    async fetchStrokeOrderSvgUncached(character) {
         const codePoint = character.codePointAt(0).toString(16).toLowerCase();
         const hex = codePoint.padStart(5, '0');
         const fileNames = [`${hex}.svg`, `${hex}-Kaisho.svg`, `${hex}-Jinmeiyo.svg`];

@@ -22,16 +22,24 @@
 
         <!-- Open Graph / Facebook / Discord / Social Media -->
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://brodante.github.io/kanji-widget-app/" />
+        <meta property="og:url" content="https://kanji.qd.je/" />
         <meta property="og:title" content="KanjiWidgets - Daily Japanese Learning" />
         <meta
             property="og:description"
             content="Master Hiragana, Katakana, and JLPT N5-N1 Kanji with offline native audio and stroke order animations."
         />
+        <!-- The old og tags pointed at brodante.github.io/preview.png, which 404s:
+             the site lives on kanji.qd.je and the deploy never shipped that file.
+             The card image is assets/social/preview-card.png, copied to /preview.png
+             by the deploy workflow. -->
+        <meta property="og:image" content="https://kanji.qd.je/preview.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="KanjiWidgets - Daily Japanese Learning" />
         <meta
-            property="og:image"
-            content="https://brodante.github.io/kanji-widget-app/preview.png"
+            name="twitter:description"
+            content="Master Hiragana, Katakana, and JLPT N5-N1 Kanji with offline native audio and stroke order animations."
         />
+        <meta name="twitter:image" content="https://kanji.qd.je/preview.png" />
 
         <!-- Existing GA4 stream, production sites only. No duplicate Firebase Analytics SDK. -->
         <script defer src="analytics.js?v=analytics-v1"></script>
@@ -72,19 +80,32 @@
         <noscript>
             <link href="assets/fonts/display-fonts.css?v=display-fonts-v1" rel="stylesheet" />
         </noscript>
+        <!-- Font Awesome, self-hosted as a subset: the cdnjs bundle shipped 16 KiB of
+             CSS plus 228 KiB of woff2 (including a 103 KiB brands font used for the
+             single GitHub icon). tools/build-fa-subset.js regenerates this from
+             @fortawesome/fontawesome-free@6.0.0 with only the icons the app uses.
+             Same glyphs, same rendering, roughly 11 KiB total. The cdnjs preconnect
+             stays: three.js still loads from there for the WebGL themes. -->
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
         <link
             media="print"
             onload="this.media = 'all'"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            href="assets/fonts/fa/css/fontawesome-subset.css?v=fa-subset-6.0.0-v1"
             rel="stylesheet"
         />
         <noscript>
             <link
-                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+                href="assets/fonts/fa/css/fontawesome-subset.css?v=fa-subset-6.0.0-v1"
                 rel="stylesheet"
             />
         </noscript>
+
+        <!-- The default level's data feeds the LCP character, but kanji-data.js can
+             only fetch it after every deferred script has run. Preloading starts the
+             same request at parse time instead (a few seconds earlier on slow
+             networks). as="fetch" plus crossorigin matches the CORS-mode fetch() in
+             kanji-data.js, so the preloaded copy is actually reused. -->
+        <link rel="preload" href="database/Hiragana.json" as="fetch" crossorigin />
 
         <!-- App Resources. The only render-blocking stylesheet: the widget cannot be styled
              correctly without it, and it is small enough to inline in a later phase. -->
