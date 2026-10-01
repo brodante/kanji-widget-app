@@ -767,6 +767,8 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     const surfaceStart = css.indexOf('.ocean-surface {');
     const surface = css.slice(surfaceStart, css.indexOf('\n}', surfaceStart));
     assert.match(surface, /height: 13vh/, 'the air band sits above the water');
+    assert.ok(!surface.includes('#ffffff'), 'the sky must not be pure white');
+    assert.match(surface, /#ffe7c2/, 'the horizon glows warm instead of glaring');
     for (const layer of ['.ocean-wave-back', '.ocean-wave-front']) {
         const start = css.indexOf(`${layer} {`);
         const rule = css.slice(start, css.indexOf('\n}', start));
@@ -800,6 +802,15 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     assert.equal((fish.match(/<span><\/span>/g) || []).length, 3);
     const fishLanes = css.match(/\.ocean-fish span:nth-child\(\d+\) \{/g) || [];
     assert.equal(new Set(fishLanes).size, 3);
+    for (const nth of [1, 2, 3]) {
+        const start = css.indexOf(`.ocean-fish span:nth-child(${nth}) {`);
+        const rule = css.slice(start, css.indexOf('\n}', start));
+        assert.match(
+            rule,
+            /background-image: url\("data:image\/svg\+xml,/,
+            'lane ' + nth + ' has its own fish'
+        );
+    }
     assert.ok(css.includes('animation-name: ocean-swim-rtl'), 'one fish swims the other way');
 
     // Bigger visitors: one shark, a pod of two dolphins, one turtle. Their
@@ -817,6 +828,29 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
         const seconds = Number.parseInt(rule.match(/animation-duration: (\d+)s/)[1], 10);
         assert.ok(seconds >= 60, `${animal} should visit rarely, got a ${seconds}s cycle`);
     }
+    for (const visitor of ['.ocean-school', '.ocean-manta']) {
+        const start = css.indexOf(`${visitor} {`);
+        const rule = css.slice(start, css.indexOf('\n}', start));
+        const seconds = Number.parseInt(rule.match(/animation-duration: (\d+)s/)[1], 10);
+        assert.ok(seconds >= 60, `${visitor} should pass rarely`);
+        assert.match(rule, /animation-name: ocean-turtle-pass/, 'reuses an existing pass');
+    }
+    const lifeSpanCount = (html.match(/ocean-school|ocean-manta/g) || []).length;
+    assert.equal(lifeSpanCount, 2, 'school and manta live in the visitors layer');
+
+    // Quiet residents: seahorses and crabs, painted once and never animated.
+    const critStart = html.indexOf('<div class="ocean-critters">');
+    const critters = html.slice(critStart, html.indexOf('</div>', critStart));
+    for (const cls of ['ocean-seahorse-1', 'ocean-seahorse-2', 'ocean-crab-1', 'ocean-crab-2']) {
+        assert.ok(critters.includes(cls), cls + ' is on the reef');
+    }
+    const critCss = css.slice(css.indexOf('.ocean-critters {'), css.indexOf('/* 8. Jellyfish:'));
+    assert.equal(
+        /\.ocean-(seahorse|crab)[^{]*\{[^}]*animation/.test(critCss),
+        false,
+        'residents never move'
+    );
+
     const whaleStart = css.indexOf('.ocean-whale {');
     const whale = css.slice(whaleStart, css.indexOf('\n}', whaleStart));
     assert.match(whale, /animation-duration: 240s/, 'the whale is rarer than the shark');
@@ -851,7 +885,7 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     // almost all the way down to the reef.
     const raysStart = css.indexOf('.ocean-rays {');
     const rays = css.slice(raysStart, css.indexOf('\n}', raysStart));
-    assert.match(rays, /rgba\(255, 255, 255, 0\.34\)/, 'main beam layer stays bright');
+    assert.match(rays, /rgba\(255, 250, 232, 0\.36\)/, 'main beam layer stays bright and warm');
     assert.match(rays, /transparent 97%/, 'beams reach down to the reef');
     assert.ok(!rays.includes('blur(14px)'), 'beams are not blurred into mush');
 
@@ -978,6 +1012,8 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     assert.ok(reduced.includes('translate3d(66vw, 0, 0) scaleX(-1)'), 'shark rests in frame');
     assert.ok(reduced.includes('.ocean-turtle {'), 'turtle rests in frame');
     assert.ok(reduced.includes('.ocean-whale {'), 'whale rests in frame');
+    assert.ok(reduced.includes('.ocean-school {'), 'school rests in frame');
+    assert.ok(reduced.includes('.ocean-manta {'), 'manta rests in frame');
     assert.ok(reduced.includes('.ocean-jellies span:nth-child(1)'), 'jellyfish rest mid-rise');
 
     // The glass panels carry the footer too, so the theme reads as one body of
