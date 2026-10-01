@@ -61,7 +61,7 @@ test('all live Recent theme styles and guide styles coexist with warning and dan
         css,
         /\.recent-section \{[^}]*background-color:[^}]*padding:[^}]*border-radius:[^}]*box-shadow:/
     );
-    for (const theme of ['midnight', 'nami', 'lumen', 'obake', 'ito', 'underwater']) {
+    for (const theme of ['midnight', 'nami', 'lumen', 'obake', 'ito', 'ocean']) {
         // The selector may sit anywhere inside a grouped rule (e.g. the
         // frosted-glass list), so match it followed by ',' or '{', not the
         // last-selector '{' shape only.

@@ -718,26 +718,35 @@ test('dev theme manifests ship downscaled thumbs next to the full wallpapers', (
     assert.equal(gif.toString('ascii', 0, 3), 'GIF', 'the thumb is still an animated GIF');
 });
 
-test('the Underwater (Pool) theme stays light and animates on the compositor only', () => {
+test('the Ocean theme is a light cross-section and animates on the compositor only', () => {
     const html = read('index.html');
     const css = read('styles.css');
     const script = read('script.js');
 
-    // Registered in the picker's Light Themes group, with a plain-text label.
+    // The old name is gone everywhere: markup, CSS, scripts and picker.
+    for (const [name, body] of [
+        ['index.html', html],
+        ['styles.css', css],
+        ['script.js', script]
+    ]) {
+        assert.equal(body.includes('underwater'), false, `${name} still mentions underwater`);
+    }
+
+    // Registered in the picker's Light Themes group under its own name.
     const lightGroup = html.slice(
         html.indexOf('<optgroup label="Light Themes">'),
         html.indexOf('</optgroup>')
     );
-    assert.ok(lightGroup.includes('<option value="underwater">Underwater (Pool)</option>'));
+    assert.ok(lightGroup.includes('<option value="ocean">Ocean</option>'));
 
     // Not a WebGL theme and in no dark list: the header quick-toggle must treat
     // it as light (sun icon, remembered via lastLightTheme).
     assert.ok(script.includes("const WEBGL_THEMES = ['nami', 'lumen', 'obake', 'ito'];"));
-    assert.equal(/darkThemes = \[[^\]]*'underwater'/.test(script), false);
+    assert.equal(/darkThemes = \[[^\]]*'ocean'/.test(script), false);
 
-    // Dark text on pale water: the vars block keeps the light/dark Google-button
-    // classification (test-account-ui reads --on-surface luminance) on the light side.
-    const varsStart = css.indexOf("[data-theme='underwater'] {");
+    // Dark text on pale water keeps the light/dark Google-button classification
+    // (test-account-ui reads --on-surface luminance) on the light side.
+    const varsStart = css.indexOf("[data-theme='ocean'] {");
     const vars = css.slice(varsStart, css.indexOf('\n}', varsStart));
     assert.match(vars, /--on-surface: #0b3a52/);
     assert.match(vars, /--accent-text: #01579b/);
@@ -745,25 +754,68 @@ test('the Underwater (Pool) theme stays light and animates on the compositor onl
 
     // The scene is one fixed layer: behind the content, click-transparent,
     // screen-reader inert, and only visible under its own theme.
-    assert.equal((html.match(/class="underwater-scene" aria-hidden="true"/g) || []).length, 1);
-    const sceneStart = css.indexOf('.underwater-scene {');
+    assert.equal((html.match(/class="ocean-scene" aria-hidden="true"/g) || []).length, 1);
+    const sceneStart = css.indexOf('.ocean-scene {');
     const scene = css.slice(sceneStart, css.indexOf('\n}', sceneStart));
     assert.match(scene, /z-index: -10/);
     assert.match(scene, /pointer-events: none/);
     assert.match(scene, /display: none/);
-    assert.ok(css.includes("[data-theme='underwater'] .underwater-scene {\n    display: block;"));
+    assert.ok(css.includes("[data-theme='ocean'] .ocean-scene {\n    display: block;"));
 
-    // Sixteen bubbles, each with its own lane, speed and start offset.
-    const bubblesStart = html.indexOf('<div class="underwater-bubbles">');
+    // Cross-section: air band on top with two tiled wave layers at the
+    // waterline, sliding in opposite directions on one shared keyframe.
+    const surfaceStart = css.indexOf('.ocean-surface {');
+    const surface = css.slice(surfaceStart, css.indexOf('\n}', surfaceStart));
+    assert.match(surface, /height: 13vh/, 'the air band sits above the water');
+    for (const layer of ['.ocean-wave-back', '.ocean-wave-front']) {
+        const start = css.indexOf(`${layer} {`);
+        const rule = css.slice(start, css.indexOf('\n}', start));
+        assert.match(rule, /background-size: 480px/);
+        assert.match(rule, /animation-duration: \d+s/);
+    }
+    const waveBase = css.slice(
+        css.indexOf('.ocean-wave {'),
+        css.indexOf('\n}', css.indexOf('.ocean-wave {'))
+    );
+    assert.match(waveBase, /animation-name: ocean-wave-drift/);
+    assert.match(waveBase, /background-repeat: repeat-x/);
+    assert.ok(css.includes('.ocean-wave-front {') && css.includes('animation-direction: reverse'));
+
+    // Sixteen bubbles with their own lanes, popping at the surface (-88vh from
+    // their start, i.e. right where the waterline sits), not above it.
+    const bubblesStart = html.indexOf('<div class="ocean-bubbles">');
     const bubbles = html.slice(bubblesStart, html.indexOf('</div>', bubblesStart));
     assert.equal((bubbles.match(/<span><\/span>/g) || []).length, 16);
-    const lanes = css.match(/\.underwater-bubbles span:nth-child\(\d+\) \{/g) || [];
+    const lanes = css.match(/\.ocean-bubbles span:nth-child\(\d+\) \{/g) || [];
     assert.equal(new Set(lanes).size, 16, 'every bubble has its own lane rule');
+    const bubbleKey = css.slice(
+        css.indexOf('@keyframes ocean-bubble-rise'),
+        css.indexOf('\n}', css.indexOf('@keyframes ocean-bubble-rise'))
+    );
+    assert.ok(bubbleKey.includes('-88vh'), 'bubbles stop at the waterline');
 
-    // Every underwater keyframe may animate transform/opacity only: anything
-    // else repaints a full-viewport layer every frame on cheap phones.
-    const keyframes = [...css.matchAll(/@keyframes (underwater-[\w-]+) \{([\s\S]*?)\n\}/g)];
-    assert.equal(keyframes.length, 5, 'glow, rays, two caustic nets, bubble rise');
+    // Three fish silhouettes with lanes, one swimming against the others.
+    const fishStart = html.indexOf('<div class="ocean-fish">');
+    const fish = html.slice(fishStart, html.indexOf('</div>', fishStart));
+    assert.equal((fish.match(/<span><\/span>/g) || []).length, 3);
+    const fishLanes = css.match(/\.ocean-fish span:nth-child\(\d+\) \{/g) || [];
+    assert.equal(new Set(fishLanes).size, 3);
+    assert.ok(css.includes('animation-name: ocean-swim-rtl'), 'one fish swims the other way');
+
+    // The reef rests on the bottom in two silhouette layers, mirrored so the
+    // same tile never reads twice, and never animates (the floor is static).
+    const reefStart = css.indexOf('.ocean-reef {');
+    const reef = css.slice(reefStart, css.indexOf('\n}', reefStart));
+    assert.match(reef, /height: 24vh/);
+    assert.match(reef, /bottom: 0/);
+    const reefBefore = css.slice(css.indexOf('.ocean-reef::before {'));
+    assert.ok(reefBefore.includes('transform: scaleX(-1)'), 'far reef layer is mirrored');
+    assert.equal(/\.ocean-reef[^{]*\{[^}]*animation/.test(css), false, 'the reef must not move');
+
+    // Every ocean keyframe may animate transform/opacity only: anything else
+    // repaints a full-viewport layer every frame on cheap phones.
+    const keyframes = [...css.matchAll(/@keyframes (ocean-[\w-]+) \{([\s\S]*?)\n\}/g)];
+    assert.equal(keyframes.length, 7, 'waves, rays, two caustic nets, bubbles, two swim paths');
     for (const [, name, body] of keyframes) {
         const props = [...body.matchAll(/^\s+([a-z-]+)\s*:/gm)].map((match) => match[1]);
         assert.ok(props.length > 0, `${name} is empty?`);
@@ -775,20 +827,21 @@ test('the Underwater (Pool) theme stays light and animates on the compositor onl
         }
     }
 
-    // Reduced motion keeps the pool but freezes it, resting bubbles mid-water.
-    const afterBubbles = css.indexOf('.underwater-bubbles span:nth-child(16)');
-    const reducedStart = css.indexOf('@media (prefers-reduced-motion: reduce)', afterBubbles);
-    assert.ok(reducedStart > afterBubbles, 'the underwater reduced-motion block exists');
+    // Reduced motion keeps the cross-section but freezes it: bubbles rest
+    // mid-water and fish hold their positions instead of swimming.
+    const afterReef = css.indexOf('.ocean-reef::after {');
+    const reducedStart = css.indexOf('@media (prefers-reduced-motion: reduce)', afterReef);
+    assert.ok(reducedStart > afterReef, 'the ocean reduced-motion block exists');
     const reduced = css.slice(reducedStart, css.indexOf('\n}\n', reducedStart));
-    assert.ok(reduced.includes("[data-theme='underwater'] .underwater-bubbles span"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-bubbles span"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-fish span"));
     assert.match(reduced, /animation: none/);
-    assert.match(reduced, /bottom: 62vh/);
 
     // The glass panels carry the footer too, so the theme reads as one body of
     // water instead of an opaque block at the bottom.
-    const glassStart = css.indexOf("[data-theme='underwater'] .kanji-widget,");
+    const glassStart = css.indexOf("[data-theme='ocean'] .kanji-widget,");
     const glass = css.slice(glassStart, css.indexOf('\n}', glassStart));
-    assert.ok(glass.includes("[data-theme='underwater'] .footer-content"));
+    assert.ok(glass.includes("[data-theme='ocean'] .footer-content"));
     assert.match(glass, /background-color: rgba\(255, 255, 255, 0\.42\) !important/);
     assert.match(glass, /backdrop-filter: blur\(10px\)/);
     assert.match(glass, /background-image: none/);

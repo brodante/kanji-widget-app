@@ -299,15 +299,7 @@ test('every theme still applies, and each WebGL theme loads only the three.js pa
             'the default theme applies'
         );
 
-        for (const theme of [
-            'paper',
-            'candy',
-            'yotsuba',
-            'sunrise',
-            'underwater',
-            'nord',
-            'midnight'
-        ]) {
+        for (const theme of ['paper', 'candy', 'yotsuba', 'sunrise', 'ocean', 'nord', 'midnight']) {
             window.app.setTheme(theme);
             assert.equal(document.documentElement.getAttribute('data-theme'), theme);
             assert.equal(injected().length, 1, `${theme} must not fetch three.js`);

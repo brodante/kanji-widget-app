@@ -215,14 +215,19 @@
         <div id="obake-canvas-container" class="obake-background"></div>
         <!-- Midnight Theme Cosmic Background Elements -->
         <div class="midnight-stars"></div>
-        <!-- Underwater (Pool) Theme: sunlit surface overhead, drifting sun
-             shafts, a caustic light net and bubbles that rise and vanish at
-             the top. Pure CSS, hidden unless data-theme="underwater". -->
-        <div class="underwater-scene" aria-hidden="true">
-            <div class="underwater-glow"></div>
-            <div class="underwater-rays"></div>
-            <div class="underwater-caustics"></div>
-            <div class="underwater-bubbles">
+        <!-- Ocean theme: a cross-section of sunlit water. A thin band of air
+             and two rolling wave layers at the waterline, sun shafts and a
+             caustic light net through the blue, bubbles that rise and pop at
+             the surface, drifting fish silhouettes and a coral reef resting
+             on the bottom. Pure CSS, hidden unless data-theme="ocean". -->
+        <div class="ocean-scene" aria-hidden="true">
+            <div class="ocean-surface">
+                <div class="ocean-wave ocean-wave-back"></div>
+                <div class="ocean-wave ocean-wave-front"></div>
+            </div>
+            <div class="ocean-rays"></div>
+            <div class="ocean-caustics"></div>
+            <div class="ocean-bubbles">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -240,6 +245,12 @@
                 <span></span>
                 <span></span>
             </div>
+            <div class="ocean-fish">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="ocean-reef"></div>
         </div>
         <!-- Ito Theme WebGL Container -->
         <div id="ito-canvas-container" class="ito-background"></div>
@@ -1267,7 +1278,7 @@
                                         <option value="paper">Paper (Minimal)</option>
                                         <option value="candy">Candy (Pastel)</option>
                                         <option value="sunrise">Sunrise (Warm)</option>
-                                        <option value="underwater">Underwater (Pool)</option>
+                                        <option value="ocean">Ocean</option>
                                     </optgroup>
                                     <optgroup label="Dark Themes">
                                         <option value="dark">Default Dark</option>

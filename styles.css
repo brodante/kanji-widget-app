@@ -3824,38 +3824,38 @@ input:focus {
 }
 
 /* ========================================== */
-/* UNDERWATER (POOL) THEME - light mode        */
-/* Looking up from under the water: a bright   */
-/* shimmering surface on top, sun shafts       */
-/* drifting down through the blue, and bubbles */
-/* rising until they vanish at the surface.    */
-/* Pure CSS: the scene is a fixed layer behind */
-/* the content (same slot as the midnight      */
-/* stars) and every animation only touches     */
-/* transform/opacity, so it stays on the       */
-/* compositor and never triggers layout or     */
-/* repaint of the app above it.                */
+/* OCEAN THEME - light mode, cross-section     */
+/* A slice of the sea: pale air at the very    */
+/* top, a moving wave line where the water     */
+/* starts, sun shafts and caustics through the */
+/* blue, bubbles that rise and pop at the      */
+/* surface, drifting fish silhouettes and a    */
+/* coral reef resting on the bottom.           */
+/* Pure CSS in one fixed layer behind the app  */
+/* (same slot as the midnight stars); every    */
+/* animation touches transform/opacity only so */
+/* the scene stays on the compositor.          */
 /* ========================================== */
 
-[data-theme='underwater'] {
+[data-theme='ocean'] {
     --primary-color: #0288d1;
     --primary-variant: #01579b;
-    --background: #a5e0f4;
+    --background: #7fd0ea;
     --surface: #ffffff;
     --on-surface: #0b3a52;
     --on-background: #08364a;
-    /* Pale water everywhere: darker accent tones so links stay above 4.5:1. */
+    /* Pale water everywhere: darker accent tones so links stay readable. */
     --accent-text: #01579b;
     --accent-text-strong: #013a6b;
 }
 
 /* Frosted glass panels, same treatment the dark glass themes give: the water
    keeps glowing through the cards instead of stopping at an opaque block. */
-[data-theme='underwater'] .kanji-widget,
-[data-theme='underwater'] .progress-section,
-[data-theme='underwater'] .journey-section,
-[data-theme='underwater'] .recent-section,
-[data-theme='underwater'] .footer-content {
+[data-theme='ocean'] .kanji-widget,
+[data-theme='ocean'] .progress-section,
+[data-theme='ocean'] .journey-section,
+[data-theme='ocean'] .recent-section,
+[data-theme='ocean'] .footer-content {
     background-color: rgba(255, 255, 255, 0.42) !important;
     /* clear any base tint so the water shows through evenly */
     background-image: none;
@@ -3867,8 +3867,10 @@ input:focus {
     transform: translate3d(0, 0, 0);
 }
 
-/* The whole scene lives in one fixed layer behind the app. */
-.underwater-scene {
+/* The whole scene lives in one fixed layer behind the app. The gradient is
+   the water column: bright turquoise under the surface, deepening downward
+   until the reef takes over. */
+.ocean-scene {
     display: none;
     position: fixed;
     top: 0;
@@ -3878,124 +3880,156 @@ input:focus {
     pointer-events: none;
     z-index: -10;
     overflow: hidden;
-    /* The water column: bright at the surface, deeper blue toward the floor. */
     background: linear-gradient(
         to bottom,
-        #f2fdff 0%,
-        #cdf1fb 16%,
-        #9cddf3 42%,
-        #6cc6e8 72%,
-        #4bb2dc 100%
+        #f4feff 0%,
+        #cdf3fb 13%,
+        #86dcf1 30%,
+        #4cbbe0 58%,
+        #2f9cc4 82%,
+        #2384ad 100%
     );
 }
 
-[data-theme='underwater'] .underwater-scene {
+[data-theme='ocean'] .ocean-scene {
     display: block;
 }
 
-/* 1. The sunlit surface: a bright band across the top that breathes slowly,
-      like light rocking on the underside of the water. */
-.underwater-glow {
+/* 1. The waterline: a thin band of air above rolling waves. Two tiled wave
+      layers slide past each other; each translates by exactly one tile so
+      the loop is seamless. The wide left offset plus extra width keeps the
+      reverse-playing layer covered at both ends. */
+.ocean-surface {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 34vh;
-    background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.95) 0%,
-        rgba(255, 255, 255, 0.55) 30%,
-        rgba(255, 255, 255, 0) 100%
-    );
-    filter: blur(2px);
-    transform-origin: top center;
-    animation: underwater-glow-shimmer 7s ease-in-out infinite;
+    height: 13vh;
+    background: linear-gradient(to bottom, #ffffff 0%, #f4fdff 62%, #e9faff 100%);
+}
+
+/* Sunlight pooling on the waterline, softly blurred. */
+.ocean-surface::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 12px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+    filter: blur(3px);
+}
+
+.ocean-wave {
+    position: absolute;
+    left: -480px;
+    width: calc(100% + 960px);
+    background-repeat: repeat-x;
+    animation-name: ocean-wave-drift;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.ocean-wave-back {
+    bottom: 9px;
+    height: 32px;
+    opacity: 0.65;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 56' preserveAspectRatio='none'%3E%3Cpath d='M0 28 C40 12 80 12 120 28 C160 44 200 44 240 28 C280 12 320 12 360 28 C400 44 440 44 480 28 V56 H0 Z' fill='%23d9f6ff'/%3E%3C/svg%3E");
+    background-size: 480px 32px;
+    animation-duration: 13s;
+}
+
+.ocean-wave-front {
+    bottom: -2px;
+    height: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 56' preserveAspectRatio='none'%3E%3Cpath d='M0 28 C40 12 80 12 120 28 C160 44 200 44 240 28 C280 12 320 12 360 28 C400 44 440 44 480 28 V56 H0 Z' fill='%239fe4f6'/%3E%3C/svg%3E");
+    background-size: 480px 38px;
+    animation-duration: 8s;
+    animation-direction: reverse;
 }
 
 /* 2. Sun shafts: two wide combed-gradient layers, blurred and masked so they
-      fade out before the bottom of the pool, drifting in opposite phases. */
-.underwater-rays {
+      fade out before the reef, drifting in opposite phases. */
+.ocean-rays {
     position: absolute;
-    top: -25%;
+    top: 8%;
     left: -25%;
     width: 150%;
-    height: 95%;
+    height: 82%;
     background: repeating-linear-gradient(
         76deg,
-        rgba(255, 255, 255, 0.26) 0 18px,
+        rgba(255, 255, 255, 0.24) 0 18px,
         rgba(255, 255, 255, 0) 18px 96px
     );
     filter: blur(9px);
     -webkit-mask-image: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0.95),
+        rgba(0, 0, 0, 0.9),
         rgba(0, 0, 0, 0.25) 55%,
         transparent 88%
     );
     mask-image: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0.95),
+        rgba(0, 0, 0, 0.9),
         rgba(0, 0, 0, 0.25) 55%,
         transparent 88%
     );
-    animation: underwater-rays-drift 13s ease-in-out infinite alternate;
+    animation: ocean-rays-drift 13s ease-in-out infinite alternate;
 }
 
-.underwater-rays::after {
+.ocean-rays::after {
     content: '';
     position: absolute;
     inset: 0;
     background: repeating-linear-gradient(
         84deg,
-        rgba(255, 255, 255, 0.2) 0 34px,
+        rgba(255, 255, 255, 0.18) 0 34px,
         rgba(255, 255, 255, 0) 34px 160px
     );
     filter: blur(14px);
-    animation: underwater-rays-drift 19s ease-in-out infinite alternate-reverse;
+    animation: ocean-rays-drift 19s ease-in-out infinite alternate-reverse;
 }
 
 /* 3. Caustics: two oversized nets of soft light dots sliding across each
-      other. Each layer translates by exactly its tile size, so the loop is
-      seamless. Plain alpha (no blend mode) keeps the compositing cheap. */
-.underwater-caustics {
+      other, each looping exactly one tile. */
+.ocean-caustics {
     position: absolute;
     inset: 0;
     overflow: hidden;
 }
 
-.underwater-caustics::before,
-.underwater-caustics::after {
+.ocean-caustics::before,
+.ocean-caustics::after {
     content: '';
     position: absolute;
     inset: -60%;
     background-image: radial-gradient(
         closest-side,
-        rgba(255, 255, 255, 0.38),
+        rgba(255, 255, 255, 0.34),
         rgba(255, 255, 255, 0) 72%
     );
     background-size: 180px 160px;
 }
 
-.underwater-caustics::before {
-    animation: underwater-caustics-a 26s linear infinite;
+.ocean-caustics::before {
+    animation: ocean-caustics-a 26s linear infinite;
 }
 
-.underwater-caustics::after {
+.ocean-caustics::after {
     background-size: 140px 120px;
     opacity: 0.7;
-    animation: underwater-caustics-b 34s linear infinite;
+    animation: ocean-caustics-b 34s linear infinite;
 }
 
 /* 4. Bubbles: sixteen spans rising from below the floor with a lazy sideways
-      wobble, fading out right before they reach the surface. Sizes, lanes,
-      speeds and (negative) delays come from the nth-child table so the stream
-      is already mid-water on the first frame. */
-.underwater-bubbles {
+      wobble, fading out as they reach the waterline (they pop at the surface,
+      not above it). Negative delays keep the stream mid-water on first paint. */
+.ocean-bubbles {
     position: absolute;
     inset: 0;
 }
 
-.underwater-bubbles span {
+.ocean-bubbles span {
     position: absolute;
     bottom: -8vh;
     border-radius: 50%;
@@ -4009,26 +4043,26 @@ input:focus {
     box-shadow:
         inset 0 0 8px rgba(255, 255, 255, 0.35),
         0 0 6px rgba(255, 255, 255, 0.2);
-    animation-name: underwater-bubble-rise;
+    animation-name: ocean-bubble-rise;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
 
-.underwater-bubbles span:nth-child(1) {
+.ocean-bubbles span:nth-child(1) {
     width: 10px;
     height: 10px;
     left: 6%;
     animation-duration: 12s;
     animation-delay: -1s;
 }
-.underwater-bubbles span:nth-child(2) {
+.ocean-bubbles span:nth-child(2) {
     width: 16px;
     height: 16px;
     left: 14%;
     animation-duration: 15s;
     animation-delay: -7s;
 }
-.underwater-bubbles span:nth-child(3) {
+.ocean-bubbles span:nth-child(3) {
     width: 7px;
     height: 7px;
     left: 22%;
@@ -4036,28 +4070,28 @@ input:focus {
     animation-delay: -4s;
     filter: blur(0.5px);
 }
-.underwater-bubbles span:nth-child(4) {
+.ocean-bubbles span:nth-child(4) {
     width: 20px;
     height: 20px;
     left: 30%;
     animation-duration: 17s;
     animation-delay: -12s;
 }
-.underwater-bubbles span:nth-child(5) {
+.ocean-bubbles span:nth-child(5) {
     width: 9px;
     height: 9px;
     left: 38%;
     animation-duration: 11s;
     animation-delay: -2s;
 }
-.underwater-bubbles span:nth-child(6) {
+.ocean-bubbles span:nth-child(6) {
     width: 13px;
     height: 13px;
     left: 46%;
     animation-duration: 14s;
     animation-delay: -9s;
 }
-.underwater-bubbles span:nth-child(7) {
+.ocean-bubbles span:nth-child(7) {
     width: 6px;
     height: 6px;
     left: 53%;
@@ -4065,21 +4099,21 @@ input:focus {
     animation-delay: -5s;
     filter: blur(0.5px);
 }
-.underwater-bubbles span:nth-child(8) {
+.ocean-bubbles span:nth-child(8) {
     width: 18px;
     height: 18px;
     left: 60%;
     animation-duration: 16s;
     animation-delay: -14s;
 }
-.underwater-bubbles span:nth-child(9) {
+.ocean-bubbles span:nth-child(9) {
     width: 11px;
     height: 11px;
     left: 67%;
     animation-duration: 13s;
     animation-delay: -3s;
 }
-.underwater-bubbles span:nth-child(10) {
+.ocean-bubbles span:nth-child(10) {
     width: 8px;
     height: 8px;
     left: 73%;
@@ -4087,28 +4121,28 @@ input:focus {
     animation-delay: -8s;
     filter: blur(0.5px);
 }
-.underwater-bubbles span:nth-child(11) {
+.ocean-bubbles span:nth-child(11) {
     width: 22px;
     height: 22px;
     left: 79%;
     animation-duration: 18s;
     animation-delay: -16s;
 }
-.underwater-bubbles span:nth-child(12) {
+.ocean-bubbles span:nth-child(12) {
     width: 12px;
     height: 12px;
     left: 85%;
     animation-duration: 14.5s;
     animation-delay: -6s;
 }
-.underwater-bubbles span:nth-child(13) {
+.ocean-bubbles span:nth-child(13) {
     width: 7px;
     height: 7px;
     left: 90%;
     animation-duration: 9.5s;
     animation-delay: -11s;
 }
-.underwater-bubbles span:nth-child(14) {
+.ocean-bubbles span:nth-child(14) {
     width: 15px;
     height: 15px;
     left: 95%;
@@ -4116,14 +4150,14 @@ input:focus {
     animation-delay: -13s;
     filter: blur(0.5px);
 }
-.underwater-bubbles span:nth-child(15) {
+.ocean-bubbles span:nth-child(15) {
     width: 9px;
     height: 9px;
     left: 10%;
     animation-duration: 11.5s;
     animation-delay: -15s;
 }
-.underwater-bubbles span:nth-child(16) {
+.ocean-bubbles span:nth-child(16) {
     width: 17px;
     height: 17px;
     left: 50%;
@@ -4131,19 +4165,94 @@ input:focus {
     animation-delay: -10s;
 }
 
-@keyframes underwater-glow-shimmer {
-    0%,
-    100% {
-        opacity: 0.85;
-        transform: translate3d(0, 0, 0) scaleY(1);
+/* 5. Fish: three silhouettes crossing the middle water at different depths
+      and speeds, one of them heading the other way. */
+.ocean-fish {
+    position: absolute;
+    inset: 0;
+}
+
+.ocean-fish span {
+    position: absolute;
+    left: 0;
+    aspect-ratio: 48 / 20;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 20'%3E%3Cpath d='M2 10 C8 3 18 3 26 10 C18 17 8 17 2 10 Z M26 10 L34 4 L32 10 L34 16 Z' fill='%23124c63'/%3E%3C/svg%3E")
+        no-repeat center / contain;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.ocean-fish span:nth-child(1) {
+    top: 34vh;
+    width: 34px;
+    opacity: 0.5;
+    animation-name: ocean-swim-ltr;
+    animation-duration: 46s;
+    animation-delay: -12s;
+}
+
+.ocean-fish span:nth-child(2) {
+    top: 50vh;
+    width: 44px;
+    opacity: 0.42;
+    animation-name: ocean-swim-rtl;
+    animation-duration: 61s;
+    animation-delay: -40s;
+}
+
+.ocean-fish span:nth-child(3) {
+    top: 42vh;
+    width: 24px;
+    opacity: 0.38;
+    animation-name: ocean-swim-ltr;
+    animation-duration: 37s;
+    animation-delay: -25s;
+}
+
+/* 6. The reef: two silhouette layers of coral heads, branching coral and
+      rocks resting on the bottom. One tiled SVG, mirrored and faded for the
+      far layer so the two rows never read as the same stamp. Static on
+      purpose: the floor of the sea does not stroll around. */
+.ocean-reef {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 24vh;
+}
+
+.ocean-reef::before,
+.ocean-reef::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 960 200' preserveAspectRatio='none'%3E%3Cpath d='M0 200 L0 160 C30 150 40 165 60 158 C70 120 78 118 84 150 C92 140 100 142 108 156 C120 100 128 96 134 148 C150 138 160 150 175 145 C185 110 195 108 202 146 C215 136 225 148 240 142 C255 90 268 88 276 140 C290 130 300 146 315 140 C330 118 342 116 350 142 C365 132 375 148 390 144 C400 96 412 94 420 142 C435 132 448 146 462 140 C475 112 486 110 494 144 C510 134 522 148 538 142 C550 100 560 98 568 144 C582 134 594 146 610 140 C622 116 634 114 642 142 C656 132 668 146 684 140 C696 92 708 90 716 142 C730 132 742 146 758 140 C770 118 782 116 790 144 C805 134 818 148 834 142 C846 104 858 102 866 146 C880 136 892 148 908 142 C920 124 932 122 940 148 C948 142 954 146 960 150 L960 200 Z' fill='%230d4257'/%3E%3C/svg%3E")
+        repeat-x bottom / 960px 100%;
+}
+
+.ocean-reef::before {
+    height: 100%;
+    opacity: 0.4;
+    transform: scaleX(-1);
+}
+
+.ocean-reef::after {
+    height: 72%;
+    opacity: 0.85;
+}
+
+@keyframes ocean-wave-drift {
+    from {
+        transform: translate3d(0, 0, 0);
     }
-    50% {
-        opacity: 1;
-        transform: translate3d(0, 2px, 0) scaleY(1.06);
+    to {
+        transform: translate3d(-480px, 0, 0);
     }
 }
 
-@keyframes underwater-rays-drift {
+@keyframes ocean-rays-drift {
     0% {
         opacity: 0.55;
         transform: translate3d(-4%, 0, 0) skewX(-3deg);
@@ -4157,7 +4266,7 @@ input:focus {
     }
 }
 
-@keyframes underwater-caustics-a {
+@keyframes ocean-caustics-a {
     from {
         transform: translate3d(0, 0, 0);
     }
@@ -4166,7 +4275,7 @@ input:focus {
     }
 }
 
-@keyframes underwater-caustics-b {
+@keyframes ocean-caustics-b {
     from {
         transform: translate3d(0, 0, 0);
     }
@@ -4175,7 +4284,7 @@ input:focus {
     }
 }
 
-@keyframes underwater-bubble-rise {
+@keyframes ocean-bubble-rise {
     0% {
         opacity: 0;
         transform: translate3d(0, 0, 0) scale(0.55);
@@ -4184,49 +4293,96 @@ input:focus {
         opacity: 0.9;
     }
     25% {
-        transform: translate3d(10px, -28vh, 0) scale(0.8);
+        transform: translate3d(10px, -24vh, 0) scale(0.8);
     }
     50% {
-        transform: translate3d(-8px, -56vh, 0) scale(1);
+        transform: translate3d(-8px, -48vh, 0) scale(1);
     }
     75% {
-        transform: translate3d(8px, -84vh, 0) scale(1.03);
+        transform: translate3d(8px, -70vh, 0) scale(1.04);
     }
-    92% {
-        opacity: 0.55;
+    88% {
+        opacity: 0.65;
     }
     100% {
         opacity: 0;
-        transform: translate3d(-4px, -114vh, 0) scale(1.06);
+        transform: translate3d(-4px, -88vh, 0) scale(1.1);
     }
 }
 
-/* Reduced motion: keep the pool (gradient, glow, shafts) but freeze every
-   animation and rest the bubbles mid-water so the scene still reads as
-   underwater without anything moving. */
+@keyframes ocean-swim-ltr {
+    0% {
+        transform: translate3d(-12vw, 0, 0);
+    }
+    25% {
+        transform: translate3d(20vw, -8px, 0);
+    }
+    50% {
+        transform: translate3d(50vw, 4px, 0);
+    }
+    75% {
+        transform: translate3d(80vw, -6px, 0);
+    }
+    100% {
+        transform: translate3d(112vw, 0, 0);
+    }
+}
+
+@keyframes ocean-swim-rtl {
+    0% {
+        transform: translate3d(112vw, 0, 0) scaleX(-1);
+    }
+    25% {
+        transform: translate3d(80vw, 6px, 0) scaleX(-1);
+    }
+    50% {
+        transform: translate3d(50vw, -5px, 0) scaleX(-1);
+    }
+    75% {
+        transform: translate3d(20vw, 7px, 0) scaleX(-1);
+    }
+    100% {
+        transform: translate3d(-12vw, 0, 0) scaleX(-1);
+    }
+}
+
+/* Reduced motion: keep the ocean (gradient, waterline, reef) but freeze every
+   animation, resting bubbles mid-water and fish mid-swim so the scene still
+   reads as a cross-section without anything moving. */
 @media (prefers-reduced-motion: reduce) {
-    [data-theme='underwater'] .underwater-glow,
-    [data-theme='underwater'] .underwater-rays,
-    [data-theme='underwater'] .underwater-rays::after,
-    [data-theme='underwater'] .underwater-caustics::before,
-    [data-theme='underwater'] .underwater-caustics::after,
-    [data-theme='underwater'] .underwater-bubbles span {
+    [data-theme='ocean'] .ocean-wave,
+    [data-theme='ocean'] .ocean-rays,
+    [data-theme='ocean'] .ocean-rays::after,
+    [data-theme='ocean'] .ocean-caustics::before,
+    [data-theme='ocean'] .ocean-caustics::after,
+    [data-theme='ocean'] .ocean-bubbles span,
+    [data-theme='ocean'] .ocean-fish span {
         animation: none;
     }
 
-    [data-theme='underwater'] .underwater-bubbles span {
+    [data-theme='ocean'] .ocean-bubbles span {
         opacity: 0.5;
         bottom: 25vh;
     }
-    [data-theme='underwater'] .underwater-bubbles span:nth-child(4n) {
+    [data-theme='ocean'] .ocean-bubbles span:nth-child(4n) {
         bottom: 45vh;
     }
-    [data-theme='underwater'] .underwater-bubbles span:nth-child(4n + 1) {
-        bottom: 62vh;
+    [data-theme='ocean'] .ocean-bubbles span:nth-child(4n + 1) {
+        bottom: 60vh;
     }
-    [data-theme='underwater'] .underwater-bubbles span:nth-child(4n + 2) {
-        bottom: 74vh;
+    [data-theme='ocean'] .ocean-bubbles span:nth-child(4n + 2) {
+        bottom: 72vh;
         opacity: 0.35;
+    }
+
+    [data-theme='ocean'] .ocean-fish span:nth-child(1) {
+        transform: translate3d(24vw, 0, 0);
+    }
+    [data-theme='ocean'] .ocean-fish span:nth-child(2) {
+        transform: translate3d(58vw, 0, 0) scaleX(-1);
+    }
+    [data-theme='ocean'] .ocean-fish span:nth-child(3) {
+        transform: translate3d(76vw, 0, 0);
     }
 }
 
