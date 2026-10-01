@@ -4176,7 +4176,7 @@ input:focus {
     position: absolute;
     left: 0;
     aspect-ratio: 48 / 20;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 20'%3E%3Cpath d='M2 10 C8 3 18 3 26 10 C18 17 8 17 2 10 Z M26 10 L34 4 L32 10 L34 16 Z' fill='%23124c63'/%3E%3C/svg%3E")
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 20'%3E%3Cpath d='M46 10 C40 3 30 3 22 10 C30 17 40 17 46 10 Z M22 10 L14 4 L16 10 L14 16 Z' fill='%23124c63'/%3E%3C/svg%3E")
         no-repeat center / contain;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
@@ -4207,6 +4207,135 @@ input:focus {
     animation-name: ocean-swim-ltr;
     animation-duration: 37s;
     animation-delay: -25s;
+}
+
+/* 5b. Bigger visitors: a shark, a pod of two dolphins and one old turtle.
+      Each crosses on a long cycle and then waits off-screen, so they feel
+      like animals passing by rather than a conveyor belt. */
+.ocean-life {
+    position: absolute;
+    inset: 0;
+}
+
+.ocean-life span {
+    position: absolute;
+    left: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+/* The shark: big, slow, once in a long while, heading left through the
+   deep middle water. */
+.ocean-shark {
+    top: 56vh;
+    width: 170px;
+    aspect-ratio: 120 / 40;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40'%3E%3Cpath d='M118 20 C104 12 84 10 66 11 L58 2 L52 12 C36 12 22 15 12 19 L2 10 L6 20 L2 30 C14 26 30 28 44 28 L48 36 L56 28 C76 30 102 27 118 20 Z' fill='%230e4152'/%3E%3C/svg%3E");
+    animation-name: ocean-shark-pass;
+    animation-duration: 95s;
+    animation-delay: -30s;
+}
+
+/* Dolphins: two of them porpoising in formation, the second one a beat
+   behind and a little smaller, like they are keeping company. */
+.ocean-dolphin {
+    top: 30vh;
+    width: 92px;
+    aspect-ratio: 100 / 36;
+    opacity: 0.45;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 36'%3E%3Cpath d='M98 16 C90 10 76 8 64 9 L56 1 L52 10 C36 10 22 13 12 17 L2 8 L6 17 L2 26 C16 24 34 26 50 26 C64 27 86 24 98 16 Z' fill='%23124c63'/%3E%3C/svg%3E");
+    animation-name: ocean-dolphin-pass;
+    animation-duration: 74s;
+    animation-delay: -20s;
+}
+
+.ocean-dolphin-2 {
+    top: 36vh;
+    width: 74px;
+    opacity: 0.4;
+    animation-delay: -18.4s;
+}
+
+/* The turtle: unhurried, near the reef, winging along on its own schedule. */
+.ocean-turtle {
+    top: 64vh;
+    width: 78px;
+    aspect-ratio: 90 / 40;
+    opacity: 0.42;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 40'%3E%3Cpath d='M20 22 C20 10 34 4 46 4 C58 4 70 10 70 20 L78 18 C84 18 88 20 88 23 C88 26 84 28 78 27 L70 25 C68 30 60 34 48 34 C36 34 26 30 22 26 L14 32 L10 26 L18 22 Z M52 32 L46 40 L58 35 Z' fill='%2310465c'/%3E%3C/svg%3E");
+    animation-name: ocean-turtle-pass;
+    animation-duration: 130s;
+    animation-delay: -70s;
+}
+
+@keyframes ocean-shark-pass {
+    0% {
+        transform: translate3d(112vw, 0, 0) scaleX(-1);
+    }
+    26% {
+        transform: translate3d(-20vw, 0, 0) scaleX(-1);
+    }
+    100% {
+        transform: translate3d(-20vw, 0, 0) scaleX(-1);
+    }
+}
+
+@keyframes ocean-dolphin-pass {
+    0% {
+        transform: translate3d(-16vw, 6px, 0);
+    }
+    9% {
+        transform: translate3d(0vw, -14px, 0);
+    }
+    18% {
+        transform: translate3d(16vw, 8px, 0);
+    }
+    27% {
+        transform: translate3d(32vw, -12px, 0);
+    }
+    36% {
+        transform: translate3d(48vw, 6px, 0);
+    }
+    45% {
+        transform: translate3d(64vw, -10px, 0);
+    }
+    54% {
+        transform: translate3d(80vw, 6px, 0);
+    }
+    62% {
+        transform: translate3d(114vw, -6px, 0);
+    }
+    100% {
+        transform: translate3d(114vw, -6px, 0);
+    }
+}
+
+@keyframes ocean-turtle-pass {
+    0% {
+        transform: translate3d(-14vw, 0, 0);
+    }
+    12% {
+        transform: translate3d(6vw, -8px, 0);
+    }
+    25% {
+        transform: translate3d(30vw, 4px, 0);
+    }
+    38% {
+        transform: translate3d(54vw, -6px, 0);
+    }
+    50% {
+        transform: translate3d(78vw, 4px, 0);
+    }
+    60% {
+        transform: translate3d(114vw, 0, 0);
+    }
+    100% {
+        transform: translate3d(114vw, 0, 0);
+    }
 }
 
 /* 6. The reef: two silhouette layers of coral heads, branching coral and
@@ -4356,7 +4485,8 @@ input:focus {
     [data-theme='ocean'] .ocean-caustics::before,
     [data-theme='ocean'] .ocean-caustics::after,
     [data-theme='ocean'] .ocean-bubbles span,
-    [data-theme='ocean'] .ocean-fish span {
+    [data-theme='ocean'] .ocean-fish span,
+    [data-theme='ocean'] .ocean-life span {
         animation: none;
     }
 
@@ -4383,6 +4513,19 @@ input:focus {
     }
     [data-theme='ocean'] .ocean-fish span:nth-child(3) {
         transform: translate3d(76vw, 0, 0);
+    }
+
+    [data-theme='ocean'] .ocean-shark {
+        transform: translate3d(66vw, 0, 0) scaleX(-1);
+    }
+    [data-theme='ocean'] .ocean-dolphin {
+        transform: translate3d(28vw, 0, 0);
+    }
+    [data-theme='ocean'] .ocean-dolphin-2 {
+        transform: translate3d(18vw, 0, 0);
+    }
+    [data-theme='ocean'] .ocean-turtle {
+        transform: translate3d(48vw, 0, 0);
     }
 }
 

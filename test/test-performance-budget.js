@@ -802,6 +802,24 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     assert.equal(new Set(fishLanes).size, 3);
     assert.ok(css.includes('animation-name: ocean-swim-rtl'), 'one fish swims the other way');
 
+    // Bigger visitors: one shark, a pod of two dolphins, one turtle. Their
+    // cycles are long (a minute or more) and each keyframe parks the animal
+    // off-screen for the rest of the loop, so they pass by occasionally
+    // instead of patrolling.
+    const lifeStart = html.indexOf('<div class="ocean-life">');
+    const life = html.slice(lifeStart, html.indexOf('</div>', lifeStart));
+    assert.equal((life.match(/class="ocean-shark"/g) || []).length, 1);
+    assert.equal((life.match(/ocean-dolphin/g) || []).length, 3, 'two dolphins (one extra class)');
+    assert.equal((life.match(/class="ocean-turtle"/g) || []).length, 1);
+    for (const animal of ['.ocean-shark', '.ocean-dolphin', '.ocean-turtle']) {
+        const start = css.indexOf(`${animal} {`);
+        const rule = css.slice(start, css.indexOf('\n}', start));
+        const seconds = Number.parseInt(rule.match(/animation-duration: (\d+)s/)[1], 10);
+        assert.ok(seconds >= 60, `${animal} should visit rarely, got a ${seconds}s cycle`);
+    }
+    const dolphin2 = css.slice(css.indexOf('.ocean-dolphin-2 {'));
+    assert.ok(dolphin2.includes('animation-delay'), 'the second dolphin trails the first one');
+
     // The reef rests on the bottom in two silhouette layers, mirrored so the
     // same tile never reads twice, and never animates (the floor is static).
     const reefStart = css.indexOf('.ocean-reef {');
@@ -815,7 +833,11 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     // Every ocean keyframe may animate transform/opacity only: anything else
     // repaints a full-viewport layer every frame on cheap phones.
     const keyframes = [...css.matchAll(/@keyframes (ocean-[\w-]+) \{([\s\S]*?)\n\}/g)];
-    assert.equal(keyframes.length, 7, 'waves, rays, two caustic nets, bubbles, two swim paths');
+    assert.equal(
+        keyframes.length,
+        10,
+        'waves, rays, two caustic nets, bubbles, two swim paths, shark, dolphins, turtle'
+    );
     for (const [, name, body] of keyframes) {
         const props = [...body.matchAll(/^\s+([a-z-]+)\s*:/gm)].map((match) => match[1]);
         assert.ok(props.length > 0, `${name} is empty?`);
@@ -835,7 +857,11 @@ test('the Ocean theme is a light cross-section and animates on the compositor on
     const reduced = css.slice(reducedStart, css.indexOf('\n}\n', reducedStart));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-bubbles span"));
     assert.ok(reduced.includes("[data-theme='ocean'] .ocean-fish span"));
+    assert.ok(reduced.includes("[data-theme='ocean'] .ocean-life span"));
     assert.match(reduced, /animation: none/);
+    // The visitors hold a still pose instead of vanishing mid-swim.
+    assert.ok(reduced.includes('translate3d(66vw, 0, 0) scaleX(-1)'), 'shark rests in frame');
+    assert.ok(reduced.includes('.ocean-turtle {'), 'turtle rests in frame');
 
     // The glass panels carry the footer too, so the theme reads as one body of
     // water instead of an opaque block at the bottom.
